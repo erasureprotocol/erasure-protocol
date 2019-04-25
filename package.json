@@ -1,0 +1,11 @@
+{
+  "name": "erasure-next-contracts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/erasureprotocol/erasure-next-contracts.git",
+  "author": "stephane@numer.ai",
+  "license": "MIT",
+  "dependencies": {
+    "etherlime": "^1.1.2"
+  }
+}
