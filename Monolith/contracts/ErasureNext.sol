@@ -16,6 +16,7 @@ contract ErasureNext_Monolith {
     address public nmr;
 
     enum GriefType { CgtP, CltP, CeqP, InfGreif, NoGreif }
+    enum State { Pending, Accepted, Ended }
 
     struct User {
         address user;
@@ -44,6 +45,7 @@ contract ErasureNext_Monolith {
         uint256 griefDeadline;
         GriefType buyerGriefType;
         GriefType sellerGriefType;
+        State status;
     }
 
     event UserCreated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
@@ -199,7 +201,8 @@ contract ErasureNext_Monolith {
             sellerGriefCost,
             griefDeadline,
             buyerGriefType,
-            sellerGriefType
+            sellerGriefType,
+            State.Pending
         ));
 
         emit AgreementProposed(
@@ -223,7 +226,9 @@ contract ErasureNext_Monolith {
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller, "only seller");
+        require(agreement.status == State.Pending, "only pending");
 
+        // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
         require(ERC20Burnable(nmr).transferFrom(agreement.buyer, address(this), agreement.buyerStake));
 
