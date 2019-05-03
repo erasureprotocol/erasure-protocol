@@ -39,8 +39,8 @@ contract ErasureNext_Monolith {
         uint256 price;
         uint256 buyerStake;
         uint256 sellerStake;
-        uint256 buyerGriefRatio;
-        uint256 sellerGriefRatio;
+        uint256 buyerGriefCost;
+        uint256 sellerGriefCost;
         uint256 griefDeadline;
         GriefType buyerGriefType;
         GriefType sellerGriefType;
@@ -59,8 +59,8 @@ contract ErasureNext_Monolith {
         uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
-        uint256 buyerGriefRatio,
-        uint256 sellerGriefRatio,
+        uint256 buyerGriefCost,
+        uint256 sellerGriefCost,
         uint256 griefDeadline,
         GriefType buyerGriefType,
         GriefType sellerGriefType
@@ -177,8 +177,8 @@ contract ErasureNext_Monolith {
         uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
-        uint256 buyerGriefRatio,
-        uint256 sellerGriefRatio,
+        uint256 buyerGriefCost,
+        uint256 sellerGriefCost,
         uint256 griefDeadline,
         GriefType buyerGriefType,
         GriefType sellerGriefType
@@ -195,8 +195,8 @@ contract ErasureNext_Monolith {
             price,
             buyerStake,
             sellerStake,
-            buyerGriefRatio,
-            sellerGriefRatio,
+            buyerGriefCost,
+            sellerGriefCost,
             griefDeadline,
             buyerGriefType,
             sellerGriefType
@@ -209,8 +209,8 @@ contract ErasureNext_Monolith {
             price,
             buyerStake,
             sellerStake,
-            buyerGriefRatio,
-            sellerGriefRatio,
+            buyerGriefCost,
+            sellerGriefCost,
             griefDeadline,
             buyerGriefType,
             sellerGriefType
@@ -239,12 +239,12 @@ contract ErasureNext_Monolith {
         uint256 cost;
 
         if (msg.sender == agreement.seller) {
-            cost = getGriefCost(agreement.sellerGriefRatio, punishment, agreement.sellerGriefType);
+            cost = getGriefCost(agreement.sellerGriefCost, punishment, agreement.sellerGriefType);
 
             agreement.sellerStake = agreement.sellerStake.sub(cost);
             agreement.buyerStake = agreement.buyerStake.sub(punishment);
         } else {
-            cost = getGriefCost(agreement.buyerGriefRatio, punishment, agreement.buyerGriefType);
+            cost = getGriefCost(agreement.buyerGriefCost, punishment, agreement.buyerGriefType);
 
             agreement.sellerStake = agreement.sellerStake.sub(punishment);
             agreement.buyerStake = agreement.buyerStake.sub(cost);
@@ -274,11 +274,11 @@ contract ErasureNext_Monolith {
 
     function getGriefCost(uint256 ratio, uint256 punishment, GriefType griefType) public pure returns(uint256 cost) {
         /*
-            CgtP: Cost to buyer greater than Punishment to seller
-            CltP: Cost to buyer less than Punishment to seller
-            CeqP: Cost to buyer equal to Punishment to seller:
-            InfGrief: Buyer can punish seller at no cost.
-            NoGrief: Buyer cannot punish seller.
+            CgtP: Cost greater than Punishment
+            CltP: Cost less than Punishment
+            CeqP: Cost equal to Punishment
+            InfGrief: Punishment at no cost
+            NoGrief: No Punishment
         */
         if (griefType == GriefType.CgtP)
             return punishment.mul(ratio);
