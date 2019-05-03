@@ -10,6 +10,7 @@ temp/
 *.env
 *.etherlime-store
 coverage/
+yarn.lock
 yarn-debug.log*
 yarn-error.log*
 .yarn-integrity
