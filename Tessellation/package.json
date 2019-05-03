@@ -1,0 +1,9 @@
+{
+  "name": "Tessellation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "etherlime": "^1.1.2"
+  }
+}
