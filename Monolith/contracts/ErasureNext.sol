@@ -9,6 +9,7 @@ contract ErasureNext_Monolith {
 
     using SafeMath for uint256;
 
+    User[] public users;
     Post[] public posts;
     Agreement[] public agreements;
 
@@ -45,6 +46,9 @@ contract ErasureNext_Monolith {
         GriefType sellerGriefType;
     }
 
+    event UserCreated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
+    event UserUpdated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
+    event UserGriefed(uint256 userID, address griefer, uint256 amount);
     event PostCreated(uint256 postID, address owner, bytes32 proofHash, bytes metadata, uint256 stake, bool symmetricGrief);
     event PostUpdated(uint256 postID, address owner, bytes32 proofHash, bytes metadata, uint256 stake, bool symmetricGrief);
     event PostGriefed(uint256 postID, address griefer, uint256 amount);
@@ -67,6 +71,54 @@ contract ErasureNext_Monolith {
 
     constructor(address _nmr) public {
         nmr = _nmr;
+    }
+
+    // USERS //
+
+    function createUser(bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 userID) {
+
+        userID = users.length;
+
+        // not vulnerable to re-entrancy since token contract is trusted
+        require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
+
+        users.push(User(msg.sender, metadata, stake, symmetricGrief));
+
+        emit UserCreated(userID, msg.sender, metadata, stake, symmetricGrief);
+    }
+
+    function updateUser(uint256 userID, bytes memory metadata, uint256 stake, bool symmetricGrief) public {
+
+        User storage user = users[userID];
+
+        require(msg.sender == user.user, "only user");
+
+        // not vulnerable to re-entrancy since token contract is trusted
+        if (stake > user.stake)
+            require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake - user.stake));
+        if (stake < user.stake)
+            require(ERC20Burnable(nmr).transfer(msg.sender, user.stake - stake));
+
+        user.metadata = metadata;
+        user.stake = stake;
+        user.symmetricGrief = symmetricGrief;
+
+        emit UserUpdated(userID, msg.sender, metadata, stake, symmetricGrief);
+    }
+
+    // known to be vulnerable to front-running
+    function griefUser(uint256 userID, uint256 amount) public {
+
+        User storage user = users[userID];
+
+        require(user.symmetricGrief);
+
+        user.stake = user.stake.sub(amount);
+
+        ERC20Burnable(nmr).burn(amount);
+        ERC20Burnable(nmr).burnFrom(msg.sender, amount);
+
+        emit UserGriefed(userID, msg.sender, amount);
     }
 
     // POSTS //
