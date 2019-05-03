@@ -134,7 +134,7 @@ contract ErasureNext_Monolith {
         emit PostCreated(postID, msg.sender, proofHash, metadata, stake, symmetricGrief);
     }
 
-    function updatePost(uint256 postID, bytes32 proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public {
+    function updatePost(uint256 postID, bytes memory metadata, uint256 stake, bool symmetricGrief) public {
 
         Post storage post = posts[postID];
 
@@ -150,7 +150,7 @@ contract ErasureNext_Monolith {
         post.stake = stake;
         post.symmetricGrief = symmetricGrief;
 
-        emit PostUpdated(postID, msg.sender, proofHash, metadata, stake, symmetricGrief);
+        emit PostUpdated(postID, msg.sender, post.proofHash, metadata, stake, symmetricGrief);
     }
 
     // known to be vulnerable to front-running
