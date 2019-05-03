@@ -26,7 +26,7 @@ contract ErasureNext_Monolith {
     }
 
     struct Post {
-        bytes32 proofHash;
+        bytes32[] hashes;
         address owner;
         bytes metadata;
         uint256 stake;
@@ -52,8 +52,9 @@ contract ErasureNext_Monolith {
     event UserCreated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
     event UserUpdated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
     event UserGriefed(uint256 userID, address griefer, uint256 amount);
-    event PostCreated(uint256 postID, address owner, bytes32 proofHash, bytes metadata, uint256 stake, bool symmetricGrief);
-    event PostUpdated(uint256 postID, address owner, bytes32 proofHash, bytes metadata, uint256 stake, bool symmetricGrief);
+    event PostCreated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
+    event PostUpdated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
+    event HashSubmitted(uint256 postID, bytes32 proofHash);
     event PostGriefed(uint256 postID, address griefer, uint256 amount);
     event AgreementProposed(
         uint256 agreementID,
@@ -134,9 +135,24 @@ contract ErasureNext_Monolith {
 
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        posts.push(Post(proofHash, msg.sender, metadata, stake, symmetricGrief));
+        bytes32[] memory hashes;
 
-        emit PostCreated(postID, msg.sender, proofHash, metadata, stake, symmetricGrief);
+        posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
+
+        submitHash(postID, proofHash);
+
+        emit PostCreated(postID, msg.sender, metadata, stake, symmetricGrief);
+    }
+
+    function submitHash(uint256 postID, bytes32 proofHash) public {
+
+        Post storage post = posts[postID];
+
+        require(msg.sender == post.owner, "only owner");
+
+        post.hashes.push(proofHash);
+
+        emit HashSubmitted(postID, proofHash);
     }
 
     function updatePost(uint256 postID, bytes memory metadata, uint256 stake, bool symmetricGrief) public {
@@ -155,7 +171,7 @@ contract ErasureNext_Monolith {
         post.stake = stake;
         post.symmetricGrief = symmetricGrief;
 
-        emit PostUpdated(postID, msg.sender, post.proofHash, metadata, stake, symmetricGrief);
+        emit PostUpdated(postID, msg.sender, metadata, stake, symmetricGrief);
     }
 
     // known to be vulnerable to front-running
