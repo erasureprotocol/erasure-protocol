@@ -37,6 +37,7 @@ contract ErasureNext_Monolith {
         bytes metadata;
         address buyer;
         address seller;
+        bool buyerProposed;
         uint256 price;
         uint256 buyerStake;
         uint256 sellerStake;
@@ -57,7 +58,9 @@ contract ErasureNext_Monolith {
     event AgreementProposed(
         uint256 agreementID,
         bytes metadata,
+        address buyer,
         address seller,
+        bool buyerProposed,
         uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
@@ -172,10 +175,10 @@ contract ErasureNext_Monolith {
 
     // AGREEMENTS //
 
-    // can only be called by the buyer (like a bid)
     function proposeAgreement(
+        bool isBuyer,
+        address counterparty,
         bytes memory metadata,
-        address seller,
         uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
@@ -186,14 +189,63 @@ contract ErasureNext_Monolith {
         GriefType sellerGriefType
     ) public returns (uint256 agreementID){
 
-        agreementID = agreements.length;
+        if (isBuyer) {
+            agreementID = pushProposal(
+                metadata,
+                msg.sender,
+                counterparty,
+                isBuyer,
+                price,
+                buyerStake,
+                sellerStake,
+                buyerGriefCost,
+                sellerGriefCost,
+                griefDeadline,
+                buyerGriefType,
+                sellerGriefType
+            );
+        } else {
+            agreementID = pushProposal(
+                metadata,
+                counterparty,
+                msg.sender,
+                isBuyer,
+                price,
+                buyerStake,
+                sellerStake,
+                buyerGriefCost,
+                sellerGriefCost,
+                griefDeadline,
+                buyerGriefType,
+                sellerGriefType
+            );
+        }
 
-        address buyer = msg.sender;
+
+    }
+
+    function pushProposal(
+        bytes memory metadata,
+        address buyer,
+        address seller,
+        bool isBuyer,
+        uint256 price,
+        uint256 buyerStake,
+        uint256 sellerStake,
+        uint256 buyerGriefCost,
+        uint256 sellerGriefCost,
+        uint256 griefDeadline,
+        GriefType buyerGriefType,
+        GriefType sellerGriefType
+    ) private returns (uint256 agreementID) {
+
+        agreementID = agreements.length;
 
         agreements.push(Agreement(
             metadata,
             buyer,
             seller,
+            isBuyer,
             price,
             buyerStake,
             sellerStake,
@@ -208,7 +260,9 @@ contract ErasureNext_Monolith {
         emit AgreementProposed(
             agreementID,
             metadata,
+            buyer,
             seller,
+            isBuyer,
             price,
             buyerStake,
             sellerStake,
@@ -220,12 +274,15 @@ contract ErasureNext_Monolith {
         );
     }
 
-    // can only be called by the seller
     function acceptAgreement(uint256 agreementID) public {
 
         Agreement storage agreement = agreements[agreementID];
 
-        require(msg.sender == agreement.seller, "only seller");
+        if (agreement.buyerProposed)
+            require(msg.sender == agreement.seller, "only seller");
+        else
+            require(msg.sender == agreement.buyer, "only seller");
+
         require(agreement.status == State.Pending, "only pending");
 
         // transfer price
