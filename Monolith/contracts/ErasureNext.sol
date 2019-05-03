@@ -228,6 +228,9 @@ contract ErasureNext_Monolith {
         require(msg.sender == agreement.seller, "only seller");
         require(agreement.status == State.Pending, "only pending");
 
+        // transfer price
+        require(ERC20Burnable(nmr).transferFrom(agreement.buyer, agreement.seller, agreement.price));
+
         // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
         require(ERC20Burnable(nmr).transferFrom(agreement.buyer, address(this), agreement.buyerStake));
