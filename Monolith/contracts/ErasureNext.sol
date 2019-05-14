@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
-import "./helpers/openzeppelin-eth/math/SafeMath.sol";
-import "./helpers/openzeppelin-eth/token/ERC20/ERC20Burnable.sol";
+import "./helpers/openzeppelin-solidity/math/SafeMath.sol";
+import "./helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
 
 // one to many relationship between Post and Agreement
 
