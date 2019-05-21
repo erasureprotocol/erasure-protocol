@@ -308,6 +308,8 @@ contract ErasureNext_Monolith {
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
         require(ERC20Burnable(nmr).transferFrom(agreement.buyer, address(this), agreement.buyerStake));
 
+        agreement.status = State.Accepted;
+
         emit AgreementAccepted(agreementID);
     }
 
@@ -316,6 +318,8 @@ contract ErasureNext_Monolith {
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
+        require(now < agreement.griefDeadline, "only before grief deadline");
+        require(agreement.status == State.Accepted, "only accepted agreements");
 
         uint256 cost;
 
@@ -341,14 +345,22 @@ contract ErasureNext_Monolith {
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
-        require(now > agreement.griefDeadline, "only after grief deadline");
+        require(agreement.status != State.Ended, "only active agreements");
 
-        // not vulnerable to re-entrancy since token contract is trusted
-        require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
-        require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
+        if (agreement.status == State.Accepted) {
+            require(now > agreement.griefDeadline, "only after grief deadline");
 
-        delete agreement.sellerStake;
-        delete agreement.buyerStake;
+            // not vulnerable to re-entrancy since token contract is trusted
+            require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
+            require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
+
+            delete agreement.sellerStake;
+            delete agreement.buyerStake;
+        } else {
+            require(agreement.status == State.Pending, "only pending agreements");
+        }
+
+        agreement.status = State.Ended;
 
         emit AgreementEnded(agreementID);
     }
