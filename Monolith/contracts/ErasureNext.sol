@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "./helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
+import "./ErasureProof.sol";
 
 // one to many relationship between Post and Agreement
 
@@ -14,6 +15,7 @@ contract ErasureNext_Monolith {
     Agreement[] public agreements;
 
     address public nmr;
+    address public erasureProof;
 
     enum GriefType { CgtP, CltP, CeqP, InfGreif, NoGreif }
     enum State { Pending, Accepted, Ended }
@@ -75,8 +77,9 @@ contract ErasureNext_Monolith {
     event AgreementGriefed(uint256 agreementID, address griefer, uint256 cost, uint256 punishment);
     event AgreementEnded(uint256 agreementID);
 
-    constructor(address _nmr) public {
+    constructor(address _nmr, address _erasureProof) public {
         nmr = _nmr;
+        erasureProof = _erasureProof;
     }
 
     // USERS //
@@ -129,7 +132,7 @@ contract ErasureNext_Monolith {
 
     // POSTS //
 
-    function createPost(bytes32 proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
+    function createPost(bytes32 proofHash, bytes32 dataHash, bytes memory sig, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
 
         postID = posts.length;
 
@@ -139,18 +142,20 @@ contract ErasureNext_Monolith {
 
         posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
 
-        submitHash(postID, proofHash);
+        submitHash(postID, proofHash, dataHash, sig);
 
         emit PostCreated(postID, msg.sender, metadata, stake, symmetricGrief);
     }
 
-    function submitHash(uint256 postID, bytes32 proofHash) public {
+    function submitHash(uint256 postID, bytes32 proofHash, bytes32 dataHash, bytes memory sig) public {
 
         Post storage post = posts[postID];
+        bytes32 prevHash = post.hashes.length == 0 ? bytes32(0) : post.hashes[post.hashes.length];
 
         require(msg.sender == post.owner, "only owner");
 
         post.hashes.push(proofHash);
+        require(ErasureProof(erasureProof).createProof(msg.sender, prevHash, dataHash, sig) == proofHash, "proofhash does not match ErasureProof");
 
         emit HashSubmitted(postID, proofHash);
     }
