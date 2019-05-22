@@ -51,11 +51,11 @@ contract ErasureNext_Monolith {
 
     event UserCreated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
     event UserUpdated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
-    event UserGriefed(uint256 userID, address griefer, uint256 amount, bytes msg);
+    event UserGriefed(uint256 userID, address griefer, uint256 amount, bytes message);
     event PostCreated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
     event PostUpdated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
     event HashSubmitted(uint256 postID, bytes32 proofHash);
-    event PostGriefed(uint256 postID, address griefer, uint256 amount, bytes msg);
+    event PostGriefed(uint256 postID, address griefer, uint256 amount, bytes message);
     event AgreementProposed(
         uint256 agreementID,
         bytes metadata,
@@ -72,7 +72,7 @@ contract ErasureNext_Monolith {
         GriefType sellerGriefType
     );
     event AgreementAccepted(uint256 agreementID);
-    event AgreementGriefed(uint256 agreementID, address griefer, uint256 cost, uint256 punishment, bytes msg);
+    event AgreementGriefed(uint256 agreementID, address griefer, uint256 cost, uint256 punishment, bytes message);
     event AgreementEnded(uint256 agreementID);
 
     constructor(address _nmr) public {
@@ -113,7 +113,7 @@ contract ErasureNext_Monolith {
     }
 
     // known to be vulnerable to front-running
-    function griefUser(uint256 userID, uint256 amount, bytes msg) public {
+    function griefUser(uint256 userID, uint256 amount, bytes memory message) public {
 
         User storage user = users[userID];
 
@@ -124,7 +124,7 @@ contract ErasureNext_Monolith {
         ERC20Burnable(nmr).burn(amount);
         ERC20Burnable(nmr).burnFrom(msg.sender, amount);
 
-        emit UserGriefed(userID, msg.sender, amount, msg);
+        emit UserGriefed(userID, msg.sender, amount, message);
     }
 
     // POSTS //
@@ -175,7 +175,7 @@ contract ErasureNext_Monolith {
     }
 
     // known to be vulnerable to front-running
-    function griefPost(uint256 postID, uint256 amount, bytes msg) public {
+    function griefPost(uint256 postID, uint256 amount, bytes memory message) public {
 
         Post storage post = posts[postID];
 
@@ -186,7 +186,7 @@ contract ErasureNext_Monolith {
         ERC20Burnable(nmr).burn(amount);
         ERC20Burnable(nmr).burnFrom(msg.sender, amount);
 
-        emit PostGriefed(postID, msg.sender, amount, msg);
+        emit PostGriefed(postID, msg.sender, amount, message);
     }
 
     // AGREEMENTS //
@@ -313,7 +313,7 @@ contract ErasureNext_Monolith {
         emit AgreementAccepted(agreementID);
     }
 
-    function griefAgreement(uint256 agreementID, uint256 punishment, bytes msg) public {
+    function griefAgreement(uint256 agreementID, uint256 punishment, bytes memory message) public {
 
         Agreement storage agreement = agreements[agreementID];
 
@@ -337,7 +337,7 @@ contract ErasureNext_Monolith {
 
         ERC20Burnable(nmr).burn(punishment.add(cost));
 
-        emit AgreementGriefed(agreementID, msg.sender, cost, punishment, msg);
+        emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
     }
 
     function endAgreement(uint256 agreementID) public {
