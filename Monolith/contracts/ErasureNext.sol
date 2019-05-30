@@ -133,12 +133,14 @@ contract ErasureNext_Monolith is IPFSWrapper {
     function createPost(bytes memory proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
 
         postID = posts.length;
+        posts.length++;
 
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        IPFSMultiHash[] memory hashes;
-
-        posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
+        posts[postID].owner = msg.sender;
+        posts[postID].metadata = metadata;
+        posts[postID].stake = stake;
+        posts[postID].symmetricGrief = symmetricGrief;
 
         submitHash(postID, proofHash);
 
