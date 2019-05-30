@@ -21,7 +21,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
 
     struct User {
         address user;
-        IPFSMultiHash metadata;
+        bytes metadata;
         uint256 stake;
         bool symmetricGrief;
     }
@@ -29,13 +29,13 @@ contract ErasureNext_Monolith is IPFSWrapper {
     struct Post {
         IPFSMultiHash[] hashes;
         address owner;
-        IPFSMultiHash metadata;
+        bytes metadata;
         uint256 stake;
         bool symmetricGrief;
     }
 
     struct Agreement {
-        IPFSMultiHash metadata;
+        bytes metadata;
         address buyer;
         address seller;
         bool buyerProposed;
@@ -89,7 +89,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         // not vulnerable to re-entrancy since token contract is trusted
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        users.push(User(msg.sender, splitIPFSHash(metadata), stake, symmetricGrief));
+        users.push(User(msg.sender, metadata, stake, symmetricGrief));
 
         emit UserCreated(userID, msg.sender, metadata, stake, symmetricGrief);
     }
@@ -106,7 +106,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         if (stake < user.stake)
             require(ERC20Burnable(nmr).transfer(msg.sender, user.stake - stake));
 
-        user.metadata = splitIPFSHash(metadata);
+        user.metadata = metadata;
         user.stake = stake;
         user.symmetricGrief = symmetricGrief;
 
@@ -138,7 +138,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
 
         IPFSMultiHash[] memory hashes;
 
-        posts.push(Post(hashes, msg.sender, splitIPFSHash(metadata), stake, symmetricGrief));
+        posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
 
         submitHash(postID, proofHash);
 
@@ -168,7 +168,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         if (stake < post.stake)
             require(ERC20Burnable(nmr).transfer(msg.sender, post.stake - stake));
 
-        post.metadata = splitIPFSHash(metadata);
+        post.metadata = metadata;
         post.stake = stake;
         post.symmetricGrief = symmetricGrief;
 
@@ -259,7 +259,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         agreementID = agreements.length;
 
         agreements.push(Agreement(
-            splitIPFSHash(metadata),
+            metadata,
             buyer,
             seller,
             isBuyer,
