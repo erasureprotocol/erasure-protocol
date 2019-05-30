@@ -10,9 +10,9 @@ contract ErasureNext_Monolith is IPFSWrapper {
 
     using SafeMath for uint256;
 
-    User[] public users;
-    Post[] public posts;
-    Agreement[] public agreements;
+    User[] private users;
+    Post[] private posts;
+    Agreement[] private agreements;
 
     address public nmr;
 
