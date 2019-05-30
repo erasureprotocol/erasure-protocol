@@ -5,6 +5,9 @@
   "repository": "https://github.com/erasureprotocol/erasure-next-contracts.git",
   "author": "stephane@numer.ai",
   "license": "MIT",
+  "scripts": {
+      "compile": "yarn etherlime compile"
+  },
   "dependencies": {
     "etherlime": "^1.1.2"
   }
