@@ -1,11 +1,12 @@
 pragma solidity ^0.5.0;
 
+import "./helpers/IPFSWrapper.sol";
 import "./helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "./helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
 
 // one to many relationship between Post and Agreement
 
-contract ErasureNext_Monolith {
+contract ErasureNext_Monolith is IPFSWrapper {
 
     using SafeMath for uint256;
 
@@ -20,21 +21,21 @@ contract ErasureNext_Monolith {
 
     struct User {
         address user;
-        bytes metadata;
+        IPFSMultiHash metadata;
         uint256 stake;
         bool symmetricGrief;
     }
 
     struct Post {
-        bytes32[] hashes;
+        IPFSMultiHash[] hashes;
         address owner;
-        bytes metadata;
+        IPFSMultiHash metadata;
         uint256 stake;
         bool symmetricGrief;
     }
 
     struct Agreement {
-        bytes metadata;
+        IPFSMultiHash metadata;
         address buyer;
         address seller;
         bool buyerProposed;
@@ -54,7 +55,7 @@ contract ErasureNext_Monolith {
     event UserGriefed(uint256 userID, address griefer, uint256 amount, bytes message);
     event PostCreated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
     event PostUpdated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
-    event HashSubmitted(uint256 postID, bytes32 proofHash);
+    event HashSubmitted(uint256 postID, bytes proofHash);
     event PostGriefed(uint256 postID, address griefer, uint256 amount, bytes message);
     event AgreementProposed(
         uint256 agreementID,
@@ -88,7 +89,7 @@ contract ErasureNext_Monolith {
         // not vulnerable to re-entrancy since token contract is trusted
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        users.push(User(msg.sender, metadata, stake, symmetricGrief));
+        users.push(User(msg.sender, splitIPFSHash(metadata), stake, symmetricGrief));
 
         emit UserCreated(userID, msg.sender, metadata, stake, symmetricGrief);
     }
@@ -105,7 +106,7 @@ contract ErasureNext_Monolith {
         if (stake < user.stake)
             require(ERC20Burnable(nmr).transfer(msg.sender, user.stake - stake));
 
-        user.metadata = metadata;
+        user.metadata = splitIPFSHash(metadata);
         user.stake = stake;
         user.symmetricGrief = symmetricGrief;
 
@@ -129,28 +130,28 @@ contract ErasureNext_Monolith {
 
     // POSTS //
 
-    function createPost(bytes32 proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
+    function createPost(bytes memory proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
 
         postID = posts.length;
 
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        bytes32[] memory hashes;
+        IPFSMultiHash[] memory hashes;
 
-        posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
+        posts.push(Post(hashes, msg.sender, splitIPFSHash(metadata), stake, symmetricGrief));
 
         submitHash(postID, proofHash);
 
         emit PostCreated(postID, msg.sender, metadata, stake, symmetricGrief);
     }
 
-    function submitHash(uint256 postID, bytes32 proofHash) public {
+    function submitHash(uint256 postID, bytes memory proofHash) public {
 
         Post storage post = posts[postID];
 
         require(msg.sender == post.owner, "only owner");
 
-        post.hashes.push(proofHash);
+        post.hashes.push(splitIPFSHash(proofHash));
 
         emit HashSubmitted(postID, proofHash);
     }
@@ -167,7 +168,7 @@ contract ErasureNext_Monolith {
         if (stake < post.stake)
             require(ERC20Burnable(nmr).transfer(msg.sender, post.stake - stake));
 
-        post.metadata = metadata;
+        post.metadata = splitIPFSHash(metadata);
         post.stake = stake;
         post.symmetricGrief = symmetricGrief;
 
@@ -258,7 +259,7 @@ contract ErasureNext_Monolith {
         agreementID = agreements.length;
 
         agreements.push(Agreement(
-            metadata,
+            splitIPFSHash(metadata),
             buyer,
             seller,
             isBuyer,
