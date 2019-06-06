@@ -1,5 +1,69 @@
 pragma solidity ^0.5.0;
 
+
+/**
+ * @title IPFSWrapper
+ * @dev Contract that handles IPFS multi hash data structures and encoding/decoding
+ *   Learn more here: https://github.com/multiformats/multihash
+ */
+contract IPFSWrapper {
+
+  struct IPFSMultiHash {
+    uint8 hashFunction;
+    uint8 digestSize;
+    bytes32 hash;
+  }
+
+  // CONSTRUCTOR
+
+  constructor () public {
+
+  }
+
+  // INTERNAL FUNCTIONS
+
+  /**
+   * @dev Given an IPFS multihash struct, returns the full base58-encoded IPFS hash
+   * @param _multiHash IPFSMultiHash struct that has the hashFunction, digestSize and the hash
+   * @return the base58-encoded full IPFS hash
+   */
+  function combineIPFSHash(IPFSMultiHash memory _multiHash) internal pure returns (bytes memory) {
+    bytes memory out = new bytes(34);
+
+    out[0] = byte(_multiHash.hashFunction);
+    out[1] = byte(_multiHash.digestSize);
+
+    uint8 i;
+    for (i = 0; i < 32; i++) {
+      out[i+2] = _multiHash.hash[i];
+    }
+
+    return out;
+  }
+
+  /**
+   * @dev Given a base58-encoded IPFS hash, divides into its individual parts and returns a struct
+   * @param _source base58-encoded IPFS hash
+   * @return IPFSMultiHash that has the hashFunction, digestSize and the hash
+   */
+  function splitIPFSHash(bytes memory _source) internal pure returns (IPFSMultiHash memory) {
+    uint8 hashFunction = uint8(_source[0]);
+    uint8 digestSize = uint8(_source[1]);
+    bytes32 hash;
+
+    assembly {
+      hash := mload(add(_source, 34))
+    }
+
+    return (IPFSMultiHash({
+      hashFunction: hashFunction,
+      digestSize: digestSize,
+      hash: hash
+    }));
+  }
+}
+
+
 /**
  * @title SafeMath
  * @dev Unsigned math operations with safety checks that revert on error.
@@ -301,15 +365,16 @@ contract ERC20Burnable is ERC20 {
 
 
 
+
 // one to many relationship between Post and Agreement
 
-contract ErasureNext_Monolith {
+contract ErasureNext_Monolith is IPFSWrapper {
 
     using SafeMath for uint256;
 
-    User[] public users;
-    Post[] public posts;
-    Agreement[] public agreements;
+    User[] private users;
+    Post[] private posts;
+    Agreement[] private agreements;
 
     address public nmr;
 
@@ -324,7 +389,7 @@ contract ErasureNext_Monolith {
     }
 
     struct Post {
-        bytes32[] hashes;
+        IPFSMultiHash[] hashes;
         address owner;
         bytes metadata;
         uint256 stake;
@@ -349,11 +414,11 @@ contract ErasureNext_Monolith {
 
     event UserCreated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
     event UserUpdated(uint256 userID, address user, bytes metadata, uint256 stake, bool symmetricGrief);
-    event UserGriefed(uint256 userID, address griefer, uint256 amount);
+    event UserGriefed(uint256 userID, address griefer, uint256 amount, bytes message);
     event PostCreated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
     event PostUpdated(uint256 postID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
-    event HashSubmitted(uint256 postID, bytes32 proofHash);
-    event PostGriefed(uint256 postID, address griefer, uint256 amount);
+    event HashSubmitted(uint256 postID, bytes proofHash);
+    event PostGriefed(uint256 postID, address griefer, uint256 amount, bytes message);
     event AgreementProposed(
         uint256 agreementID,
         bytes metadata,
@@ -370,7 +435,7 @@ contract ErasureNext_Monolith {
         GriefType sellerGriefType
     );
     event AgreementAccepted(uint256 agreementID);
-    event AgreementGriefed(uint256 agreementID, address griefer, uint256 cost, uint256 punishment);
+    event AgreementGriefed(uint256 agreementID, address griefer, uint256 cost, uint256 punishment, bytes message);
     event AgreementEnded(uint256 agreementID);
 
     constructor(address _nmr) public {
@@ -411,7 +476,7 @@ contract ErasureNext_Monolith {
     }
 
     // known to be vulnerable to front-running
-    function griefUser(uint256 userID, uint256 amount) public {
+    function griefUser(uint256 userID, uint256 amount, bytes memory message) public {
 
         User storage user = users[userID];
 
@@ -422,33 +487,35 @@ contract ErasureNext_Monolith {
         ERC20Burnable(nmr).burn(amount);
         ERC20Burnable(nmr).burnFrom(msg.sender, amount);
 
-        emit UserGriefed(userID, msg.sender, amount);
+        emit UserGriefed(userID, msg.sender, amount, message);
     }
 
     // POSTS //
 
-    function createPost(bytes32 proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
+    function createPost(bytes memory proofHash, bytes memory metadata, uint256 stake, bool symmetricGrief) public returns (uint256 postID) {
 
         postID = posts.length;
+        posts.length++;
 
         require(ERC20Burnable(nmr).transferFrom(msg.sender, address(this), stake));
 
-        bytes32[] memory hashes;
-
-        posts.push(Post(hashes, msg.sender, metadata, stake, symmetricGrief));
+        posts[postID].owner = msg.sender;
+        posts[postID].metadata = metadata;
+        posts[postID].stake = stake;
+        posts[postID].symmetricGrief = symmetricGrief;
 
         submitHash(postID, proofHash);
 
         emit PostCreated(postID, msg.sender, metadata, stake, symmetricGrief);
     }
 
-    function submitHash(uint256 postID, bytes32 proofHash) public {
+    function submitHash(uint256 postID, bytes memory proofHash) public {
 
         Post storage post = posts[postID];
 
         require(msg.sender == post.owner, "only owner");
 
-        post.hashes.push(proofHash);
+        post.hashes.push(splitIPFSHash(proofHash));
 
         emit HashSubmitted(postID, proofHash);
     }
@@ -473,7 +540,7 @@ contract ErasureNext_Monolith {
     }
 
     // known to be vulnerable to front-running
-    function griefPost(uint256 postID, uint256 amount) public {
+    function griefPost(uint256 postID, uint256 amount, bytes memory message) public {
 
         Post storage post = posts[postID];
 
@@ -484,7 +551,7 @@ contract ErasureNext_Monolith {
         ERC20Burnable(nmr).burn(amount);
         ERC20Burnable(nmr).burnFrom(msg.sender, amount);
 
-        emit PostGriefed(postID, msg.sender, amount);
+        emit PostGriefed(postID, msg.sender, amount, message);
     }
 
     // AGREEMENTS //
@@ -606,14 +673,18 @@ contract ErasureNext_Monolith {
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
         require(ERC20Burnable(nmr).transferFrom(agreement.buyer, address(this), agreement.buyerStake));
 
+        agreement.status = State.Accepted;
+
         emit AgreementAccepted(agreementID);
     }
 
-    function griefAgreement(uint256 agreementID, uint256 punishment) public {
+    function griefAgreement(uint256 agreementID, uint256 punishment, bytes memory message) public {
 
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
+        require(now < agreement.griefDeadline, "only before grief deadline");
+        require(agreement.status == State.Accepted, "only accepted agreements");
 
         uint256 cost;
 
@@ -631,7 +702,7 @@ contract ErasureNext_Monolith {
 
         ERC20Burnable(nmr).burn(punishment.add(cost));
 
-        emit AgreementGriefed(agreementID, msg.sender, cost, punishment);
+        emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
     }
 
     function endAgreement(uint256 agreementID) public {
@@ -639,14 +710,22 @@ contract ErasureNext_Monolith {
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
-        require(now > agreement.griefDeadline, "only after grief deadline");
+        require(agreement.status != State.Ended, "only active agreements");
 
-        // not vulnerable to re-entrancy since token contract is trusted
-        require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
-        require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
+        if (agreement.status == State.Accepted) {
+            require(now > agreement.griefDeadline, "only after grief deadline");
 
-        delete agreement.sellerStake;
-        delete agreement.buyerStake;
+            // not vulnerable to re-entrancy since token contract is trusted
+            require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
+            require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
+
+            delete agreement.sellerStake;
+            delete agreement.buyerStake;
+        } else {
+            require(agreement.status == State.Pending, "only pending agreements");
+        }
+
+        agreement.status = State.Ended;
 
         emit AgreementEnded(agreementID);
     }
