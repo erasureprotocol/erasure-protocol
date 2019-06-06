@@ -20,7 +20,6 @@ contract ErasureNext_Agreements {
         address buyer;
         address seller;
         bool buyerProposed;
-        uint256 price;
         uint256 buyerStake;
         uint256 sellerStake;
         uint256 buyerGriefCost;
@@ -37,7 +36,6 @@ contract ErasureNext_Agreements {
         address buyer,
         address seller,
         bool buyerProposed,
-        uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
         uint256 buyerGriefCost,
@@ -60,7 +58,6 @@ contract ErasureNext_Agreements {
         bool isBuyer,
         address counterparty,
         bytes memory metadata,
-        uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
         uint256 buyerGriefCost,
@@ -76,7 +73,6 @@ contract ErasureNext_Agreements {
                 msg.sender,
                 counterparty,
                 isBuyer,
-                price,
                 buyerStake,
                 sellerStake,
                 buyerGriefCost,
@@ -91,7 +87,6 @@ contract ErasureNext_Agreements {
                 counterparty,
                 msg.sender,
                 isBuyer,
-                price,
                 buyerStake,
                 sellerStake,
                 buyerGriefCost,
@@ -110,7 +105,6 @@ contract ErasureNext_Agreements {
         address buyer,
         address seller,
         bool isBuyer,
-        uint256 price,
         uint256 buyerStake,
         uint256 sellerStake,
         uint256 buyerGriefCost,
@@ -127,7 +121,6 @@ contract ErasureNext_Agreements {
             buyer,
             seller,
             isBuyer,
-            price,
             buyerStake,
             sellerStake,
             buyerGriefCost,
@@ -144,7 +137,6 @@ contract ErasureNext_Agreements {
             buyer,
             seller,
             isBuyer,
-            price,
             buyerStake,
             sellerStake,
             buyerGriefCost,
@@ -165,9 +157,6 @@ contract ErasureNext_Agreements {
             require(msg.sender == agreement.buyer, "only seller");
 
         require(agreement.status == State.Pending, "only pending");
-
-        // transfer price
-        require(ERC20Burnable(nmr).transferFrom(agreement.buyer, agreement.seller, agreement.price));
 
         // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
