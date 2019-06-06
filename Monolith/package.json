@@ -6,7 +6,8 @@
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
-    "compile": "yarn etherlime compile"
+    "compile": "yarn etherlime compile",
+    "flatten": "yarn etherlime flatten ErasureNext_Posts.sol && yarn etherlime flatten ErasureNext_Agreements.sol"
   },
   "dependencies": {
     "etherlime": "2.0.3"
