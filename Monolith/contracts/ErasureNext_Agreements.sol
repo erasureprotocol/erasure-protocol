@@ -179,17 +179,14 @@ contract ErasureNext_Agreements {
 
         if (msg.sender == agreement.seller) {
             cost = getGriefCost(agreement.sellerGriefCost, punishment, agreement.sellerGriefType);
-
-            agreement.sellerStake = agreement.sellerStake.sub(cost);
             agreement.buyerStake = agreement.buyerStake.sub(punishment);
         } else {
             cost = getGriefCost(agreement.buyerGriefCost, punishment, agreement.buyerGriefType);
-
             agreement.sellerStake = agreement.sellerStake.sub(punishment);
-            agreement.buyerStake = agreement.buyerStake.sub(cost);
         }
 
-        ERC20Burnable(nmr).burn(punishment.add(cost));
+        ERC20Burnable(nmr).burn(punishment);
+        ERC20Burnable(nmr).burnFrom(msg.sender, cost);
 
         emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
     }
