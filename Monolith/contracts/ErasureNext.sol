@@ -21,13 +21,13 @@ contract ErasureNext_Monolith is IPFSWrapper {
     struct Post {
         IPFSMultiHash[] hashes;
         address owner;
-        IPFSMultiHash metadata;
+        bytes metadata;
         uint256 stake;
         bool symmetricGrief;
     }
 
     struct Agreement {
-        IPFSMultiHash metadata;
+        bytes metadata;
         address buyer;
         address seller;
         bool buyerProposed;
@@ -111,7 +111,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         if (stake < post.stake)
             require(ERC20Burnable(nmr).transfer(msg.sender, post.stake - stake));
 
-        post.metadata = splitIPFSHash(metadata);
+        post.metadata = metadata;
         post.stake = stake;
         post.symmetricGrief = symmetricGrief;
 
@@ -202,7 +202,7 @@ contract ErasureNext_Monolith is IPFSWrapper {
         agreementID = agreements.length;
 
         agreements.push(Agreement(
-            splitIPFSHash(metadata),
+            metadata,
             buyer,
             seller,
             isBuyer,
