@@ -67,6 +67,9 @@ contract ErasureNext_Agreements {
         GriefType sellerGriefType
     ) public returns (uint256 agreementID){
 
+        require(now < griefDeadline, "grief deadline must be in the future");
+        require(msg.sender != counterparty, "counterparty must be a different address");
+
         if (isBuyer) {
             agreementID = pushProposal(
                 metadata,
@@ -151,10 +154,12 @@ contract ErasureNext_Agreements {
 
         Agreement storage agreement = agreements[agreementID];
 
+        require(now < agreement.griefDeadline, "only before grief deadline");
+
         if (agreement.buyerProposed)
             require(msg.sender == agreement.seller, "only seller");
         else
-            require(msg.sender == agreement.buyer, "only seller");
+            require(msg.sender == agreement.buyer, "only buyer");
 
         require(agreement.status == State.Pending, "only pending");
 
