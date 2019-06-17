@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./helpers/openzeppelin-solidity/math/SafeMath.sol";
-import "./helpers/openzeppelin-solidity/token/IERC20.sol";
+import "./helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 
 
 contract ErasureNext_Escrow {
@@ -13,24 +13,24 @@ contract ErasureNext_Escrow {
     struct Escrow {
         address buyer;
         address seller;
-        uint256 agreementID
+        uint256 agreementID;
         address token;
         uint256 amount;
         uint256 deadline;
     }
 
     event EscrowCreated(uint256 escrowID, uint256 agreementID, address buyer, address seller);
-    event FundsSubmitted(uint256 escrowID, address owner, bytes metadata, uint256 stake, bool symmetricGrief);
+    event FundsSubmitted(uint256 escrowID, address token, uint256 amount, uint256 deadline);
     event DataSubmitted(uint256 escrowID, bytes encryptedData);
     event FundsWithdrawn(uint256 escrowID);
 
     // ESCROWS //
 
-    function createEscrow(uint256 agreementID, address buyer, address seller) returns (uint256 escrowID) {
+    function createEscrow(uint256 agreementID, address buyer, address seller) public returns (uint256 escrowID) {
 
         escrowID = escrows.length;
         escrows.length++;
-        Escrow escrow = escrows[escrowID];
+        Escrow storage escrow = escrows[escrowID];
 
         escrow.buyer = buyer;
         escrow.seller = seller;
@@ -39,24 +39,24 @@ contract ErasureNext_Escrow {
         emit EscrowCreated(escrowID, agreementID, buyer, seller);
     }
 
-    function submitFunds(uint256 escrowID, address token, uint256 amount, uint256 lockTime) public {
+    function submitFunds(uint256 escrowID, address token, uint256 amount, uint256 duration) public {
 
-        Escrow escrow = escrows[escrowID];
+        Escrow storage escrow = escrows[escrowID];
 
         require(msg.sender == escrow.buyer);
 
         escrow.token = token;
         escrow.amount = amount;
-        escrow.deadline = lockTime.add(block.timestamp);
+        escrow.deadline = duration.add(block.timestamp);
 
         require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
-        emit FundsSubmitted(escrowID, owner, metadata, stake, symmetricGrief);
+        emit FundsSubmitted(escrowID, msg.sender, amount, escrow.deadline);
     }
 
     function submitData(uint256 escrowID, bytes memory encryptedData) public {
 
-        Escrow escrow = escrows[escrowID];
+        Escrow storage escrow = escrows[escrowID];
 
         require(msg.sender == escrow.seller);
         require(block.timestamp < escrow.deadline); // This should be checked off-chain because if the tx fails, the data is revealed without a payment
@@ -70,7 +70,7 @@ contract ErasureNext_Escrow {
 
     function withdrawFunds(uint256 escrowID) public {
 
-        Escrow escrow = escrows[escrowID];
+        Escrow storage escrow = escrows[escrowID];
 
         require(msg.sender == escrow.buyer);
         require(block.timestamp >= escrow.deadline);
