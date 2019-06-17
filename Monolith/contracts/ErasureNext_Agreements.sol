@@ -65,7 +65,7 @@ contract ErasureNext_Agreements {
         uint256 griefDeadline,
         GriefType buyerGriefType,
         GriefType sellerGriefType
-    ) public returns (uint256 agreementID){
+    ) public returns (uint256 agreementID) {
 
         if (isBuyer) {
             agreementID = pushProposal(
@@ -96,8 +96,26 @@ contract ErasureNext_Agreements {
                 sellerGriefType
             );
         }
+    }
 
+    function validateGriefParams(GriefType type, uint256 stake, uint256 ratio) private returns (bool valid) {
+        if (type == GriefType.CgtP || type == GriefType.CltP)
+            return (stake > 0 && ratio > 1);
+        if (type == GriefType.CeqP) {
+            return (stake > 0 && ratio == 1);
+        if (type == GriefType.InfGreif) {
+            return (stake > 0 && ratio == 0);
+        if (type == GriefType.NoGreif) {
+            return (stake == 0 && ratio == 0);
+        else
+            return false;
+    }
 
+    function validateDeadline(GriefType buyerType, GriefType sellerType, uint256 griefDeadline) private returns (bool valid) {
+        if (buyerType == GriefType.NoGreif && sellerType == GriefType.NoGreif)
+            return (griefDeadline == 0);
+        else
+            return (griefDeadline > block.timestamp);
     }
 
     function pushProposal(
@@ -113,6 +131,11 @@ contract ErasureNext_Agreements {
         GriefType buyerGriefType,
         GriefType sellerGriefType
     ) private returns (uint256 agreementID) {
+
+        require(validateGriefParams(buyerGriefType, sellerStake, buyerGriefCost), "buyer grief type invalid");
+        require(validateGriefParams(sellerGriefType, buyerStake, sellerGriefCost), "seller grief type invalid");
+        require(validateDeadline(buyerGriefType, sellerGriefType, griefDeadline), "griefDeadline invalid");
+        require(buyer != seller, "cannot make agreement with self");
 
         agreementID = agreements.length;
 
@@ -154,9 +177,10 @@ contract ErasureNext_Agreements {
         if (agreement.buyerProposed)
             require(msg.sender == agreement.seller, "only seller");
         else
-            require(msg.sender == agreement.buyer, "only seller");
+            require(msg.sender == agreement.buyer, "only buyer");
 
         require(agreement.status == State.Pending, "only pending");
+        require(validateDeadline(agreement.buyerGriefType, agreement.sellerGriefType, agreement.griefDeadline), "griefDeadline invalid");
 
         // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller, address(this), agreement.sellerStake));
