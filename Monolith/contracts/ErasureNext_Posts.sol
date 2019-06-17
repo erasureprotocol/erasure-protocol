@@ -64,5 +64,12 @@ contract ErasureNext_Posts is IPFSWrapper {
         emit PostUpdated(postID, msg.sender, metadata);
     }
 
+    function getPostOwner(uint256 postID) public view returns (address owner) {
+        return posts[postID].owner;
+    }
+
+    function getPostMetadata(uint256 postID) public view returns (bytes memory metadata) {
+        return posts[postID].metadata;
+    }
 
 }
