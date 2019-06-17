@@ -45,11 +45,11 @@ contract ErasureNext_Escrow {
 
         require(msg.sender == escrow.buyer);
 
+        require(IERC20(token).transferFrom(msg.sender, address(this), amount));
+
         escrow.token = token;
         escrow.amount = amount;
         escrow.deadline = duration.add(block.timestamp);
-
-        require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
         emit FundsSubmitted(escrowID, msg.sender, amount, escrow.deadline);
     }
@@ -61,9 +61,9 @@ contract ErasureNext_Escrow {
         require(msg.sender == escrow.seller);
         require(block.timestamp < escrow.deadline); // This should be checked off-chain because if the tx fails, the data is revealed without a payment
 
-        delete escrow.amount;
-
         require(IERC20(escrow.token).transfer(msg.sender, escrow.amount));
+
+        delete escrow.amount;
 
         emit DataSubmitted(escrowID, encryptedData);
     }
@@ -75,9 +75,9 @@ contract ErasureNext_Escrow {
         require(msg.sender == escrow.buyer);
         require(block.timestamp >= escrow.deadline);
 
-        delete escrow.amount;
-
         require(IERC20(escrow.token).transfer(msg.sender, escrow.amount));
+
+        delete escrow.amount;
 
         emit FundsWithdrawn(escrowID);
     }
