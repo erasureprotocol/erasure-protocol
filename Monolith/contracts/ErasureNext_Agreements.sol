@@ -236,4 +236,35 @@ contract ErasureNext_Agreements {
             revert();
     }
 
+    function getAgreement(uint256 agreementID) public view returns (
+        bytes memory metadata,
+        address buyer,
+        address seller,
+        bool buyerProposed,
+        uint256 buyerStake,
+        uint256 sellerStake,
+        uint256 buyerGriefCost,
+        uint256 sellerGriefCost,
+        uint256 griefDeadline,
+        GriefType buyerGriefType,
+        GriefType sellerGriefType,
+        State status
+    ) {
+
+        Agreement storage agreement = agreements[agreementID];
+
+        metadata = agreement.metadata;
+        buyer = agreement.buyer;
+        seller = agreement.seller;
+        buyerProposed = agreement.buyerProposed;
+        buyerStake = agreement.buyerStake;
+        sellerStake = agreement.sellerStake;
+        buyerGriefCost = agreement.buyerGriefCost;
+        sellerGriefCost = agreement.sellerGriefCost;
+        griefDeadline = agreement.griefDeadline;
+        buyerGriefType = agreement.buyerGriefType;
+        sellerGriefType = agreement.sellerGriefType;
+        status = agreement.status;
+    }
+
 }
