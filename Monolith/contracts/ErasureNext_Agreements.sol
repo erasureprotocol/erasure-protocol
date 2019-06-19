@@ -98,7 +98,7 @@ contract ErasureNext_Agreements {
         }
     }
 
-    function validateGriefParams(GriefType griefType, uint256 stake, uint256 ratio) private returns (bool valid) {
+    function validateGriefParams(GriefType griefType, uint256 stake, uint256 ratio) private pure returns (bool valid) {
         if (griefType == GriefType.CgtP || griefType == GriefType.CltP)
             return (stake > 0 && ratio > 1);
         if (griefType == GriefType.CeqP)
