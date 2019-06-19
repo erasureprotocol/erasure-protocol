@@ -82,6 +82,11 @@ contract ErasureNext_Escrow {
         emit FundsWithdrawn(escrowID);
     }
 
+    function createAndFund(address payer, address counterparty, bytes memory metadata, address token, uint256 amount, uint256 deadline) public returns (uint256 escrowID) {
+        escrowID = createEscrow(payer, counterparty, metadata);
+        submitFunds(escrowID, token, amount, deadline);
+    }
+
     // Getters //
 
     function getEscrow(uint256 escrowID) public view returns (
