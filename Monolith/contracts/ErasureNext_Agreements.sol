@@ -98,14 +98,14 @@ contract ErasureNext_Agreements {
         }
     }
 
-    function validateGriefParams(GriefType type, uint256 stake, uint256 ratio) private returns (bool valid) {
-        if (type == GriefType.CgtP || type == GriefType.CltP)
+    function validateGriefParams(GriefType griefType, uint256 stake, uint256 ratio) private returns (bool valid) {
+        if (griefType == GriefType.CgtP || griefType == GriefType.CltP)
             return (stake > 0 && ratio > 1);
-        if (type == GriefType.CeqP) {
+        if (griefType == GriefType.CeqP)
             return (stake > 0 && ratio == 1);
-        if (type == GriefType.InfGreif) {
+        if (griefType == GriefType.InfGreif)
             return (stake > 0 && ratio == 0);
-        if (type == GriefType.NoGreif) {
+        if (griefType == GriefType.NoGreif)
             return (stake == 0 && ratio == 0);
         else
             return false;
