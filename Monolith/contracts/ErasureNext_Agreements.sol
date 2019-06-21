@@ -98,20 +98,20 @@ contract ErasureNext_Agreements {
         }
     }
 
-    function validateGriefParams(GriefType type, uint256 stake, uint256 ratio) private returns (bool valid) {
-        if (type == GriefType.CgtP || type == GriefType.CltP)
+    function validateGriefParams(GriefType griefType, uint256 stake, uint256 ratio) private pure returns (bool valid) {
+        if (griefType == GriefType.CgtP || griefType == GriefType.CltP)
             return (stake > 0 && ratio > 1);
-        if (type == GriefType.CeqP) {
+        if (griefType == GriefType.CeqP)
             return (stake > 0 && ratio == 1);
-        if (type == GriefType.InfGreif) {
+        if (griefType == GriefType.InfGreif)
             return (stake > 0 && ratio == 0);
-        if (type == GriefType.NoGreif) {
+        if (griefType == GriefType.NoGreif)
             return (stake == 0 && ratio == 0);
         else
             return false;
     }
 
-    function validateDeadline(GriefType buyerType, GriefType sellerType, uint256 griefDeadline) private returns (bool valid) {
+    function validateDeadline(GriefType buyerType, GriefType sellerType, uint256 griefDeadline) private view returns (bool valid) {
         if (buyerType == GriefType.NoGreif && sellerType == GriefType.NoGreif)
             return (griefDeadline == 0);
         else
@@ -135,7 +135,6 @@ contract ErasureNext_Agreements {
         require(validateGriefParams(buyerGriefType, sellerStake, buyerGriefCost), "buyer grief type invalid");
         require(validateGriefParams(sellerGriefType, buyerStake, sellerGriefCost), "seller grief type invalid");
         require(validateDeadline(buyerGriefType, sellerGriefType, griefDeadline), "griefDeadline invalid");
-        require(buyer != seller, "cannot make agreement with self");
 
         agreementID = agreements.length;
 
@@ -191,23 +190,16 @@ contract ErasureNext_Agreements {
         emit AgreementAccepted(agreementID);
     }
 
-    function griefAgreement(uint256 agreementID, uint256 punishment, bytes memory message) public {
+    function griefSeller(uint256 agreementID, uint256 punishment, bytes memory message) public {
 
         Agreement storage agreement = agreements[agreementID];
 
-        require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
+        require(msg.sender == agreement.buyer, "only buyer");
         require(now < agreement.griefDeadline, "only before grief deadline");
         require(agreement.status == State.Accepted, "only accepted agreements");
 
-        uint256 cost;
-
-        if (msg.sender == agreement.seller) {
-            cost = getGriefCost(agreement.sellerGriefCost, punishment, agreement.sellerGriefType);
-            agreement.buyerStake = agreement.buyerStake.sub(punishment);
-        } else {
-            cost = getGriefCost(agreement.buyerGriefCost, punishment, agreement.buyerGriefType);
-            agreement.sellerStake = agreement.sellerStake.sub(punishment);
-        }
+        uint256 cost = getGriefCost(agreement.buyerGriefCost, punishment, agreement.buyerGriefType);
+        agreement.sellerStake = agreement.sellerStake.sub(punishment);
 
         ERC20Burnable(nmr).burn(punishment);
         ERC20Burnable(nmr).burnFrom(msg.sender, cost);
@@ -215,25 +207,49 @@ contract ErasureNext_Agreements {
         emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
     }
 
+    function griefBuyer(uint256 agreementID, uint256 punishment, bytes memory message) public {
+
+        Agreement storage agreement = agreements[agreementID];
+
+        require(msg.sender == agreement.seller, "only seller");
+        require(now < agreement.griefDeadline, "only before grief deadline");
+        require(agreement.status == State.Accepted, "only accepted agreements");
+
+        uint256 cost = getGriefCost(agreement.sellerGriefCost, punishment, agreement.sellerGriefType);
+        agreement.buyerStake = agreement.buyerStake.sub(punishment);
+
+        ERC20Burnable(nmr).burn(punishment);
+        ERC20Burnable(nmr).burnFrom(msg.sender, cost);
+
+        emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
+    }
+
+    function cancelProposal(uint256 agreementID) public {
+
+        Agreement storage agreement = agreements[agreementID];
+
+        require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
+        require(agreement.status == State.Pending, "only pending agreements");
+
+        agreement.status = State.Ended;
+
+        emit AgreementEnded(agreementID);
+    }
+
     function endAgreement(uint256 agreementID) public {
 
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
-        require(agreement.status != State.Ended, "only active agreements");
+        require(agreement.status == State.Accepted, "only accepted agreements");
+        require(now > agreement.griefDeadline, "only after grief deadline");
 
-        if (agreement.status == State.Accepted) {
-            require(now > agreement.griefDeadline, "only after grief deadline");
+        // not vulnerable to re-entrancy since token contract is trusted
+        require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
+        require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
 
-            // not vulnerable to re-entrancy since token contract is trusted
-            require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
-            require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
-
-            delete agreement.sellerStake;
-            delete agreement.buyerStake;
-        } else {
-            require(agreement.status == State.Pending, "only pending agreements");
-        }
+        delete agreement.sellerStake;
+        delete agreement.buyerStake;
 
         agreement.status = State.Ended;
 
