@@ -4,7 +4,7 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
 
 
-contract SymmetricGriefing {
+contract Symmetric {
 
     using SafeMath for uint256;
 

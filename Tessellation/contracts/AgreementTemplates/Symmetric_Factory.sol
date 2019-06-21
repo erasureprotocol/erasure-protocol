@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
-import "./SymmetricGriefing.sol";
+import "./Symmetric.sol";
 
 
-contract SymmetricGriefing_Factory {
+contract Symmetric_Factory {
 
     using SafeMath for uint256;
 
@@ -25,7 +25,7 @@ contract SymmetricGriefing_Factory {
             bytes memory metadata
         ) = abi.decode(initData, (uint256, uint256, bytes));
 
-        instance = new SymmetricGriefing(token, msg.sender, stake, deadline, metadata);
+        instance = new Symmetric(token, msg.sender, stake, deadline, metadata);
 
         instances.push(instance);
     }
