@@ -215,25 +215,32 @@ contract ErasureNext_Agreements {
         emit AgreementGriefed(agreementID, msg.sender, cost, punishment, message);
     }
 
+    function cancelProposal(uint256 agreementID) public {
+
+        Agreement storage agreement = agreements[agreementID];
+
+        require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
+        require(agreement.status == State.Pending, "only pending agreements");
+
+        agreement.status = State.Ended;
+
+        emit AgreementEnded(agreementID);
+    }
+
     function endAgreement(uint256 agreementID) public {
 
         Agreement storage agreement = agreements[agreementID];
 
         require(msg.sender == agreement.seller || msg.sender == agreement.buyer, "only seller or buyer");
-        require(agreement.status != State.Ended, "only active agreements");
+        require(agreement.status == State.Accepted, "only accepted agreements");
+        require(now > agreement.griefDeadline, "only after grief deadline");
 
-        if (agreement.status == State.Accepted) {
-            require(now > agreement.griefDeadline, "only after grief deadline");
+        // not vulnerable to re-entrancy since token contract is trusted
+        require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
+        require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
 
-            // not vulnerable to re-entrancy since token contract is trusted
-            require(ERC20Burnable(nmr).transfer(agreement.seller, agreement.sellerStake));
-            require(ERC20Burnable(nmr).transfer(agreement.buyer, agreement.buyerStake));
-
-            delete agreement.sellerStake;
-            delete agreement.buyerStake;
-        } else {
-            require(agreement.status == State.Pending, "only pending agreements");
-        }
+        delete agreement.sellerStake;
+        delete agreement.buyerStake;
 
         agreement.status = State.Ended;
 

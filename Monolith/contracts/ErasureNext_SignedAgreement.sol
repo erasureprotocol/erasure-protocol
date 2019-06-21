@@ -119,7 +119,7 @@ contract ErasureNext_SignedAgreement {
         uint256 escrowAmount = ErasureNext_Escrow(escrow).getEscrowAmount(escrowID);
 
         ErasureNext_Escrow(escrow).withdrawFunds(escrowID);
-        ErasureNext_Agreements(agreements).endAgreement(agreementID);
+        ErasureNext_Agreements(agreements).cancelProposal(agreementID);
 
         require(IERC20(nmr).transfer(msg.sender, escrowAmount));
     }
