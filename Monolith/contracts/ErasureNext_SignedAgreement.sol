@@ -128,9 +128,7 @@ contract ErasureNext_SignedAgreement {
 
         require(agreementSet.exists(bytes32(agreementID)), "signed agreement must exist");
 
-        (,,,,uint256 buyerStake,uint256 sellerStake,,,,,,ErasureNext_Agreements.State status) = ErasureNext_Agreements(agreements).getAgreement(agreementID);
-
-        require(status == ErasureNext_Agreements.State.Accepted);
+        (,,,,uint256 buyerStake,uint256 sellerStake,,,,,,) = ErasureNext_Agreements(agreements).getAgreement(agreementID);
 
         ErasureNext_Agreements(agreements).endAgreement(agreementID);
 
