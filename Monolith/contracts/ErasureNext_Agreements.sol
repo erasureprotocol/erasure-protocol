@@ -135,7 +135,6 @@ contract ErasureNext_Agreements {
         require(validateGriefParams(buyerGriefType, sellerStake, buyerGriefCost), "buyer grief type invalid");
         require(validateGriefParams(sellerGriefType, buyerStake, sellerGriefCost), "seller grief type invalid");
         require(validateDeadline(buyerGriefType, sellerGriefType, griefDeadline), "griefDeadline invalid");
-        require(buyer != seller, "cannot make agreement with self");
 
         agreementID = agreements.length;
 
