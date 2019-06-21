@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "compile": "yarn etherlime compile"
+  },
   "dependencies": {
-    "etherlime": "^1.1.2"
+    "etherlime": "2.0.3"
   }
 }
