@@ -140,14 +140,24 @@ contract ErasureNext_SignedAgreement {
 
     // Griefing //
 
-    function griefAgreement(uint256 agreementID, uint256 punishment, bytes memory message) public {
+    function griefSeller(uint256 agreementID, uint256 punishment, bytes memory message) public {
 
-        require(msg.sender == signedAgreements[agreementID].seller || msg.sender == signedAgreements[agreementID].buyer, "only seller or buyer");
+        require(msg.sender == signedAgreements[agreementID].buyer, "only buyer");
 
         require(IERC20(nmr).transferFrom(msg.sender, address(this), punishment));
         require(IERC20(nmr).approve(agreements, punishment));
 
-        ErasureNext_Agreements(agreements).griefAgreement(agreementID, punishment, message);
+        ErasureNext_Agreements(agreements).griefSeller(agreementID, punishment, message);
+    }
+
+    function griefBuyer(uint256 agreementID, uint256 punishment, bytes memory message) public {
+
+        require(msg.sender == signedAgreements[agreementID].seller, "only seller");
+
+        require(IERC20(nmr).transferFrom(msg.sender, address(this), punishment));
+        require(IERC20(nmr).approve(agreements, punishment));
+
+        ErasureNext_Agreements(agreements).griefBuyer(agreementID, punishment, message);
     }
 
 }
