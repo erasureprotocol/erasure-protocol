@@ -17,3 +17,6 @@ install:
   - yarn install
 script:
   - yarn run compile
+  - cd ../Tessellation/
+  - yarn install
+  - yarn run compile
