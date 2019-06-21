@@ -78,38 +78,18 @@ contract ErasureNext_Agreements {
         GriefType buyerGriefType,
         GriefType sellerGriefType
     ) public returns (uint256 id) {
+        require(validateGriefParams(buyerGriefType, sellerStake, buyerGriefCost), "buyer grief type invalid");
+        require(validateGriefParams(sellerGriefType, buyerStake, sellerGriefCost), "seller grief type invalid");
+        require(validateDeadline(buyerGriefType, sellerGriefType, griefDeadline), "griefDeadline invalid");
+        address buyer;
+        address seller;
         if (isBuyer) {
-            id = partialProposal(
-                isBuyer,
-                griefDeadline,
-                metadata,
-                buyerStake,
-                buyerGriefCost,
-                buyerGriefType
-            );
-            addSeller(id, counterparty, sellerStake, sellerGriefCost, sellerGriefType);
+            buyer = msg.sender;
+            seller = counterparty;
         } else {
-            id = partialProposal(
-                isBuyer,
-                griefDeadline,
-                metadata,
-                sellerStake,
-                sellerGriefCost,
-                sellerGriefType
-            );
-            addBuyer(id, counterparty, buyerStake, buyerGriefCost, buyerGriefType);
+            buyer = counterparty;
+            seller = msg.sender;
         }
-    }
-
-    function partialProposal(
-        bool isBuyer,
-        uint256 griefDeadline,
-        bytes memory metadata,
-        uint256 stake,
-        uint256 griefCostToPunishment,
-        GriefType griefType
-    ) public returns (uint256 id) {
-
         id = agreements.length;
         agreements.length++;
 
@@ -117,13 +97,8 @@ contract ErasureNext_Agreements {
         agreements[id].status = State.Pending;
         agreements[id].buyerProposed = isBuyer;
         agreements[id].metadata = metadata;
-
-        if (isBuyer) {
-            _addBuyer(id, msg.sender, stake, griefCostToPunishment, griefType);
-        } else {
-            _addSeller(id, msg.sender, stake, griefCostToPunishment, griefType);
-        }
-
+        addSeller(id, seller, sellerStake, sellerGriefCost, sellerGriefType);
+        addBuyer(id, buyer, buyerStake, buyerGriefCost, buyerGriefType);
         emit AgreementProposed(id, griefDeadline, isBuyer, metadata);
     }
 
@@ -181,9 +156,6 @@ contract ErasureNext_Agreements {
             require(msg.sender == agreement.buyer.wallet, "only buyer");
 
         require(agreement.status == State.Pending, "only pending");
-        require(validateGriefParams(agreement.buyer.griefType, agreement.seller.stake, agreement.buyer.griefCostToPunishment), "buyer grief type invalid");
-        require(validateGriefParams(agreement.seller.griefType, agreement.buyer.stake, agreement.seller.griefCostToPunishment), "seller grief type invalid");
-        require(validateDeadline(agreement.buyer.griefType, agreement.seller.griefType, agreement.griefDeadline), "griefDeadline invalid");
 
         // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller.wallet, address(this), agreement.seller.stake));
