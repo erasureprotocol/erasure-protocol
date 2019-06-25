@@ -156,6 +156,7 @@ contract ErasureNext_Agreements {
             require(msg.sender == agreement.buyer.wallet, "only buyer");
 
         require(agreement.status == State.Pending, "only pending");
+        require(validateDeadline(agreement.buyer.griefType, agreement.seller.griefType, agreement.griefDeadline), "griefDeadline invalid");
 
         // transfer stakes
         require(ERC20Burnable(nmr).transferFrom(agreement.seller.wallet, address(this), agreement.seller.stake));
