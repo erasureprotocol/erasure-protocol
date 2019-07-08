@@ -49,7 +49,56 @@ contract ErasureNext_SignedAgreement {
 
     // Agreement lifecycle //
 
-    function createSignedAgreement(
+    function createSignedAgreement(bytes memory metadata, uint256 sellerStake, bytes memory agreementArgs, uint256 escrowDeadline) public returns (uint256 agreementID, uint256 escrowID) {
+
+        agreementID = encodedProposeAgreement(metadata, sellerStake, agreementArgs);
+
+        require(IERC20(nmr).transferFrom(msg.sender, address(this), sellerStake));
+        require(IERC20(nmr).approve(escrow, sellerStake));
+
+        escrowID = ErasureNext_Escrow(escrow).createAndFund(
+            address(this),
+            nmr,
+            sellerStake,
+            escrowDeadline,
+            metadata
+        );
+
+        signedAgreements[agreementID].seller = msg.sender;
+        signedAgreements[agreementID].escrowID = escrowID;
+
+        agreementSet.insert(bytes32(agreementID));
+
+        emit SignedAgreementCreated(agreementID, escrowID, msg.sender);
+    }
+
+    function encodedProposeAgreement(bytes memory metadata, uint256 sellerStake, bytes memory agreementArgs) internal returns (uint256 agreementID) {
+        (
+            uint256 buyerStake,
+            uint256 buyerGriefCost,
+            uint256 sellerGriefCost,
+            uint256 griefDeadline,
+            ErasureNext_Agreements.GriefType buyerGriefType,
+            ErasureNext_Agreements.GriefType sellerGriefType
+        ) = abi.decode(agreementArgs, (uint256, uint256, uint256, uint256, ErasureNext_Agreements.GriefType, ErasureNext_Agreements.GriefType));
+
+        agreementID = ErasureNext_Agreements(agreements).proposeAgreement(
+            true,
+            address(this),
+            metadata,
+            buyerStake,
+            sellerStake,
+            buyerGriefCost,
+            sellerGriefCost,
+            griefDeadline,
+            buyerGriefType,
+            sellerGriefType
+        );
+    }
+
+    // Cannot use this version due to stack limit
+
+    /* function createSignedAgreement(
         bytes memory metadata,
         uint256 buyerStake,
         uint256 sellerStake,
@@ -58,7 +107,7 @@ contract ErasureNext_SignedAgreement {
         uint256 griefDeadline,
         ErasureNext_Agreements.GriefType buyerGriefType,
         ErasureNext_Agreements.GriefType sellerGriefType,
-        uint256 deadline
+        uint256 escrowDeadline
     ) public returns (uint256 agreementID, uint256 escrowID) {
 
         agreementID = ErasureNext_Agreements(agreements).proposeAgreement(
@@ -74,20 +123,15 @@ contract ErasureNext_SignedAgreement {
             sellerGriefType
         );
 
-        escrowID = ErasureNext_Escrow(escrow).createEscrow(
-            address(this),
-            address(this),
-            metadata
-        );
-
         require(IERC20(nmr).transferFrom(msg.sender, address(this), sellerStake));
         require(IERC20(nmr).approve(escrow, sellerStake));
 
-        ErasureNext_Escrow(escrow).submitFunds(
-            escrowID,
+        escrowID = ErasureNext_Escrow(escrow).createAndFund(
+            address(this),
             nmr,
             sellerStake,
-            deadline
+            escrowDeadline,
+            metadata
         );
 
         signedAgreements[agreementID].seller = msg.sender;
@@ -96,7 +140,7 @@ contract ErasureNext_SignedAgreement {
         agreementSet.insert(bytes32(agreementID));
 
         emit SignedAgreementCreated(agreementID, escrowID, msg.sender);
-    }
+    } */
 
     function countersignAgreement(uint256 agreementID, bytes memory data) public {
 
@@ -116,9 +160,8 @@ contract ErasureNext_SignedAgreement {
     function cancelEscrow(uint256 agreementID) public onlySeller(agreementID) {
 
         uint256 escrowID = signedAgreements[agreementID].escrowID;
-        uint256 escrowAmount = ErasureNext_Escrow(escrow).getEscrowAmount(escrowID);
 
-        ErasureNext_Escrow(escrow).withdrawFunds(escrowID);
+        uint256 escrowAmount = ErasureNext_Escrow(escrow).withdrawFunds(escrowID);
         ErasureNext_Agreements(agreements).cancelProposal(agreementID);
 
         require(IERC20(nmr).transfer(msg.sender, escrowAmount));
