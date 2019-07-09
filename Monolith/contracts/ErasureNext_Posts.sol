@@ -16,10 +16,11 @@ contract ErasureNext_Posts is IPFSWrapper {
     struct Post {
         IPFSMultiHash[] hashes;
         address owner;
+        bytes staticMetadata;
         bytes metadata;
     }
 
-    event PostCreated(uint256 postID, address owner, bytes metadata);
+    event PostCreated(uint256 postID, address owner, bytes staticMetadata, bytes metadata);
     event PostUpdated(uint256 postID, address owner, bytes metadata);
     event HashSubmitted(uint256 postID, bytes proofHash);
 
@@ -29,17 +30,18 @@ contract ErasureNext_Posts is IPFSWrapper {
 
     // POSTS //
 
-    function createPost(bytes memory proofHash, bytes memory metadata) public returns (uint256 postID) {
+    function createPost(bytes memory proofHash, bytes memory staticMetadata, bytes memory metadata) public returns (uint256 postID) {
 
         postID = posts.length;
         posts.length++;
 
         posts[postID].owner = msg.sender;
+        posts[postID].staticMetadata = staticMetadata;
         posts[postID].metadata = metadata;
 
         submitHash(postID, proofHash);
 
-        emit PostCreated(postID, msg.sender, metadata);
+        emit PostCreated(postID, msg.sender, staticMetadata, metadata);
     }
 
     function submitHash(uint256 postID, bytes memory proofHash) public {
