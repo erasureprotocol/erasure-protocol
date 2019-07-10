@@ -7,9 +7,13 @@
   "license": "MIT",
   "scripts": {
     "compile": "yarn etherlime compile",
-    "flatten": "yarn etherlime flatten ErasureNext_Posts.sol && yarn etherlime flatten ErasureNext_Agreements.sol"
+    "flatten": "yarn etherlime flatten",
+    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=true"
   },
   "dependencies": {
-    "etherlime": "2.0.5"
+    "dotenv": "^8.0.0",
+    "etherlime": "2",
+    "etherlime-lib": "^1.1.2",
+    "ethers": "^4.0.32"
   }
 }
