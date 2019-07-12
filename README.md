@@ -2,8 +2,9 @@
 
 # erasure-next-contracts
 
-### Rinkeby
+### Erasure Monolith
 
+#### Rinkeby
 | Contract | Address |
 | - | - |
 | MockToken | [0xb6954ecf843d3f445aa918c8614e871c2cbcfd2c](https://rinkeby.etherscan.io/address/0xb6954ecf843d3f445aa918c8614e871c2cbcfd2c) |
