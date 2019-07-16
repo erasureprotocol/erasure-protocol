@@ -48,14 +48,6 @@ contract EscrowedOpenAgreement {
         _;
     }
 
-    /* TODO: implement flow without wrapper contract */
-    /* TODO: should we use  */
-    /* TODO: implement simplified two party agreement */
-    /* TODO: review how to use factory (create2, codecopy) */
-    /* TODO: review what events should be */
-    /* TODO: should we remove agreement from registry once closed */
-    /* TODO: should agreement finalization be separate from signatures -> would allow using agreement as built in escrow */
-
     /////////////////////
     // Open Agreements //
     /////////////////////
