@@ -14,6 +14,7 @@
     "dotenv": "^8.0.0",
     "etherlime": "2",
     "etherlime-lib": "^1.1.2",
-    "ethers": "^4.0.32"
+    "ethers": "^4.0.32",
+    "web3": "^1.0.0-beta.55"
   }
 }
