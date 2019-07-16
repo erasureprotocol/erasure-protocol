@@ -5,13 +5,19 @@ import "./agreements/MultiPartyGriefing.sol";
 
 contract Erasure_Agreements {
 
-    using SafeMath for uint256;
-
     address[] public agreements;
 
-    function createAgreement(address _token, uint256 _griefDeadline, bytes memory _metadata) public returns (address agreement) {
-        agreement = address(new MultiPartyGriefing(_token, msg.sender, _griefDeadline, _metadata));
+    event AgreementCreated(address agreement, address creator);
+
+    function create(
+        address token,
+        bool trustedCreator,
+        uint256 griefDeadline,
+        bytes memory metadata
+    ) public returns (address agreement) {
+        agreement = address(new MultiPartyGriefing(msg.sender, token, trustedCreator, griefDeadline, metadata));
         agreements.push(agreement);
+        emit AgreementCreated(agreement, msg.sender);
     }
 
 }
