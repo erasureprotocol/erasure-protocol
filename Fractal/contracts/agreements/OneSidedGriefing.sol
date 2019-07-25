@@ -17,7 +17,7 @@ import "../modules/Metadata.sol";
  * TODO:
  * - Validate if state machine works as expected in edge cases
  */
-contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
+contract OneSidedGriefing is Countdown, SimpleGriefing, Metadata {
 
     using SafeMath for uint256;
 

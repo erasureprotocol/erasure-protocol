@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./agreements/MultiPartyGriefing.sol";
-import "./agreements/OneSidedAgreement.sol";
+import "./agreements/OneWayGriefing.sol";
 
 
 contract MultiPartyGriefing_Factory {
@@ -22,7 +22,7 @@ contract MultiPartyGriefing_Factory {
     }
 }
 
-contract OneSidedAgreement_Factory {
+contract OneWayGriefing_Factory {
 
 }
 
