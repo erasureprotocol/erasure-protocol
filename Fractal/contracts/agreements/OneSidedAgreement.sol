@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
+import "../modules/Metadata.sol";
 
 
 contract Operated {
@@ -14,10 +15,14 @@ contract Operated {
     }
 
     constructor() internal {
-        _operator = msg.sender;
+        _setOperator(msg.sender);
     }
 
-    function getOperator() internal view returns (address operator) {
+    function _setOperator(address operator) internal {
+        _operator = operator;
+    }
+
+    function getOperator() public view returns (address operator) {
         operator = _operator;
     }
 
@@ -43,11 +48,11 @@ contract Deadline {
 
     // view functions
 
-    function getDeadline() internal view returns (uint256 deadline) {
+    function getDeadline() public view returns (uint256 deadline) {
         deadline = _deadline;
     }
 
-    function isAfterDeadline() internal view returns (bool status) {
+    function isAfterDeadline() public view returns (bool status) {
         status = (now >= _deadline);
     }
 
@@ -93,15 +98,15 @@ contract Countdown is Deadline {
 
     // view functions
 
-    function getLength() internal view returns (uint256 length) {
+    function getLength() public view returns (uint256 length) {
         length = _length;
     }
 
-    function isOver() internal view returns (bool status) {
+    function isOver() public view returns (bool status) {
         status = Deadline.isAfterDeadline();
     }
 
-    function timeRemaining() internal view returns (uint256 time) {
+    function timeRemaining() public view returns (uint256 time) {
         time = Deadline.getDeadline().sub(now);
     }
 
@@ -117,31 +122,6 @@ contract Countdown is Deadline {
         _;
     }
 
-}
-
-contract Metadata {
-
-    bytes private _staticMetadata;
-    bytes private _variableMetadata;
-
-    event StaticMetadataSet(bytes staticMetadata);
-    event VariableMetadataSet(bytes variableMetadata);
-
-    function setStaticMetadata(bytes memory staticMetadata) public {
-        require(_staticMetadata.length == 0, "static metadat cannot be changed");
-        _staticMetadata = staticMetadata;
-        emit StaticMetadataSet(staticMetadata);
-    }
-
-    function setVariableMetadata(bytes memory variableMetadata) public {
-        _variableMetadata = variableMetadata;
-        emit VariableMetadataSet(variableMetadata);
-    }
-
-    function getMetadata() public view returns (bytes memory staticMetadata, bytes memory variableMetadata) {
-        staticMetadata = _staticMetadata;
-        variableMetadata = _variableMetadata;
-    }
 }
 
 contract SimpleGriefing {
@@ -218,7 +198,7 @@ contract SimpleGriefing {
 
     // view functions
 
-    function getStake(address party) internal view returns (uint256 stake, uint256 ratio, PunishType punishType) {
+    function getStake(address party) public view returns (uint256 stake, uint256 ratio, PunishType punishType) {
         // get stake data from storage
         stake = _stakeData[party].stake;
         ratio = _stakeData[party].ratio;
@@ -227,7 +207,7 @@ contract SimpleGriefing {
 
     // pure functions
 
-    function getCost(uint256 ratio, uint256 punishment, PunishType punishType) internal pure returns(uint256 cost) {
+    function getCost(uint256 ratio, uint256 punishment, PunishType punishType) public pure returns(uint256 cost) {
         /*  CgtP: Cost greater than Punishment
          *  CltP: Cost less than Punishment
          *  CeqP: Cost equal to Punishment
@@ -245,7 +225,7 @@ contract SimpleGriefing {
             revert();
     }
 
-    function getPunishment(uint256 ratio, uint256 cost, PunishType punishType) internal pure returns(uint256 punishment) {
+    function getPunishment(uint256 ratio, uint256 cost, PunishType punishType) public pure returns(uint256 punishment) {
         /*  CgtP: Cost greater than Punishment
          *  CltP: Cost less than Punishment
          *  CeqP: Cost equal to Punishment
@@ -274,9 +254,7 @@ contract SimpleGriefing {
  * - Payments are separate.
  *
  * TODO:
- * - Should it be possible to update metadata?
  * - Validate if state machine works as expected in edge cases
- * - Review if should use parties contract separate from griefing contract
  */
 contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
 
@@ -297,7 +275,8 @@ contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
         address counterparty,
         uint256 ratio,
         SimpleGriefing.PunishType punishType,
-        uint256 endDelay
+        uint256 endDelay,
+        bytes memory staticMetadata
     ) public {
 
         // set storage values
@@ -311,6 +290,9 @@ contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
         // set countdown length
         Countdown.setLength(endDelay);
 
+        // set static metadata
+        Metadata._setStaticMetadata(staticMetadata);
+
         // emit event
         emit Created(staker, counterparty, ratio, punishType, token, endDelay);
     }
@@ -323,6 +305,12 @@ contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
     modifier onlyCounterparty(address caller) {
         require(caller == _data.counterparty, 'only counterparty');
         _;
+    }
+
+    // state functions
+
+    function setVariableMetadata(bytes memory variableMetadata) public onlyStaker(msg.sender) {
+        Metadata._setVariableMetadata(variableMetadata);
     }
 
     function increaseStake(uint256 currentStake, uint256 amountToAdd) public onlyStaker(msg.sender) {
@@ -374,5 +362,4 @@ contract OneSidedAgreement is Countdown, SimpleGriefing, Metadata {
         // retrieve stake
         amount = SimpleGriefing.retrieve(msg.sender, msg.sender);
     }
-
 }
