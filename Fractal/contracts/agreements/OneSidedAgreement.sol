@@ -32,10 +32,13 @@ contract Deadline {
 
     uint256 private _deadline;
 
+    event DeadlineSet(uint256 deadline);
+
     // state functions
 
     function setDeadline(uint256 deadline) internal {
         _deadline = deadline;
+        emit DeadlineSet(deadline);
     }
 
     // view functions
@@ -73,10 +76,13 @@ contract Countdown is Deadline {
 
     uint256 private _length;
 
+    event LengthSet(uint256 length);
+
     // state functions
 
     function setLength(uint256 length) internal {
         _length = length;
+        emit LengthSet(length);
     }
 
     function start() internal returns (uint256 deadline) {
@@ -148,6 +154,10 @@ contract SimpleGriefing is Parties {
         address token;
     }
 
+    event StakeUpdated(address party, uint256 stake, uint256 ratio, PunishType punishType);
+    event StakePunished(uint256 punishment, uint256 cost, bytes message);
+    event StakeRetrieved(address party, address recipient, uint256 amount);
+
     function getDataStoreHash() internal pure returns (bytes32 hash) {
         hash = keccak256('SimpleGriefing');
     }
@@ -158,6 +168,7 @@ contract SimpleGriefing is Parties {
 
     function setStake(address party, uint256 stake, uint256 ratio, PunishType punishType) internal {
         Parties.setData(party, abi.encode(stake, ratio, punishType));
+        emit StakeUpdated(party, stake, ratio, punishType);
     }
 
     function getCost(uint256 ratio, uint256 punishment, PunishType punishType) internal pure returns(uint256 cost) {
@@ -204,9 +215,11 @@ contract SimpleGriefing is Parties {
         ERC20Burnable(params.token).burnFrom(from, cost);
 
         setStake(target, stake.sub(punishment), ratio, punishType);
+
+        emit StakePunished(punishment, cost, message);
     }
 
-    function retrieve(address party) internal returns (uint256 stake) {
+    function retrieve(address party, address recipient) internal returns (uint256 stake) {
         (uint256 currentStake, uint256 ratio, PunishType punishType) = getStake(party);
 
         stake = currentStake;
@@ -214,8 +227,11 @@ contract SimpleGriefing is Parties {
         require(stake > 0, "no stake to recover");
         setStake(party, 0, ratio, punishType);
 
-        require(IERC20(params.token).transfer(party, stake), "token transfer failed");
+        require(IERC20(params.token).transfer(recipient, stake), "token transfer failed");
+
+        emit StakeRetrieved(party, recipient, stake);
     }
+
 }
 
 /* Immediately engage with specific buyer
@@ -229,7 +245,6 @@ contract SimpleGriefing is Parties {
  * TODO:
  * - Should it be possible to update metadata?
  * - Validate if state machine works as expected in edge cases
- * - Should events be emited by inherited contracts
  * - Review if should use parties contract separate from griefing contract
  */
 contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
@@ -244,10 +259,6 @@ contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
     }
 
     event Created(address indexed staker, address indexed counterparty, uint256 ratio, SimpleGriefing.PunishType punishType, address token, uint256 endDelay);
-    event StakeUpdated(uint256 previousStake, uint256 newStake);
-    event Punished(uint256 punishment, uint256 cost, bytes message);
-    event EndRequested(uint256 deadline);
-    event StakeRetrieved(uint256 amount);
 
     constructor(address token, address staker, address counterparty, uint256 ratio, SimpleGriefing.PunishType punishType, uint256 endDelay) public {
 
@@ -296,38 +307,24 @@ contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
 
         // add amount to stake storage
         SimpleGriefing.setStake(_data.staker, newStake, ratio, punishType);
-
-        // emit event
-        emit StakeUpdated(stake, newStake);
-
     }
 
     function punish(uint256 punishment, bytes memory message) public onlyCounterparty(msg.sender) returns (uint256 cost) {
-
-        // get current stake amount
-        (uint256 stake,,) = SimpleGriefing.getStake(_data.staker);
 
         // require agreement is not ended
         require(!Countdown.isOver(), "agreement not ended");
 
         // execute griefing
         cost = SimpleGriefing.grief(msg.sender, _data.staker, punishment, message);
-
-        // emit event
-        emit Punished(punishment, cost, message);
-        emit StakeUpdated(stake, stake.sub(punishment));
     }
 
-    function requestEnd() public onlyStaker(msg.sender) returns (uint256 deadline) {
+    function setDeadline() public onlyStaker(msg.sender) returns (uint256 deadline) {
 
         // require countdown is not started
         require(Deadline.getDeadline() == 0, "deadline already set");
 
         // start countdown
         deadline = Countdown.start();
-
-        // emit event
-        emit EndRequested(deadline);
     }
 
     function retrieve() public onlyStaker(msg.sender) returns (uint256 amount) {
@@ -336,10 +333,7 @@ contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
         require(Deadline.isAfterDeadline(),"deadline not passed");
 
         // retrieve stake
-        amount = SimpleGriefing.retrieve(msg.sender);
-
-        // emit event
-        emit StakeRetrieved(amount);
+        amount = SimpleGriefing.retrieve(msg.sender, msg.sender);
     }
 
 }
