@@ -119,6 +119,30 @@ contract Countdown is Deadline {
 
 }
 
+contract Metadata {
+
+    bytes private _staticMetadata;
+    bytes private _variableMetadata;
+
+    event StaticMetadataSet(bytes staticMetadata);
+    event VariableMetadataSet(bytes variableMetadata);
+
+    function setStaticMetadata(bytes memory staticMetadata) public {
+        require(_staticMetadata.length == 0, "static metadat cannot be changed");
+        _staticMetadata = staticMetadata;
+        emit StaticMetadataSet(staticMetadata);
+    }
+
+    function setVariableMetadata(bytes memory variableMetadata) public {
+        _variableMetadata = variableMetadata;
+        emit VariableMetadataSet(variableMetadata);
+    }
+
+    function getMetadata() public view returns (bytes memory staticMetadata, bytes memory variableMetadata) {
+        staticMetadata = _staticMetadata;
+        variableMetadata = _variableMetadata;
+    }
+}
 
 contract Parties {
 
@@ -247,7 +271,7 @@ contract SimpleGriefing is Parties {
  * - Validate if state machine works as expected in edge cases
  * - Review if should use parties contract separate from griefing contract
  */
-contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
+contract OneSidedAgreement is Countdown, Parties, SimpleGriefing, Metadata {
 
     using SafeMath for uint256;
 
@@ -260,8 +284,16 @@ contract OneSidedAgreement is Countdown, Parties, SimpleGriefing {
 
     event Created(address indexed staker, address indexed counterparty, uint256 ratio, SimpleGriefing.PunishType punishType, address token, uint256 endDelay);
 
-    constructor(address token, address staker, address counterparty, uint256 ratio, SimpleGriefing.PunishType punishType, uint256 endDelay) public {
+    constructor(
+        address token,
+        address staker,
+        address counterparty,
+        uint256 ratio,
+        SimpleGriefing.PunishType punishType,
+        uint256 endDelay
+    ) public {
 
+        // set storage values
         _data.token = token;
         _data.staker = staker;
         _data.counterparty = counterparty;
