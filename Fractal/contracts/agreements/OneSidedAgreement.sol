@@ -187,11 +187,15 @@ contract SimpleGriefing is Parties {
     }
 
     function getStake(address party) internal view returns (uint256 stake, uint256 ratio, PunishType punishType) {
+        // get stake data from storage
         (stake, ratio, punishType) = abi.decode(Parties.getData(party), (uint256, uint256, PunishType));
     }
 
     function setStake(address party, uint256 stake, uint256 ratio, PunishType punishType) internal {
+        // set data in storage
         Parties.setData(party, abi.encode(stake, ratio, punishType));
+
+        // emit event
         emit StakeUpdated(party, stake, ratio, punishType);
     }
 
@@ -232,27 +236,42 @@ contract SimpleGriefing is Parties {
     }
 
     function grief(address from, address target, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
+        // get stake data from storage
         (uint256 stake, uint256 ratio, PunishType punishType) = getStake(target);
+
+        // calculate cost from punisment value and punishment type
         cost = getCost(ratio, punishment, punishType);
 
+        // burn the punishment from the target's stake
         ERC20Burnable(params.token).burn(punishment);
+
+        // burn the cost from the caller's balance
         ERC20Burnable(params.token).burnFrom(from, cost);
 
+        // set new stake data to storage
         setStake(target, stake.sub(punishment), ratio, punishType);
 
+        // emit event
         emit StakePunished(punishment, cost, message);
     }
 
     function retrieve(address party, address recipient) internal returns (uint256 stake) {
+        // get stake data from storage
         (uint256 currentStake, uint256 ratio, PunishType punishType) = getStake(party);
 
+        // assign return value
         stake = currentStake;
 
+        // require there is some stake to return
         require(stake > 0, "no stake to recover");
+
+        // set new stake data to storage
         setStake(party, 0, ratio, punishType);
 
+        // transfer stake to the party
         require(IERC20(params.token).transfer(recipient, stake), "token transfer failed");
 
+        // emit event
         emit StakeRetrieved(party, recipient, stake);
     }
 
