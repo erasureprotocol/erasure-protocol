@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "^8.0.0",
+    "eip1167-spawner": "0.2.3",
     "etherlime": "2",
     "etherlime-lib": "^1.1.2",
     "ethers": "^4.0.32",
