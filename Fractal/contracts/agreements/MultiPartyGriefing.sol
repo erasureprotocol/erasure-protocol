@@ -47,7 +47,16 @@ contract MultiPartyGriefing {
     event Ended(address indexed by, bool indexed completed);
     event StakeRecovered(address indexed party, uint256 amount);
 
-    constructor(address operator, address token, bool trustedOperator, uint256 griefDeadline, bytes memory metadata) public {
+    function initialize(
+        address operator,
+        address token,
+        bool trustedOperator,
+        uint256 griefDeadline,
+        bytes memory metadata
+    ) public {
+        // only allow function to be delegatecalled from within a constructor.
+        assembly { if extcodesize(address) { revert(0, 0) } }
+
         params.operator = operator;
         params.token = token;
         params.trustedOperator = trustedOperator;
