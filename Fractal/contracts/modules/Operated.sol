@@ -37,13 +37,16 @@ contract Operated {
         operator = _operatorData.operator;
     }
 
+    function isOperator(address caller) public view returns (bool validity) {
+        validity = (caller == getOperator());
+    }
+
     function isActive() public view returns (bool status) {
         status = _operatorData.status;
     }
 
-    function onlyOperator(address caller) public view {
-        require(caller == getOperator(), "only operator");
-        require(isActive(), "only active operator");
+    function isActiveOperator(address caller) public view returns (bool validity) {
+        validity = (isOperator(caller) && isActive());
     }
 
 }
