@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 import "../modules/Countdown.sol";
-import "../modules/SimpleGriefing.sol";
+import "../modules/Griefing.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
 
@@ -17,8 +17,12 @@ import "../modules/Operated.sol";
  *
  * TODO:
  * - Validate if state machine works as expected in edge cases
+ *
+ * NOTE:
+ * - This top level contract should only perform access control and state transitions
+ *
  */
-contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
+contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     using SafeMath for uint256;
 
@@ -29,7 +33,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         address counterparty;
     }
 
-    event Created(address indexed staker, address indexed counterparty, uint256 ratio, SimpleGriefing.PunishType punishType, address token, uint256 endDelay);
+    event Created(address indexed staker, address indexed counterparty, uint256 ratio, Griefing.RatioType ratioType, address token, uint256 countdownLength);
 
     constructor(
         address token,
@@ -37,8 +41,8 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         address staker,
         address counterparty,
         uint256 ratio,
-        SimpleGriefing.PunishType punishType,
-        uint256 endDelay,
+        Griefing.RatioType ratioType,
+        uint256 countdownLength,
         bytes memory staticMetadata
     ) public {
 
@@ -53,17 +57,17 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
             Operated._activate();
         }
 
-        // set griefing params
-        SimpleGriefing._setStake(staker, 0, ratio, punishType);
+        // set griefing ratio
+        Griefing._setRatio(staker, ratio, ratioType);
 
         // set countdown length
-        Countdown._setLength(endDelay);
+        Countdown._setLength(countdownLength);
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
 
         // emit event
-        emit Created(staker, counterparty, ratio, punishType, token, endDelay);
+        emit Created(staker, counterparty, ratio, ratioType, token, countdownLength);
     }
 
     // state functions
@@ -76,27 +80,15 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         Metadata._setVariableMetadata(variableMetadata);
     }
 
-    function increaseStake(address from, uint256 currentStake, uint256 amountToAdd) public {
+    function increaseStake(address funder, uint256 currentStake, uint256 amountToAdd) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
-
-        // get current stake amount
-        (uint256 stake, uint256 ratio, SimpleGriefing.PunishType punishType) = SimpleGriefing.getStake(_data.staker);
-
-        // calculate new sake amount
-        uint256 newStake = stake.add(amountToAdd);
-
-        // require current stake matches parameter to prevent front-running
-        require(stake == currentStake, 'currentStake parameter does not match stake');
 
         // require agreement is not ended
         require(!Countdown.isOver(), "agreement not ended");
 
-        // transfer amount
-        require(IERC20(_data.token).transferFrom(from, address(this), amountToAdd), "token transfer failed");
-
-        // add amount to stake storage
-        SimpleGriefing._setStake(_data.staker, newStake, ratio, punishType);
+        // add stake
+        Staking._addStake(_data.staker, funder, currentStake, amountToAdd);
     }
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
@@ -107,10 +99,10 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         require(!Countdown.isOver(), "agreement not ended");
 
         // execute griefing
-        cost = SimpleGriefing._grief(from, _data.staker, punishment, message);
+        cost = Griefing._grief(from, _data.staker, punishment, message);
     }
 
-    function setDeadline() public returns (uint256 deadline) {
+    function startCountdown() public returns (uint256 deadline) {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
@@ -121,7 +113,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         deadline = Countdown._start();
     }
 
-    function retrieve(address recipient) public returns (uint256 amount) {
+    function retrieveStake(address recipient) public returns (uint256 amount) {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
@@ -129,7 +121,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
         require(Deadline.isAfterDeadline(),"deadline not passed");
 
         // retrieve stake
-        amount = SimpleGriefing._retrieve(_data.staker, recipient);
+        amount = Staking._takeFullStake(_data.staker, recipient);
     }
 
     // view functions
