@@ -14,7 +14,7 @@ contract Deadline {
 
     // state functions
 
-    function setDeadline(uint256 deadline) internal {
+    function _setDeadline(uint256 deadline) internal {
         _deadline = deadline;
         emit DeadlineSet(deadline);
     }

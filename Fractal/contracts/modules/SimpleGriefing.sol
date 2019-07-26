@@ -28,7 +28,7 @@ contract SimpleGriefing {
 
     // state functions
 
-    function setStake(address party, uint256 stake, uint256 ratio, PunishType punishType) internal {
+    function _setStake(address party, uint256 stake, uint256 ratio, PunishType punishType) internal {
         // set data in storage
         _stakeData[party] = StakeData(stake, ratio, punishType);
 
@@ -36,7 +36,7 @@ contract SimpleGriefing {
         emit StakeUpdated(party, stake, ratio, punishType);
     }
 
-    function grief(address from, address target, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
+    function _grief(address from, address target, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
         // get stake data from storage
         (uint256 stake, uint256 ratio, PunishType punishType) = getStake(target);
 
@@ -50,13 +50,13 @@ contract SimpleGriefing {
         ERC20Burnable(params.token).burnFrom(from, cost);
 
         // set new stake data to storage
-        setStake(target, stake.sub(punishment), ratio, punishType);
+        _setStake(target, stake.sub(punishment), ratio, punishType);
 
         // emit event
         emit StakePunished(punishment, cost, message);
     }
 
-    function retrieve(address party, address recipient) internal returns (uint256 stake) {
+    function _retrieve(address party, address recipient) internal returns (uint256 stake) {
         // get stake data from storage
         (uint256 currentStake, uint256 ratio, PunishType punishType) = getStake(party);
 
@@ -67,7 +67,7 @@ contract SimpleGriefing {
         require(stake > 0, "no stake to recover");
 
         // set new stake data to storage
-        setStake(party, 0, ratio, punishType);
+        _setStake(party, 0, ratio, punishType);
 
         // transfer stake to the party
         require(IERC20(params.token).transfer(recipient, stake), "token transfer failed");

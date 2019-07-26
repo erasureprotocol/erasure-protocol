@@ -19,15 +19,15 @@ contract Countdown is Deadline {
 
     // state functions
 
-    function setLength(uint256 length) internal {
+    function _setLength(uint256 length) internal {
         _length = length;
         emit LengthSet(length);
     }
 
-    function start() internal returns (uint256 deadline) {
+    function _start() internal returns (uint256 deadline) {
         require(_length != 0, 'length not set');
         deadline = _length.add(now);
-        Deadline.setDeadline(deadline);
+        Deadline._setDeadline(deadline);
     }
 
     // view functions

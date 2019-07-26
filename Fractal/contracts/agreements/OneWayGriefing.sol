@@ -46,10 +46,10 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata {
         _data.counterparty = counterparty;
 
         // set griefing params
-        SimpleGriefing.setStake(staker, 0, ratio, punishType);
+        SimpleGriefing._setStake(staker, 0, ratio, punishType);
 
         // set countdown length
-        Countdown.setLength(endDelay);
+        Countdown._setLength(endDelay);
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
@@ -94,7 +94,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata {
         require(IERC20(_data.token).transferFrom(caller, address(this), amountToAdd), "token transfer failed");
 
         // add amount to stake storage
-        SimpleGriefing.setStake(_data.staker, newStake, ratio, punishType);
+        SimpleGriefing._setStake(_data.staker, newStake, ratio, punishType);
     }
 
     function punish(uint256 punishment, bytes memory message) public onlyCounterparty(msg.sender) returns (uint256 cost) {
@@ -103,7 +103,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata {
         require(!Countdown.isOver(), "agreement not ended");
 
         // execute griefing
-        cost = SimpleGriefing.grief(msg.sender, _data.staker, punishment, message);
+        cost = SimpleGriefing._grief(msg.sender, _data.staker, punishment, message);
     }
 
     function setDeadline() public onlyStaker(msg.sender) returns (uint256 deadline) {
@@ -112,7 +112,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata {
         require(Deadline.getDeadline() == 0, "deadline already set");
 
         // start countdown
-        deadline = Countdown.start();
+        deadline = Countdown._start();
     }
 
     function retrieve() public onlyStaker(msg.sender) returns (uint256 amount) {
@@ -121,6 +121,6 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata {
         require(Deadline.isAfterDeadline(),"deadline not passed");
 
         // retrieve stake
-        amount = SimpleGriefing.retrieve(msg.sender, msg.sender);
+        amount = SimpleGriefing._retrieve(msg.sender, msg.sender);
     }
 }
