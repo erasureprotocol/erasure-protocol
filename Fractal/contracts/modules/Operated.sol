@@ -3,23 +3,47 @@ pragma solidity ^0.5.0;
 
 contract Operated {
 
-    address private _operator;
+    OperatorData private _operatorData;
 
-    modifier onlyOperator() {
-        require(msg.sender == getOperator(), "only operator");
-        _;
+    struct OperatorData {
+        address operator;
+        bool status;
     }
 
-    constructor() internal {
-        _setOperator(msg.sender);
-    }
+    event StatusUpdated(address operator, bool status);
+
+    // state functions
 
     function _setOperator(address operator) internal {
-        _operator = operator;
+        _operatorData.operator = operator;
+        emit StatusUpdated(operator, _operatorData.status);
     }
 
+    function _activate() internal {
+        require(_operatorData.status == false, "already active");
+        _operatorData.status = true;
+        emit StatusUpdated(_operatorData.operator, true);
+    }
+
+    function _deactivate() internal {
+        require(_operatorData.status == true, "already deactivated");
+        _operatorData.status = false;
+        emit StatusUpdated(_operatorData.operator, false);
+    }
+
+    // view functions
+
     function getOperator() public view returns (address operator) {
-        operator = _operator;
+        operator = _operatorData.operator;
+    }
+
+    function isActive() public view returns (bool status) {
+        status = _operatorData.status;
+    }
+
+    function onlyOperator(address caller) public view {
+        require(caller == getOperator(), "only operator");
+        require(isActive(), "only active operator");
     }
 
 }
