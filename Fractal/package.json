@@ -6,7 +6,7 @@
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
-    "compile": "yarn etherlime compile",
+    "compile": "yarn etherlime compile --solcVersion=0.5.7",
     "flatten": "yarn etherlime flatten",
     "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=true"
   },

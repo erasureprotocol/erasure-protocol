@@ -1,9 +1,10 @@
 pragma solidity ^0.5.0;
 
 import "./agreements/MultiPartyGriefing.sol";
+import "./agreements/OneWayGriefing.sol";
 
 
-contract Erasure_Agreements {
+contract MultiPartyGriefing_Factory {
 
     address[] public agreements;
 
@@ -19,5 +20,13 @@ contract Erasure_Agreements {
         agreements.push(agreement);
         emit AgreementCreated(agreement, msg.sender);
     }
+}
+
+contract OneWayGriefing_Factory {
+
+}
+
+
+contract Erasure_Agreements {
 
 }

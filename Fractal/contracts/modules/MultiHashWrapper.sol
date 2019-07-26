@@ -27,7 +27,7 @@ contract MultiHashWrapper {
    * @param _multiHash MultiHash struct that has the hashFunction, digestSize and the hash
    * @return the base58-encoded full hash
    */
-  function combineMultiHash(MultiHash memory _multiHash) internal pure returns (bytes memory) {
+  function _combineMultiHash(MultiHash memory _multiHash) internal pure returns (bytes memory) {
     bytes memory out = new bytes(34);
 
     out[0] = byte(_multiHash.hashFunction);
@@ -46,7 +46,7 @@ contract MultiHashWrapper {
    * @param _source base58-encoded  hash
    * @return MultiHash that has the hashFunction, digestSize and the hash
    */
-  function splitMultiHash(bytes memory _source) internal pure returns (MultiHash memory) {
+  function _splitMultiHash(bytes memory _source) internal pure returns (MultiHash memory) {
     uint8 hashFunction = uint8(_source[0]);
     uint8 digestSize = uint8(_source[1]);
     bytes32 hash;

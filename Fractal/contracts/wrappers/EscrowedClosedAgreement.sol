@@ -69,7 +69,7 @@ contract EscrowedClosedAgreement {
     ) public returns (address agreement, address sellerEscrow, address buyerEscrow) {
 
         // create the agreement
-        agreement = Erasure_Agreements(params.agreementFactory).create(token, true, griefDeadline, metadata);
+        agreement = MultiPartyGriefing_Factory(params.agreementFactory).create(token, true, griefDeadline, metadata);
 
         // add seller to agreement
         MultiPartyGriefing(agreement).addParty(msg.sender, sellerStake, sellerGriefParams);

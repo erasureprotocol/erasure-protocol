@@ -1,42 +1,51 @@
 pragma solidity ^0.5.0;
 
-import "../helpers/MultiHashWrapper.sol";
+import "../modules/MultiHashWrapper.sol";
+import "../modules/Metadata.sol";
 
 
-contract Post is MultiHashWrapper {
+contract Post is MultiHashWrapper, Metadata {
 
-    Data private post;
-
-    struct Data {
+    PostData private _post;
+    struct PostData {
         MultiHash proofHash;
         address owner;
-        bytes staticMetadata;
-        bytes metadata;
     }
 
-    event Created(address owner, bytes proofHash, bytes staticMetadata, bytes metadata);
-    event Updated(bytes metadata);
+    event Created(address owner, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
-    constructor(bytes memory proofHash, bytes memory staticMetadata, bytes memory metadata) public {
-        post.proofHash = splitMultiHash(proofHash);
-        post.owner = msg.sender;
-        post.staticMetadata = staticMetadata;
-        post.metadata = metadata;
-        emit Created(msg.sender, proofHash, staticMetadata, metadata);
+    constructor(bytes memory proofHash, bytes memory staticMetadata, bytes memory variableMetadata) public {
+
+        // set storage variables
+        _post.proofHash = MultiHashWrapper._splitMultiHash(proofHash);
+        _post.owner = msg.sender;
+
+        // set static metadata
+        Metadata._setStaticMetadata(staticMetadata);
+
+        // set variable metadata
+        Metadata._setVariableMetadata(variableMetadata);
+
+        // emit event
+        emit Created(msg.sender, proofHash, staticMetadata, variableMetadata);
     }
 
-    function update(bytes memory metadata) public {
-        require(msg.sender == post.owner, "only owner");
-        post.metadata = metadata;
-        emit Updated(metadata);
+    modifier onlyOwner() {
+        require(msg.sender == _post.owner, "only owner");
+        _;
     }
 
-    function getOwner() public view returns (address owner) {
-        return post.owner;
+    // state functions
+
+    function setVariableMetadata(bytes memory variableMetadata) public onlyOwner() {
+        Metadata._setVariableMetadata(variableMetadata);
     }
 
-    function getMetadata() public view returns (bytes memory metadata) {
-        return post.metadata;
+    // view functions
+
+    function getPostData() public view returns (bytes memory proofHash, address owner) {
+        proofHash = MultiHashWrapper._combineMultiHash(_post.proofHash);
+        owner = _post.owner;
     }
 
 }
