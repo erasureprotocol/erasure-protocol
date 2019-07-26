@@ -70,7 +70,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     function setVariableMetadata(bytes memory variableMetadata) public {
         // restrict access
-        require(onlyStaker(msg.sender) || Operated.onlyOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
         // update metadata
         Metadata._setVariableMetadata(variableMetadata);
@@ -78,7 +78,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     function increaseStake(address from, uint256 currentStake, uint256 amountToAdd) public {
         // restrict access
-        require(onlyStaker(msg.sender) || Operated.onlyOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
         // get current stake amount
         (uint256 stake, uint256 ratio, SimpleGriefing.PunishType punishType) = SimpleGriefing.getStake(_data.staker);
@@ -101,7 +101,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
-        require(onlyCounterparty(msg.sender) || Operated.onlyOperator(msg.sender), "only counterparty or operator");
+        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or operator");
 
         // require agreement is not ended
         require(!Countdown.isOver(), "agreement not ended");
@@ -112,7 +112,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     function setDeadline() public returns (uint256 deadline) {
         // restrict access
-        require(onlyStaker(msg.sender) || Operated.onlyOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
         // require countdown is not started
         require(Deadline.getDeadline() == 0, "deadline already set");
@@ -123,7 +123,7 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     function retrieve(address recipient) public returns (uint256 amount) {
         // restrict access
-        require(onlyStaker(msg.sender) || Operated.onlyOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
         // require deadline is passed
         require(Deadline.isAfterDeadline(),"deadline not passed");
@@ -134,11 +134,11 @@ contract OneWayGriefing is Countdown, SimpleGriefing, Metadata, Operated {
 
     // view functions
 
-    function onlyStaker(address caller) public view {
-        require(caller == _data.staker, 'only staker');
+    function isStaker(address caller) public view returns (bool validity) {
+        validity = (caller == _data.staker);
     }
 
-    function onlyCounterparty(address caller) public view {
-        require(caller == _data.counterparty, 'only counterparty');
+    function isCounterparty(address caller) public view returns (bool validity) {
+        validity = (caller == _data.counterparty);
     }
 }
