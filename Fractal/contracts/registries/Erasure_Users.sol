@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./helpers/HitchensUnorderedAddressSet.sol";
+import "../helpers/HitchensUnorderedAddressSetLib.sol";
 
 
 contract Erasure_Users {

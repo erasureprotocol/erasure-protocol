@@ -1,71 +1,67 @@
 pragma solidity ^0.5.0;
 
-import "../Erasure_Posts.sol";
+import "./Post_Factory.sol";
+import "../modules/iRegistry.sol";
 import "../modules/Metadata.sol";
+import "../modules/Operated.sol";
 
 
-/*
- * TODO: should it be possible to update the post factory?
- */
-contract Feed is Metadata {
+contract Feed is Operated, Metadata {
 
     address[] private _posts;
+    address private _postRegistry;
 
-    FeedData private _feed;
-    struct FeedData {
-        address owner;
-        address postFactory;
-    }
+    event PostCreated(address post, address postFactory, bytes initData);
 
-    event PostCreated(address post);
+    function initialize(
+        address operator,
+        address postRegistry,
+        bytes memory feedStaticMetadata
+    ) public {
+        // only allow function to be delegatecalled from within a constructor.
+        assembly { if extcodesize(address) { revert(0, 0) } }
 
-    constructor(address postFactory, bytes memory feedStaticMetadata) public {
+        // set operator
+        Operated._setOperator(operator);
+        Operated._activate();
 
-        // set storage variables
-        _feed.owner = msg.sender;
-        _feed.postFactory = postFactory;
+        // set post registry
+        _postRegistry = postRegistry;
 
         // set static metadata
         Metadata._setStaticMetadata(feedStaticMetadata);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == _feed.owner, "only owner");
-        _;
-    }
-
     // state functions
 
-    function createPost(
-        bytes memory proofHash,
-        bytes memory postStaticMetadata,
-        bytes memory postVariableMetadata
-    ) public returns (address post) {
+    function createPost(address postFactory, bytes memory initData) public returns (address post) {
+        // only operator
+        require(Operated.isOperator(msg.sender), "only operator");
+
+        // validate factory is registered
+        require(
+            iRegistry(_postRegistry).getFactoryStatus(postFactory) == iRegistry.FactoryStatus.Registered,
+            "Factory is not actively registered."
+        );
 
         // spawn new post contract
-        post = Erasure_Posts(_feed.postFactory).create(proofHash, postStaticMetadata, postVariableMetadata);
+        post = Post_Factory(postFactory).create(initData);
 
         // add to array of posts
         _posts.push(post);
 
         // emit event
-        emit PostCreated(post);
+        emit PostCreated(post, postFactory, initData);
     }
 
-    function setPostVariableMetadata(address post, bytes memory postVariableMetadata) public onlyOwner() {
-        Post(post).setVariableMetadata(postVariableMetadata);
-    }
+    function setFeedVariableMetadata(bytes memory feedVariableMetadata) public {
+        // only operator
+        require(Operated.isOperator(msg.sender), "only operator");
 
-    function setFeedVariableMetadata(bytes memory feedVariableMetadata) public onlyOwner() {
         Metadata._setVariableMetadata(feedVariableMetadata);
     }
 
     // view functions
-
-    function getFeedData() public view returns (address owner, address postFactory) {
-        owner = _feed.owner;
-        postFactory = _feed.postFactory;
-    }
 
     function getPosts() public view returns (address[] memory posts) {
         posts = _posts;

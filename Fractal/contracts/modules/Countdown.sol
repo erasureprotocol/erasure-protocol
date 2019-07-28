@@ -5,9 +5,6 @@ import "./Deadline.sol";
 
 
 /* Countdown timer
- *
- * TODO:
- * - Review if timeRemaining() and isOver() behave correctly when length not set or countdown not started
  */
 contract Countdown is Deadline {
 
@@ -36,24 +33,26 @@ contract Countdown is Deadline {
         length = _length;
     }
 
+    // if Deadline._setDeadline or Countdown._setLength is not called,
+    // isOver will yield false
     function isOver() public view returns (bool status) {
-        status = Deadline.isAfterDeadline();
+        // when length and deadline not set,
+        // countdown has not started, hence not isOver
+        if (_length == 0 && Deadline.getDeadline() == 0) {
+            status = false;
+        } else {
+            status = Deadline.isAfterDeadline();
+        }
     }
 
+    // timeRemaining will default to 0 if _setDeadline is not called
+    // if the now exceeds deadline, just return 0 as the timeRemaining
     function timeRemaining() public view returns (uint256 time) {
-        time = Deadline.getDeadline().sub(now);
-    }
-
-    // modifiers
-
-    modifier onlyEndedCountdown() {
-        require(isOver(), 'only ended countdown');
-        _;
-    }
-
-    modifier onlyActiveCountdown() {
-        require(timeRemaining() > 0, 'only active countdown');
-        _;
+        if (now >= Deadline.getDeadline()) {
+            time = 0;
+        } else {
+            time = Deadline.getDeadline().sub(now);
+        }
     }
 
 }
