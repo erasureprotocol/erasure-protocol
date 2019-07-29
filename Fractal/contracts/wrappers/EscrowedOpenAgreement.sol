@@ -2,7 +2,7 @@ pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
-import "../helpers/HitchensUnorderedAddressSet.sol";
+import "../helpers/HitchensUnorderedAddressSetLib.sol";
 import "../Erasure_Agreements.sol";
 import "../agreements/MultiPartyGriefing.sol";
 import "../Erasure_Escrows.sol";

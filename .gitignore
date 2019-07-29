@@ -18,3 +18,4 @@ package-lock.json
 .zos.session
 deploy.json
 coverage.json
+coverage-artifacts/
