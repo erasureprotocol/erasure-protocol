@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../helpers/HitchensUnorderedAddressSet.sol";
+import "../helpers/HitchensUnorderedAddressSetLib.sol";
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
 import "../helpers/openzeppelin-solidity/cryptography/ECDSA.sol";

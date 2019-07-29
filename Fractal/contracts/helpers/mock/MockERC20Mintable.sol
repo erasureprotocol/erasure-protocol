@@ -6,7 +6,7 @@ import "../openzeppelin-solidity/token/ERC20/ERC20.sol";
  * @title ERC20Mintable
  * @dev ERC20 minting logic.
  */
-contract ERC20Mintable is ERC20 {
+contract MockERC20Mintable is ERC20 {
     /**
      * @dev Function to mint tokens
      * @param to The address that will receive the minted tokens.
