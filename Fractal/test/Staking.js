@@ -274,4 +274,67 @@ describe("Staking", function() {
       assert.equal(actualStake.toNumber(), amountTaken);
     });
   });
+
+  describe("Staking._takeFullStake", () => {
+    // funder has funds to fund for the staker's stake
+    const staker = wallets.seller.signer.signingKey.address;
+    const recipient = wallets.numerai.signer.signingKey.address;
+
+    it("should takeFullStake successfully", async () => {
+      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+
+      const amountToAdd = 10;
+      const amountTaken = 10;
+
+      // approve staking contract to transferFrom
+      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+
+      // add stake of 10 tokens
+      await contracts.TestStaking.instance.addStake(
+        staker,
+        recipient,
+        0,
+        amountToAdd
+      );
+
+      const txn = await contracts.TestStaking.instance.takeFullStake(
+        staker,
+        recipient
+      );
+
+      // check receipt for correct event logs
+      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
+        txn
+      );
+      const expectedEvent = "StakeTaken";
+
+      const stakeAddedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === expectedEvent,
+        "There is no such event"
+      );
+
+      assert.isDefined(stakeAddedEvent);
+      assert.equal(stakeAddedEvent.args.staker, staker);
+      assert.equal(stakeAddedEvent.args.recipient, recipient);
+      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountTaken);
+      assert.equal(stakeAddedEvent.args.newStake.toNumber(), 0);
+
+      // check updated token balances, should be 10000 * 10**18
+      const expectedBalance = "10000000000000000000000";
+      const actualBalance = await contracts.MockNMR.instance.balanceOf(
+        recipient
+      );
+      assert.equal(actualBalance.toString(10), expectedBalance);
+
+      // now check the updated token balance of the staking contract
+      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+        stakingAddress
+      );
+      assert.equal(stakingBalance.toString(10), 0);
+
+      // check correct stake in staking contract mapping
+      const actualStake = await contracts.TestStaking.instance.getStake(staker);
+      assert.equal(actualStake.toNumber(), 0);
+    });
+  });
 });
