@@ -17,3 +17,4 @@ install:
   - yarn install
 script:
   - yarn run compile
+  - node node_modules/.bin/etherlime test
