@@ -8,7 +8,7 @@ import "./agreements/OneWayGriefing.sol";
 contract MultiPartyGriefing_Factory is Spawner {
 
     address logicContract; // NOTE: deploy first & use constant to save ~200 gas/create
-    address[] public agreements;
+    address[] private _agreements;
 
     event AgreementCreated(address agreement, address creator);
 
@@ -37,8 +37,34 @@ contract MultiPartyGriefing_Factory is Spawner {
         agreement = _spawn(logicContract, initializationCalldata);
 
         // add the agreement to the array and emit an event.
-        agreements.push(agreement);
+        _agreements.push(agreement);
         emit AgreementCreated(agreement, msg.sender);
+    }
+
+    function countAgreements() external view returns (uint256) {
+        return _agreements.length;
+    }
+
+    function getAgreement(uint256 index) external view returns (address) {
+        require(index < _agreements.length, "index out of range");
+
+        return _agreements[index];
+    }
+
+    // Note: startIndex is inclusive, endIndex exclusive
+    function getAgreements(
+        uint256 startIndex,
+        uint256 endIndex
+    ) external view returns (address[] memory) {
+        require(startIndex < endIndex, "startIndex must be less than endIndex");
+        require(endIndex <= _agreements.length, "end index out of range");
+        
+        address[] memory range = new address[](endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            range[i - startIndex] = _agreements[i];
+        }
+
+        return range;
     }
 }
 
