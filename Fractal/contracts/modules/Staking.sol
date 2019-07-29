@@ -16,6 +16,11 @@ contract Staking {
     event StakeTaken(address staker, address recipient, uint256 amount, uint256 newStake);
     event StakeBurned(address staker, uint256 amount, uint256 newStake);
 
+    modifier tokenMustBeSet() {
+        require(_token != address(0), "token not set yet");
+        _;
+    }
+
     // state functions
 
     function _setToken(address token) internal {
@@ -26,7 +31,7 @@ contract Staking {
         emit TokenSet(token);
     }
 
-    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal {
+    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal tokenMustBeSet {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -46,7 +51,7 @@ contract Staking {
         emit StakeAdded(staker, funder, amountToAdd, newStake);
     }
 
-    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal {
+    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal tokenMustBeSet {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -66,7 +71,7 @@ contract Staking {
         emit StakeTaken(staker, recipient, amountToTake, newStake);
     }
 
-    function _takeFullStake(address staker, address recipient) internal returns (uint256 stake) {
+    function _takeFullStake(address staker, address recipient) internal tokenMustBeSet returns (uint256 stake) {
         // get stake from storage
         stake = _stake[staker];
 
@@ -74,7 +79,7 @@ contract Staking {
         _takeStake(staker, recipient, stake, stake);
     }
 
-    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) internal {
+    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) tokenMustBeSet internal {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -94,7 +99,7 @@ contract Staking {
         emit StakeBurned(staker, amountToBurn, newStake);
     }
 
-    function _burnFullStake(address staker) internal returns (uint256 stake) {
+    function _burnFullStake(address staker) internal tokenMustBeSet returns (uint256 stake) {
         // get stake from storage
         stake = _stake[staker];
 
