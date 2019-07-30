@@ -16,7 +16,7 @@ install:
   - cd Fractal/
   - yarn install
 before_script:
-  - (node node_modules/.bin/etherlime ganache &) > /dev/null 2>&1
+  - (yarn run ganache &) > /dev/null 2>&1
 script:
   - yarn run compile
-  - node node_modules/.bin/etherlime test
+  - yarn run coverage
