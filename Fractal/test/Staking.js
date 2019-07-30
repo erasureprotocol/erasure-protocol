@@ -11,9 +11,6 @@ describe("Staking", function() {
   };
 
   let contracts = {
-    Staking: {
-      artifact: require("../build/Staking.json")
-    },
     TestStaking: {
       artifact: require("../build/TestStaking.json")
     },
