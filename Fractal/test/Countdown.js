@@ -1,11 +1,8 @@
 const etherlime = require("etherlime-lib");
-const BigNumber = require("bignumber.js");
 const Web3 = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
 describe("Countdown", function() {
-  this.timeout(10000);
-
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
