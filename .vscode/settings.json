@@ -1,5 +1,8 @@
 {
   "[javascriptreact]": {
     "editor.tabSize": 2
+  },
+  "[solidity]": {
+    "editor.tabSize": 2
   }
 }
