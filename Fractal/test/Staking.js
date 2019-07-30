@@ -27,9 +27,6 @@ describe("Staking", function() {
     deployer = new etherlime.EtherlimeGanacheDeployer(
       wallets.numerai.secretKey
     );
-    contracts.Staking.instance = await deployer.deploy(
-      contracts.Staking.artifact
-    );
     contracts.TestStaking.instance = await deployer.deploy(
       contracts.TestStaking.artifact
     );
