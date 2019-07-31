@@ -223,6 +223,35 @@ describe("Staking", function() {
       );
     });
 
+    it("should fail when amountToTake > currentStake", async () => {
+      const amountStaked = 10;
+      const amountToTake = 20;
+      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+
+      // approve staking contract to transferFrom
+      await contracts.MockNMR.instance
+        .from(recipient)
+        .approve(stakingAddress, amountStaked);
+
+      // add stake of 10 tokens
+      await contracts.TestStaking.instance.addStake(
+        staker,
+        recipient,
+        0,
+        amountStaked
+      );
+
+      // amountToTake > amountStaked
+      await assert.revert(
+        contracts.TestStaking.instance.takeStake(
+          staker,
+          recipient,
+          amountStaked,
+          amountToTake
+        )
+      );
+    });
+
     it("should takeStake successfully", async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
@@ -388,7 +417,7 @@ describe("Staking", function() {
       );
     });
 
-    it("should fail when amountToTake is 0", async () => {
+    it("should fail when amountToBurn is 0", async () => {
       const amountStaked = 10;
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
@@ -408,6 +437,34 @@ describe("Staking", function() {
       // should be 10
       await assert.revert(
         contracts.TestStaking.instance.burnStake(staker, amountStaked, 0)
+      );
+    });
+
+    it("should fail when amountToBurn > currentStake", async () => {
+      const amountStaked = 10;
+      const amountToBurn = 20;
+      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+
+      // approve staking contract to transferFrom
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountStaked);
+
+      // add stake of 10 tokens
+      await contracts.TestStaking.instance.addStake(
+        staker,
+        funder,
+        0,
+        amountStaked
+      );
+
+      // require amountToBurn <= amountStaked
+      await assert.revert(
+        contracts.TestStaking.instance.burnStake(
+          staker,
+          amountStaked,
+          amountToBurn
+        )
       );
     });
 
