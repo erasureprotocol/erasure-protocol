@@ -1,5 +1,4 @@
 const etherlime = require("etherlime-lib");
-const BigNumber = require("bignumber.js");
 
 describe("Staking", function() {
   this.timeout(10000);
@@ -11,9 +10,6 @@ describe("Staking", function() {
   };
 
   let contracts = {
-    Staking: {
-      artifact: require("../build/Staking.json")
-    },
     TestStaking: {
       artifact: require("../build/TestStaking.json")
     },
@@ -26,9 +22,6 @@ describe("Staking", function() {
   beforeEach(async () => {
     deployer = new etherlime.EtherlimeGanacheDeployer(
       wallets.numerai.secretKey
-    );
-    contracts.Staking.instance = await deployer.deploy(
-      contracts.Staking.artifact
     );
     contracts.TestStaking.instance = await deployer.deploy(
       contracts.TestStaking.artifact
@@ -63,7 +56,7 @@ describe("Staking", function() {
 
       // reset back to initial token value
       await contracts.TestStaking.instance.setToken(
-        "0x0000000000000000000000000000000000000000"
+        ethers.constants.AddressZero
       );
 
       await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
@@ -139,7 +132,8 @@ describe("Staking", function() {
       assert.equal(stakeAddedEvent.args.newStake.toNumber(), amountToAdd);
 
       // check updated token balances, 10000 * 10**18 - 10
-      const expectedBalance = "9999999999999999999990";
+      const originalBalance = ethers.utils.parseEther("10000");
+      const expectedBalance = originalBalance.sub(amountToAdd).toString(10);
       const actualBalance = await contracts.MockNMR.instance.balanceOf(funder);
       assert.equal(actualBalance.toString(10), expectedBalance);
 
@@ -162,7 +156,7 @@ describe("Staking", function() {
     it("should fail when token is not set", async () => {
       // reset back to initial token value
       await contracts.TestStaking.instance.setToken(
-        "0x0000000000000000000000000000000000000000"
+        ethers.constants.AddressZero
       );
 
       await assert.revert(
@@ -299,7 +293,8 @@ describe("Staking", function() {
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), amountTaken);
 
       // check updated token balances, 10000 * 10**18 - 10
-      const expectedBalance = "9999999999999999999995";
+      const originalBalance = ethers.utils.parseEther("10000");
+      const expectedBalance = originalBalance.sub(amountTaken).toString(10);
       const actualBalance = await contracts.MockNMR.instance.balanceOf(
         recipient
       );
@@ -364,7 +359,7 @@ describe("Staking", function() {
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
 
       // check updated token balances, should be 10000 * 10**18
-      const expectedBalance = "10000000000000000000000";
+      const expectedBalance = ethers.utils.parseEther("10000");
       const actualBalance = await contracts.MockNMR.instance.balanceOf(
         recipient
       );
@@ -389,7 +384,7 @@ describe("Staking", function() {
     it("should fail when token is not set", async () => {
       // reset back to initial token value
       await contracts.TestStaking.instance.setToken(
-        "0x0000000000000000000000000000000000000000"
+        ethers.constants.AddressZero
       );
 
       await assert.revert(
