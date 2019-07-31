@@ -8,7 +8,7 @@ pragma solidity ^0.5.0;
  *
  *  => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6
  */
- interface iFactory {
+ interface interfaceFactory {
 
      event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);
 
