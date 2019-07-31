@@ -63,7 +63,7 @@ describe("Staking", function() {
         "0x0000000000000000000000000000000000000000"
       );
 
-      await contracts.MockNMR.instance.approve(stakingAddress, 10);
+      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
 
       await assert.revert(
         contracts.TestStaking.instance.addStake(staker, funder, 0, 10)
@@ -79,7 +79,7 @@ describe("Staking", function() {
       );
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, 10);
+      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
 
       await contracts.TestStaking.instance.addStake(staker, funder, 0, 10);
 
@@ -93,7 +93,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, 10);
+      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
 
       await assert.revert(
         contracts.TestStaking.instance.addStake(staker, funder, 0, 0)
@@ -106,7 +106,9 @@ describe("Staking", function() {
       const amountToAdd = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountToAdd);
 
       // add stake of 10 tokens
       const txn = await contracts.TestStaking.instance.addStake(
@@ -170,7 +172,9 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountStaked);
+      await contracts.MockNMR.instance
+        .from(recipient)
+        .approve(stakingAddress, amountStaked);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -196,7 +200,9 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountStaked);
+      await contracts.MockNMR.instance
+        .from(recipient)
+        .approve(stakingAddress, amountStaked);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -224,7 +230,9 @@ describe("Staking", function() {
       const amountTaken = 5;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+      await contracts.MockNMR.instance
+        .from(recipient)
+        .approve(stakingAddress, amountToAdd);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -289,7 +297,9 @@ describe("Staking", function() {
       const amountTaken = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+      await contracts.MockNMR.instance
+        .from(recipient)
+        .approve(stakingAddress, amountToAdd);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -360,7 +370,9 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountBurnt);
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountBurnt);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -381,7 +393,9 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountStaked);
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountStaked);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -404,7 +418,9 @@ describe("Staking", function() {
       const amountBurn = 5;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountToAdd);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -463,7 +479,9 @@ describe("Staking", function() {
       const amountToAdd = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.approve(stakingAddress, amountToAdd);
+      await contracts.MockNMR.instance
+        .from(funder)
+        .approve(stakingAddress, amountToAdd);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
