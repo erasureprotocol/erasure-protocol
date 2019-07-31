@@ -36,10 +36,15 @@ contract Countdown is Deadline {
         length = _length;
     }
 
+    // if Deadline._setDeadline is not called, isOver will yield true
+    // due to now - 0 = now
     function isOver() public view returns (bool status) {
         status = Deadline.isAfterDeadline();
     }
 
+    // timeRemaining will throw from SafeMath subtraction overflow
+    // if deadline is not set
+    // due to 0 - now = -now
     function timeRemaining() public view returns (uint256 time) {
         time = Deadline.getDeadline().sub(now);
     }

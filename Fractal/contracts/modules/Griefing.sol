@@ -33,6 +33,7 @@ contract Griefing is Staking {
         RatioType ratioType = _griefRatio[staker].ratioType;
 
         // calculate cost
+        // getCost also acts as a guard when _setRatio is not called before
         cost = getCost(ratio, punishment, ratioType);
 
         // burn the cost from the punisher's balance
@@ -73,7 +74,7 @@ contract Griefing is Staking {
         if (ratioType == RatioType.Inf)
             return 0;
         if (ratioType == RatioType.NaN)
-            revert();
+            revert("ratioType cannot be RatioType.NaN");
     }
 
     function getPunishment(uint256 ratio, uint256 cost, RatioType ratioType) public pure returns(uint256 punishment) {
@@ -89,9 +90,9 @@ contract Griefing is Staking {
         if (ratioType == RatioType.CeqP)
             return cost;
         if (ratioType == RatioType.Inf)
-            revert();
+            revert("ratioType annot be RatioType.Inf");
         if (ratioType == RatioType.NaN)
-            revert();
+            revert("ratioType be RatioType.NaN");
     }
 
 }

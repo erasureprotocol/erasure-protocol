@@ -15,6 +15,7 @@ contract Operated {
     // state functions
 
     function _setOperator(address operator) internal {
+        require(_operatorData.operator != operator, "same operator set");
         _operatorData.operator = operator;
         emit StatusUpdated(operator, _operatorData.status);
     }
