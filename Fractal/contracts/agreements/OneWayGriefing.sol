@@ -33,9 +33,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         address counterparty;
     }
 
-    event Created(address indexed staker, address indexed counterparty, uint256 ratio, Griefing.RatioType ratioType, address token, uint256 countdownLength);
-
-    constructor(
+    function initialize(
         address token,
         address operator,
         address staker,
@@ -45,6 +43,8 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         uint256 countdownLength,
         bytes memory staticMetadata
     ) public {
+        // only allow function to be delegatecalled from within a constructor.
+        assembly { if extcodesize(address) { revert(0, 0) } }
 
         // set storage values
         _data.token = token;
@@ -65,9 +65,6 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
-
-        // emit event
-        emit Created(staker, counterparty, ratio, ratioType, token, countdownLength);
     }
 
     // state functions
