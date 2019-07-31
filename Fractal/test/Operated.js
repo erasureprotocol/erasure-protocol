@@ -42,8 +42,9 @@ describe("Operated", function() {
 
     it("should revert when setOperator called with same operator", async () => {
       await contracts.TestOperated.instance.setOperator(operator);
-      await assert.revert(
-        contracts.TestOperated.instance.setOperator(operator)
+      await assert.revertWith(
+        contracts.TestOperated.instance.setOperator(operator),
+        "same operator set"
       );
     });
   });
@@ -60,7 +61,10 @@ describe("Operated", function() {
 
     it("should revert when activate called when isActive", async () => {
       await contracts.TestOperated.instance.activate();
-      await assert.revert(contracts.TestOperated.instance.activate());
+      await assert.revertWith(
+        contracts.TestOperated.instance.activate(),
+        "already active"
+      );
     });
   });
 
@@ -77,7 +81,10 @@ describe("Operated", function() {
     });
 
     it("should revert when deactivate called when not active", async () => {
-      await assert.revert(contracts.TestOperated.instance.deactivate());
+      await assert.revertWith(
+        contracts.TestOperated.instance.deactivate(),
+        "already deactivated"
+      );
     });
   });
 

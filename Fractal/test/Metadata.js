@@ -26,6 +26,20 @@ describe("Metadata", function() {
   });
 
   describe("Metadata._setStaticMetadata", () => {
+    it("should not change static metadata", async () => {
+      const metadata = "TESTING";
+      await contracts.TestMetadata.instance.setStaticMetadata(
+        Buffer.from(metadata)
+      );
+
+      await assert.revertWith(
+        contracts.TestMetadata.instance.setStaticMetadata(
+          Buffer.from(metadata)
+        ),
+        "static metadata cannot be changed"
+      );
+    });
+
     it("sets static metadata correctly", async () => {
       const metadata = "TESTING";
       const hexMetadata = web3.utils.utf8ToHex(metadata);
