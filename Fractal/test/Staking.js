@@ -564,11 +564,6 @@ describe("Staking", function() {
       assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountToAdd);
       assert.equal(stakeBurnedEvent.args.newStake.toNumber(), 0);
 
-      // check updated token balances, 10000 * 10**18 - 10
-      const expectedBalance = "9999999999999999999990";
-      const actualBalance = await contracts.MockNMR.instance.balanceOf(funder);
-      assert.equal(actualBalance.toString(10), expectedBalance);
-
       // now check the updated token balance of the staking contract
       const stakingBalance = await contracts.MockNMR.instance.balanceOf(
         stakingAddress
