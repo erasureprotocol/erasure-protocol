@@ -287,16 +287,16 @@ describe("Staking", function() {
       );
       const expectedEvent = "StakeTaken";
 
-      const stakeAddedEvent = receipt.events.find(
+      const stakeTakenEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
 
-      assert.isDefined(stakeAddedEvent);
-      assert.equal(stakeAddedEvent.args.staker, staker);
-      assert.equal(stakeAddedEvent.args.recipient, recipient);
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountTaken);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), amountTaken);
+      assert.isDefined(stakeTakenEvent);
+      assert.equal(stakeTakenEvent.args.staker, staker);
+      assert.equal(stakeTakenEvent.args.recipient, recipient);
+      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountTaken);
+      assert.equal(stakeTakenEvent.args.newStake.toNumber(), amountTaken);
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = "9999999999999999999995";
@@ -352,16 +352,16 @@ describe("Staking", function() {
       );
       const expectedEvent = "StakeTaken";
 
-      const stakeAddedEvent = receipt.events.find(
+      const stakeTakenEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
 
-      assert.isDefined(stakeAddedEvent);
-      assert.equal(stakeAddedEvent.args.staker, staker);
-      assert.equal(stakeAddedEvent.args.recipient, recipient);
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountTaken);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), 0);
+      assert.isDefined(stakeTakenEvent);
+      assert.equal(stakeTakenEvent.args.staker, staker);
+      assert.equal(stakeTakenEvent.args.recipient, recipient);
+      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountTaken);
+      assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
 
       // check updated token balances, should be 10000 * 10**18
       const expectedBalance = "10000000000000000000000";
@@ -502,20 +502,15 @@ describe("Staking", function() {
       );
       const expectedEvent = "StakeBurned";
 
-      const stakeAddedEvent = receipt.events.find(
+      const stakeBurnedEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
 
-      assert.isDefined(stakeAddedEvent);
-      assert.equal(stakeAddedEvent.args.staker, staker);
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountBurn);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), amountBurn);
-
-      // check updated token balances, 10000 * 10**18 - 10
-      const expectedBalance = "9999999999999999999990";
-      const actualBalance = await contracts.MockNMR.instance.balanceOf(funder);
-      assert.equal(actualBalance.toString(10), expectedBalance);
+      assert.isDefined(stakeBurnedEvent);
+      assert.equal(stakeBurnedEvent.args.staker, staker);
+      assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountBurn);
+      assert.equal(stakeBurnedEvent.args.newStake.toNumber(), amountBurn);
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await contracts.MockNMR.instance.balanceOf(
@@ -559,15 +554,15 @@ describe("Staking", function() {
       );
       const expectedEvent = "StakeBurned";
 
-      const stakeAddedEvent = receipt.events.find(
+      const stakeBurnedEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
 
-      assert.isDefined(stakeAddedEvent);
-      assert.equal(stakeAddedEvent.args.staker, staker);
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), 0);
+      assert.isDefined(stakeBurnedEvent);
+      assert.equal(stakeBurnedEvent.args.staker, staker);
+      assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountToAdd);
+      assert.equal(stakeBurnedEvent.args.newStake.toNumber(), 0);
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = "9999999999999999999990";
