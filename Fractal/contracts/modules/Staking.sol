@@ -58,6 +58,9 @@ contract Staking {
         // require non-zero stake to take
         require(amountToTake > 0, "no stake to take");
 
+        // amountToTake has to be less than equal currentStake
+        require(amountToTake <= currentStake, "cannot take more than currentStake");
+
         // transfer the stake amount
         require(IERC20(_token).transfer(recipient, amountToTake), "token transfer failed");
 
@@ -85,6 +88,9 @@ contract Staking {
 
         // require non-zero stake to burn
         require(amountToBurn > 0, "no stake to burn");
+
+        // amountToTake has to be less than equal currentStake
+        require(amountToBurn <= currentStake, "cannot burn more than currentStake");
 
         // burn the stake amount
         ERC20Burnable(_token).burn(amountToBurn);
