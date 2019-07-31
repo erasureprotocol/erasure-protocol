@@ -1,6 +1,4 @@
 const etherlime = require("etherlime-lib");
-const Web3 = require("web3");
-const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
 describe("Countdown", function() {
   let wallets = {
@@ -53,7 +51,7 @@ describe("Countdown", function() {
     });
 
     it("checks is after deadline", async () => {
-      const block = await web3.eth.getBlock("latest");
+      const block = await deployer.provider.getBlock("latest");
       const blockTimestamp = block.timestamp;
 
       // test exceed deadline, 2000 (current time) > 1000 (deadline)
@@ -107,7 +105,7 @@ describe("Countdown", function() {
       await contracts.TestCountdown.instance.setLength(length);
       await contracts.TestCountdown.instance.start();
 
-      const block = await web3.eth.getBlock("latest");
+      const block = await deployer.provider.getBlock("latest");
       const blockTimestamp = block.timestamp;
 
       // check that it's not over
@@ -133,7 +131,7 @@ describe("Countdown", function() {
       await contracts.TestCountdown.instance.setLength(length);
       await contracts.TestCountdown.instance.start();
 
-      const block = await web3.eth.getBlock("latest");
+      const block = await deployer.provider.getBlock("latest");
       const blockTimestamp = block.timestamp;
 
       await utils.setTimeTo(deployer.provider, blockTimestamp + increment);

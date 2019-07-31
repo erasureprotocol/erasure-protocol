@@ -6,7 +6,6 @@ describe("Operated", function() {
     seller: accounts[1],
     buyer: accounts[2]
   };
-  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   let contracts = {
     TestOperated: {
@@ -53,7 +52,7 @@ describe("Operated", function() {
     it("should activate correctly", async () => {
       const txn = await contracts.TestOperated.instance.activate();
       await assert.emit(txn, "StatusUpdated");
-      await assert.emitWithArgs(txn, [zeroAddress, true]);
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, true]);
 
       const actualIsActive = await contracts.TestOperated.instance.isActive();
       assert.equal(actualIsActive, true);
@@ -71,7 +70,7 @@ describe("Operated", function() {
 
       const txn = await contracts.TestOperated.instance.deactivate();
       await assert.emit(txn, "StatusUpdated");
-      await assert.emitWithArgs(txn, [zeroAddress, false]);
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
 
       const actualIsActive = await contracts.TestOperated.instance.isActive();
       assert.equal(actualIsActive, false);

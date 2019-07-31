@@ -8,7 +8,6 @@ describe("Metadata", function() {
     seller: accounts[1],
     buyer: accounts[2]
   };
-  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   let contracts = {
     TestMetadata: {
