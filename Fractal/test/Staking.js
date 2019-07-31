@@ -44,7 +44,10 @@ describe("Staking", function() {
   describe("Staking._setToken", () => {
     it("should setToken successfully", async () => {
       const tokenAddress = contracts.MockNMR.instance.contractAddress;
-      await contracts.TestStaking.instance.setToken(tokenAddress);
+      const txn = await contracts.TestStaking.instance.setToken(tokenAddress);
+      assert.emit(txn, "TokenSet");
+      assert.emitWithArgs(txn, [tokenAddress]);
+
       const newToken = await contracts.TestStaking.instance.getToken();
       assert.equal(newToken, tokenAddress);
     });
