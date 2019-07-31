@@ -82,7 +82,10 @@ describe("Countdown", function() {
 
   describe("Countdown._start", () => {
     it("reverts when length not set", async () => {
-      await assert.revert(contracts.TestCountdown.instance.start());
+      await assert.revertWith(
+        contracts.TestCountdown.instance.start(),
+        "length not set"
+      );
     });
 
     it("starts countdown correctly", async () => {
@@ -97,7 +100,7 @@ describe("Countdown", function() {
   describe("Countdown.isOver", () => {
     it("should get isOver as false when length not set", async () => {
       let isOver = await contracts.TestCountdown.instance.isOver();
-      assert.equal(isOver, true);
+      assert.equal(isOver, false);
     });
 
     it("gets isOver status correctly", async () => {
@@ -122,7 +125,10 @@ describe("Countdown", function() {
 
   describe("Countdown.timeRemaining", () => {
     it("reverts when getting timeRemaining when deadline not set", async () => {
-      await assert.revert(contracts.TestCountdown.instance.timeRemaining());
+      await assert.revertWith(
+        contracts.TestCountdown.instance.timeRemaining(),
+        "not started"
+      );
     });
 
     it("gets timeRemaining correctly", async () => {

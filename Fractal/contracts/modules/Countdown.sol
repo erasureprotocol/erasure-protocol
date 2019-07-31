@@ -39,13 +39,20 @@ contract Countdown is Deadline {
     // if Deadline._setDeadline is not called, isOver will yield true
     // due to now - 0 = now
     function isOver() public view returns (bool status) {
-        status = Deadline.isAfterDeadline();
+        // when length and deadline not set,
+        // countdown has not started, hence not isOver
+        if (_length == 0 && Deadline.getDeadline() == 0) {
+            status = false;
+        } else {
+            status = Deadline.isAfterDeadline();
+        }
     }
 
     // timeRemaining will throw from SafeMath subtraction overflow
     // if deadline is not set
     // due to 0 - now = -now
     function timeRemaining() public view returns (uint256 time) {
+        require(_length != 0 && Deadline.getDeadline() != 0, "not started");
         time = Deadline.getDeadline().sub(now);
     }
 
