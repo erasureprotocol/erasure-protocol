@@ -3,6 +3,12 @@ pragma solidity ^0.5.0;
 import "../modules/Staking.sol";
 
 contract TestStaking is Staking {
+  uint256 private _fullStake;
+
+  function getFullStake() public view returns(uint256 fullStake) {
+    fullStake = _fullStake;
+  }
+
   function setToken(address token) public {
     Staking._setToken(token);
   }
@@ -16,7 +22,8 @@ contract TestStaking is Staking {
   }
 
   function takeFullStake(address staker, address recipient) public {
-    Staking._takeFullStake(staker, recipient);
+    uint256 fullStake = Staking._takeFullStake(staker, recipient);
+    _fullStake = fullStake;
   }
 
   function burnStake(address staker, uint256 currentStake, uint256 amountToBurn) public {
@@ -24,6 +31,7 @@ contract TestStaking is Staking {
   }
 
   function burnFullStake(address staker) public {
-    Staking._burnFullStake(staker);
+    uint256 fullStake = Staking._burnFullStake(staker);
+    _fullStake = fullStake;
   }
 }

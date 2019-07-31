@@ -320,20 +320,19 @@ describe("Staking", function() {
     it("should takeFullStake successfully", async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      const amountToAdd = 10;
-      const amountTaken = 10;
+      const amountStaked = 10;
 
       // approve staking contract to transferFrom
       await contracts.MockNMR.instance
         .from(recipient)
-        .approve(stakingAddress, amountToAdd);
+        .approve(stakingAddress, amountStaked);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
         staker,
         recipient,
         0,
-        amountToAdd
+        amountStaked
       );
 
       const txn = await contracts.TestStaking.instance.takeFullStake(
@@ -355,8 +354,12 @@ describe("Staking", function() {
       assert.isDefined(stakeTakenEvent);
       assert.equal(stakeTakenEvent.args.staker, staker);
       assert.equal(stakeTakenEvent.args.recipient, recipient);
-      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountTaken);
+      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountStaked);
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
+
+      // check the returned fullStake amount
+      const returnVal = await contracts.TestStaking.instance.getFullStake();
+      assert.equal(returnVal.toString(10), amountStaked);
 
       // check updated token balances, should be 10000 * 10**18
       const expectedBalance = ethers.utils.parseEther("10000");
@@ -558,6 +561,10 @@ describe("Staking", function() {
       assert.equal(stakeBurnedEvent.args.staker, staker);
       assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountToAdd);
       assert.equal(stakeBurnedEvent.args.newStake.toNumber(), 0);
+
+      // check the returned fullStake amount
+      const returnVal = await contracts.TestStaking.instance.getFullStake();
+      assert.equal(returnVal.toString(10), amountToAdd);
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await contracts.MockNMR.instance.balanceOf(
