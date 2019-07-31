@@ -3,9 +3,9 @@ pragma solidity ^0.5.0;
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
 import "../helpers/HitchensUnorderedAddressSetLib.sol";
-import "../Erasure_Agreements.sol";
 import "../agreements/MultiPartyGriefing.sol";
-import "../Erasure_Escrows.sol";
+import "../agreements/MultiPartyGriefing_Factory.sol";
+import "../escrows/DataEscrow_Factory.sol";
 import "../escrows/DataEscrow.sol";
 
 // allow any counterparty to sign and activate the agreement using stake and payment escrows
@@ -65,13 +65,13 @@ contract EscrowedOpenAgreement {
     ) public returns (address agreement, address sellerEscrow, address buyerEscrow) {
 
         // create the agreement
-        agreement = MultiPartyGriefing_Factory(params.agreementFactory).create(token, true, griefDeadline, metadata);
+        agreement = MultiPartyGriefing_Factory(params.agreementFactory).createExplicit(address(this), token, true, griefDeadline, metadata);
 
         // add seller to agreement
         MultiPartyGriefing(agreement).addParty(msg.sender, sellerStake, sellerGriefParams);
 
         // create seller escrow
-        sellerEscrow = Erasure_Escrows(params.escrowFactory).create(
+        sellerEscrow = DataEscrow_Factory(params.escrowFactory).createExplicit(
             address(this),
             address(this),
             token,
@@ -81,7 +81,7 @@ contract EscrowedOpenAgreement {
         );
 
         // create buyer escrow
-        buyerEscrow = Erasure_Escrows(params.escrowFactory).create(
+        buyerEscrow = DataEscrow_Factory(params.escrowFactory).createExplicit(
             address(this),
             address(this),
             token,
