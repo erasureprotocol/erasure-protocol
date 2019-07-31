@@ -9,6 +9,8 @@ const RATIO_TYPES = {
 };
 
 describe("Griefing", function() {
+  this.timeout(4000);
+
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
@@ -61,12 +63,13 @@ describe("Griefing", function() {
 
     it("should revert when ratioType is NaN (no punishment)", async () => {
       // no calculation can be made when no punishment is allowed
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance.getCost(
           ratio,
           punishment,
           RATIO_TYPES.NaN
-        )
+        ),
+        "ratioType cannot be RatioType.NaN"
       );
     });
 
@@ -113,23 +116,25 @@ describe("Griefing", function() {
 
     it("should revert when ratioType is NaN (no punishment)", async () => {
       // no calculation can be made when no punishment is allowed
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance.getPunishment(
           ratio,
           cost,
           RATIO_TYPES.NaN
-        )
+        ),
+        "ratioType cannot be RatioType.NaN"
       );
     });
 
     it("should revert when ratioType is Inf (punishment at no cost)", async () => {
       // no calculation can be made when no cost to be computed from
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance.getPunishment(
           ratio,
           cost,
           RATIO_TYPES.Inf
-        )
+        ),
+        "ratioType cannot be RatioType.Inf"
       );
     });
 
@@ -206,24 +211,39 @@ describe("Griefing", function() {
     const ratioType = RATIO_TYPES.CgtP;
     const message = "I don't like you";
 
+    it("should revert when token not set", async () => {
+      await contracts.TestGriefing.instance.setToken(
+        ethers.constants.AddressZero
+      );
+
+      await assert.revertWith(
+        contracts.TestGriefing.instance
+          .from(buyer)
+          .grief(buyer, seller, punishment, Buffer.from(message)),
+        "token not set"
+      );
+    });
+
     it("should revert when grief ratio not set", async () => {
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
           punishment,
           Buffer.from(message)
-        )
+        ),
+        "no punishment allowed"
       );
     });
 
     it("should revert when not approved to burn", async () => {
       await contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType);
 
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message))
+          .grief(buyer, seller, punishment, Buffer.from(message)),
+        "SafeMath: subtraction overflow"
       );
     });
 
@@ -239,10 +259,11 @@ describe("Griefing", function() {
         .from(buyer)
         .approve(contractAddress, wrongApproveAmount);
 
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message))
+          .grief(buyer, seller, punishment, Buffer.from(message)),
+        "SafeMath: subtraction overflow"
       );
     });
 
@@ -263,6 +284,35 @@ describe("Griefing", function() {
       );
     });
 
+    it("should revert when seller has too little stake", async () => {
+      const contractAddress = contracts.TestGriefing.instance.contractAddress;
+
+      // seller process
+      await contracts.TestGriefing.instance
+        .from(seller)
+        .setRatio(seller, ratio, ratioType);
+
+      await contracts.MockNMR.instance
+        .from(seller)
+        .approve(contractAddress, punishment - 1);
+
+      await contracts.TestGriefing.instance
+        .from(seller)
+        .addStake(seller, seller, 0, punishment - 1);
+
+      // buyer process
+      await contracts.MockNMR.instance
+        .from(buyer)
+        .approve(contractAddress, punishment * ratio);
+
+      await assert.revertWith(
+        contracts.TestGriefing.instance
+          .from(buyer)
+          .grief(buyer, seller, punishment, Buffer.from(message)),
+        "cannot burn more than currentStake"
+      );
+    });
+
     it("should grief correctly", async () => {
       const contractAddress = contracts.TestGriefing.instance.contractAddress;
 
@@ -271,6 +321,10 @@ describe("Griefing", function() {
         .from(seller)
         .setRatio(seller, ratio, ratioType);
 
+      await contracts.MockNMR.instance
+        .from(seller)
+        .approve(contractAddress, stakeAmount);
+
       await contracts.TestGriefing.instance
         .from(seller)
         .addStake(seller, seller, 0, stakeAmount);
@@ -278,13 +332,11 @@ describe("Griefing", function() {
       // buyer process
       await contracts.MockNMR.instance
         .from(buyer)
-        .approve(contractAddress, punishment);
+        .approve(contractAddress, punishment * ratio);
 
-      await assert.revert(
-        contracts.TestGriefing.instance
-          .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message))
-      );
+      await contracts.TestGriefing.instance
+        .from(buyer)
+        .grief(buyer, seller, punishment, Buffer.from(message));
     });
   });
 });
