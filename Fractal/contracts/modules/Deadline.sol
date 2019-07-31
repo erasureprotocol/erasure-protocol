@@ -25,6 +25,8 @@ contract Deadline {
         deadline = _deadline;
     }
 
+    // if the _deadline is not set yet, isAfterDeadline will return true
+    // due to now - 0 = now
     function isAfterDeadline() public view returns (bool status) {
         status = (now >= _deadline);
     }

@@ -28,11 +28,16 @@ contract Griefing is Staking {
     }
 
     function _grief(address punisher, address staker, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
+        require(Staking.getToken() != address(0), "token not set");
+
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
         RatioType ratioType = _griefRatio[staker].ratioType;
 
+        require(ratioType != RatioType.NaN, "no punishment allowed");
+
         // calculate cost
+        // getCost also acts as a guard when _setRatio is not called before
         cost = getCost(ratio, punishment, ratioType);
 
         // burn the cost from the punisher's balance
@@ -73,7 +78,7 @@ contract Griefing is Staking {
         if (ratioType == RatioType.Inf)
             return 0;
         if (ratioType == RatioType.NaN)
-            revert();
+            revert("ratioType cannot be RatioType.NaN");
     }
 
     function getPunishment(uint256 ratio, uint256 cost, RatioType ratioType) public pure returns(uint256 punishment) {
@@ -89,9 +94,9 @@ contract Griefing is Staking {
         if (ratioType == RatioType.CeqP)
             return cost;
         if (ratioType == RatioType.Inf)
-            revert();
+            revert("ratioType cannot be RatioType.Inf");
         if (ratioType == RatioType.NaN)
-            revert();
+            revert("ratioType cannot be RatioType.NaN");
     }
 
 }
