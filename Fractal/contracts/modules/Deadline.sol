@@ -31,16 +31,4 @@ contract Deadline {
         status = (now >= _deadline);
     }
 
-    // modifiers
-
-    modifier onlyAfterDeadline() {
-        require(isAfterDeadline(), 'only after deadline');
-        _;
-    }
-
-    modifier onlyBeforeDeadline() {
-        require(!isAfterDeadline(), 'only before deadline');
-        _;
-    }
-
 }

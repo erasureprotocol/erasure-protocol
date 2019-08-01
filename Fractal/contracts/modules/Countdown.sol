@@ -56,16 +56,4 @@ contract Countdown is Deadline {
         time = Deadline.getDeadline().sub(now);
     }
 
-    // modifiers
-
-    modifier onlyEndedCountdown() {
-        require(isOver(), 'only ended countdown');
-        _;
-    }
-
-    modifier onlyActiveCountdown() {
-        require(timeRemaining() > 0, 'only active countdown');
-        _;
-    }
-
 }
