@@ -2,11 +2,12 @@ pragma solidity ^0.5.0;
 
 import "../helpers/HitchensUnorderedAddressSetLib.sol";
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
-import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
+import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
+import "../modules/BurnNMR.sol";
 import "../helpers/openzeppelin-solidity/cryptography/ECDSA.sol";
 
 
-contract MultiPartyGriefing {
+contract MultiPartyGriefing is BurnNMR {
 
     using SafeMath for uint256;
     using HitchensUnorderedAddressSetLib for HitchensUnorderedAddressSetLib.Set;
@@ -17,7 +18,6 @@ contract MultiPartyGriefing {
     Parameters public params;
 
     struct Parameters {
-        address token;
         address operator;
         bool trustedOperator; // allows for the operator to sign, grief, and recoverStake on behalf of users
         uint256 griefDeadline;
@@ -58,7 +58,7 @@ contract MultiPartyGriefing {
         assembly { if extcodesize(address) { revert(0, 0) } }
 
         params.operator = operator;
-        params.token = token;
+        BurnNMR._setToken(token);
         params.trustedOperator = trustedOperator;
         params.griefDeadline = griefDeadline;
         params.metadata = metadata;
@@ -112,7 +112,7 @@ contract MultiPartyGriefing {
 
         _sign(party);
         // tokens are transfered from the party
-        require(IERC20(params.token).transferFrom(party, address(this), parties[party].stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transferFrom(party, address(this), parties[party].stake), "token transfer failed");
     }
 
     // Call from trusted operator
@@ -122,7 +122,7 @@ contract MultiPartyGriefing {
 
         _sign(party);
         // tokens are transfered from the operator
-        require(IERC20(params.token).transferFrom(params.operator, address(this), parties[party].stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transferFrom(params.operator, address(this), parties[party].stake), "token transfer failed");
     }
 
     // Call from party address
@@ -131,7 +131,7 @@ contract MultiPartyGriefing {
 
         _sign(party);
         // tokens are transfered from the party
-        require(IERC20(params.token).transferFrom(party, address(this), parties[party].stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transferFrom(party, address(this), parties[party].stake), "token transfer failed");
     }
 
     function _sign(address party) internal {
@@ -163,7 +163,7 @@ contract MultiPartyGriefing {
 
         uint256 cost = _grief(party, counterparty, punishment, message);
         // tokens are burned from the party
-        ERC20Burnable(params.token).burnFrom(party, cost);
+        BurnNMR._burnFrom(party, cost);
     }
 
     // Call from trusted operator
@@ -173,7 +173,7 @@ contract MultiPartyGriefing {
 
         uint256 cost = _grief(party, counterparty, punishment, message);
         // tokens are burned from the operator
-        ERC20Burnable(params.token).burnFrom(params.operator, cost);
+        BurnNMR._burnFrom(params.operator, cost);
     }
 
     // Call from party address
@@ -182,7 +182,7 @@ contract MultiPartyGriefing {
 
         uint256 cost = _grief(party, counterparty, punishment, message);
         // tokens are burned from the party
-        ERC20Burnable(params.token).burnFrom(party, cost);
+        BurnNMR._burnFrom(party, cost);
     }
 
     function _grief(address party, address counterparty, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
@@ -198,7 +198,7 @@ contract MultiPartyGriefing {
 
         emit Griefed(party, counterparty, punishment, cost, message);
 
-        ERC20Burnable(params.token).burn(punishment);
+        BurnNMR._burn(punishment);
     }
 
     // Ended
@@ -225,7 +225,7 @@ contract MultiPartyGriefing {
         stake = _abort(party);
         // transfer stake to party
         if (stake > 0)
-            require(IERC20(params.token).transfer(party, stake));
+            require(IERC20(BurnNMR.getToken()).transfer(party, stake));
     }
 
     // Call from trusted operator
@@ -236,7 +236,7 @@ contract MultiPartyGriefing {
         stake = _abort(party);
         // transfer stake to operator
         if (stake > 0)
-            require(IERC20(params.token).transfer(params.operator, stake));
+            require(IERC20(BurnNMR.getToken()).transfer(params.operator, stake));
     }
 
     // Call from party address
@@ -246,7 +246,7 @@ contract MultiPartyGriefing {
         stake = _abort(party);
         // transfer stake to party
         if (stake > 0)
-            require(IERC20(params.token).transfer(party, stake));
+            require(IERC20(BurnNMR.getToken()).transfer(party, stake));
     }
 
     function _abort(address party) internal returns (uint256 stake) {
@@ -311,7 +311,7 @@ contract MultiPartyGriefing {
 
         stake = _recoverStake(party);
         // transfer stake to party
-        require(IERC20(params.token).transfer(party, stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transfer(party, stake), "token transfer failed");
     }
 
     // Call from trusted operator
@@ -321,7 +321,7 @@ contract MultiPartyGriefing {
 
         stake = _recoverStake(party);
         // transfer stake to operator
-        require(IERC20(params.token).transfer(params.operator, stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transfer(params.operator, stake), "token transfer failed");
     }
 
     // Call from party address
@@ -330,7 +330,7 @@ contract MultiPartyGriefing {
 
         stake = _recoverStake(party);
         // transfer stake to party
-        require(IERC20(params.token).transfer(party, stake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transfer(party, stake), "token transfer failed");
     }
 
     function _recoverStake(address party) internal returns (uint256 stake) {
@@ -409,10 +409,6 @@ contract MultiPartyGriefing {
     }
 
     // Storage Getters
-
-    function getToken() public view returns (address token) {
-        token = params.token;
-    }
 
     function getStake(address party) public view returns (uint256 amount) {
         amount = parties[party].stake;
