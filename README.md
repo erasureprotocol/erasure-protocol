@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/erasureprotocol/erasure-next-contracts.svg?token=htxVq6Egy28TqXbFnsyf&branch=master)](https://travis-ci.com/erasureprotocol/erasure-next-contracts)
+[![Build Status](https://travis-ci.com/erasureprotocol/erasure-next-contracts.svg?token=htxVq6Egy28TqXbFnsyf&branch=master)](https://travis-ci.com/erasureprotocol/erasure-next-contracts) [![Coverage Status](https://coveralls.io/repos/github/erasureprotocol/erasure-next-contracts/badge.svg?t=Ccgknn)](https://coveralls.io/github/erasureprotocol/erasure-next-contracts)
 
 # erasure-next-contracts
 
