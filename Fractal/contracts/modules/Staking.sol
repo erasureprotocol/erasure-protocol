@@ -1,14 +1,14 @@
 pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
-import "../helpers/openzeppelin-solidity/token/ERC20/ERC20Burnable.sol";
+import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
+import "./BurnNMR.sol";
 
 
-contract Staking {
+contract Staking is BurnNMR {
 
     using SafeMath for uint256;
 
-    address private _token;
     mapping (address => uint256) private _stake;
 
     event TokenSet(address token);
@@ -17,7 +17,7 @@ contract Staking {
     event StakeBurned(address staker, uint256 amount, uint256 newStake);
 
     modifier tokenMustBeSet() {
-        require(_token != address(0), "token not set yet");
+        require(BurnNMR.getToken() != address(0), "token not set yet");
         _;
     }
 
@@ -25,7 +25,7 @@ contract Staking {
 
     function _setToken(address token) internal {
         // set storage
-        _token = token;
+        BurnNMR._setToken(token);
 
         // emit event
         emit TokenSet(token);
@@ -39,7 +39,7 @@ contract Staking {
         require(amountToAdd > 0, "no stake to add");
 
         // transfer the stake amount
-        require(IERC20(_token).transferFrom(funder, address(this), amountToAdd), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transferFrom(funder, address(this), amountToAdd), "token transfer failed");
 
         // calculate new stake amount
         uint256 newStake = currentStake.add(amountToAdd);
@@ -62,7 +62,7 @@ contract Staking {
         require(amountToTake <= currentStake, "cannot take more than currentStake");
 
         // transfer the stake amount
-        require(IERC20(_token).transfer(recipient, amountToTake), "token transfer failed");
+        require(IERC20(BurnNMR.getToken()).transfer(recipient, amountToTake), "token transfer failed");
 
         // calculate new stake amount
         uint256 newStake = currentStake.sub(amountToTake);
@@ -93,7 +93,7 @@ contract Staking {
         require(amountToBurn <= currentStake, "cannot burn more than currentStake");
 
         // burn the stake amount
-        ERC20Burnable(_token).burn(amountToBurn);
+        BurnNMR._burn(amountToBurn);
 
         // calculate new stake amount
         uint256 newStake = currentStake.sub(amountToBurn);
@@ -117,10 +117,6 @@ contract Staking {
 
     function getStake(address staker) public view returns (uint256 stake) {
         stake = _stake[staker];
-    }
-
-    function getToken() public view returns (address token) {
-        token = _token;
     }
 
 }
