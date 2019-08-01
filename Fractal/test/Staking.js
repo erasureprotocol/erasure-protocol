@@ -1,6 +1,8 @@
 const etherlime = require("etherlime-lib");
 
 describe("Staking", function() {
+  this.timeout(4000);
+
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],

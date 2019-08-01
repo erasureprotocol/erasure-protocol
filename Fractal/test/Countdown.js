@@ -142,7 +142,7 @@ describe("Countdown", function() {
 
       await utils.setTimeTo(deployer.provider, blockTimestamp + increment);
       const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
-      assert.equal(timeRemaining.toNumber(), length - increment);
+      assert.isAtMost(timeRemaining.toNumber(), length - increment);
     });
   });
 });

@@ -337,6 +337,9 @@ describe("Griefing", function() {
       await contracts.TestGriefing.instance
         .from(buyer)
         .grief(buyer, seller, punishment, Buffer.from(message));
+
+      const griefCost = await contracts.TestGriefing.instance.getGriefCost();
+      assert.equal(griefCost, punishment * ratio);
     });
   });
 });
