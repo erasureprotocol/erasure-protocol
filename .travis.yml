@@ -18,5 +18,6 @@ install:
 before_script:
   - (yarn run ganache &) > /dev/null 2>&1
 script:
-  - yarn run compile
-  - yarn run coverage
+  - yarn run compile | grep --invert-match fail
+  - yarn run test | grep --invert-match fail
+  - yarn run coverage | grep --invert-match fail
