@@ -1,12 +1,6 @@
 const { createDeployer } = require("../helpers/setup");
 
-const RATIO_TYPES = {
-  NaN: 0,
-  CgtP: 1,
-  CltP: 2,
-  CeqP: 3,
-  Inf: 4
-};
+const { RATIO_TYPES } = require("../helpers/variables");
 
 describe("Griefing", function() {
   this.timeout(4000);
@@ -176,11 +170,16 @@ describe("Griefing", function() {
 
     it("should revert on wrong ratioType", async () => {
       const invalidRatioTypeEnumVal = 5;
+      const block = await deployer.provider.getBlock("latest");
+
+      // sending in an invalid enum value eats up the block's gas limit
+      // setting a per-txn gasLimit avoids that
       await assert.revert(
         contracts.TestGriefing.instance.setRatio(
           seller,
           ratio,
-          invalidRatioTypeEnumVal
+          invalidRatioTypeEnumVal,
+          { gasLimit: 30000 }
         )
       );
     });
