@@ -28,7 +28,7 @@ contract Griefing is Staking {
     }
 
     function _grief(address punisher, address staker, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
-        require(Staking.getToken() != address(0), "token not set");
+        require(BurnNMR.getToken() != address(0), "token not set");
 
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
