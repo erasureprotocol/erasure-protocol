@@ -1,6 +1,8 @@
 const { createDeployer } = require("./helpers/setup");
 
 describe("Countdown", function() {
+  this.timeout(4000);
+
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
