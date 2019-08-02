@@ -1,7 +1,7 @@
-const etherlime = require("etherlime-lib");
+const { createDeployer } = require("../helpers/setup");
 
 describe("Staking", function() {
-  this.timeout(10000);
+  this.timeout(4000);
 
   let wallets = {
     numerai: accounts[0],
@@ -11,18 +11,19 @@ describe("Staking", function() {
 
   let contracts = {
     TestStaking: {
-      artifact: require("../build/TestStaking.json")
+      artifact: require("../../build/TestStaking.json")
     },
     MockNMR: {
-      artifact: require("../build/MockNMR.json")
+      artifact: require("../../build/MockNMR.json")
     }
   };
 
   let deployer;
+  before(() => {
+    deployer = createDeployer();
+  });
+
   beforeEach(async () => {
-    deployer = new etherlime.EtherlimeGanacheDeployer(
-      wallets.numerai.secretKey
-    );
     contracts.TestStaking.instance = await deployer.deploy(
       contracts.TestStaking.artifact
     );
@@ -61,8 +62,9 @@ describe("Staking", function() {
 
       await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
 
-      await assert.revert(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
+        "token not set yet"
       );
     });
 
@@ -70,8 +72,9 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // currentStake should begin from 0
-      await assert.revert(
-        contracts.TestStaking.instance.addStake(staker, funder, 10, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 10, 10),
+        "current stake incorrect"
       );
 
       // approve staking contract to transferFrom
@@ -80,8 +83,9 @@ describe("Staking", function() {
       await contracts.TestStaking.instance.addStake(staker, funder, 0, 10);
 
       // // new currentStake should be 10 instead
-      await assert.revert(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
+        "current stake incorrect"
       );
     });
 
@@ -91,8 +95,9 @@ describe("Staking", function() {
       // approve staking contract to transferFrom
       await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
 
-      await assert.revert(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 0)
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 0),
+        "no stake to add"
       );
     });
 
@@ -159,8 +164,9 @@ describe("Staking", function() {
         ethers.constants.AddressZero
       );
 
-      await assert.revert(
-        contracts.TestStaking.instance.takeStake(staker, recipient, 0, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.takeStake(staker, recipient, 0, 10),
+        "token not set yet"
       );
     });
 
@@ -182,13 +188,14 @@ describe("Staking", function() {
       );
 
       // should be 10
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestStaking.instance.takeStake(
           staker,
           recipient,
           0,
           amountStaked
-        )
+        ),
+        "current stake incorrect"
       );
     });
 
@@ -210,13 +217,14 @@ describe("Staking", function() {
       );
 
       // should be 10
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestStaking.instance.takeStake(
           staker,
           recipient,
           amountStaked,
           0
-        )
+        ),
+        "no stake to take"
       );
     });
 
@@ -239,13 +247,14 @@ describe("Staking", function() {
       );
 
       // amountToTake > amountStaked
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestStaking.instance.takeStake(
           staker,
           recipient,
           amountStaked,
           amountToTake
-        )
+        ),
+        "cannot take more than currentStake"
       );
     });
 
@@ -390,8 +399,9 @@ describe("Staking", function() {
         ethers.constants.AddressZero
       );
 
-      await assert.revert(
-        contracts.TestStaking.instance.burnStake(staker, 0, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.burnStake(staker, 0, 10),
+        "token not set yet"
       );
     });
 
@@ -413,8 +423,9 @@ describe("Staking", function() {
       );
 
       // should be 10
-      await assert.revert(
-        contracts.TestStaking.instance.burnStake(staker, 0, amountBurnt)
+      await assert.revertWith(
+        contracts.TestStaking.instance.burnStake(staker, 0, amountBurnt),
+        "current stake incorrect"
       );
     });
 
@@ -435,9 +446,9 @@ describe("Staking", function() {
         amountStaked
       );
 
-      // should be 10
-      await assert.revert(
-        contracts.TestStaking.instance.burnStake(staker, amountStaked, 0)
+      await assert.revertWith(
+        contracts.TestStaking.instance.burnStake(staker, amountStaked, 0),
+        "no stake to burn"
       );
     });
 
@@ -460,12 +471,13 @@ describe("Staking", function() {
       );
 
       // require amountToBurn <= amountStaked
-      await assert.revert(
+      await assert.revertWith(
         contracts.TestStaking.instance.burnStake(
           staker,
           amountStaked,
           amountToBurn
-        )
+        ),
+        "cannot burn more than currentStake"
       );
     });
 

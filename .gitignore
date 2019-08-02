@@ -14,8 +14,10 @@ yarn.lock
 yarn-debug.log*
 yarn-error.log*
 .yarn-integrity
+.vscode/
 package-lock.json
 .zos.session
 deploy.json
 coverage.json
 coverage-artifacts/
+*.outputParameter

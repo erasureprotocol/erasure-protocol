@@ -12,7 +12,7 @@ contract Metadata {
     // state functions
 
     function _setStaticMetadata(bytes memory staticMetadata) internal {
-        require(_staticMetadata.length == 0, "static metadat cannot be changed");
+        require(_staticMetadata.length == 0, "static metadata cannot be changed");
         _staticMetadata = staticMetadata;
         emit StaticMetadataSet(staticMetadata);
     }
