@@ -1,4 +1,4 @@
-const etherlime = require("etherlime-lib");
+const { createDeployer } = require("./helpers/setup");
 
 describe("Staking", function() {
   this.timeout(4000);
@@ -19,10 +19,11 @@ describe("Staking", function() {
   };
 
   let deployer;
+  before(() => {
+    deployer = createDeployer();
+  });
+
   beforeEach(async () => {
-    deployer = new etherlime.EtherlimeGanacheDeployer(
-      wallets.numerai.secretKey
-    );
     contracts.TestStaking.instance = await deployer.deploy(
       contracts.TestStaking.artifact
     );

@@ -1,4 +1,4 @@
-const etherlime = require("etherlime-lib");
+const { createDeployer } = require("./helpers/setup");
 
 const RATIO_TYPES = {
   NaN: 0,
@@ -27,10 +27,11 @@ describe("Griefing", function() {
   };
 
   let deployer;
+  before(() => {
+    deployer = createDeployer();
+  });
+
   beforeEach(async () => {
-    deployer = new etherlime.EtherlimeGanacheDeployer(
-      wallets.numerai.secretKey
-    );
     contracts.TestGriefing.instance = await deployer.deploy(
       contracts.TestGriefing.artifact
     );

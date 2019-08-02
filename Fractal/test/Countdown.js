@@ -1,4 +1,4 @@
-const etherlime = require("etherlime-lib");
+const { createDeployer } = require("./helpers/setup");
 
 describe("Countdown", function() {
   let wallets = {
@@ -14,10 +14,11 @@ describe("Countdown", function() {
   };
 
   let deployer;
+  before(() => {
+    deployer = createDeployer();
+  });
+
   beforeEach(async () => {
-    deployer = new etherlime.EtherlimeGanacheDeployer(
-      wallets.numerai.secretKey
-    );
     contracts.TestCountdown.instance = await deployer.deploy(
       contracts.TestCountdown.artifact
     );

@@ -1,4 +1,4 @@
-const etherlime = require("etherlime-lib");
+const { createDeployer } = require("./helpers/setup");
 const Web3 = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
@@ -16,10 +16,12 @@ describe("Metadata", function() {
   };
 
   let deployer;
+
+  before(() => {
+    deployer = createDeployer();
+  });
+
   beforeEach(async () => {
-    deployer = new etherlime.EtherlimeGanacheDeployer(
-      wallets.numerai.secretKey
-    );
     contracts.TestMetadata.instance = await deployer.deploy(
       contracts.TestMetadata.artifact
     );
