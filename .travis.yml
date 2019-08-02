@@ -19,4 +19,5 @@ before_script:
   - (yarn run ganache &) > /dev/null 2>&1
 script:
   - yarn run compile
+  - yarn run test
   - yarn run coverage
