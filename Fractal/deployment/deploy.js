@@ -4,7 +4,6 @@ require('dotenv').config()
 
 const tokenAddress = '0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9'
 
-
 const deploy = async (network, secret) => {
 
 	let contracts = {
