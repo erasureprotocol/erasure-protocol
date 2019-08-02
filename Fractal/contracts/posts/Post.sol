@@ -2,23 +2,30 @@ pragma solidity ^0.5.0;
 
 import "../modules/MultiHashWrapper.sol";
 import "../modules/Metadata.sol";
+import "../modules/Operated.sol";
 
 
-contract Post is MultiHashWrapper, Metadata {
+contract Post is MultiHashWrapper, Operated, Metadata {
 
-    PostData private _post;
-    struct PostData {
-        MultiHash proofHash;
-        address owner;
-    }
+    MultiHash private _proofHash;
 
-    event Created(address owner, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
+    event Created(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
-    constructor(bytes memory proofHash, bytes memory staticMetadata, bytes memory variableMetadata) public {
+    function initialize(
+        address operator,
+        bytes memory proofHash,
+        bytes memory staticMetadata,
+        bytes memory variableMetadata
+    ) public {
+        // only allow function to be delegatecalled from within a constructor.
+        assembly { if extcodesize(address) { revert(0, 0) } }
 
         // set storage variables
-        _post.proofHash = MultiHashWrapper._splitMultiHash(proofHash);
-        _post.owner = msg.sender;
+        _proofHash = MultiHashWrapper._splitMultiHash(proofHash);
+
+        // set operator
+        Operated._setOperator(operator);
+        Operated._activate();
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
@@ -27,25 +34,23 @@ contract Post is MultiHashWrapper, Metadata {
         Metadata._setVariableMetadata(variableMetadata);
 
         // emit event
-        emit Created(msg.sender, proofHash, staticMetadata, variableMetadata);
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == _post.owner, "only owner");
-        _;
+        emit Created(operator, proofHash, staticMetadata, variableMetadata);
     }
 
     // state functions
 
-    function setVariableMetadata(bytes memory variableMetadata) public onlyOwner() {
+    function setVariableMetadata(bytes memory variableMetadata) public {
+        // only operator
+        require(Operated.isOperator(msg.sender), "only operator");
+
+        // set metadata in storage
         Metadata._setVariableMetadata(variableMetadata);
     }
 
     // view functions
 
-    function getPostData() public view returns (bytes memory proofHash, address owner) {
-        proofHash = MultiHashWrapper._combineMultiHash(_post.proofHash);
-        owner = _post.owner;
+    function getProofHash() public view returns (bytes memory proofHash) {
+        proofHash = MultiHashWrapper._combineMultiHash(_proofHash);
     }
 
 }
