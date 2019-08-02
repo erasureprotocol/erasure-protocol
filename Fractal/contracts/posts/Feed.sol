@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../Erasure_Posts.sol";
+import "./Post_Factory.sol";
 import "../modules/Metadata.sol";
 
 
@@ -43,7 +43,7 @@ contract Feed is Metadata {
     ) public returns (address post) {
 
         // spawn new post contract
-        post = Erasure_Posts(_feed.postFactory).create(proofHash, postStaticMetadata, postVariableMetadata);
+        post = Post_Factory(_feed.postFactory).create(proofHash, postStaticMetadata, postVariableMetadata);
 
         // add to array of posts
         _posts.push(post);

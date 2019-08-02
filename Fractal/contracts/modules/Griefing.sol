@@ -41,7 +41,7 @@ contract Griefing is Staking {
         cost = getCost(ratio, punishment, ratioType);
 
         // burn the cost from the punisher's balance
-        ERC20Burnable(Staking.getToken()).burnFrom(punisher, cost);
+        BurnNMR._burnFrom(punisher, cost);
 
         // get stake from storage
         uint256 currentStake = Staking.getStake(staker);
