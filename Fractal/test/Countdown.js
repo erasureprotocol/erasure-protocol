@@ -46,9 +46,9 @@ describe("Countdown", function() {
   });
 
   describe("Deadline._isAfterDeadline", () => {
-    it("should be true if deadline not set", async () => {
+    it("should be false if deadline not set", async () => {
       const isAfterDeadline = await contracts.TestCountdown.instance.isAfterDeadline();
-      assert.equal(isAfterDeadline, true);
+      assert.equal(isAfterDeadline, false);
     });
 
     it("checks is after deadline", async () => {

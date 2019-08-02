@@ -36,8 +36,8 @@ contract Countdown is Deadline {
         length = _length;
     }
 
-    // if Deadline._setDeadline is not called, isOver will yield true
-    // due to now - 0 = now
+    // if Deadline._setDeadline or Countdown._setLength is not called,
+    // isOver will yield false
     function isOver() public view returns (bool status) {
         // when length and deadline not set,
         // countdown has not started, hence not isOver
