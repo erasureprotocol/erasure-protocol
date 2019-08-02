@@ -125,14 +125,12 @@ describe("Countdown", function() {
   });
 
   describe("Countdown.timeRemaining", () => {
-    it("reverts when getting timeRemaining when deadline not set", async () => {
-      await assert.revertWith(
-        contracts.TestCountdown.instance.timeRemaining(),
-        "not started"
-      );
+    it("should get timeRemaining as 0 when deadline not set", async () => {
+      const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
+      assert.equal(timeRemaining, 0);
     });
 
-    it("gets timeRemaining correctly", async () => {
+    it("gets timeRemaining correctly before deadline", async () => {
       const length = 2000;
       const increment = 1000;
       await contracts.TestCountdown.instance.setLength(length);
@@ -144,6 +142,20 @@ describe("Countdown", function() {
       await utils.setTimeTo(deployer.provider, blockTimestamp + increment);
       const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
       assert.isAtMost(timeRemaining.toNumber(), length - increment);
+    });
+
+    it("gets timeRemaining as 0 correctly after deadline", async () => {
+      const length = 2000;
+      const increment = 3000;
+      await contracts.TestCountdown.instance.setLength(length);
+      await contracts.TestCountdown.instance.start();
+
+      const block = await deployer.provider.getBlock("latest");
+      const blockTimestamp = block.timestamp;
+
+      await utils.setTimeTo(deployer.provider, blockTimestamp + increment);
+      const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
+      assert.equal(timeRemaining.toNumber(), 0);
     });
   });
 });

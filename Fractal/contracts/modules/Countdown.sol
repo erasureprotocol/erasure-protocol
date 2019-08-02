@@ -5,9 +5,6 @@ import "./Deadline.sol";
 
 
 /* Countdown timer
- *
- * TODO:
- * - Review if timeRemaining() and isOver() behave correctly when length not set or countdown not started
  */
 contract Countdown is Deadline {
 
@@ -48,12 +45,14 @@ contract Countdown is Deadline {
         }
     }
 
-    // timeRemaining will throw from SafeMath subtraction overflow
-    // if deadline is not set
-    // due to 0 - now = -now
+    // timeRemaining will default to 0 if _setDeadline is not called
+    // if the now exceeds deadline, just return 0 as the timeRemaining
     function timeRemaining() public view returns (uint256 time) {
-        require(_length != 0 && Deadline.getDeadline() != 0, "not started");
-        time = Deadline.getDeadline().sub(now);
+        if (now >= Deadline.getDeadline()) {
+            time = 0;
+        } else {
+            time = Deadline.getDeadline().sub(now);
+        }
     }
 
 }
