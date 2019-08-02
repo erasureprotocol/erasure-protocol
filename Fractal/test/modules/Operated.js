@@ -1,4 +1,4 @@
-const { createDeployer } = require("./helpers/setup");
+const { createDeployer } = require("../helpers/setup");
 
 describe("Operated", function() {
   let wallets = {
@@ -9,7 +9,7 @@ describe("Operated", function() {
 
   let contracts = {
     TestOperated: {
-      artifact: require("../build/TestOperated.json")
+      artifact: require("../../build/TestOperated.json")
     }
   };
 

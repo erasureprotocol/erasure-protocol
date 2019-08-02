@@ -1,4 +1,4 @@
-const { createDeployer } = require("./helpers/setup");
+const { createDeployer } = require("../helpers/setup");
 
 describe("Staking", function() {
   this.timeout(4000);
@@ -11,10 +11,10 @@ describe("Staking", function() {
 
   let contracts = {
     TestStaking: {
-      artifact: require("../build/TestStaking.json")
+      artifact: require("../../build/TestStaking.json")
     },
     MockNMR: {
-      artifact: require("../build/MockNMR.json")
+      artifact: require("../../build/MockNMR.json")
     }
   };
 

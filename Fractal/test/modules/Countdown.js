@@ -1,4 +1,4 @@
-const { createDeployer } = require("./helpers/setup");
+const { createDeployer } = require("../helpers/setup");
 
 describe("Countdown", function() {
   this.timeout(4000);
@@ -11,7 +11,7 @@ describe("Countdown", function() {
 
   let contracts = {
     TestCountdown: {
-      artifact: require("../build/TestCountdown.json")
+      artifact: require("../../build/TestCountdown.json")
     }
   };
 

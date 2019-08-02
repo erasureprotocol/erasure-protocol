@@ -1,4 +1,4 @@
-const { createDeployer } = require("./helpers/setup");
+const { createDeployer } = require("../helpers/setup");
 
 const RATIO_TYPES = {
   NaN: 0,
@@ -19,10 +19,10 @@ describe("Griefing", function() {
 
   let contracts = {
     TestGriefing: {
-      artifact: require("../build/TestGriefing.json")
+      artifact: require("../../build/TestGriefing.json")
     },
     MockNMR: {
-      artifact: require("../build/MockNMR.json")
+      artifact: require("../../build/MockNMR.json")
     }
   };
 

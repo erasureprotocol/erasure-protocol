@@ -1,4 +1,4 @@
-const { createDeployer } = require("./helpers/setup");
+const { createDeployer } = require("../helpers/setup");
 const Web3 = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
@@ -11,7 +11,7 @@ describe("Metadata", function() {
 
   let contracts = {
     TestMetadata: {
-      artifact: require("../build/TestMetadata.json")
+      artifact: require("../../build/TestMetadata.json")
     }
   };
 
