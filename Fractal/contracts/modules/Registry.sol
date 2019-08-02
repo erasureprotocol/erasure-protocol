@@ -3,9 +3,9 @@ pragma solidity ^0.5.0;
 import "../helpers/openzeppelin-solidity/ownership/Ownable.sol";
 
 
-contract FactoryRegistry is Ownable {
+contract Registry is Ownable {
 
-    enum FactoryState { Unregistered, Registered, Retired }
+    enum FactoryStatus { Unregistered, Registered, Retired }
 
     event FactoryAdded(address owner, address factory, uint256 factoryID, bytes extraData);
     event FactoryRetired(address owner, address factory, uint256 factoryID);
@@ -15,7 +15,7 @@ contract FactoryRegistry is Ownable {
     mapping(address => Factory) private _factoryData;
 
     struct Factory {
-        FactoryState state;
+        FactoryStatus status;
         uint16 factoryID;
         bytes extraData;
     }
@@ -44,7 +44,7 @@ contract FactoryRegistry is Ownable {
 
         // ensure that the provided factory is new.
         require(
-            factoryData.state == FactoryState.Unregistered,
+            factoryData.status == FactoryStatus.Unregistered,
             "Factory already exists at the provided factory address."
         );
 
@@ -52,7 +52,7 @@ contract FactoryRegistry is Ownable {
         uint16 factoryID = uint16(_factoryList.length);
 
         // set all of the information for the new factory.
-        factoryData.state = FactoryState.Registered;
+        factoryData.status = FactoryStatus.Registered;
         factoryData.factoryID = factoryID;
         factoryData.extraData = extraData;
 
@@ -70,12 +70,12 @@ contract FactoryRegistry is Ownable {
 
         // ensure that the provided factory is new and not already retired.
         require(
-            factoryData.state == FactoryState.Registered,
+            factoryData.status == FactoryStatus.Registered,
             "Factory is not currently registered."
         );
 
         // retire the factory.
-        factoryData.state = FactoryState.Retired;
+        factoryData.status = FactoryStatus.Retired;
 
         emit FactoryRetired(msg.sender, factory, factoryData.factoryID);
     }
@@ -86,13 +86,29 @@ contract FactoryRegistry is Ownable {
         count = _instances.length;
     }
 
+    function getFactoryStatus(address factory) external view returns (FactoryStatus status) {
+        status = _factoryData[factory].status;
+    }
+
+    function getFactoryID(address factory) external view returns (uint16 factoryID) {
+        factoryID = _factoryData[factory].factoryID;
+    }
+
+    function getFactoryData(address factory) external view returns (bytes memory extraData) {
+        extraData = _factoryData[factory].extraData;
+    }
+
+    function getFactoryAddress(uint16 factoryID) external view returns (address factory) {
+        factory = _factoryList[factoryID];
+    }
+
     function getFactory(address factory) public view returns (
-        FactoryState state,
+        FactoryStatus status,
         uint16 factoryID,
         bytes memory extraData
     ) {
         Factory memory factoryData = _factoryData[factory];
-        state = factoryData.state;
+        status = factoryData.status;
         factoryID = factoryData.factoryID;
         extraData = factoryData.extraData;
     }
@@ -122,15 +138,15 @@ contract FactoryRegistry is Ownable {
 
     function register(address instance, address creator, uint64 extraData) external {
         (
-            FactoryState state,
+            FactoryStatus status,
             uint16 factoryID,
             // bytes memory extraData
         ) = getFactory(msg.sender);
 
         // ensure that the caller is a registered factory
         require(
-            state == FactoryState.Registered,
-            "Factory in wrong state."
+            status == FactoryStatus.Registered,
+            "Factory in wrong status."
         );
 
         uint256 instanceIndex = _instances.length;

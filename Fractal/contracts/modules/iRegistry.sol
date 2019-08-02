@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
 
-interface iFactoryRegistry {
+interface iRegistry {
 
-    enum FactoryState { Unregistered, Registered, Retired }
+    enum FactoryStatus { Unregistered, Registered, Retired }
 
     event FactoryAdded(address owner, address factory, uint256 factoryID, bytes extraData);
     event FactoryRetired(address owner, address factory, uint256 factoryID);
@@ -17,7 +17,11 @@ interface iFactoryRegistry {
     // factory view functions
 
     function getFactoryCount() external view returns (uint256 count);
-    function getFactory(address factory) external view returns (FactoryState state, uint16 factoryID, bytes memory extraData);
+    function getFactoryStatus(address factory) external view returns (FactoryStatus status);
+    function getFactoryID(address factory) external view returns (uint16 factoryID);
+    function getFactoryData(address factory) external view returns (bytes memory extraData);
+    function getFactoryAddress(uint16 factoryID) external view returns (address factory);
+    function getFactory(address factory) external view returns (FactoryStatus state, uint16 factoryID, bytes memory extraData);
     function getFactories() external view returns (address[] memory factories);
     function getPaginatedFactories(uint256 startIndex, uint256 endIndex) external view returns (address[] memory factories);
 

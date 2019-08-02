@@ -1,11 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "../modules/FactoryRegistry.sol";
+import "../modules/Registry.sol";
 
 
-contract Erasure_Escrows is FactoryRegistry {
+contract Erasure_Escrows is Registry {
 
-    constructor() public FactoryRegistry('Escrow') {
+    constructor() public Registry('Escrow') {
 
     }
 }

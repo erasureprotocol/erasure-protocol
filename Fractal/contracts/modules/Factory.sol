@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "../helpers/Spawner.sol";
-import "./iFactoryRegistry.sol";
+import "./iRegistry.sol";
 
 
 contract Factory is Spawner {
@@ -27,7 +27,7 @@ contract Factory is Spawner {
         _Init_ABI = initABI;
 
         // validate correct instance registry
-        require(instanceType == iFactoryRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
+        require(instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
 
         // set instanceType
         _Instance_Type = instanceType;
@@ -43,7 +43,7 @@ contract Factory is Spawner {
         _instances.push(instance);
 
         // add the instance to the instance registry
-        iFactoryRegistry(getInstanceRegistry()).register(instance, msg.sender, uint64(0));
+        iRegistry(getInstanceRegistry()).register(instance, msg.sender, uint64(0));
 
         // emit event
         emit InstanceCreated(instance, msg.sender, getInitABI(), initData);

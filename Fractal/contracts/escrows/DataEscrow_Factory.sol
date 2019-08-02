@@ -1,11 +1,9 @@
 pragma solidity ^0.5.0;
 
-import "../helpers/Spawner.sol";
 import "./DataEscrow.sol";
-import "../modules/iFactoryRegistry.sol";
 
 
-contract DataEscrow_Factory is Spawner {
+contract DataEscrow_Factory {
 
     function createExplicit(
         address tokenProvider,
