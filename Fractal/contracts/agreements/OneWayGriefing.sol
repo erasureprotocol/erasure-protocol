@@ -28,7 +28,6 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     Data private _data;
     struct Data {
-        address token;
         address staker;
         address counterparty;
     }
@@ -51,7 +50,6 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         require(codeSize == 0, "must be called within contract constructor");
 
         // set storage values
-        _data.token = token;
         _data.staker = staker;
         _data.counterparty = counterparty;
 
@@ -60,6 +58,9 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
             Operated._setOperator(operator);
             Operated._activate();
         }
+
+        // set token used for staking
+        Staking._setToken(token);
 
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);
@@ -86,7 +87,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement not ended");
+        require(!Countdown.isOver(), "agreement ended");
 
         // add stake
         Staking._addStake(_data.staker, funder, currentStake, amountToAdd);
@@ -97,7 +98,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement not ended");
+        require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing
         cost = Griefing._grief(from, _data.staker, punishment, message);
