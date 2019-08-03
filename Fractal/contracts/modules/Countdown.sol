@@ -36,9 +36,9 @@ contract Countdown is Deadline {
     // if Deadline._setDeadline or Countdown._setLength is not called,
     // isOver will yield false
     function isOver() public view returns (bool status) {
-        // when length and deadline not set,
+        // when length or deadline not set,
         // countdown has not started, hence not isOver
-        if (_length == 0 && Deadline.getDeadline() == 0) {
+        if (_length == 0 || Deadline.getDeadline() == 0) {
             status = false;
         } else {
             status = Deadline.isAfterDeadline();

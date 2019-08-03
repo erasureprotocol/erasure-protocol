@@ -40,6 +40,10 @@ contract Griefing is Staking {
         // getCost also acts as a guard when _setRatio is not called before
         cost = getCost(ratio, punishment, ratioType);
 
+        // revert when punisher allowance is insufficient
+        uint256 punisherAllowance = IERC20(BurnNMR.getToken()).allowance(punisher, address(this));
+        require(punisherAllowance >= cost, "insufficient allowance");
+
         // burn the cost from the punisher's balance
         BurnNMR._burnFrom(punisher, cost);
 

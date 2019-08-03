@@ -243,7 +243,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "SafeMath: subtraction overflow"
+        "insufficient allowance"
       );
     });
 
@@ -263,7 +263,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "SafeMath: subtraction overflow"
+        "insufficient allowance"
       );
     });
 
