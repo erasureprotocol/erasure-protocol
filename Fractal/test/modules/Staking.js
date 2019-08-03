@@ -68,6 +68,12 @@ describe("Staking", function() {
       );
     });
 
+    it("should fail when no allowance", async () => {
+      await assert.revert(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 10)
+      );
+    });
+
     it("should fail when currentStake is wrong", async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
