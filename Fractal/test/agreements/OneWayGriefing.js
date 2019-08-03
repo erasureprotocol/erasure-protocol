@@ -75,6 +75,74 @@ describe("OneWayGriefing", function() {
         this.OneWayGriefing.initialize(
           this.MockNMR.contractAddress,
           ...initArgs
+        ),
+        "must be called within contract constructor"
+      );
+    });
+
+    it("should initialize contract", async () => {
+      this.TestOneWayGriefing = await deployTestOneWayGriefing();
+
+      // check that it's the TestOneWayGriefing state that is changed
+      // not the OneWayGriefing logic contract's state
+      const logicContractIsActive = await this.OneWayGriefing.isActive();
+      assert.equal(logicContractIsActive, false);
+
+      // check all the state changes
+
+      // Staking._setToken
+      const token = await this.TestOneWayGriefing.getToken();
+      assert.equal(token, this.MockNMR.contractAddress);
+
+      // _data.staker
+      const isStaker = await this.TestOneWayGriefing.isStaker(seller);
+      assert.equal(isStaker, true);
+
+      // _data.counterparty
+      const isCounterparty = await this.TestOneWayGriefing.isCounterparty(
+        buyer
+      );
+      assert.equal(isCounterparty, true);
+
+      // Operator._setOperator
+      const operator = await this.TestOneWayGriefing.getOperator();
+      assert.equal(operator, owner);
+
+      //  Operator._activate()
+      const callingContractIsActive = await this.TestOneWayGriefing.isActive();
+      assert.equal(callingContractIsActive, true);
+
+      // Griefing._setRatio
+      const [
+        actualRatio,
+        actualRatioType
+      ] = await this.TestOneWayGriefing.getRatio(seller);
+      assert.equal(actualRatio, ratio);
+      assert.equal(actualRatioType, ratioType);
+
+      // Countdown._setLength
+      const actualLength = await this.TestOneWayGriefing.getLength();
+      assert.equal(actualLength, countdownLength);
+
+      // Metadata._setStaticMetadata
+      const [
+        actualStaticMetadata,
+        actualVariableMetadata
+      ] = await this.TestOneWayGriefing.getMetadata();
+      assert.equal(
+        actualStaticMetadata,
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(staticMetadata))
+      );
+      assert.equal(actualVariableMetadata, "0x");
+
+      // Test for event logs
+      // console.log(this.TestOneWayGriefing);
+      // const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
+      //   this.TestOneWayGriefing.deployTransaction
+      // );
+      // console.log(receipt.events);
+    });
+
     it("should revert when not initialized from constructor", async () => {
       const initArgs = [
         this.OneWayGriefing.contractAddress,
@@ -144,10 +212,6 @@ describe("OneWayGriefing", function() {
 
       await assert.emit(txn, "DeadlineSet");
       await assert.emitWithArgs(txn, deadline);
-
-      // get the stored delegatecall result
-      const actualDeadline = await this.TestOneWayGriefing.getDeadline();
-      assert.equal(actualDeadline.toNumber(), deadline);
     };
 
     it("should revert when msg.sender is not staker or operator", async () => {
@@ -176,7 +240,7 @@ describe("OneWayGriefing", function() {
   describe("OneWayGriefing.increaseStake", () => {
     const funder = seller;
     let currentStake = 0; // to increment as we go
-    let amountToAdd = 500; // 100 token weis
+    let amountToAdd = 100; // 100 token weis
 
     it("should revert when msg.sender is not staker", async () => {
       // use the buyer to be the msg.sender
@@ -239,63 +303,6 @@ describe("OneWayGriefing", function() {
           amountToAdd
         ),
         "agreement ended"
-      );
-    });
-  });
-
-  describe("OneWayGriefing.punish", () => {
-    const from = buyer;
-    const message = "I don't like you";
-    const punishArgs = [from, punishment, Buffer.from(message)];
-
-    it("should revert when msg.sender is not counterparty or operator", async () => {
-      // seller is not counterparty or operator
-      await assert.revertWith(
-        this.TestOneWayGriefing.from(seller).punish(...punishArgs),
-        "only counterparty or operator"
-      );
-    });
-
-    // the time was set past deadline in the test before
-    // we need to redeploy a new contract to reset the countdown
-    // this is because there's no ability to wind back time in EVM
-    it("should revert when agreement ended", async () => {
-      await assert.revertWith(
-        this.TestOneWayGriefing.from(buyer).punish(...punishArgs),
-        "agreement ended"
-      );
-
-      this.TestOneWayGriefing = await deployTestOneWayGriefing();
-    });
-
-    it("should revert when no approval to burn tokens", async () => {
-      await assert.revertWith(
-        this.TestOneWayGriefing.from(buyer).punish(...punishArgs),
-        "insufficient allowance"
-      );
-    });
-
-    it("should punish seller", async () => {
-      // increase seller's stake to 500
-      await this.MockNMR.from(seller).approve(
-        this.TestOneWayGriefing.contractAddress,
-        sellerStake
-      );
-      await this.TestOneWayGriefing.from(seller).increaseStake(
-        seller,
-        0,
-        sellerStake
-      );
-
-      const expectedCost = punishment * ratio;
-
-      await this.MockNMR.from(buyer).approve(
-        this.TestOneWayGriefing.contractAddress,
-        expectedCost
-      );
-
-      const txn = await this.TestOneWayGriefing.from(buyer).punish(
-        ...punishArgs
       );
       const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
         txn
