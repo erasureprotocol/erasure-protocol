@@ -15,8 +15,11 @@ describe("OneWayGriefing", function() {
   const seller = sellerWallet.signer.signingKey.address;
 
   // variables used in initialize()
+<<<<<<< HEAD
   const sellerStake = 500;
   const punishment = 100;
+=======
+>>>>>>> 2ebe658... test covers setVariableMetadata, startCountdown, increaseStake
   const ratio = 2;
   const ratioType = RATIO_TYPES.CgtP;
   const countdownLength = 1000;
