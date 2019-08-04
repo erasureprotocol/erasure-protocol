@@ -26,18 +26,22 @@ const deploy = async (network, secret) => {
 		deployer = await new etherlime.InfuraPrivateKeyDeployer(wallet.privateKey, 'rinkeby', process.env.INFURA_API_KEY)
 		deployer.setVerifierApiKey(process.env.ETHERSCAN_API_KEY)
 
-		contracts.Erasure_Agreements.instance = await deployer.deployAndVerify(contracts.Erasure_Agreements.artifact, false)
-		contracts.Erasure_Escrows.instance = await deployer.deployAndVerify(contracts.Erasure_Escrows.artifact, false)
-		contracts.Erasure_Feeds.instance = await deployer.deployAndVerify(contracts.Erasure_Feeds.artifact, false)
+		// deploy registries
 		contracts.Erasure_Posts.instance = await deployer.deployAndVerify(contracts.Erasure_Posts.artifact, false)
+		contracts.Erasure_Feeds.instance = await deployer.deployAndVerify(contracts.Erasure_Feeds.artifact, false)
+		contracts.Erasure_Agreements.instance = await deployer.deployAndVerify(contracts.Erasure_Agreements.artifact, false)
 		contracts.Erasure_Users.instance = await deployer.deployAndVerify(contracts.Erasure_Users.artifact, false)
 
-		contracts.OneWayGriefing_Factory.instance = await deployer.deployAndVerify(contracts.OneWayGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress)
-		contracts.Feed_Factory.instance = await deployer.deployAndVerify(contracts.Feed_Factory.artifact, false, contracts.Erasure_Feeds.instance.contractAddress)
+		// deploy factories
 		contracts.Post_Factory.instance = await deployer.deployAndVerify(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress)
+		contracts.Feed_Factory.instance = await deployer.deployAndVerify(contracts.Feed_Factory.artifact, false, contracts.Erasure_Feeds.instance.contractAddress)
+		contracts.OneWayGriefing_Factory.instance = await deployer.deployAndVerify(contracts.OneWayGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress)
 
-	} else if (network == 'local') {
-		deployer = new etherlime.EtherlimeGanacheDeployer()
+		// register factories
+		contracts.Erasure_Posts.instance.addFactory(contracts.Post_Factory.instance.contractAddress, ethers.utils.hexlify(0x0))
+		contracts.Erasure_Feeds.instance.addFactory(contracts.Feed_Factory.instance.contractAddress, ethers.utils.hexlify(0x0))
+		contracts.Erasure_Agreements.instance.addFactory(contracts.OneWayGriefing_Factory.instance.contractAddress, ethers.utils.hexlify(0x0))
+
 	}
 
 }
