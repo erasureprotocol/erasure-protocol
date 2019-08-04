@@ -15,6 +15,8 @@ describe("OneWayGriefing", function() {
   const seller = sellerWallet.signer.signingKey.address;
 
   // variables used in initialize()
+  const sellerStake = 500;
+  const punishment = 100;
   const ratio = 2;
   const ratioType = RATIO_TYPES.CgtP;
   const countdownLength = 1000;
@@ -208,6 +210,7 @@ describe("OneWayGriefing", function() {
       await assert.emit(txn, "DeadlineSet");
       await assert.emitWithArgs(txn, deadline);
 
+      // get the stored delegatecall result
       const actualDeadline = await this.TestOneWayGriefing.getDeadline();
       assert.equal(actualDeadline.toNumber(), deadline);
     };
@@ -238,7 +241,7 @@ describe("OneWayGriefing", function() {
   describe("OneWayGriefing.increaseStake", () => {
     const funder = seller;
     let currentStake = 0; // to increment as we go
-    let amountToAdd = 100; // 100 token weis
+    let amountToAdd = 500; // 100 token weis
 
     it("should revert when msg.sender is not staker", async () => {
       // use the buyer to be the msg.sender
@@ -306,12 +309,11 @@ describe("OneWayGriefing", function() {
   });
 
   describe("OneWayGriefing.punish", () => {
-    const from = seller;
-    const punishment = 100;
+    const from = buyer;
     const message = "I don't like you";
     const punishArgs = [from, punishment, Buffer.from(message)];
 
-    it("should revert when not counterparty or operator", async () => {
+    it("should revert when msg.sender is not counterparty or operator", async () => {
       // seller is not counterparty or operator
       await assert.revertWith(
         this.TestOneWayGriefing.from(seller).punish(...punishArgs),
@@ -336,6 +338,112 @@ describe("OneWayGriefing", function() {
         this.TestOneWayGriefing.from(buyer).punish(...punishArgs),
         "insufficient allowance"
       );
+    });
+
+    it("should punish seller", async () => {
+      // increase seller's stake to 500
+      await this.MockNMR.from(seller).approve(
+        this.TestOneWayGriefing.contractAddress,
+        sellerStake
+      );
+      await this.TestOneWayGriefing.from(seller).increaseStake(
+        seller,
+        0,
+        sellerStake
+      );
+
+      const expectedCost = punishment * ratio;
+
+      await this.MockNMR.from(buyer).approve(
+        this.TestOneWayGriefing.contractAddress,
+        expectedCost
+      );
+
+      const txn = await this.TestOneWayGriefing.from(buyer).punish(
+        ...punishArgs
+      );
+      const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
+        txn
+      );
+      const expectedEvent = "Griefed";
+
+      const griefedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === expectedEvent,
+        "There is no such event"
+      );
+
+      assert.isDefined(griefedEvent);
+      assert.equal(griefedEvent.args.punisher, buyer);
+      assert.equal(griefedEvent.args.staker, seller);
+      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
+      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
+      assert.equal(
+        griefedEvent.args.message,
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
+      );
+
+      // get the stored delegatecall result
+      const griefCost = await this.TestOneWayGriefing.getGriefCost();
+      assert.equal(griefCost, expectedCost);
+    });
+  });
+
+  describe("OneWayGriefing.retrieveStake", () => {
+    it("should revert when msg.sender is not staker or operator", async () => {
+      // buyer is not staker or operator
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(buyer).retrieveStake(buyer),
+        "only staker or operator"
+      );
+    });
+
+    it("should revert when deadline not passed", async () => {
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(seller).retrieveStake(seller),
+        "deadline not passed"
+      );
+    });
+
+    it("should retrieve stake correctly", async () => {
+      await this.TestOneWayGriefing.from(seller).startCountdown();
+
+      const block = await deployer.provider.getBlock("latest");
+      const blockTimestamp = block.timestamp;
+
+      const exceedDeadlineBy = 1000;
+      const futureTimestamp =
+        blockTimestamp + countdownLength + exceedDeadlineBy;
+
+      await utils.setTimeTo(deployer.provider, futureTimestamp);
+
+      const txn = await this.TestOneWayGriefing.from(seller).retrieveStake(
+        seller
+      );
+
+      // check receipt for correct event logs
+      const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
+        txn
+      );
+      const expectedEvent = "StakeTaken";
+
+      const stakeTakenEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === expectedEvent,
+        "There is no such event"
+      );
+
+      const retrieveAmount = sellerStake - punishment;
+
+      assert.isDefined(stakeTakenEvent);
+      assert.equal(stakeTakenEvent.args.staker, seller);
+      assert.equal(stakeTakenEvent.args.recipient, seller);
+
+      // seller was punished before by 100 tokens in test before
+      assert.equal(stakeTakenEvent.args.amount.toNumber(), retrieveAmount);
+      assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
+
+      // get the stored delegatecall result
+      const actualRetrieveAmount = await this.TestOneWayGriefing.getRetrieveStakeAmount();
+      assert.equal(actualRetrieveAmount, retrieveAmount);
     });
   });
 });

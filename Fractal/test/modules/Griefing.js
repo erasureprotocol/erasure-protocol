@@ -337,17 +337,26 @@ describe("Griefing", function() {
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
         .grief(buyer, seller, punishment, Buffer.from(message));
+      const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
+        txn
+      );
 
       const expectedCost = punishment * ratio;
 
-      await assert.emit(txn, "Griefed");
-      await assert.emitWithArgs(txn, [
-        buyer,
-        seller,
-        punishment,
-        expectedCost,
-        message
-      ]);
+      const griefedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === "Griefed",
+        "There is no such event"
+      );
+
+      assert.isDefined(griefedEvent);
+      assert.equal(griefedEvent.args.punisher, buyer);
+      assert.equal(griefedEvent.args.staker, seller);
+      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
+      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
+      assert.equal(
+        griefedEvent.args.message,
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
+      );
 
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
       assert.equal(griefCost, expectedCost);

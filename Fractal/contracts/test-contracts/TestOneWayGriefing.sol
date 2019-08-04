@@ -8,6 +8,7 @@ contract TestOneWayGriefing is OneWayGriefing {
 
     uint256 private _griefCost;
     uint256 private _deadline;
+    uint256 private _retrieveStakeAmount;
 
     constructor(
         address griefingContract,
@@ -38,6 +39,15 @@ contract TestOneWayGriefing is OneWayGriefing {
         // surface the revert reason to tests
         (bool revertStatus, bytes memory revertReason) = _griefingContract.delegatecall(callData);
         require(revertStatus, string(revertReason));
+    }
+
+    function storeDelegateCallResult(uint256 storageSlot) internal {
+        assembly {
+            let pointer := mload(0x40)
+            returndatacopy(pointer, 0x0, returndatasize)
+            let retVal := mload(pointer)
+            sstore(storageSlot, retVal)
+        }
     }
 
     function initializeOneWayGriefing(
@@ -88,14 +98,9 @@ contract TestOneWayGriefing is OneWayGriefing {
         bytes memory callData = abi.encodeWithSelector(_template.startCountdown.selector);
         delegateCallToOneWayGriefing(callData);
 
-        assembly {
-            let pointer := mload(0x40)
-            returndatacopy(pointer, 0x0, returndatasize)
-            let retVal := mload(pointer)
-            sstore(_deadline_slot, retVal)
-            return(0x0, returndatasize)
-        }
-
+        uint256 storageSlot;
+        assembly { storageSlot := _deadline_slot }
+        storeDelegateCallResult(storageSlot);
         deadline = _deadline;
     }
 
@@ -106,18 +111,26 @@ contract TestOneWayGriefing is OneWayGriefing {
         );
         delegateCallToOneWayGriefing(callData);
 
-        assembly {
-            let pointer := mload(0x40)
-            returndatacopy(pointer, 0x0, returndatasize)
-            let retVal := mload(pointer)
-            sstore(_griefCost_slot, retVal)
-            return(0x0, returndatasize)
-        }
-
+        uint256 storageSlot;
+        assembly { storageSlot := _griefCost_slot }
+        storeDelegateCallResult(storageSlot);
         cost = _griefCost;
     }
 
-    // view
+    function retrieveStake(address recipient) public returns (uint256 amount) {
+        bytes memory callData = abi.encodeWithSelector(
+            _template.retrieveStake.selector,
+            recipient
+        );
+        delegateCallToOneWayGriefing(callData);
+
+        uint256 storageSlot;
+        assembly { storageSlot := _retrieveStakeAmount_slot }
+        storeDelegateCallResult(storageSlot);
+        amount = _retrieveStakeAmount;
+    }
+
+    // view functions
 
     function getDeadline() public view returns(uint256 deadline) {
         deadline = _deadline;
@@ -125,5 +138,9 @@ contract TestOneWayGriefing is OneWayGriefing {
 
     function getGriefCost() public view returns(uint256 cost) {
         cost = _griefCost;
+    }
+
+    function getRetrieveStakeAmount() public view returns(uint256 retrieveStakeAmount) {
+        retrieveStakeAmount = _retrieveStakeAmount;
     }
 }

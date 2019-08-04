@@ -98,6 +98,8 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or operator");
 
         // require agreement is not ended
+        // TODO: should you punish before you startCountdown?
+        // this does not throw when OneWayGriefing.startCountdown not invoked
         require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing
