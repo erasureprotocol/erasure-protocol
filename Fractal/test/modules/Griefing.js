@@ -334,12 +334,23 @@ describe("Griefing", function() {
         .from(buyer)
         .approve(contractAddress, punishment * ratio);
 
-      await contracts.TestGriefing.instance
+      const txn = await contracts.TestGriefing.instance
         .from(buyer)
         .grief(buyer, seller, punishment, Buffer.from(message));
 
+      const expectedCost = punishment * ratio;
+
+      await assert.emit(txn, "Griefed");
+      await assert.emitWithArgs(txn, [
+        buyer,
+        seller,
+        punishment,
+        expectedCost,
+        message
+      ]);
+
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
-      assert.equal(griefCost, punishment * ratio);
+      assert.equal(griefCost, expectedCost);
     });
   });
 });

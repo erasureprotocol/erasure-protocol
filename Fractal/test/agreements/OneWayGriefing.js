@@ -304,4 +304,38 @@ describe("OneWayGriefing", function() {
       );
     });
   });
+
+  describe("OneWayGriefing.punish", () => {
+    const from = seller;
+    const punishment = 100;
+    const message = "I don't like you";
+    const punishArgs = [from, punishment, Buffer.from(message)];
+
+    it("should revert when not counterparty or operator", async () => {
+      // seller is not counterparty or operator
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(seller).punish(...punishArgs),
+        "only counterparty or operator"
+      );
+    });
+
+    // the time was set past deadline in the test before
+    // we need to redeploy a new contract to reset the countdown
+    // this is because there's no ability to wind back time in EVM
+    it("should revert when agreement ended", async () => {
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(buyer).punish(...punishArgs),
+        "agreement ended"
+      );
+
+      this.TestOneWayGriefing = await deployTestOneWayGriefing();
+    });
+
+    it("should revert when no approval to burn tokens", async () => {
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(buyer).punish(...punishArgs),
+        "insufficient allowance"
+      );
+    });
+  });
 });
