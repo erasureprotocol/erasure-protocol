@@ -7,6 +7,7 @@ contract TestOneWayGriefing is OneWayGriefing {
     address private _griefingContract;
 
     uint256 private _griefCost;
+    uint256 private _deadline;
 
     constructor(
         address griefingContract,
@@ -83,24 +84,46 @@ contract TestOneWayGriefing is OneWayGriefing {
         delegateCallToOneWayGriefing(callData);
     }
 
+    function startCountdown() public returns (uint256 deadline) {
+        bytes memory callData = abi.encodeWithSelector(_template.startCountdown.selector);
+        delegateCallToOneWayGriefing(callData);
+
+        assembly {
+            let pointer := mload(0x40)
+            returndatacopy(pointer, 0x0, returndatasize)
+            let retVal := mload(pointer)
+            sstore(_deadline_slot, retVal)
+            return(0x0, returndatasize)
+        }
+
+        deadline = _deadline;
+    }
+
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         bytes memory callData = abi.encodeWithSelector(
             _template.punish.selector,
             from, punishment, message
         );
-        // delegateCallToOneWayGriefing(callData);
+        delegateCallToOneWayGriefing(callData);
 
         assembly {
-            let returnSize := 32
-            mstore(0x40, callData)
-
-            calldatacopy(0xff, 0, calldatasize)
-            let _retVal := delegatecall(gas, address, 0x40, calldatasize, 0, returnSize)
-            switch _retVal case 0 { revert(0,0) } default {
-                let griefCost := mload(0)
-                sstore("_griefCost", griefCost)
-                return(0, returnSize)
-            }
+            let pointer := mload(0x40)
+            returndatacopy(pointer, 0x0, returndatasize)
+            let retVal := mload(pointer)
+            sstore(_griefCost_slot, retVal)
+            return(0x0, returndatasize)
         }
+
+        cost = _griefCost;
+    }
+
+    // view
+
+    function getDeadline() public view returns(uint256 deadline) {
+        deadline = _deadline;
+    }
+
+    function getGriefCost() public view returns(uint256 cost) {
+        cost = _griefCost;
     }
 }
