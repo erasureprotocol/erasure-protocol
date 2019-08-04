@@ -212,6 +212,9 @@ describe("OneWayGriefing", function() {
 
       await assert.emit(txn, "DeadlineSet");
       await assert.emitWithArgs(txn, deadline);
+
+      const actualDeadline = await this.TestOneWayGriefing.getDeadline();
+      assert.equal(actualDeadline.toNumber(), deadline);
     };
 
     it("should revert when msg.sender is not staker or operator", async () => {
