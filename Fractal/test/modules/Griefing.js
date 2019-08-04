@@ -358,6 +358,17 @@ describe("Griefing", function() {
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
       );
 
+      const expectedCost = punishment * ratio;
+
+      await assert.emit(txn, "Griefed");
+      await assert.emitWithArgs(txn, [
+        buyer,
+        seller,
+        punishment,
+        expectedCost,
+        message
+      ]);
+
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
       assert.equal(griefCost, expectedCost);
     });
