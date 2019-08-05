@@ -20,7 +20,15 @@ contract OneWayGriefing_Factory is Factory {
         Factory._initialize(instanceRegistry, templateContract, instanceType, initABI);
     }
 
-    event ExplicitInitData(address indexed staker, address indexed counterparty, uint256 ratio, Griefing.RatioType ratioType, address token, uint256 countdownLength, bytes staticMetadata);
+    event ExplicitInitData(
+        address indexed staker,
+        address indexed counterparty,
+        uint256 ratio,
+        Griefing.RatioType ratioType,
+        address token,
+        uint256 countdownLength,
+        bytes staticMetadata
+    );
 
     function createExplicit(
         address token,
