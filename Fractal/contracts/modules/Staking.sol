@@ -38,14 +38,14 @@ contract Staking is BurnNMR {
         // require non-zero stake to add
         require(amountToAdd > 0, "no stake to add");
 
-        // transfer the stake amount
-        require(IERC20(BurnNMR.getToken()).transferFrom(funder, address(this), amountToAdd), "token transfer failed");
-
-        // calculate new stake amount
+                // calculate new stake amount
         uint256 newStake = currentStake.add(amountToAdd);
 
         // set new stake to storage
         _stake[staker] = newStake;
+
+        // transfer the stake amount
+        require(IERC20(BurnNMR.getToken()).transferFrom(funder, address(this), amountToAdd), "token transfer failed");
 
         // emit event
         emit StakeAdded(staker, funder, amountToAdd, newStake);
@@ -61,14 +61,14 @@ contract Staking is BurnNMR {
         // amountToTake has to be less than equal currentStake
         require(amountToTake <= currentStake, "cannot take more than currentStake");
 
-        // transfer the stake amount
-        require(IERC20(BurnNMR.getToken()).transfer(recipient, amountToTake), "token transfer failed");
-
         // calculate new stake amount
         uint256 newStake = currentStake.sub(amountToTake);
 
         // set new stake to storage
         _stake[staker] = newStake;
+
+        // transfer the stake amount
+        require(IERC20(BurnNMR.getToken()).transfer(recipient, amountToTake), "token transfer failed");
 
         // emit event
         emit StakeTaken(staker, recipient, amountToTake, newStake);
@@ -92,14 +92,14 @@ contract Staking is BurnNMR {
         // amountToTake has to be less than equal currentStake
         require(amountToBurn <= currentStake, "cannot burn more than currentStake");
 
-        // burn the stake amount
-        BurnNMR._burn(amountToBurn);
-
         // calculate new stake amount
         uint256 newStake = currentStake.sub(amountToBurn);
 
         // set new stake to storage
         _stake[staker] = newStake;
+
+        // burn the stake amount
+        BurnNMR._burn(amountToBurn);
 
         // emit event
         emit StakeBurned(staker, amountToBurn, newStake);
