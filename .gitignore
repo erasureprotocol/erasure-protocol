@@ -21,3 +21,5 @@ deploy.json
 coverage.json
 coverage-artifacts/
 *.outputParameter
+flat/
+venv/
