@@ -1,7 +1,7 @@
 const { createDeployer } = require("../helpers/setup");
 
 describe("Staking", function() {
-  this.timeout(4000);
+  this.timeout(6000);
 
   let wallets = {
     numerai: accounts[0],

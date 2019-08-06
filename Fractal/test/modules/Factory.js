@@ -29,12 +29,21 @@ describe("Factory", function() {
   const seller = sellerWallet.signer.signingKey.address;
 
   // variables used in initialize()
-  const sellerStake = 500;
-  const punishment = 100;
   const ratio = 2;
   const ratioType = RATIO_TYPES.CgtP;
   const countdownLength = 1000;
   const staticMetadata = "TESTING";
+
+  const initABITypes = [
+    "address",
+    "address",
+    "address",
+    "address",
+    "uint256",
+    "uint8",
+    "uint256",
+    "bytes"
+  ];
   const expectedABI =
     "(bytes4,address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
 
@@ -49,6 +58,10 @@ describe("Factory", function() {
   ];
 
   let deployer;
+  let logicContractAddress;
+  let nonce = 0;
+  const totalInstanceCount = 5;
+  let instances = [];
 
   before(async () => {
     deployer = createDeployer();
@@ -57,6 +70,28 @@ describe("Factory", function() {
     this.Registry = await deployer.deploy(ErasureAgreementsRegistryArtifact);
     this.WrongRegistry = await deployer.deploy(ErasurePostsRegistryArtifact);
   });
+
+  const populateInstances = async count => {
+    for (let i = 0; i < count; i++) {
+      await this.OWGFactory.from(seller).createExplicit(
+        this.MockNMR.contractAddress,
+        ...createArgs
+      );
+
+      const { instanceAddress } = createInstanceAddress(
+        this.OWGFactory.contractAddress,
+        logicContractAddress,
+        seller,
+        "initialize",
+        initABITypes,
+        [this.MockNMR.contractAddress, ...createArgs],
+        nonce
+      );
+
+      instances.push(instanceAddress);
+      nonce++;
+    }
+  };
 
   describe("Factory._initialize", () => {
     it("should revert when wrong instanceType for registry", async () => {
@@ -101,11 +136,11 @@ describe("Factory", function() {
       assert.equal(actualInstanceRegistry, this.Registry.contractAddress);
 
       // Factory.getTemplate
-      const expectedTemplateAddress = await getLatestContractAdressFrom(
+      logicContractAddress = await getLatestContractAdressFrom(
         this.OWGFactory.contractAddress
       );
       const actualTemplateAddress = await this.OWGFactory.getTemplate();
-      assert.equal(actualTemplateAddress, expectedTemplateAddress);
+      assert.equal(actualTemplateAddress, logicContractAddress);
     });
   });
 
@@ -115,8 +150,6 @@ describe("Factory", function() {
         this.OWGFactory.contractAddress,
         Buffer.from("")
       );
-
-      const logicContract = await this.OWGFactory.getTemplate();
 
       // seller creates the OneWayGriefing instance
       const txn = await this.OWGFactory.from(seller).createExplicit(
@@ -136,30 +169,107 @@ describe("Factory", function() {
       assert.equal(instanceCreatedEvent.args.creator, seller);
       assert.equal(instanceCreatedEvent.args.initABI, expectedABI);
 
-      const { targetAddress, initData } = createInstanceAddress(
-        seller,
+      // test for correctness of proxy address generation
+
+      const { instanceAddress, initData } = createInstanceAddress(
         this.OWGFactory.contractAddress,
-        logicContract,
+        logicContractAddress,
+        seller,
         "initialize",
-        [
-          "address",
-          "address",
-          "address",
-          "address",
-          "uint256",
-          "uint8",
-          "uint256",
-          "bytes"
-        ],
+        initABITypes,
         [this.MockNMR.contractAddress, ...createArgs],
-        0
+        nonce
       );
-      assert.equal(instanceCreatedEvent.args.instance, targetAddress);
+      assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
       assert.equal(instanceCreatedEvent.args.initData, initData);
 
-      const actualRuntimeCode = await deployer.provider.getCode(targetAddress);
-      const runtimeCode = createEip1167RuntimeCode(logicContract);
+      // check the EIP1167 runtime code
+
+      const actualRuntimeCode = await deployer.provider.getCode(
+        instanceAddress
+      );
+      const runtimeCode = createEip1167RuntimeCode(logicContractAddress);
       assert.equal(actualRuntimeCode, runtimeCode);
+
+      // test instance retrieval view functions
+
+      const actualInstanceAddress = await this.OWGFactory.getInstance(nonce);
+      assert.equal(actualInstanceAddress, instanceAddress);
+
+      // push to instances array to be checked against later
+      instances.push(instanceAddress);
+
+      // increase nonce after use for next instance address generation
+      nonce++;
+
+      // const instances = await this.OWGFactory.getInstances();
+      // assert.deepEqual(instances, [instanceAddress]);
+    });
+  });
+
+  describe("Factory.getInstanceCount", () => {
+    it("should get correct instance count", async () => {
+      await populateInstances(totalInstanceCount - 1); // -1 because we created 1 instance before this
+
+      const actualCount = await this.OWGFactory.getInstanceCount();
+      assert.equal(actualCount, totalInstanceCount);
+    });
+  });
+
+  describe("Factory.getInstance", () => {
+    it("should get instance correctly", async () => {
+      // iterate thru all the instance index and check against the instances array
+      // ensure that the order is preserved
+      for (let i = 0; i < totalInstanceCount; i++) {
+        const actualInstanceAddress = await this.OWGFactory.getInstance(i);
+        const expectedInstanceAddress = instances[i];
+        assert.equal(actualInstanceAddress, expectedInstanceAddress);
+      }
+    });
+  });
+
+  describe("Factory.getInstances", () => {
+    it("should get all instances correctly", async () => {
+      // check that both instance arrays from blockchain and locally match
+      const actualInstances = await this.OWGFactory.getInstances();
+      assert.deepEqual(actualInstances, instances); // deepEqual because array comparison
+    });
+  });
+
+  describe("Factory.getPaginatedInstances", () => {
+    it("should revert when startIndex >= endIndex", async () => {
+      await assert.revertWith(
+        this.OWGFactory.getPaginatedInstances(3, 2),
+        "startIndex must be less than endIndex"
+      );
+    });
+
+    it("should revert when endIndex > instances.length", async () => {
+      await assert.revertWith(
+        this.OWGFactory.getPaginatedInstances(
+          totalInstanceCount - 1,
+          totalInstanceCount + 1
+        ),
+        "end index out of range"
+      );
+    });
+
+    it("should get paginated instances correctly", async () => {
+      let startIndex = 0;
+      let endIndex = 3;
+      let actualInstances = await this.OWGFactory.getPaginatedInstances(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
+
+      startIndex = 3;
+      endIndex = 5;
+      actualInstances = await this.OWGFactory.getPaginatedInstances(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
     });
   });
 });

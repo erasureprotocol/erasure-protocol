@@ -6,9 +6,9 @@ const hexlify = utf8str =>
 
 // the long, manual way of re-creating the instance address
 function createInstanceAddress(
-  sender,
   factoryContractAddress,
   logicContractAddress,
+  sender,
   initializeFunctionName,
   abiTypes,
   abiValues,
@@ -48,12 +48,12 @@ function createInstanceAddress(
     ["0xff", factoryContractAddress, salt, initCodeHash]
   );
 
-  let targetAddress = ethers.utils.getAddress(
+  let instanceAddress = ethers.utils.getAddress(
     "0x" + create2hash.slice(12).substring(14)
   );
   return {
     initData,
-    targetAddress
+    instanceAddress
   };
 }
 
