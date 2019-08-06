@@ -1,13 +1,11 @@
 pragma solidity ^0.5.0;
 
-import "../modules/MultiHashWrapper.sol";
+import "../modules/ProofHash.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
 
 
-contract Post is MultiHashWrapper, Operated, Metadata {
-
-    MultiHash private _proofHash;
+contract Post is ProofHash, Operated, Metadata {
 
     event Created(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
@@ -21,7 +19,7 @@ contract Post is MultiHashWrapper, Operated, Metadata {
         assembly { if extcodesize(address) { revert(0, 0) } }
 
         // set storage variables
-        _proofHash = MultiHashWrapper._splitMultiHash(proofHash);
+        ProofHash._setProofHash(proofHash);
 
         // set operator
         Operated._setOperator(operator);
@@ -45,12 +43,6 @@ contract Post is MultiHashWrapper, Operated, Metadata {
 
         // set metadata in storage
         Metadata._setVariableMetadata(variableMetadata);
-    }
-
-    // view functions
-
-    function getProofHash() public view returns (bytes memory proofHash) {
-        proofHash = MultiHashWrapper._combineMultiHash(_proofHash);
     }
 
 }
