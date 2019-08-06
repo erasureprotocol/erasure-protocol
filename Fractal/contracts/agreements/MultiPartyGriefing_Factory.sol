@@ -9,18 +9,31 @@ contract MultiPartyGriefing_Factory is Factory {
     constructor(address instanceRegistry) public {
         // deploy template contract
         address templateContract = address(new MultiPartyGriefing());
-
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
-
-        // set initABI
-        string memory initABI = '(bytes4,address,address,bool,uint256,bytes)';
-
+        // set initdataABI
+        string memory initdataABI = '(address,address,bool,uint256,bytes)';
+        // set calldataABI
+        string memory calldataABI = '(bytes4,address,address,bool,uint256,bytes)';
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI, calldataABI);
     }
 
-    event ExplicitInitData(address indexed operator, bool trustedOperator, uint256 griefDeadline, address token, bytes metadata);
+    event ExplicitInitData(address indexed operator, bool trustedOperator, uint256 griefDeadline, bytes metadata);
+
+    function create(bytes memory initdata) public returns (address instance) {
+        // decode initdata
+        (
+            address operator,
+            address token,
+            bool trustedOperator,
+            uint256 griefDeadline,
+            bytes memory metadata
+        ) = abi.decode(initdata, (address,address,bool,uint256,bytes));
+
+        // call explicit create
+        instance = createExplicit(operator, token, trustedOperator, griefDeadline, metadata);
+    }
 
     function createExplicit(
         address operator,
@@ -33,7 +46,7 @@ contract MultiPartyGriefing_Factory is Factory {
         MultiPartyGriefing template;
 
         // construct the data payload used when initializing the new contract.
-        bytes memory initData = abi.encodeWithSelector(
+        bytes memory callData = abi.encodeWithSelector(
             template.initialize.selector, // selector
             operator,        // operator
             token,           // token
@@ -43,10 +56,10 @@ contract MultiPartyGriefing_Factory is Factory {
         );
 
         // deploy instance
-        instance = Factory.create(initData);
+        instance = Factory._create(callData);
 
         // emit events
-        emit ExplicitInitData(operator, trustedOperator, griefDeadline, token, metadata);
+        emit ExplicitInitData(operator, trustedOperator, griefDeadline, metadata);
     }
 
 }

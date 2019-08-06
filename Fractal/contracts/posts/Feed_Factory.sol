@@ -9,21 +9,30 @@ contract Feed_Factory is Factory {
     constructor(address instanceRegistry) public {
         // deploy template contract
         address templateContract = address(new Feed());
-
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Feed')));
-
-        // set initABI
-        string memory initABI = '(bytes4,address,address,bytes)';
-
+        // set initdataABI
+        string memory initdataABI = '(address,bytes)';
+        // set calldataABI
+        string memory calldataABI = '(bytes4,address,address,bytes)';
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI, calldataABI);
     }
 
-    event ExplicitInitData(address operator, address postRegistry, bytes feedStaticMetadata);
+    event ExplicitInitData(address postRegistry, bytes feedStaticMetadata);
+
+    function create(bytes memory initdata) public returns (address instance) {
+        // decode initdata
+        (
+            address postRegistry,
+            bytes memory feedStaticMetadata
+        ) = abi.decode(initdata, (address,bytes));
+
+        // call explicit create
+        instance = createExplicit(postRegistry, feedStaticMetadata);
+    }
 
     function createExplicit(
-        address operator,
         address postRegistry,
         bytes memory feedStaticMetadata
     ) public returns (address instance) {
@@ -31,18 +40,18 @@ contract Feed_Factory is Factory {
         Feed template;
 
         // construct the data payload used when initializing the new contract.
-        bytes memory initData = abi.encodeWithSelector(
+        bytes memory callData = abi.encodeWithSelector(
             template.initialize.selector, // selector
-            operator,
+            msg.sender,
             postRegistry,
             feedStaticMetadata
         );
 
         // deploy instance
-        instance = Factory.create(initData);
+        instance = Factory._create(callData);
 
         // emit event
-        emit ExplicitInitData(operator, postRegistry, feedStaticMetadata);
+        emit ExplicitInitData(postRegistry, feedStaticMetadata);
     }
 
 }
