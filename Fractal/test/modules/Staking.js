@@ -1,7 +1,7 @@
 const { createDeployer } = require("../helpers/setup");
 
 describe("Staking", function() {
-  this.timeout(4000);
+  this.timeout(6000);
 
   let wallets = {
     numerai: accounts[0],
@@ -65,6 +65,13 @@ describe("Staking", function() {
       await assert.revertWith(
         contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
         "token not set yet"
+      );
+    });
+
+    it("should fail when no allowance", async () => {
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
+        "insufficient allowance"
       );
     });
 

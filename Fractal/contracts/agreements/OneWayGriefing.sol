@@ -28,7 +28,6 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     Data private _data;
     struct Data {
-        address token;
         address staker;
         address counterparty;
     }
@@ -44,10 +43,13 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         bytes memory staticMetadata
     ) public {
         // only allow function to be delegatecalled from within a constructor.
-        assembly { if extcodesize(address) { revert(0, 0) } }
+        uint32 codeSize;
+        assembly {
+            codeSize := extcodesize(address)
+        }
+        require(codeSize == 0, "must be called within contract constructor");
 
         // set storage values
-        _data.token = token;
         _data.staker = staker;
         _data.counterparty = counterparty;
 
@@ -56,6 +58,9 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
             Operated._setOperator(operator);
             Operated._activate();
         }
+
+        // set token used for staking
+        Staking._setToken(token);
 
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);
@@ -71,7 +76,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function setVariableMetadata(bytes memory variableMetadata) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // update metadata
         Metadata._setVariableMetadata(variableMetadata);
@@ -79,10 +84,10 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function increaseStake(address funder, uint256 currentStake, uint256 amountToAdd) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement not ended");
+        require(!Countdown.isOver(), "agreement ended");
 
         // add stake
         Staking._addStake(_data.staker, funder, currentStake, amountToAdd);
@@ -90,10 +95,10 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or operator");
+        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement not ended");
+        require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing
         cost = Griefing._grief(from, _data.staker, punishment, message);
@@ -101,7 +106,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function startCountdown() public returns (uint256 deadline) {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require countdown is not started
         require(Deadline.getDeadline() == 0, "deadline already set");
@@ -112,7 +117,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function retrieveStake(address recipient) public returns (uint256 amount) {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require deadline is passed
         require(Deadline.isAfterDeadline(),"deadline not passed");

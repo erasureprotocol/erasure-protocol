@@ -243,7 +243,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "SafeMath: subtraction overflow"
+        "insufficient allowance"
       );
     });
 
@@ -263,7 +263,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "SafeMath: subtraction overflow"
+        "insufficient allowance"
       );
     });
 
@@ -334,12 +334,32 @@ describe("Griefing", function() {
         .from(buyer)
         .approve(contractAddress, punishment * ratio);
 
-      await contracts.TestGriefing.instance
+      const txn = await contracts.TestGriefing.instance
         .from(buyer)
         .grief(buyer, seller, punishment, Buffer.from(message));
+      const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
+        txn
+      );
+
+      const expectedCost = punishment * ratio;
+
+      const griefedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === "Griefed",
+        "There is no such event"
+      );
+
+      assert.isDefined(griefedEvent);
+      assert.equal(griefedEvent.args.punisher, buyer);
+      assert.equal(griefedEvent.args.staker, seller);
+      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
+      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
+      assert.equal(
+        griefedEvent.args.message,
+        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
+      );
 
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
-      assert.equal(griefCost, punishment * ratio);
+      assert.equal(griefCost, expectedCost);
     });
   });
 });

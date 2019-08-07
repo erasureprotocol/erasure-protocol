@@ -83,6 +83,7 @@ contract MockERC20 is IERC20 {
      * @param value uint256 the amount of tokens to be transferred
      */
     function transferFrom(address from, address to, uint256 value) public returns (bool) {
+        require(_allowances[from][msg.sender] >= value, "insufficient allowance");
         _transfer(from, to, value);
         _approve(from, msg.sender, _allowances[from][msg.sender].sub(value));
         return true;
@@ -188,6 +189,7 @@ contract MockERC20 is IERC20 {
      * @param value The amount that will be burnt.
      */
     function _burnFrom(address account, uint256 value) internal returns (bool status) {
+        require(_allowances[account][msg.sender] >= value, "insufficient allowance");
         status = _burn(account, value);
         _approve(account, msg.sender, _allowances[account][msg.sender].sub(value));
     }
