@@ -22,7 +22,7 @@ contract Countdown is Deadline {
     }
 
     function _start() internal returns (uint256 deadline) {
-        require(_length != 0, 'length not set');
+        require(_length != 0, "length not set");
         deadline = _length.add(now);
         Deadline._setDeadline(deadline);
     }

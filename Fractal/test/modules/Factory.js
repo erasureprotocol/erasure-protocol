@@ -207,9 +207,6 @@ describe("Factory", function() {
 
       // increase nonce after use for next instance address generation
       nonce++;
-
-      // const instances = await this.OWGFactory.getInstances();
-      // assert.deepEqual(instances, [instanceAddress]);
     });
   });
 
