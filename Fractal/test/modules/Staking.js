@@ -69,8 +69,9 @@ describe("Staking", function() {
     });
 
     it("should fail when no allowance", async () => {
-      await assert.revert(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10)
+      await assert.revertWith(
+        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
+        "insufficient allowance"
       );
     });
 
