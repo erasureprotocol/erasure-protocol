@@ -86,7 +86,8 @@ contract TestOneWayGriefing is OneWayGriefing {
 
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
-        _deadline = abi.decode(data, (uint256));
+        deadline = abi.decode(data, (uint256));
+        _deadline = deadline;
     }
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
@@ -96,7 +97,8 @@ contract TestOneWayGriefing is OneWayGriefing {
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
-        _griefCost = abi.decode(data, (uint256));
+        cost = abi.decode(data, (uint256));
+        _griefCost = cost;
     }
 
     function retrieveStake(address recipient) public returns (uint256 amount) {
@@ -106,7 +108,18 @@ contract TestOneWayGriefing is OneWayGriefing {
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
-        _retrieveStakeAmount = abi.decode(data, (uint256));
+        amount = abi.decode(data, (uint256));
+        _retrieveStakeAmount = amount;
+    }
+
+    // backdoor function to activate Operator for testing
+    function activateOperator() public {
+        Operated._activate();
+    }
+
+    // backdoor function to deactivate Operator for testing
+    function deactivateOperator() public {
+        Operated._deactivate();
     }
 
     // view functions
