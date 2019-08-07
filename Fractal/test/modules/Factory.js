@@ -44,7 +44,9 @@ describe("Factory", function() {
     "uint256",
     "bytes"
   ];
-  const expectedABI =
+  const initDataABI =
+    "(address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
+  const callDataABI =
     "(bytes4,address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
 
   const createArgs = [
@@ -127,9 +129,13 @@ describe("Factory", function() {
         )
       );
 
-      // Factory.getInitABI
-      const actualABI = await this.OWGFactory.getInitABI();
-      assert.equal(actualABI, expectedABI);
+      // Factory.getInitdataABI
+      const actualInitdataABI = await this.OWGFactory.getInitdataABI();
+      assert.equal(actualInitdataABI, initDataABI);
+
+      // Factory.getCalldataABI
+      const actualCalldataABI = await this.OWGFactory.getCalldataABI();
+      assert.equal(actualCalldataABI, callDataABI);
 
       // Factory.getInstanceRegistry
       const actualInstanceRegistry = await this.OWGFactory.getInstanceRegistry();
@@ -167,7 +173,7 @@ describe("Factory", function() {
 
       assert.isDefined(instanceCreatedEvent);
       assert.equal(instanceCreatedEvent.args.creator, seller);
-      assert.equal(instanceCreatedEvent.args.initABI, expectedABI);
+      assert.equal(instanceCreatedEvent.args.calldataABI, callDataABI);
 
       // test for correctness of proxy address generation
 
@@ -181,7 +187,7 @@ describe("Factory", function() {
         nonce
       );
       assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
-      assert.equal(instanceCreatedEvent.args.initData, initData);
+      assert.equal(instanceCreatedEvent.args.callData, initData);
 
       // check the EIP1167 runtime code
 
