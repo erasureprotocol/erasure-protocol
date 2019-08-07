@@ -15,11 +15,8 @@ describe("OneWayGriefing", function() {
   const seller = sellerWallet.signer.signingKey.address;
 
   // variables used in initialize()
-<<<<<<< HEAD
   const sellerStake = 500;
   const punishment = 100;
-=======
->>>>>>> 2ebe658... test covers setVariableMetadata, startCountdown, increaseStake
   const ratio = 2;
   const ratioType = RATIO_TYPES.CgtP;
   const countdownLength = 1000;
@@ -308,88 +305,6 @@ describe("OneWayGriefing", function() {
         ),
         "agreement ended"
       );
-      const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
-        txn
-      );
-      const expectedEvent = "Griefed";
-
-      const griefedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-
-      assert.isDefined(griefedEvent);
-      assert.equal(griefedEvent.args.punisher, buyer);
-      assert.equal(griefedEvent.args.staker, seller);
-      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
-      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
-      assert.equal(
-        griefedEvent.args.message,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
-      );
-
-      // get the stored delegatecall result
-      const griefCost = await this.TestOneWayGriefing.getGriefCost();
-      assert.equal(griefCost, expectedCost);
-    });
-  });
-
-  describe("OneWayGriefing.retrieveStake", () => {
-    it("should revert when msg.sender is not staker or operator", async () => {
-      // buyer is not staker or operator
-      await assert.revertWith(
-        this.TestOneWayGriefing.from(buyer).retrieveStake(buyer),
-        "only staker or operator"
-      );
-    });
-
-    it("should revert when deadline not passed", async () => {
-      await assert.revertWith(
-        this.TestOneWayGriefing.from(seller).retrieveStake(seller),
-        "deadline not passed"
-      );
-    });
-
-    it("should retrieve stake correctly", async () => {
-      await this.TestOneWayGriefing.from(seller).startCountdown();
-
-      const block = await deployer.provider.getBlock("latest");
-      const blockTimestamp = block.timestamp;
-
-      const exceedDeadlineBy = 1000;
-      const futureTimestamp =
-        blockTimestamp + countdownLength + exceedDeadlineBy;
-
-      await utils.setTimeTo(deployer.provider, futureTimestamp);
-
-      const txn = await this.TestOneWayGriefing.from(seller).retrieveStake(
-        seller
-      );
-
-      // check receipt for correct event logs
-      const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
-        txn
-      );
-      const expectedEvent = "StakeTaken";
-
-      const stakeTakenEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-
-      const retrieveAmount = sellerStake - punishment;
-
-      assert.isDefined(stakeTakenEvent);
-      assert.equal(stakeTakenEvent.args.staker, seller);
-      assert.equal(stakeTakenEvent.args.recipient, seller);
-
-      // seller was punished before by 100 tokens in test before
-      assert.equal(stakeTakenEvent.args.amount.toNumber(), retrieveAmount);
-      assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
-
-      // get the stored delegatecall result
-      const actualRetrieveAmount = await this.TestOneWayGriefing.getRetrieveStakeAmount();
-      assert.equal(actualRetrieveAmount, retrieveAmount);
     });
   });
 

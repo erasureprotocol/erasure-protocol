@@ -20,7 +20,7 @@ contract TestOneWayGriefing is OneWayGriefing {
         Griefing.RatioType ratioType,
         uint256 countdownLength,
         bytes memory staticMetadata) public {
-        
+
         initializeOneWayGriefing(
             griefingContract,
             token,
