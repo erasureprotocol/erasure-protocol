@@ -76,7 +76,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function setVariableMetadata(bytes memory variableMetadata) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // update metadata
         Metadata._setVariableMetadata(variableMetadata);
@@ -84,7 +84,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function increaseStake(address funder, uint256 currentStake, uint256 amountToAdd) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require agreement is not ended
         require(!Countdown.isOver(), "agreement ended");
@@ -95,7 +95,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or operator");
+        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // require agreement is not ended
         // TODO: should you punish before you startCountdown?
@@ -108,7 +108,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function startCountdown() public returns (uint256 deadline) {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require countdown is not started
         require(Deadline.getDeadline() == 0, "deadline already set");
@@ -119,7 +119,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
 
     function retrieveStake(address recipient) public returns (uint256 amount) {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or operator");
+        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require deadline is passed
         require(Deadline.isAfterDeadline(),"deadline not passed");
