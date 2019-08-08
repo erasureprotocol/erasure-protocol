@@ -1,0 +1,283 @@
+const ethers = require("ethers");
+const { createDeployer } = require("../helpers/setup");
+const { hexlify } = require("../helpers/utils");
+const RegistryArtifact = require("../../build/Registry.json");
+
+describe("Registry", () => {
+  const instanceType = "TestRegistry";
+  const factoryExtraData = "FACTORY_EXTRA_DATA";
+
+  const FACTORY_STATUS = {
+    Unregistered: 0,
+    Registered: 1,
+    Retired: 2
+  };
+
+  // wallets and addresses
+  const [ownerWallet, buyerWallet, sellerWallet] = accounts;
+  const owner = ownerWallet.signer.signingKey.address; // normalize address
+  const buyer = buyerWallet.signer.signingKey.address; // normalize address
+  const seller = sellerWallet.signer.signingKey.address; // normalize address
+  // nonce used to generate random address
+  let factoryNonce = 0;
+
+  // tracks local factory addresses to compare against blockchain
+  let factories = [];
+  let factoryStatuses = {};
+  let instances = [];
+
+  const generateRandomAddress = () => {
+    // a factory address is just a hash generated from a nonce
+    const hexdigest = ethers.utils.keccak256(
+      ethers.utils.toUtf8Bytes(factoryNonce.toString())
+    );
+
+    const addr = "0x" + hexdigest.slice(12).substring(14);
+    factoryNonce++;
+    return ethers.utils.getAddress(addr); // normalize the address
+  };
+
+  // create a local factory address stored in factories array and factoryStatuses is updated
+  const addLocalFactory = factoryAddress => {
+    const factoryId = factories.push(factoryAddress) - 1;
+    factoryStatuses[factoryAddress] = FACTORY_STATUS.Registered;
+    return factoryId;
+  };
+
+  const retireLocalFactory = factoryAddress => {
+    factoryStatuses[factoryAddress] = FACTORY_STATUS.Retired;
+  };
+
+  // addLocalFactory n times
+  const populateFactories = count => {
+    const addedFactories = [];
+
+    for (let i = 0; i < count; i++) {
+      const factoryAddress = generateRandomAddress();
+      addLocalFactory(factoryAddress);
+      addedFactories.push(factoryAddress);
+    }
+    return addedFactories;
+  };
+
+  const validateFactory = async (factoryId, factoryAddress) => {
+    const factoryStatus = factoryStatuses[factoryAddress];
+
+    // Factory.getFactoryID
+    let actualFactoryId = await this.Registry.getFactoryID(factoryAddress);
+    assert.equal(actualFactoryId, factoryId);
+
+    // Factory.getFactoryStatus = Registered
+    let actualFactoryStatus = await this.Registry.getFactoryStatus(
+      factoryAddress
+    );
+    assert.equal(actualFactoryStatus, factoryStatus);
+
+    // Factory.getExtraData
+    let actualExtraData = await this.Registry.getFactoryData(factoryAddress);
+    assert.equal(actualExtraData, hexlify(factoryExtraData));
+
+    // Factory.getFactory
+    [
+      actualFactoryStatus,
+      actualFactoryId,
+      actualExtraData
+    ] = await this.Registry.getFactory(factoryAddress);
+    assert.equal(actualFactoryStatus, factoryStatus);
+    assert.equal(actualFactoryId, factoryId);
+    assert.equal(actualExtraData, hexlify(factoryExtraData));
+  };
+
+  let deployer;
+  before(async () => {
+    deployer = await createDeployer();
+  });
+
+  describe("Registry.constructor", () => {
+    it("should deploy correctly", async () => {
+      this.Registry = await deployer.deploy(
+        RegistryArtifact,
+        false,
+        instanceType
+      );
+
+      const actualInstanceType = await this.Registry.getInstanceType();
+
+      // _instanceType stored as bytes4
+      const instanceTypeHash = ethers.utils.hexDataSlice(
+        ethers.utils.keccak256(Buffer.from(instanceType)),
+        0,
+        4
+      );
+      assert.equal(actualInstanceType, instanceTypeHash);
+    });
+  });
+
+  // Factory state functions
+
+  describe("Registry.addFactory", () => {
+    const factoryAddress = generateRandomAddress();
+
+    it("should revert when not owner", async () => {
+      await assert.revertWith(
+        this.Registry.from(seller).addFactory(
+          factoryAddress,
+          Buffer.from(factoryExtraData)
+        ),
+        "Ownable: caller is not the owner"
+      );
+    });
+
+    it("should add factory correctly", async () => {
+      const txn = await this.Registry.from(owner).addFactory(
+        factoryAddress,
+        Buffer.from(factoryExtraData)
+      );
+
+      await assert.emit(txn, "FactoryAdded");
+      await assert.emitWithArgs(txn, [
+        owner,
+        factoryAddress,
+        0,
+        hexlify(factoryExtraData)
+      ]);
+
+      const factoryId = addLocalFactory(factoryAddress);
+
+      validateFactory(factoryId, factoryAddress);
+    });
+
+    it("should revert when factory already added", async () => {
+      await assert.revertWith(
+        this.Registry.from(owner).addFactory(
+          factoryAddress,
+          Buffer.from(factoryExtraData)
+        ),
+        "factory already exists at the provided factory address"
+      );
+    });
+
+    it("should revert when factory is retired", async () => {
+      // retire the added factory
+      await this.Registry.from(owner).retireFactory(factoryAddress);
+      retireLocalFactory(factoryAddress);
+
+      await assert.revertWith(
+        this.Registry.from(owner).addFactory(
+          factoryAddress,
+          Buffer.from(factoryExtraData)
+        ),
+        "factory already exists at the provided factory address"
+      );
+    });
+  });
+
+  describe("Factory.retireFactory", () => {
+    const factoryAddress = generateRandomAddress();
+
+    it("should revert when not owner", async () => {
+      await assert.revertWith(
+        this.Registry.from(seller).retireFactory(factoryAddress),
+        "Ownable: caller is not the owner"
+      );
+    });
+
+    it("should revert when factory is not added", async () => {
+      await assert.revertWith(
+        this.Registry.from(owner).retireFactory(factoryAddress),
+        "factory is not currently registered"
+      );
+    });
+
+    it("should revert when factory is already retired", async () => {
+      await this.Registry.from(owner).addFactory(
+        factoryAddress,
+        Buffer.from(factoryExtraData)
+      );
+      addLocalFactory(factoryAddress);
+
+      await this.Registry.from(owner).retireFactory(factoryAddress);
+      retireLocalFactory(factoryAddress);
+
+      await assert.revertWith(
+        this.Registry.from(owner).retireFactory(factoryAddress),
+        "factory is not currently registered"
+      );
+    });
+  });
+
+  // Factory view functions
+
+  describe("Factory.getFactoryCount", () => {
+    it("should get factory count correctly", async () => {
+      const populateCount = 5;
+
+      for (let i = 0; i < populateCount; i++) {
+        const factoryAddress = generateRandomAddress();
+        await this.Registry.from(owner).addFactory(
+          factoryAddress,
+          Buffer.from(factoryExtraData)
+        );
+
+        addLocalFactory(factoryAddress);
+      }
+
+      const factoryCount = await this.Registry.getFactoryCount();
+      assert.equal(factoryCount.toNumber(), factories.length);
+    });
+  });
+
+  describe("Factory.getFactory", () => {
+    it("gets factory correctly", async () => {
+      for (let factoryId = 0; factoryId < factories.length; factoryId++) {
+        const factoryAddress = factories[factoryId];
+
+        await validateFactory(factoryId, factoryAddress);
+      }
+    });
+  });
+
+  describe("Factory.getFactories", () => {
+    it("should get factories correctly", async () => {
+      const actualFactories = await this.Registry.getFactories();
+      assert.deepEqual(actualFactories, factories);
+    });
+  });
+
+  describe("Factory.getPaginatedFactories", () => {
+    it("should revert when startIndex >= endIndex", async () => {
+      await assert.revertWith(
+        this.Registry.getPaginatedFactories(3, 2),
+        "startIndex must be less than endIndex"
+      );
+    });
+
+    it("should revert when endIndex > instances.length", async () => {
+      await assert.revertWith(
+        this.Registry.getPaginatedFactories(
+          factories.length - 1,
+          factories.length + 1
+        ),
+        "end index out of range"
+      );
+    });
+
+    it("should get paginated instances correctly", async () => {
+      let startIndex = 0;
+      let endIndex = 3;
+      let actualFactories = await this.Registry.getPaginatedFactories(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)); // deepEqual because array comparison
+
+      startIndex = 3;
+      endIndex = 5;
+      actualFactories = await this.Registry.getPaginatedFactories(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)); // deepEqual because array comparison
+    });
+  });
+});

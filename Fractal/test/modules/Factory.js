@@ -158,7 +158,7 @@ describe("Factory", function() {
       assert.equal(actualTemplateAddress, logicContractAddress);
 
       // register the factory into the registry
-      await this.Registry.addFactory(
+      await this.Registry.from(owner).addFactory(
         this.OWGFactory.contractAddress,
         Buffer.from("")
       );
