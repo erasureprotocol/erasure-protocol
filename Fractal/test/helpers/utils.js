@@ -4,33 +4,33 @@ const SpawnArtifact = require("../../build/Spawn.json");
 const hexlify = utf8str =>
   ethers.utils.hexlify(ethers.utils.toUtf8Bytes(utf8str));
 
-// the long, manual way of re-creating the instance address
-function createInstanceAddress(
+function createSelector(functionName, abiTypes) {
+  const joinedTypes = abiTypes.join(",");
+  const functionSignature = `${functionName}(${joinedTypes})`;
+
+  const selector = ethers.utils.hexDataSlice(
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(functionSignature)),
+    0,
+    4
+  );
+  return selector;
+}
+
+function createInstanceAddressWithInitData(
   factoryContractAddress,
   logicContractAddress,
   sender,
-  initializeFunctionName,
-  abiTypes,
-  abiValues,
+  selector,
+  initData,
   nonce
 ) {
   const abiEncoder = new ethers.utils.AbiCoder();
 
-  const joinedTypes = abiTypes.join(",");
-  const initSignature = `${initializeFunctionName}(${joinedTypes})`;
-
-  const initSelector = ethers.utils.hexDataSlice(
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(initSignature)),
-    0,
-    4
-  );
-
-  const initData =
-    initSelector + abiEncoder.encode(abiTypes, abiValues).slice(2);
+  const callData = selector + initData.slice(2);
 
   const initCallData = abiEncoder.encode(
     ["address", "bytes"],
-    [logicContractAddress, initData]
+    [logicContractAddress, callData] // slice '0x' from initData
   );
 
   const initCodeHash = ethers.utils.solidityKeccak256(
@@ -52,9 +52,38 @@ function createInstanceAddress(
     "0x" + create2hash.slice(12).substring(14)
   );
   return {
-    initData,
+    callData,
     instanceAddress
   };
+}
+
+// the long, manual way of re-creating the instance address
+function createInstanceAddress(
+  factoryContractAddress,
+  logicContractAddress,
+  sender,
+  initializeFunctionName,
+  abiTypes,
+  abiValues,
+  nonce
+) {
+  const abiEncoder = new ethers.utils.AbiCoder();
+
+  const selector = createSelector(
+    initializeFunctionName,
+    abiTypes
+  );
+
+  const initData = abiEncoder.encode(abiTypes, abiValues);
+
+  return createInstanceAddressWithInitData(
+    factoryContractAddress,
+    logicContractAddress,
+    sender,
+    selector,
+    initData,
+    nonce
+  );
 }
 
 function createEip1167RuntimeCode(logicContractAddress) {
@@ -71,5 +100,7 @@ function createEip1167RuntimeCode(logicContractAddress) {
 module.exports = {
   hexlify,
   createInstanceAddress,
-  createEip1167RuntimeCode
+  createInstanceAddressWithInitData,
+  createEip1167RuntimeCode,
+  createSelector
 };

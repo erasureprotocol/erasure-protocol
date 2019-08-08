@@ -2,7 +2,9 @@ const { createDeployer } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
 const {
   createInstanceAddress,
-  createEip1167RuntimeCode
+  createEip1167RuntimeCode,
+  createInstanceAddressWithInitData,
+  createSelector
 } = require("../helpers/utils");
 
 const OneWayGriefing_FactoryArtifact = require("../../build/OneWayGriefing_Factory.json");
@@ -48,6 +50,7 @@ describe("Factory", function() {
     "(address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
   const callDataABI =
     "(bytes4,address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
+  const initializeFunctionName = "initialize";
 
   const createArgs = [
     owner,
@@ -73,6 +76,23 @@ describe("Factory", function() {
     this.WrongRegistry = await deployer.deploy(ErasurePostsRegistryArtifact);
   });
 
+  const createLocalInstance = () => {
+    const { instanceAddress, callData } = createInstanceAddress(
+      this.OWGFactory.contractAddress,
+      logicContractAddress,
+      seller,
+      initializeFunctionName,
+      initABITypes,
+      [this.MockNMR.contractAddress, ...createArgs],
+      nonce
+    );
+
+    instances.push(instanceAddress);
+    nonce++;
+
+    return { instanceAddress, callData };
+  };
+
   const populateInstances = async count => {
     for (let i = 0; i < count; i++) {
       await this.OWGFactory.from(seller).createExplicit(
@@ -80,18 +100,7 @@ describe("Factory", function() {
         ...createArgs
       );
 
-      const { instanceAddress } = createInstanceAddress(
-        this.OWGFactory.contractAddress,
-        logicContractAddress,
-        seller,
-        "initialize",
-        initABITypes,
-        [this.MockNMR.contractAddress, ...createArgs],
-        nonce
-      );
-
-      instances.push(instanceAddress);
-      nonce++;
+      createLocalInstance();
     }
   };
 
@@ -147,75 +156,138 @@ describe("Factory", function() {
       );
       const actualTemplateAddress = await this.OWGFactory.getTemplate();
       assert.equal(actualTemplateAddress, logicContractAddress);
-    });
-  });
 
-  describe("Factory.create", () => {
-    it("should create instance correctly", async () => {
+      // register the factory into the registry
       await this.Registry.addFactory(
         this.OWGFactory.contractAddress,
         Buffer.from("")
       );
+    });
+  });
 
+  const validateCreateExplicitTxn = async txn => {
+    const receipt = await this.OWGFactory.verboseWaitForTransaction(txn);
+
+    const expectedEvent = "InstanceCreated";
+    const instanceCreatedEvent = receipt.events.find(
+      emittedEvent => emittedEvent.event === expectedEvent,
+      "There is no such event"
+    );
+
+    assert.isDefined(instanceCreatedEvent);
+    assert.equal(instanceCreatedEvent.args.creator, seller);
+    assert.equal(instanceCreatedEvent.args.calldataABI, callDataABI);
+
+    // test for correctness of proxy address generation
+
+    const { instanceAddress, callData } = createLocalInstance();
+
+    assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
+    assert.equal(instanceCreatedEvent.args.callData, callData);
+
+    // check the EIP1167 runtime code
+
+    const actualRuntimeCode = await deployer.provider.getCode(instanceAddress);
+    const runtimeCode = createEip1167RuntimeCode(logicContractAddress);
+    assert.equal(actualRuntimeCode, runtimeCode);
+  };
+
+  describe("Factory.create", () => {
+    const abiEncoder = new ethers.utils.AbiCoder();
+
+    it("should revert with missing argument in ABI", async () => {
+      const wrongABITypes = [
+        // "address", missing this first argument
+        "address",
+        "address",
+        "address",
+        "uint256",
+        "uint8",
+        "uint256",
+        "bytes"
+      ];
+
+      const initData = abiEncoder.encode(wrongABITypes, [
+        // this.MockNMR.contractAddress,
+        ...createArgs
+      ]);
+
+      await assert.revert(this.OWGFactory.from(seller).create(initData));
+    });
+
+    it("should revert with different type in ABI", async () => {
+      const wrongABITypes = [
+        "uint256",
+        "address",
+        "address",
+        "address",
+        "uint256",
+        "uint8",
+        "uint256",
+        "bytes"
+      ];
+
+      const replacementAddress = 123;
+
+      const initData = abiEncoder.encode(wrongABITypes, [
+        replacementAddress,
+        ...createArgs
+      ]);
+
+      await this.OWGFactory.from(seller).create(initData);
+
+      // use correct selector, not with the wrong ABI
+      const selector = createSelector(
+        initializeFunctionName,
+        initABITypes
+      );
+
+      const { instanceAddress } = createInstanceAddressWithInitData(
+        this.OWGFactory.contractAddress,
+        logicContractAddress,
+        seller,
+        selector,
+        initData,
+        nonce
+      );
+
+      instances.push(instanceAddress);
+
+      // dont increment nonce because next parameters are different
+      // nonce only increments when parameters are the same
+    });
+
+    it("should create instance correctly", async () => {
+      const initData = abiEncoder.encode(initABITypes, [
+        this.MockNMR.contractAddress,
+        ...createArgs
+      ]);
+
+      const txn = await this.OWGFactory.from(seller).create(initData);
+
+      await validateCreateExplicitTxn(txn);
+    });
+  });
+
+  describe("Factory.createExplicit", () => {
+    it("should create instance correctly", async () => {
       // seller creates the OneWayGriefing instance
       const txn = await this.OWGFactory.from(seller).createExplicit(
         this.MockNMR.contractAddress,
         ...createArgs
       );
 
-      const receipt = await this.OWGFactory.verboseWaitForTransaction(txn);
-
-      const expectedEvent = "InstanceCreated";
-      const instanceCreatedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-
-      assert.isDefined(instanceCreatedEvent);
-      assert.equal(instanceCreatedEvent.args.creator, seller);
-      assert.equal(instanceCreatedEvent.args.calldataABI, callDataABI);
-
-      // test for correctness of proxy address generation
-
-      const { instanceAddress, initData } = createInstanceAddress(
-        this.OWGFactory.contractAddress,
-        logicContractAddress,
-        seller,
-        "initialize",
-        initABITypes,
-        [this.MockNMR.contractAddress, ...createArgs],
-        nonce
-      );
-      assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
-      assert.equal(instanceCreatedEvent.args.callData, initData);
-
-      // check the EIP1167 runtime code
-
-      const actualRuntimeCode = await deployer.provider.getCode(
-        instanceAddress
-      );
-      const runtimeCode = createEip1167RuntimeCode(logicContractAddress);
-      assert.equal(actualRuntimeCode, runtimeCode);
-
-      // test instance retrieval view functions
-
-      const actualInstanceAddress = await this.OWGFactory.getInstance(nonce);
-      assert.equal(actualInstanceAddress, instanceAddress);
-
-      // push to instances array to be checked against later
-      instances.push(instanceAddress);
-
-      // increase nonce after use for next instance address generation
-      nonce++;
+      await validateCreateExplicitTxn(txn);
     });
   });
 
   describe("Factory.getInstanceCount", () => {
     it("should get correct instance count", async () => {
-      await populateInstances(totalInstanceCount - 1); // -1 because we created 1 instance before this
+      const populateCount = 5;
+      await populateInstances(populateCount); // -1 because we created 1 instance before this
 
       const actualCount = await this.OWGFactory.getInstanceCount();
-      assert.equal(actualCount, totalInstanceCount);
+      assert.equal(actualCount.toNumber(), instances.length);
     });
   });
 
@@ -250,8 +322,8 @@ describe("Factory", function() {
     it("should revert when endIndex > instances.length", async () => {
       await assert.revertWith(
         this.OWGFactory.getPaginatedInstances(
-          totalInstanceCount - 1,
-          totalInstanceCount + 1
+          instances.length - 1,
+          instances.length + 1
         ),
         "end index out of range"
       );
