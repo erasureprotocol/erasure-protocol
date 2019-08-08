@@ -3,8 +3,6 @@ pragma solidity ^0.5.0;
 
 /* Deadline
  *
- * TODO:
- * - Review if isAfterDeadline() behaves correctly when _deadline not set
  */
 contract Deadline {
 

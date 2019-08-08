@@ -8,15 +8,9 @@ import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
 
 /* Immediately engage with specific buyer
- * - Stake can be increased at any time
- * - Agreement is defined at the user level.
- * - Request to end agreement and recover stake takes 40 days to complete.
- * - No escrow of funds required.
- * - Buyer has Inf griefing.
- * - Payments are separate.
- *
- * TODO:
- * - Validate if state machine works as expected in edge cases
+ * - Stake can be increased at any time.
+ * - Request to end agreement and recover stake requires cooldown period to complete.
+ * - Counterparty can greif the staker at predefined ratio.
  *
  * NOTE:
  * - This top level contract should only perform access control and state transitions
