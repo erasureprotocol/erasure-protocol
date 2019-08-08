@@ -44,9 +44,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
     ) public {
         // only allow function to be delegatecalled from within a constructor.
         uint32 codeSize;
-        assembly {
-            codeSize := extcodesize(address)
-        }
+        assembly { codeSize := extcodesize(address) }
         require(codeSize == 0, "must be called within contract constructor");
 
         // set storage values

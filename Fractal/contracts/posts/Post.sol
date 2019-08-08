@@ -16,7 +16,9 @@ contract Post is ProofHash, Operated, Metadata {
         bytes memory variableMetadata
     ) public {
         // only allow function to be delegatecalled from within a constructor.
-        assembly { if extcodesize(address) { revert(0, 0) } }
+        uint32 codeSize;
+        assembly { codeSize := extcodesize(address) }
+        require(codeSize == 0, "must be called within contract constructor");
 
         // set storage variables
         ProofHash._setProofHash(proofHash);

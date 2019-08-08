@@ -55,7 +55,9 @@ contract MultiPartyGriefing is BurnNMR {
         bytes memory metadata
     ) public {
         // only allow function to be delegatecalled from within a constructor.
-        assembly { if extcodesize(address) { revert(0, 0) } }
+        uint32 codeSize;
+        assembly { codeSize := extcodesize(address) }
+        require(codeSize == 0, "must be called within contract constructor");
 
         params.operator = operator;
         BurnNMR._setToken(token);
