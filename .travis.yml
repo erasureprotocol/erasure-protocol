@@ -20,4 +20,3 @@ before_script:
 script:
   - yarn run compile
   - yarn run test
-  - yarn run coverage
