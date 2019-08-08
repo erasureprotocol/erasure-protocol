@@ -45,7 +45,7 @@ contract Registry is Ownable {
         // ensure that the provided factory is new.
         require(
             factoryData.status == FactoryStatus.Unregistered,
-            "Factory already exists at the provided factory address."
+            "factory already exists at the provided factory address"
         );
 
         // get the factoryID of the new factory.
@@ -71,7 +71,7 @@ contract Registry is Ownable {
         // ensure that the provided factory is new and not already retired.
         require(
             factoryData.status == FactoryStatus.Registered,
-            "Factory is not currently registered."
+            "factory is not currently registered"
         );
 
         // retire the factory.
@@ -83,7 +83,7 @@ contract Registry is Ownable {
     // factory view functions
 
     function getFactoryCount() external view returns (uint256 count) {
-        count = _instances.length;
+        count = _factoryList.length;
     }
 
     function getFactoryStatus(address factory) external view returns (FactoryStatus status) {
