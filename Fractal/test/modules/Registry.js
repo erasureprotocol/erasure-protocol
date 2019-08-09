@@ -389,10 +389,43 @@ describe("Registry", () => {
   });
 
   describe("Registry.getInstance", () => {
+    it("should revert when out of range", async () => {
+      await assert.revertWith(
+        this.Registry.getInstance(instances.length + 1),
+        "index out of range"
+      );
+    });
+
     it("should get instance correctly", async () => {
       for (let i = 0; i < instances.length; i++) {
         const instanceAddress = await this.Registry.getInstance(i);
         assert.equal(instanceAddress, instances[i]);
+      }
+    });
+  });
+
+  describe("Registry.getInstanceData", () => {
+    const factoryAddress = buyer;
+
+    it("should revert when out of range", async () => {
+      await assert.revertWith(
+        this.Registry.getInstanceData(instances.length + 1),
+        "index out of range"
+      );
+    });
+
+    it("should get instance data correctly", async () => {
+      const factoryID = factories.indexOf(factoryAddress);
+
+      for (let i = 0; i < instances.length; i++) {
+        const [
+          instanceAddress,
+          actualFactoryID,
+          extraData
+        ] = await this.Registry.getInstanceData(i);
+        assert.equal(instanceAddress, instances[i]);
+        assert.equal(actualFactoryID, factoryID);
+        assert.equal(extraData.toNumber(), instanceExtraData);
       }
     });
   });
