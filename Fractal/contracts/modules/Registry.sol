@@ -146,7 +146,7 @@ contract Registry is Ownable {
         // ensure that the caller is a registered factory
         require(
             status == FactoryStatus.Registered,
-            "Factory in wrong status."
+            "factory in wrong status"
         );
 
         uint256 instanceIndex = _instances.length;
@@ -177,13 +177,14 @@ contract Registry is Ownable {
     }
 
     function getInstances() external view returns (address[] memory instances) {
-
         uint256 length = _instances.length;
+        address[] memory addresses = new address[](length);
 
         // Populate array with addresses in range
         for (uint256 i = 0; i < length; i++) {
-            instances[i] = _instances[i].instance;
+            addresses[i] = _instances[i].instance;
         }
+        instances = addresses;
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
