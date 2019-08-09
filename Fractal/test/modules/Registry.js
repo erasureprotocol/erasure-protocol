@@ -48,36 +48,24 @@ describe("Registry", () => {
     factoryStatuses[factoryAddress] = FACTORY_STATUS.Retired;
   };
 
-  // addLocalFactory n times
-  const populateFactories = count => {
-    const addedFactories = [];
-
-    for (let i = 0; i < count; i++) {
-      const factoryAddress = generateRandomAddress();
-      addLocalFactory(factoryAddress);
-      addedFactories.push(factoryAddress);
-    }
-    return addedFactories;
-  };
-
   const validateFactory = async (factoryId, factoryAddress) => {
     const factoryStatus = factoryStatuses[factoryAddress];
 
-    // Factory.getFactoryID
+    // Registry.getFactoryID
     let actualFactoryId = await this.Registry.getFactoryID(factoryAddress);
     assert.equal(actualFactoryId, factoryId);
 
-    // Factory.getFactoryStatus = Registered
+    // Registry.getFactoryStatus = Registered
     let actualFactoryStatus = await this.Registry.getFactoryStatus(
       factoryAddress
     );
     assert.equal(actualFactoryStatus, factoryStatus);
 
-    // Factory.getExtraData
+    // Registry.getExtraData
     let actualExtraData = await this.Registry.getFactoryData(factoryAddress);
     assert.equal(actualExtraData, hexlify(factoryExtraData));
 
-    // Factory.getFactory
+    // Registry.getFactory
     [
       actualFactoryStatus,
       actualFactoryId,
@@ -172,7 +160,7 @@ describe("Registry", () => {
     });
   });
 
-  describe("Factory.retireFactory", () => {
+  describe("Registry.retireFactory", () => {
     const factoryAddress = generateRandomAddress();
 
     it("should revert when not owner", async () => {
@@ -204,11 +192,30 @@ describe("Registry", () => {
         "factory is not currently registered"
       );
     });
+
+    it("should retire factory correctly", async () => {
+      const factoryAddress = generateRandomAddress();
+
+      await this.Registry.from(owner).addFactory(
+        factoryAddress,
+        Buffer.from(factoryExtraData)
+      );
+      const factoryId = addLocalFactory(factoryAddress);
+
+      const txn = await this.Registry.from(owner).retireFactory(factoryAddress);
+      retireLocalFactory(factoryAddress);
+
+      assert.emit(txn, "FactoryRetired");
+      assert.emitWithArgs(txn, [owner, factoryAddress, factoryId]);
+
+      const actualStatus = await this.Registry.getFactoryStatus(factoryAddress);
+      assert.equal(actualStatus, FACTORY_STATUS.Retired);
+    });
   });
 
   // Factory view functions
 
-  describe("Factory.getFactoryCount", () => {
+  describe("Registry.getFactoryCount", () => {
     it("should get factory count correctly", async () => {
       const populateCount = 5;
 
@@ -227,7 +234,7 @@ describe("Registry", () => {
     });
   });
 
-  describe("Factory.getFactory", () => {
+  describe("Registry.getFactory", () => {
     it("gets factory correctly", async () => {
       for (let factoryId = 0; factoryId < factories.length; factoryId++) {
         const factoryAddress = factories[factoryId];
@@ -237,14 +244,14 @@ describe("Registry", () => {
     });
   });
 
-  describe("Factory.getFactories", () => {
+  describe("Registry.getFactories", () => {
     it("should get factories correctly", async () => {
       const actualFactories = await this.Registry.getFactories();
       assert.deepEqual(actualFactories, factories);
     });
   });
 
-  describe("Factory.getPaginatedFactories", () => {
+  describe("Registry.getPaginatedFactories", () => {
     it("should revert when startIndex >= endIndex", async () => {
       await assert.revertWith(
         this.Registry.getPaginatedFactories(3, 2),
