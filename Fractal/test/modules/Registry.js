@@ -24,7 +24,6 @@ describe("Registry", () => {
   // tracks local factory addresses to compare against blockchain
   let factories = [];
   let factoryStatuses = {};
-  let instances = [];
 
   const generateRandomAddress = () => {
     // a factory address is just a hash generated from a nonce
@@ -285,6 +284,160 @@ describe("Registry", () => {
         endIndex
       );
       assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)); // deepEqual because array comparison
+    });
+  });
+
+  // Instance state functions
+
+  const instanceExtraData = 0;
+
+  let instances = [];
+
+  const addLocalInstance = instanceAddress => {
+    const instanceIndex = instances.push(instanceAddress) - 1;
+    return instanceIndex;
+  };
+
+  describe("Registry.register", () => {
+    // pretend that the buyer address is one of the factory
+    const factoryAddress = buyer;
+
+    it("should revert when factory not added", async () => {
+      const instanceAddress = generateRandomAddress();
+
+      await assert.revertWith(
+        this.Registry.from(factoryAddress).register(
+          instanceAddress,
+          buyer,
+          instanceExtraData
+        ),
+        "factory in wrong status"
+      );
+    });
+
+    it("should revert when factory is retired", async () => {
+      const factoryAddress = seller;
+
+      await this.Registry.from(owner).addFactory(
+        seller,
+        Buffer.from(factoryExtraData)
+      );
+      await this.Registry.from(owner).retireFactory(seller);
+
+      addLocalFactory(factoryAddress);
+
+      const instanceAddress = generateRandomAddress();
+
+      await assert.revertWith(
+        this.Registry.from(factoryAddress).register(
+          instanceAddress,
+          seller,
+          instanceExtraData
+        ),
+        "factory in wrong status"
+      );
+    });
+
+    it("should register instance correctly", async () => {
+      await this.Registry.from(owner).addFactory(
+        factoryAddress,
+        Buffer.from(factoryExtraData)
+      );
+      const factoryId = addLocalFactory(factoryAddress);
+
+      const instanceAddress = generateRandomAddress();
+
+      const txn = await this.Registry.from(factoryAddress).register(
+        instanceAddress,
+        seller,
+        instanceExtraData
+      );
+
+      const instanceIndex = addLocalInstance(instanceAddress);
+
+      await assert.emit(txn, "InstanceRegistered");
+      await assert.emitWithArgs(txn, [
+        instanceAddress,
+        instanceIndex,
+        seller,
+        factoryAddress,
+        factoryId
+      ]);
+    });
+  });
+
+  describe("Registry.getInstanceCount", () => {
+    const factoryAddress = buyer;
+
+    it("should get instance count correctly", async () => {
+      const populateCount = 5;
+
+      for (let i = 0; i < populateCount; i++) {
+        const instanceAddress = generateRandomAddress();
+
+        await this.Registry.from(factoryAddress).register(
+          instanceAddress,
+          buyer,
+          instanceExtraData
+        );
+        addLocalInstance(instanceAddress);
+      }
+
+      const instanceCount = await this.Registry.getInstanceCount();
+      assert.equal(instanceCount, instances.length);
+    });
+  });
+
+  describe("Registry.getInstance", () => {
+    it("should get instance correctly", async () => {
+      for (let i = 0; i < instances.length; i++) {
+        const instanceAddress = await this.Registry.getInstance(i);
+        assert.equal(instanceAddress, instances[i]);
+      }
+    });
+  });
+
+  describe("Registry.getInstances", () => {
+    it("should get instances correctly", async () => {
+      const actualInstances = await this.Registry.getInstances();
+      assert.deepEqual(actualInstances, instances);
+    });
+  });
+
+  describe("Registry.getPaginatedInstances", () => {
+    it("should revert when startIndex >= endIndex", async () => {
+      await assert.revertWith(
+        this.Registry.getPaginatedInstances(3, 2),
+        "startIndex must be less than endIndex"
+      );
+    });
+
+    it("should revert when endIndex > instances.length", async () => {
+      await assert.revertWith(
+        this.Registry.getPaginatedInstances(
+          instances.length - 1,
+          instances.length + 1
+        ),
+        "end index out of range"
+      );
+    });
+
+    it("should get paginated instances correctly", async () => {
+      let startIndex = 0;
+      let endIndex = 3;
+      let actualInstances = await this.Registry.getPaginatedInstances(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
+
+      startIndex = 3;
+      endIndex = 5;
+      actualInstances = await this.Registry.getPaginatedInstances(
+        startIndex,
+        endIndex
+      );
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
     });
   });
 });
