@@ -74,7 +74,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         Metadata._setVariableMetadata(variableMetadata);
     }
 
-    function increaseStake(address funder, uint256 currentStake, uint256 amountToAdd) public {
+    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
@@ -82,7 +82,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         require(!Countdown.isOver(), "agreement ended");
 
         // add stake
-        Staking._addStake(_data.staker, funder, currentStake, amountToAdd);
+        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
     }
 
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {

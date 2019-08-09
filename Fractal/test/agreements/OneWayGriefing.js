@@ -263,7 +263,6 @@ describe("OneWayGriefing", function() {
   });
 
   describe("OneWayGriefing.increaseStake", () => {
-    const funder = seller;
     let currentStake = 0; // to increment as we go
     let amountToAdd = 500; // 500 token weis
 
@@ -274,7 +273,6 @@ describe("OneWayGriefing", function() {
       );
 
       const txn = await this.TestOneWayGriefing.from(sender).increaseStake(
-        sender,
         currentStake,
         amountToAdd
       );
@@ -298,11 +296,10 @@ describe("OneWayGriefing", function() {
       assert.equal(stakeAddedEvent.args.newStake.toNumber(), currentStake);
     };
 
-    it("should revert when msg.sender is not staker", async () => {
+    it("should revert when msg.sender is counterparty", async () => {
       // use the buyer to be the msg.sender
       await assert.revertWith(
         this.TestOneWayGriefing.from(buyer).increaseStake(
-          funder,
           currentStake,
           amountToAdd
         ),
@@ -315,7 +312,6 @@ describe("OneWayGriefing", function() {
 
       await assert.revertWith(
         this.TestOneWayGriefing.from(buyer).increaseStake(
-          funder,
           currentStake,
           amountToAdd
         ),
@@ -357,7 +353,6 @@ describe("OneWayGriefing", function() {
 
       await assert.revertWith(
         this.TestOneWayGriefing.from(seller).increaseStake(
-          funder,
           currentStake,
           amountToAdd
         ),
@@ -380,7 +375,6 @@ describe("OneWayGriefing", function() {
         amountToAdd
       );
       await this.TestOneWayGriefing.from(seller).increaseStake(
-        seller,
         currentStake,
         amountToAdd
       );
@@ -511,7 +505,7 @@ describe("OneWayGriefing", function() {
         sellerStake
       );
 
-      await this.TestOneWayGriefing.increaseStake(seller, 0, sellerStake);
+      await this.TestOneWayGriefing.from(seller).increaseStake(0, sellerStake);
 
       // required to start countdown
 
