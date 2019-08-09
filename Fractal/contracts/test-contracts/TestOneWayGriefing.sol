@@ -72,10 +72,10 @@ contract TestOneWayGriefing is OneWayGriefing {
         require(ok, string(data));
     }
 
-    function increaseStake(address funder, uint256 currentStake, uint256 amountToAdd) public {
+    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
         bytes memory callData = abi.encodeWithSelector(
             _template.increaseStake.selector,
-            funder, currentStake, amountToAdd
+            currentStake, amountToAdd
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
