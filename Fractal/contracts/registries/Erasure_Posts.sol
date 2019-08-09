@@ -5,7 +5,7 @@ import "../modules/Registry.sol";
 
 contract Erasure_Posts is Registry {
 
-    constructor() public Registry('Post') {
+    constructor() public Registry("Post") {
 
     }
 }
