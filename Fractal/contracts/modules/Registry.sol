@@ -176,6 +176,17 @@ contract Registry is Ownable {
         instance = _instances[index].instance;
     }
 
+    function getInstanceData(uint256 index) external view
+        returns (address instanceAddress, uint16 factoryID, uint80 extraData) {
+
+        require(index < _instances.length, "index out of range");
+
+        Instance memory instance = _instances[index];
+        instanceAddress = instance.instance;
+        factoryID = instance.factoryID;
+        extraData = instance.extraData;
+    }
+
     function getInstances() external view returns (address[] memory instances) {
         uint256 length = _instances.length;
         address[] memory addresses = new address[](length);
