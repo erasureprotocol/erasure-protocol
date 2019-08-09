@@ -27,7 +27,7 @@ interface iRegistry {
 
     // instance state functions
 
-    function register(address instance, address creator, uint64 extraData) external;
+    function register(address instance, address creator, uint80 extraData) external;
 
     // instance view functions
 
