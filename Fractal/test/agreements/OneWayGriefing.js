@@ -178,7 +178,7 @@ describe("OneWayGriefing", function() {
       await this.TestOneWayGriefing.from(operator).deactivateOperator();
 
       await assert.revertWith(
-        this.TestOneWayGriefing.from(counterparty).setVariableMetadata(
+        this.TestOneWayGriefing.from(operator).setVariableMetadata(
           Buffer.from(stakerMetadata)
         ),
         "only staker or active operator"
@@ -311,7 +311,7 @@ describe("OneWayGriefing", function() {
       await this.TestOneWayGriefing.from(operator).deactivateOperator();
 
       await assert.revertWith(
-        this.TestOneWayGriefing.from(counterparty).increaseStake(
+        this.TestOneWayGriefing.from(operator).increaseStake(
           currentStake,
           amountToAdd
         ),
@@ -471,7 +471,7 @@ describe("OneWayGriefing", function() {
       await this.TestOneWayGriefing.from(operator).deactivateOperator();
 
       await assert.revertWith(
-        this.TestOneWayGriefing.from(counterparty).retrieveStake(counterparty),
+        this.TestOneWayGriefing.from(operator).retrieveStake(counterparty),
         "only staker or active operator"
       );
 
