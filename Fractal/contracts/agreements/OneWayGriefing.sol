@@ -85,6 +85,17 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
         Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
     }
 
+    function reward(uint256 currentStake, uint256 amountToAdd) public {
+        // restrict access
+        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+
+        // require agreement is not ended
+        require(!Countdown.isOver(), "agreement ended");
+
+        // add stake
+        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
+    }
+
     function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
