@@ -258,12 +258,18 @@ describe("OneWayGriefing", function() {
       // re-deploy a new TestOneWayGriefing and initialize
       this.TestOneWayGriefing = await deployTestOneWayGriefing();
 
+      // create snapshot
+      let snapshotID = await utils.snapshot(deployer.provider);
+
       await startCountdown(operator);
+
+      // return to snapshot
+      await utils.revertState(deployer.provider, snapshotID);
     });
   });
 
   describe("OneWayGriefing.increaseStake", () => {
-    let currentStake = 0; // to increment as we go
+    let currentStake; // to increment as we go
     let amountToAdd = 500; // 500 token weis
 
     const increaseStake = async sender => {
@@ -297,6 +303,9 @@ describe("OneWayGriefing", function() {
     };
 
     it("should revert when msg.sender is counterparty", async () => {
+      // update currentStake
+      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+
       // use the counterparty to be the msg.sender
       await assert.revertWith(
         this.TestOneWayGriefing.from(counterparty).increaseStake(
@@ -326,20 +335,14 @@ describe("OneWayGriefing", function() {
     });
 
     it("should increase stake when msg.sender is operator", async () => {
-      this.TestOneWayGriefing = await deployTestOneWayGriefing();
-
-      // have to reset currentStake
-      currentStake = 0;
-
       await increaseStake(operator);
     });
 
-    it("should increase stake when countdown not started", async () => {
-      // proceed normally without starting countdown
-      await increaseStake(staker);
-    });
-
     it("should revert when countdown over", async () => {
+
+      // create snapshot
+      let snapshotID = await utils.snapshot(deployer.provider);
+
       await this.TestOneWayGriefing.startCountdown();
 
       // get current blockTimestamp so we can reset later
@@ -358,6 +361,112 @@ describe("OneWayGriefing", function() {
         ),
         "agreement ended"
       );
+
+      // return to snapshot
+      await utils.revertState(deployer.provider, snapshotID);
+    });
+  });
+
+  describe("OneWayGriefing.reward", () => {
+    let currentStake; // to increment as we go
+    let amountToAdd = 500; // 500 token weis
+
+    const reward = async sender => {
+      // update currentStake
+      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+
+      await this.MockNMR.from(sender).approve(
+        this.TestOneWayGriefing.contractAddress,
+        amountToAdd
+      );
+
+      const txn = await this.TestOneWayGriefing.from(sender).reward(
+        currentStake,
+        amountToAdd
+      );
+
+      currentStake += amountToAdd;
+
+      assert.equal((await this.TestOneWayGriefing.getStake(staker)).toNumber(), currentStake);
+
+      const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
+        txn
+      );
+      const expectedEvent = "StakeAdded";
+
+      const stakeAddedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === expectedEvent,
+        "There is no such event"
+      );
+
+      assert.isDefined(stakeAddedEvent);
+      assert.equal(stakeAddedEvent.args.staker, staker);
+      assert.equal(stakeAddedEvent.args.funder, sender);
+      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd);
+      assert.equal(stakeAddedEvent.args.newStake.toNumber(), currentStake);
+    };
+
+    it("should revert when msg.sender is staker", async () => {
+      // update currentStake
+      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+
+      // use the staker to be the msg.sender
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(staker).reward(
+          currentStake,
+          amountToAdd
+        ),
+        "only counterparty or active operator"
+      );
+    });
+
+    it("should revert when msg.sender is deactivated operator", async () => {
+      await this.TestOneWayGriefing.from(operator).deactivateOperator();
+
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(operator).reward(
+          currentStake,
+          amountToAdd
+        ),
+        "only counterparty or active operator"
+      );
+
+      await this.TestOneWayGriefing.from(operator).activateOperator();
+    });
+
+    it("should succeed when msg.sender is counterparty", async () => {
+      await reward(counterparty);
+    });
+
+    it("should succeed when msg.sender is operator", async () => {
+      await reward(operator);
+    });
+
+    it("should revert when countdown over", async () => {
+      // create snapshot
+      let snapshotID = await utils.snapshot(deployer.provider);
+
+      await this.TestOneWayGriefing.startCountdown();
+
+      // get current blockTimestamp so we can reset later
+      const block = await deployer.provider.getBlock("latest");
+      const oldTimestamp = block.timestamp;
+
+      // set to 1000 seconds after the deadline
+      const timePastDeadline = 1000;
+      const newTimestamp = oldTimestamp + countdownLength + timePastDeadline;
+      await utils.setTimeTo(deployer.provider, newTimestamp);
+
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(counterparty).reward(
+          currentStake,
+          amountToAdd
+        ),
+        "agreement ended"
+      );
+
+      // return to snapshot
+      await utils.revertState(deployer.provider, snapshotID);
     });
   });
 
@@ -420,6 +529,9 @@ describe("OneWayGriefing", function() {
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
+      // update currentStake
+      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+
       // staker is not counterparty or operator
       await assert.revertWith(
         this.TestOneWayGriefing.from(staker).punish(...punishArgs),
@@ -427,16 +539,32 @@ describe("OneWayGriefing", function() {
       );
     });
 
-    // the time was set past deadline in the test before
-    // we need to redeploy a new contract to reset the countdown
-    // this is because there's no ability to wind back time in EVM
     it("should revert when agreement ended", async () => {
+      // create snapshot
+      let snapshotID = await utils.snapshot(deployer.provider);
+
+      // required to start countdown
+
+      await this.TestOneWayGriefing.from(staker).startCountdown();
+
+      // move time forward to after the deadline
+
+      const block = await deployer.provider.getBlock("latest");
+      const blockTimestamp = block.timestamp;
+
+      const exceedDeadlineBy = 1000;
+      const futureTimestamp =
+        blockTimestamp + countdownLength + exceedDeadlineBy;
+
+      await utils.setTimeTo(deployer.provider, futureTimestamp);
+
       await assert.revertWith(
         this.TestOneWayGriefing.from(counterparty).punish(...punishArgs),
         "agreement ended"
       );
 
-      this.TestOneWayGriefing = await deployTestOneWayGriefing();
+      // return to snapshot
+      await utils.revertState(deployer.provider, snapshotID);
     });
 
     it("should revert when no approval to burn tokens", async () => {

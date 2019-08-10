@@ -81,6 +81,15 @@ contract TestOneWayGriefing is OneWayGriefing {
         require(ok, string(data));
     }
 
+    function reward(uint256 currentStake, uint256 amountToAdd) public {
+        bytes memory callData = abi.encodeWithSelector(
+            _template.reward.selector,
+            currentStake, amountToAdd
+        );
+        (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
+        require(ok, string(data));
+    }
+
     function startCountdown() public returns (uint256 deadline) {
         bytes memory callData = abi.encodeWithSelector(_template.startCountdown.selector);
 
