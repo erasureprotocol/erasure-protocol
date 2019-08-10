@@ -38,7 +38,7 @@ contract Staking is BurnNMR {
         // require non-zero stake to add
         require(amountToAdd > 0, "no stake to add");
 
-                // calculate new stake amount
+        // calculate new stake amount
         uint256 newStake = currentStake.add(amountToAdd);
 
         // set new stake to storage
