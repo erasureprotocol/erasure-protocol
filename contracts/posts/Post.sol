@@ -40,8 +40,8 @@ contract Post is ProofHash, Operated, Metadata {
     // state functions
 
     function setVariableMetadata(bytes memory variableMetadata) public {
-        // only operator
-        require(Operated.isOperator(msg.sender), "only operator");
+        // only active operator
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         // set metadata in storage
         Metadata._setVariableMetadata(variableMetadata);

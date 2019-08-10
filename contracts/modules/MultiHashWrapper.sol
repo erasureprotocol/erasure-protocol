@@ -8,10 +8,11 @@ pragma solidity ^0.5.0;
  */
 contract MultiHashWrapper {
 
+    // bytes32 hash first to fill the first storage slot
     struct MultiHash {
+        bytes32 hash;
         uint8 hashFunction;
         uint8 digestSize;
-        bytes32 hash;
     }
 
     /**
@@ -30,6 +31,6 @@ contract MultiHashWrapper {
     */
     function _splitMultiHash(bytes memory source) internal pure returns (MultiHash memory) {
         (uint8 hashFunction, uint8 digestSize, bytes32 hash) = abi.decode(source, (uint8,uint8,bytes32));
-        return MultiHash(hashFunction, digestSize, hash);
+        return MultiHash(hash, hashFunction, digestSize);
     }
 }
