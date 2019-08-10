@@ -10,7 +10,6 @@ const deploy = async (network, secret) => {
       artifact: require("../build/Erasure_Agreements.json")
     },
     Erasure_Escrows: { artifact: require("../build/Erasure_Escrows.json") },
-    Erasure_Feeds: { artifact: require("../build/Erasure_Feeds.json") },
     Erasure_Posts: { artifact: require("../build/Erasure_Posts.json") },
     Erasure_Users: { artifact: require("../build/Erasure_Users.json") },
     OneWayGriefing_Factory: {
@@ -37,10 +36,6 @@ const deploy = async (network, secret) => {
       contracts.Erasure_Posts.artifact,
       false
     );
-    contracts.Erasure_Feeds.instance = await deployer.deployAndVerify(
-      contracts.Erasure_Feeds.artifact,
-      false
-    );
     contracts.Erasure_Agreements.instance = await deployer.deployAndVerify(
       contracts.Erasure_Agreements.artifact,
       false
@@ -59,7 +54,7 @@ const deploy = async (network, secret) => {
     contracts.Feed_Factory.instance = await deployer.deployAndVerify(
       contracts.Feed_Factory.artifact,
       false,
-      contracts.Erasure_Feeds.instance.contractAddress
+      contracts.Erasure_Posts.instance.contractAddress
     );
     contracts.OneWayGriefing_Factory.instance = await deployer.deployAndVerify(
       contracts.OneWayGriefing_Factory.artifact,
@@ -72,7 +67,7 @@ const deploy = async (network, secret) => {
       contracts.Post_Factory.instance.contractAddress,
       ethers.utils.hexlify(0x0)
     );
-    contracts.Erasure_Feeds.instance.addFactory(
+    contracts.Erasure_Posts.instance.addFactory(
       contracts.Feed_Factory.instance.contractAddress,
       ethers.utils.hexlify(0x0)
     );
