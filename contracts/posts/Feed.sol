@@ -38,12 +38,12 @@ contract Feed is Operated, Metadata {
 
     function createPost(address postFactory, bytes memory initData) public returns (address post) {
         // only operator
-        require(Operated.isOperator(msg.sender), "only operator");
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         // validate factory is registered
         require(
             iRegistry(_postRegistry).getFactoryStatus(postFactory) == iRegistry.FactoryStatus.Registered,
-            "Factory is not actively registered."
+            "factory is not actively registered"
         );
 
         // spawn new post contract
@@ -67,6 +67,10 @@ contract Feed is Operated, Metadata {
 
     function getPosts() public view returns (address[] memory posts) {
         posts = _posts;
+    }
+
+    function getPostRegistry() public view returns (address postRegistry) {
+        postRegistry = _postRegistry;
     }
 
 }
