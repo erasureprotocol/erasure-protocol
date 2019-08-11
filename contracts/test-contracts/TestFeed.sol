@@ -79,4 +79,9 @@ contract TestFeed is Feed {
     function deactivateOperator() public {
         Operated._deactivate();
     }
+
+    // backdoor function to activate Operator for testing
+    function activateOperator() public {
+        Operated._activate();
+    }
 }
