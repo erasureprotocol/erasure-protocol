@@ -58,7 +58,7 @@ contract Feed is Operated, Metadata {
 
     function setFeedVariableMetadata(bytes memory feedVariableMetadata) public {
         // only operator
-        require(Operated.isOperator(msg.sender), "only operator");
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         Metadata._setVariableMetadata(feedVariableMetadata);
     }

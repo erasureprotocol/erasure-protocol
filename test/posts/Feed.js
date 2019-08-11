@@ -11,13 +11,21 @@ const TestFeedArtifact = require("../../build/TestFeed.json");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
-describe("Feed", () => {
+describe("Feed", function() {
+  this.timeout(4000);
+
   let deployer;
 
   // wallets and addresses
   const [ownerWallet, posterWallet] = accounts;
   const owner = ownerWallet.signer.signingKey.address;
   const poster = posterWallet.signer.signingKey.address;
+
+  // local Post array
+  let posts = [];
+  const addPost = postAddress => {
+    posts.push(postAddress);
+  };
 
   // post variables
   let nonce = 0;
@@ -130,6 +138,21 @@ describe("Feed", () => {
       );
     });
 
+    // check deactivated operator
+    it("should revert when msg.sender is not active operator", async () => {
+      await this.TestFeed.deactivateOperator();
+
+      await assert.revertWith(
+        this.TestFeed.from(poster).createPost(
+          this.PostFactory.contractAddress,
+          "0x"
+        ),
+        "only active operator"
+      );
+
+      await this.TestFeed.activateOperator();
+    });
+
     // post registry address does not conform to iregistry
     it("should revert when postRegistry is not registry", async () => {
       this.TestFeed = await deployer.deploy(
@@ -166,7 +189,7 @@ describe("Feed", () => {
 
     // success case
     it("should create post successfully", async () => {
-      await this.PostRegistry.addFactory(
+      await this.PostRegistry.from(owner).addFactory(
         this.PostFactory.contractAddress,
         "0x"
       );
@@ -204,6 +227,7 @@ describe("Feed", () => {
         initData,
         nonce
       );
+      addPost(postAddress);
       nonce++;
 
       let expectedEvent = "PostCreated";
@@ -221,6 +245,37 @@ describe("Feed", () => {
       );
     });
 
+    // post factory does not conform to Post_Factory
+    it("should revert when Post_Factory address is not Post_Factory", async () => {
+      // register the Feed contract as an invalid factory
+      await this.PostRegistry.from(owner).addFactory(
+        this.Feed.contractAddress,
+        "0x"
+      );
+
+      await assert.revert(
+        this.TestFeed.from(owner).createPost(
+          this.Feed.contractAddress,
+          createPostCallData
+        )
+      );
+    });
+
+    // malformed post init data
+    it("should revert with malformed post init data", async () => {
+      const initData = abiEncoder.encode(
+        ["bytes", "bytes"], // missing 1 bytes parameter
+        [proofHash, postStaticMetadata]
+      );
+
+      await assert.revert(
+        this.TestFeed.from(owner).createPost(
+          this.Feed.contractAddress,
+          initData
+        )
+      );
+    });
+
     // factory must not be retired
     it("should revert when factory is retired", async () => {
       await this.PostRegistry.retireFactory(this.PostFactory.contractAddress);
@@ -233,21 +288,51 @@ describe("Feed", () => {
         "factory is not actively registered"
       );
     });
+  });
 
-    // post factory does not conform to Post_Factory
-    // malformed post init data
+  describe("Feed.setFeedVariableMetadata", () => {
+    it("should revert when msg.sender not operator", async () => {
+      await assert.revertWith(
+        this.TestFeed.from(poster).setFeedVariableMetadata(
+          newFeedVariableMetadata
+        ),
+        "only active operator"
+      );
+    });
 
-    // check deactivated operator
     it("should revert when msg.sender is not active operator", async () => {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(poster).createPost(
-          this.PostFactory.contractAddress,
-          "0x"
+        this.TestFeed.from(owner).setFeedVariableMetadata(
+          newFeedVariableMetadata
         ),
         "only active operator"
       );
+
+      await this.TestFeed.activateOperator();
+    });
+
+    it("should set feed variable metadata", async () => {
+      const txn = await this.TestFeed.from(owner).setFeedVariableMetadata(
+        newFeedVariableMetadata
+      );
+      await assert.emit(txn, "VariableMetadataSet");
+      await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
+
+      const [
+        actualStaticMetadata,
+        actualVariableMetadata
+      ] = await this.TestFeed.getMetadata();
+      assert.equal(actualStaticMetadata, feedStaticMetadata);
+      assert.equal(actualVariableMetadata, newFeedVariableMetadata);
+    });
+  });
+
+  describe("Feed.getPosts", () => {
+    it("should get posts", async () => {
+      const actualPosts = await this.TestFeed.getPosts();
+      assert.deepEqual(actualPosts, posts);
     });
   });
 });
