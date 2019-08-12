@@ -3,7 +3,9 @@ const { createDeployer } = require("../helpers/setup");
 const { hexlify } = require("../helpers/utils");
 const RegistryArtifact = require("../../build/Registry.json");
 
-describe("Registry", () => {
+describe("Registry", function() {
+  this.timeout(4000);
+
   const instanceType = "TestRegistry";
   const factoryExtraData = "FACTORY_EXTRA_DATA";
 
