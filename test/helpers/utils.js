@@ -110,11 +110,21 @@ function createEip1167RuntimeCode(logicContractAddress) {
   );
 }
 
+const getLatestContractAdressFrom = async (provider, address) => {
+  const nonce = await deployer.provider.getTransactionCount(address);
+  const contractAddress = ethers.utils.getContractAddress({
+    from: address,
+    nonce: nonce - 1
+  });
+  return contractAddress;
+};
+
 module.exports = {
   hexlify,
   createInstanceAddress,
   createInstanceAddressWithInitData,
   createEip1167RuntimeCode,
   createSelector,
-  createMultihashSha256
+  createMultihashSha256,
+  getLatestContractAdressFrom
 };
