@@ -17,7 +17,7 @@ contract Feed_Factory is Factory {
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
-    event ExplicitInitData(address postRegistry, bytes feedStaticMetadata);
+    event ExplicitInitData(address operator, address postRegistry, bytes feedStaticMetadata);
 
     function create(bytes memory callData) public returns (address instance) {
         // deploy instance
@@ -27,15 +27,17 @@ contract Feed_Factory is Factory {
     function createEncoded(bytes memory initdata) public returns (address instance) {
         // decode initdata
         (
+            address operator,
             address postRegistry,
             bytes memory feedStaticMetadata
-        ) = abi.decode(initdata, (address,bytes));
+        ) = abi.decode(initdata, (address,address,bytes));
 
         // call explicit create
-        instance = createExplicit(postRegistry, feedStaticMetadata);
+        instance = createExplicit(operator, postRegistry, feedStaticMetadata);
     }
 
     function createExplicit(
+        address operator,
         address postRegistry,
         bytes memory feedStaticMetadata
     ) public returns (address instance) {
@@ -45,7 +47,7 @@ contract Feed_Factory is Factory {
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(
             template.initialize.selector, // selector
-            msg.sender,
+            operator,
             postRegistry,
             feedStaticMetadata
         );
@@ -54,7 +56,7 @@ contract Feed_Factory is Factory {
         instance = Factory._create(callData);
 
         // emit event
-        emit ExplicitInitData(postRegistry, feedStaticMetadata);
+        emit ExplicitInitData(operator, postRegistry, feedStaticMetadata);
     }
 
 }

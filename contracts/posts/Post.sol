@@ -25,8 +25,10 @@ contract Post is ProofHash, Operated, Metadata, Template {
         ProofHash._setProofHash(proofHash);
 
         // set operator
-        Operated._setOperator(operator);
-        Operated._activateOperator();
+        if (operator != address(0)) {
+            Operated._setOperator(operator);
+            Operated._activateOperator();
+        }
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
@@ -41,8 +43,8 @@ contract Post is ProofHash, Operated, Metadata, Template {
     // state functions
 
     function setVariableMetadata(bytes memory variableMetadata) public {
-        // only active operator
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        // only active operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
         // set metadata in storage
         Metadata._setVariableMetadata(variableMetadata);

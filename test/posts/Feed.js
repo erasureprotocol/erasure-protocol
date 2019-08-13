@@ -17,9 +17,10 @@ describe("Feed", function() {
   let deployer;
 
   // wallets and addresses
-  const [ownerWallet, posterWallet] = accounts;
-  const owner = ownerWallet.signer.signingKey.address;
-  const poster = posterWallet.signer.signingKey.address;
+  const [creatorWallet, otherWallet, operatorWallet] = accounts;
+  const creator = creatorWallet.signer.signingKey.address;
+  const other = otherWallet.signer.signingKey.address;
+  const operator = operatorWallet.signer.signingKey.address;
 
   // local Post array
   let posts = [];
@@ -39,8 +40,9 @@ describe("Feed", function() {
     ethers.utils.toUtf8Bytes("feedVariableMetadata")
   );
   const abiEncoder = new ethers.utils.AbiCoder();
-  const createPostABITypes = ["bytes", "bytes", "bytes"];
+  const createPostABITypes = ["address", "bytes", "bytes", "bytes"];
   const createPostABIValues = [
+    operator,
     proofHash,
     postStaticMetadata,
     postVariableMetadata
@@ -67,7 +69,7 @@ describe("Feed", function() {
       false,
       this.Feed.contractAddress,
       validInit,
-      owner,
+      operator,
       this.PostRegistry.contractAddress,
       feedStaticMetadata
     );
@@ -99,10 +101,10 @@ describe("Feed", function() {
       assert.equal(actualPostRegistry, this.PostRegistry.contractAddress);
 
       // Operator._setOperator
-      const operator = await this.TestFeed.getOperator();
-      assert.equal(operator, owner);
+      const actualOperator = await this.TestFeed.getOperator();
+      assert.equal(actualOperator, operator);
 
-      //  Operator._activate()
+      //  Operator._activateOperator()
       const operatorIsActive = await this.TestFeed.hasActiveOperator();
       assert.equal(operatorIsActive, true);
 
@@ -117,7 +119,7 @@ describe("Feed", function() {
     it("should revert when initialize from function", async () => {
       await assert.revertWith(
         this.TestFeed.initializeFeed(
-          owner,
+          operator,
           this.PostRegistry.contractAddress,
           feedStaticMetadata
         ),
@@ -128,26 +130,26 @@ describe("Feed", function() {
 
   describe("Feed.createPost", () => {
     // check operator access control
-    it("should revert when msg.sender is not operator", async () => {
+    it("should revert when msg.sender is not operator or creator", async () => {
       await assert.revertWith(
-        this.TestFeed.from(poster).createPost(
+        this.TestFeed.from(other).createPost(
           this.PostFactory.contractAddress,
-          "0x"
+          createPostCallData
         ),
-        "only active operator"
+        "only active operator or creator"
       );
     });
 
     // check deactivated operator
-    it("should revert when msg.sender is not active operator", async () => {
+    it("should revert when msg.sender is operator but not active", async () => {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(poster).createPost(
+        this.TestFeed.from(operator).createPost(
           this.PostFactory.contractAddress,
-          "0x"
+          createPostCallData
         ),
-        "only active operator"
+        "only active operator or creator"
       );
 
       await this.TestFeed.activateOperator();
@@ -160,15 +162,15 @@ describe("Feed", function() {
         false,
         this.Feed.contractAddress,
         true,
-        owner,
+        creator,
         this.PostFactory.contractAddress, // pass in Factory instead of Registry
         feedStaticMetadata
       );
 
       await assert.revert(
-        this.TestFeed.from(owner).createPost(
+        this.TestFeed.from(creator).createPost(
           this.PostFactory.contractAddress,
-          "0x"
+          createPostCallData
         )
       );
 
@@ -179,22 +181,74 @@ describe("Feed", function() {
     // factory must be registered
     it("should revert when factory not registered", async () => {
       await assert.revertWith(
-        this.TestFeed.from(owner).createPost(
+        this.TestFeed.from(creator).createPost(
           this.PostFactory.contractAddress,
-          "0x"
+          createPostCallData
         ),
         "factory is not actively registered"
       );
     });
 
     // success case
-    it("should create post successfully", async () => {
-      await this.PostRegistry.from(owner).addFactory(
+    it("should create post successfully from creator", async () => {
+      await this.PostRegistry.from(creator).addFactory(
         this.PostFactory.contractAddress,
         "0x"
       );
 
-      const txn = await this.TestFeed.from(owner).createPost(
+      const txn = await this.TestFeed.from(creator).createPost(
+        this.PostFactory.contractAddress,
+        createPostCallData
+      );
+
+      const receipt = await this.TestFeed.verboseWaitForTransaction(txn);
+
+      const postTemplate = await this.PostFactory.getTemplate();
+      const selector = createSelector(
+        "initialize",
+        ["address", "bytes", "bytes", "bytes"]
+      );
+
+      const initData = abiEncoder.encode(
+        ["address", "bytes", "bytes", "bytes"],
+        [
+          this.TestFeed.contractAddress,
+          proofHash,
+          postStaticMetadata,
+          postVariableMetadata
+        ]
+      );
+
+      const {
+        instanceAddress: postAddress
+      } = createInstanceAddressWithInitData(
+        this.PostFactory.contractAddress,
+        postTemplate,
+        this.TestFeed.contractAddress,
+        selector,
+        initData,
+        nonce
+      );
+      addPost(postAddress);
+      nonce++;
+
+      let expectedEvent = "PostCreated";
+      const postCreatedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === expectedEvent,
+        "There is no such event"
+      );
+
+      assert.isDefined(postCreatedEvent);
+      assert.equal(postCreatedEvent.args.initData, createPostCallData);
+      assert.equal(postCreatedEvent.args.post, postAddress);
+      assert.equal(
+        postCreatedEvent.args.postFactory,
+        this.PostFactory.contractAddress
+      );
+    });
+
+    it("should create post successfully from operator", async () => {
+      const txn = await this.TestFeed.from(operator).createPost(
         this.PostFactory.contractAddress,
         createPostCallData
       );
@@ -248,13 +302,13 @@ describe("Feed", function() {
     // post factory does not conform to Post_Factory
     it("should revert when Post_Factory address is not Post_Factory", async () => {
       // register the Feed contract as an invalid factory
-      await this.PostRegistry.from(owner).addFactory(
+      await this.PostRegistry.from(creator).addFactory(
         this.Feed.contractAddress,
         "0x"
       );
 
       await assert.revert(
-        this.TestFeed.from(owner).createPost(
+        this.TestFeed.from(creator).createPost(
           this.Feed.contractAddress,
           createPostCallData
         )
@@ -269,7 +323,7 @@ describe("Feed", function() {
       );
 
       await assert.revert(
-        this.TestFeed.from(owner).createPost(
+        this.TestFeed.from(creator).createPost(
           this.Feed.contractAddress,
           initData
         )
@@ -281,7 +335,7 @@ describe("Feed", function() {
       await this.PostRegistry.retireFactory(this.PostFactory.contractAddress);
 
       await assert.revertWith(
-        this.TestFeed.from(owner).createPost(
+        this.TestFeed.from(creator).createPost(
           this.PostFactory.contractAddress,
           "0x"
         ),
@@ -291,30 +345,45 @@ describe("Feed", function() {
   });
 
   describe("Feed.setFeedVariableMetadata", () => {
-    it("should revert when msg.sender not operator", async () => {
+    it("should revert when msg.sender not operator or creator", async () => {
       await assert.revertWith(
-        this.TestFeed.from(poster).setFeedVariableMetadata(
+        this.TestFeed.from(other).setFeedVariableMetadata(
           newFeedVariableMetadata
         ),
-        "only active operator"
+        "only active operator or creator"
       );
     });
 
-    it("should revert when msg.sender is not active operator", async () => {
+    it("should revert when msg.sender is operator but not active", async () => {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(owner).setFeedVariableMetadata(
+        this.TestFeed.from(operator).setFeedVariableMetadata(
           newFeedVariableMetadata
         ),
-        "only active operator"
+        "only active operator or creator"
       );
 
       await this.TestFeed.activateOperator();
     });
 
-    it("should set feed variable metadata", async () => {
-      const txn = await this.TestFeed.from(owner).setFeedVariableMetadata(
+    it("should set feed variable metadata from operator when active", async () => {
+      const txn = await this.TestFeed.from(operator).setFeedVariableMetadata(
+        newFeedVariableMetadata
+      );
+      await assert.emit(txn, "VariableMetadataSet");
+      await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
+
+      const [
+        actualStaticMetadata,
+        actualVariableMetadata
+      ] = await this.TestFeed.getMetadata();
+      assert.equal(actualStaticMetadata, feedStaticMetadata);
+      assert.equal(actualVariableMetadata, newFeedVariableMetadata);
+    });
+
+    it("should set feed variable metadata from creator", async () => {
+      const txn = await this.TestFeed.from(creator).setFeedVariableMetadata(
         newFeedVariableMetadata
       );
       await assert.emit(txn, "VariableMetadataSet");

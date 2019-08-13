@@ -17,7 +17,7 @@ contract Post_Factory is Factory {
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
-    event ExplicitInitData(bytes proofHash, bytes staticMetadata, bytes variableMetadata);
+    event ExplicitInitData(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
     function create(bytes memory callData) public returns (address instance) {
         // deploy instance
@@ -27,16 +27,18 @@ contract Post_Factory is Factory {
     function createEncoded(bytes memory initdata) public returns (address instance) {
         // decode initdata
         (
+            address operator,
             bytes memory proofHash,
             bytes memory staticMetadata,
             bytes memory variableMetadata
-        ) = abi.decode(initdata, (bytes,bytes,bytes));
+        ) = abi.decode(initdata, (address,bytes,bytes,bytes));
 
         // call explicit create
-        instance = createExplicit(proofHash, staticMetadata, variableMetadata);
+        instance = createExplicit(operator, proofHash, staticMetadata, variableMetadata);
     }
 
     function createExplicit(
+        address operator,
         bytes memory proofHash,
         bytes memory staticMetadata,
         bytes memory variableMetadata
@@ -47,7 +49,7 @@ contract Post_Factory is Factory {
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(
             template.initialize.selector, // selector
-            msg.sender,                   // operator
+            operator,
             proofHash,
             staticMetadata,
             variableMetadata
@@ -57,7 +59,7 @@ contract Post_Factory is Factory {
         instance = Factory._create(callData);
 
         // emit event
-        emit ExplicitInitData(proofHash, staticMetadata, variableMetadata);
+        emit ExplicitInitData(operator, proofHash, staticMetadata, variableMetadata);
     }
 
 }
