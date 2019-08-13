@@ -26,10 +26,9 @@ function testFactory(
     this.timeout(4000);
 
     // wallets and addresses
-    const [ownerWallet, buyerWallet, sellerWallet] = accounts;
+    const [ownerWallet, , creatorWallet] = accounts;
     const owner = ownerWallet.signer.signingKey.address;
-    const buyer = buyerWallet.signer.signingKey.address;
-    const seller = sellerWallet.signer.signingKey.address;
+    const creator = creatorWallet.signer.signingKey.address;
 
     const initializeFunctionName = "initialize";
 
@@ -48,7 +47,7 @@ function testFactory(
       const { instanceAddress, callData } = createInstanceAddress(
         this.Factory.contractAddress,
         logicContractAddress,
-        seller,
+        creator,
         initializeFunctionName,
         createInstanceTypes,
         createInstanceArgs,
@@ -63,7 +62,7 @@ function testFactory(
 
     const populateInstances = async count => {
       for (let i = 0; i < count; i++) {
-        await this.Factory.from(seller).createExplicit(...createArgs);
+        await this.Factory.from(creator).createExplicit(...createArgs);
         createLocalInstance();
       }
     };
@@ -137,7 +136,7 @@ function testFactory(
       );
 
       assert.isDefined(instanceCreatedEvent);
-      assert.equal(instanceCreatedEvent.args.creator, seller);
+      assert.equal(instanceCreatedEvent.args.creator, creator);
       assert.equal(instanceCreatedEvent.args.calldataABI, callDataABI);
 
       // test for correctness of proxy address generation
@@ -167,20 +166,20 @@ function testFactory(
       //   const wrongCreateTypes = createTypes.slice(1);
       //   const wrongCreateArgs = createArgs.slice(1);
       //   const initData = abiEncoder.encode(wrongCreateTypes, wrongCreateArgs);
-      //   await assert.revert(this.Factory.from(seller).create(initData));
+      //   await assert.revert(this.Factory.from(creator).create(initData));
       // });
 
       it("should create instance correctly", async () => {
         const initData = abiEncoder.encode(createTypes, createArgs);
-        const txn = await this.Factory.from(seller).create(initData);
+        const txn = await this.Factory.from(creator).create(initData);
         await validateCreateExplicitTxn(txn);
       });
     });
 
     describe(`${factoryName}.createExplicit`, () => {
       it("should create instance correctly", async () => {
-        // seller creates the OneWayGriefing instance
-        const txn = await this.Factory.from(seller).createExplicit(
+        // creator creates the OneWayGriefing instance
+        const txn = await this.Factory.from(creator).createExplicit(
           ...createArgs
         );
 
