@@ -25,8 +25,10 @@ contract Feed is Operated, Metadata, Template {
         require(codeSize == 0, "must be called within contract constructor");
 
         // set operator
-        Operated._setOperator(operator);
-        Operated._activateOperator();
+        if (operator != address(0)) {
+            Operated._setOperator(operator);
+            Operated._activateOperator();
+        }
 
         // set post registry
         _postRegistry = postRegistry;
@@ -38,8 +40,8 @@ contract Feed is Operated, Metadata, Template {
     // state functions
 
     function createPost(address postFactory, bytes memory initData) public returns (address post) {
-        // only operator
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        // only active operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
         // validate factory is registered
         require(
@@ -58,8 +60,8 @@ contract Feed is Operated, Metadata, Template {
     }
 
     function setFeedVariableMetadata(bytes memory feedVariableMetadata) public {
-        // only operator
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        // only active operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
         Metadata._setVariableMetadata(feedVariableMetadata);
     }

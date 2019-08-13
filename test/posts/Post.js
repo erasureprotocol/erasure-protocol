@@ -103,7 +103,7 @@ describe("Post", () => {
     it("should revert when msg.sender is not operator", async () => {
       await assert.revertWith(
         this.TestPost.from(poster).setVariableMetadata(newVariableMetadata),
-        "only active operator"
+        "only active operator or creator"
       );
     });
 
@@ -127,7 +127,7 @@ describe("Post", () => {
 
       await assert.revertWith(
         this.TestPost.from(owner).setVariableMetadata(newVariableMetadata),
-        "only active operator"
+        "only active operator or creator"
       );
     });
   });
