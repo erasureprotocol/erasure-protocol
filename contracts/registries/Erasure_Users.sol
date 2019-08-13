@@ -28,7 +28,7 @@ contract Erasure_Users {
 
     function removeUser() public {
         // require user is registered
-        require(_users.exists(msg.sender));
+        require(_users.exists(msg.sender), "user does not exist");
 
         // remove user
         _users.remove(msg.sender);
