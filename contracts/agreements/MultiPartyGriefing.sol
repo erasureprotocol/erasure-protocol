@@ -5,9 +5,10 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 import "../modules/BurnNMR.sol";
 import "../helpers/openzeppelin-solidity/cryptography/ECDSA.sol";
+import "../modules/Template.sol";
 
 
-contract MultiPartyGriefing is BurnNMR {
+contract MultiPartyGriefing is BurnNMR, Template {
 
     using SafeMath for uint256;
     using HitchensUnorderedAddressSetLib for HitchensUnorderedAddressSetLib.Set;

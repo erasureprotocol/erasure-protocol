@@ -29,7 +29,6 @@ const createInstanceTypes = ["address", ...createTypes];
 const createInstanceArgs = [poster, ...createArgs];
 
 const initDataABI = "(bytes,bytes,bytes)";
-const callDataABI = "(bytes4,address,bytes,bytes,bytes)";
 
 function runFactoryTest() {
   const deployer = createDeployer();
@@ -41,7 +40,6 @@ function runFactoryTest() {
         factoryName,
         instanceType,
         initDataABI,
-        callDataABI,
         createTypes,
         createArgs,
         PostFactoryArtifact,

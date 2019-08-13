@@ -4,9 +4,10 @@ import "./Post_Factory.sol";
 import "../modules/iRegistry.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
+import "../modules/Template.sol";
 
 
-contract Feed is Operated, Metadata {
+contract Feed is Operated, Metadata, Template {
 
     address[] private _posts;
     address private _postRegistry;
@@ -47,7 +48,7 @@ contract Feed is Operated, Metadata {
         );
 
         // spawn new post contract
-        post = Post_Factory(postFactory).create(initData);
+        post = Post_Factory(postFactory).createEncoded(initData);
 
         // add to array of posts
         _posts.push(post);

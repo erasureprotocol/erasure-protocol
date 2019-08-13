@@ -6,6 +6,7 @@ import "../modules/Countdown.sol";
 import "../modules/Griefing.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
+import "../modules/Template.sol";
 
 /* Immediately engage with specific buyer
  * - Stake can be increased at any time.
@@ -16,7 +17,7 @@ import "../modules/Operated.sol";
  * - This top level contract should only perform access control and state transitions
  *
  */
-contract OneWayGriefing is Countdown, Griefing, Metadata, Operated {
+contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
 
     using SafeMath for uint256;
 

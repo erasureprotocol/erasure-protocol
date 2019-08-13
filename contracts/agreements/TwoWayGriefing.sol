@@ -6,6 +6,7 @@ import "../modules/Countdown.sol";
 import "../modules/Griefing.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
+import "../modules/Template.sol";
 
 /* Agreement between two stakers
  * - each staker has the ability to grief each other
@@ -14,7 +15,7 @@ import "../modules/Operated.sol";
  * - This top level contract should only perform access control and state transitions
  *
  */
-contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated {
+contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
 
     using SafeMath for uint256;
 

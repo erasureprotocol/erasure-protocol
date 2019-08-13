@@ -13,15 +13,18 @@ contract Feed_Factory is Factory {
         bytes4 instanceType = bytes4(keccak256(bytes('Feed')));
         // set initdataABI
         string memory initdataABI = '(address,bytes)';
-        // set calldataABI
-        string memory calldataABI = '(bytes4,address,address,bytes)';
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI, calldataABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
     event ExplicitInitData(address postRegistry, bytes feedStaticMetadata);
 
-    function create(bytes memory initdata) public returns (address instance) {
+    function create(bytes memory callData) public returns (address instance) {
+        // deploy instance
+        instance = Factory._create(callData);
+    }
+
+    function createEncoded(bytes memory initdata) public returns (address instance) {
         // decode initdata
         (
             address postRegistry,

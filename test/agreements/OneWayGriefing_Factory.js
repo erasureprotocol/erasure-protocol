@@ -30,8 +30,6 @@ const createTypes = [
 
 const initDataABI =
   "(address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
-const callDataABI =
-  "(bytes4,address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
 
 let MockNMR;
 
@@ -65,7 +63,6 @@ function runFactoryTest() {
         "OneWayGriefing_Factory",
         instanceType,
         initDataABI,
-        callDataABI,
         createTypes,
         createArgs,
         OneWayGriefing_FactoryArtifact,
