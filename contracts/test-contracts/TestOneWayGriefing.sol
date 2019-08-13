@@ -123,12 +123,12 @@ contract TestOneWayGriefing is OneWayGriefing {
 
     // backdoor function to activate Operator for testing
     function activateOperator() public {
-        Operated._activate();
+        Operated._activateOperator();
     }
 
     // backdoor function to deactivate Operator for testing
     function deactivateOperator() public {
-        Operated._deactivate();
+        Operated._deactivateOperator();
     }
 
     // view functions

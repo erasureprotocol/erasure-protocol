@@ -25,7 +25,7 @@ contract Post is ProofHash, Operated, Metadata {
 
         // set operator
         Operated._setOperator(operator);
-        Operated._activate();
+        Operated._activateOperator();
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);

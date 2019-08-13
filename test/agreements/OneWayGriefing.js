@@ -82,7 +82,7 @@ describe("OneWayGriefing", function() {
 
       // check that it's the TestOneWayGriefing state that is changed
       // not the OneWayGriefing logic contract's state
-      const logicContractIsActive = await this.OneWayGriefing.isActive();
+      const logicContractIsActive = await this.OneWayGriefing.hasActiveOperator();
       assert.equal(logicContractIsActive, false);
 
       // check all the state changes
@@ -106,7 +106,7 @@ describe("OneWayGriefing", function() {
       assert.equal(operator, operator);
 
       //  Operator._activate()
-      const callingContractIsActive = await this.TestOneWayGriefing.isActive();
+      const callingContractIsActive = await this.TestOneWayGriefing.hasActiveOperator();
       assert.equal(callingContractIsActive, true);
 
       // Griefing._setRatio

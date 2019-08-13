@@ -29,7 +29,7 @@ describe("Operated", function() {
 
     it("should setOperator correctly", async () => {
       const txn = await contracts.TestOperated.instance.setOperator(operator);
-      await assert.emit(txn, "StatusUpdated");
+      await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [operator, false]);
 
       const actualOperator = await contracts.TestOperated.instance.getOperator();
@@ -45,46 +45,46 @@ describe("Operated", function() {
       await contracts.TestOperated.instance.setOperator(operator);
       await assert.revertWith(
         contracts.TestOperated.instance.setOperator(operator),
-        "same operator set"
+        "cannot set same operator"
       );
     });
   });
 
-  describe("Operator._activate", () => {
+  describe("Operator._activateOperator", () => {
     it("should activate correctly", async () => {
-      const txn = await contracts.TestOperated.instance.activate();
-      await assert.emit(txn, "StatusUpdated");
+      const txn = await contracts.TestOperated.instance.activateOperator();
+      await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, true]);
 
-      const actualIsActive = await contracts.TestOperated.instance.isActive();
+      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
       assert.equal(actualIsActive, true);
     });
 
-    it("should revert when activate called when isActive", async () => {
-      await contracts.TestOperated.instance.activate();
+    it("should revert when activateOperator called when operator is already active", async () => {
+      await contracts.TestOperated.instance.activateOperator();
       await assert.revertWith(
-        contracts.TestOperated.instance.activate(),
-        "already active"
+        contracts.TestOperated.instance.activateOperator(),
+        "only when operator not active"
       );
     });
   });
 
-  describe("Operator._deactivate", () => {
-    it("should activate correctly", async () => {
-      await contracts.TestOperated.instance.activate();
+  describe("Operator._deactivateOperator", () => {
+    it("should deactivateOperator correctly", async () => {
+      await contracts.TestOperated.instance.activateOperator();
 
-      const txn = await contracts.TestOperated.instance.deactivate();
-      await assert.emit(txn, "StatusUpdated");
+      const txn = await contracts.TestOperated.instance.deactivateOperator();
+      await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
 
-      const actualIsActive = await contracts.TestOperated.instance.isActive();
+      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
       assert.equal(actualIsActive, false);
     });
 
-    it("should revert when deactivate called when not active", async () => {
+    it("should revert when deactivateOperator called when operator not active", async () => {
       await assert.revertWith(
-        contracts.TestOperated.instance.deactivate(),
-        "already deactivated"
+        contracts.TestOperated.instance.deactivateOperator(),
+        "only when operator active"
       );
     });
   });
@@ -93,7 +93,7 @@ describe("Operated", function() {
     const operator = wallets.seller.signer.signingKey.address;
 
     it("should get isActiveOperator=true correctly", async () => {
-      await contracts.TestOperated.instance.activate();
+      await contracts.TestOperated.instance.activateOperator();
       await contracts.TestOperated.instance.setOperator(operator);
 
       const isActiveOperator = await contracts.TestOperated.instance.isActiveOperator(
@@ -103,7 +103,7 @@ describe("Operated", function() {
     });
 
     it("should get isActiveOperator=false correctly", async () => {
-      await contracts.TestOperated.instance.activate();
+      await contracts.TestOperated.instance.activateOperator();
 
       const isActiveOperator = await contracts.TestOperated.instance.isActiveOperator(
         operator

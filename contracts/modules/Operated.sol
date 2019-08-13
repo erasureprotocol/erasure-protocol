@@ -3,51 +3,59 @@ pragma solidity ^0.5.0;
 
 contract Operated {
 
-    OperatorData private _operatorData;
+    address private _operator;
+    bool private _status;
 
-    struct OperatorData {
-        address operator;
-        bool status;
-    }
-
-    event StatusUpdated(address operator, bool status);
+    event OperatorUpdated(address operator, bool status);
 
     // state functions
 
     function _setOperator(address operator) internal {
-        require(_operatorData.operator != operator, "same operator set");
-        _operatorData.operator = operator;
-        emit StatusUpdated(operator, _operatorData.status);
+        require(_operator != operator, "cannot set same operator");
+        _operator = operator;
+        emit OperatorUpdated(operator, hasActiveOperator());
     }
 
-    function _activate() internal {
-        require(_operatorData.status == false, "already active");
-        _operatorData.status = true;
-        emit StatusUpdated(_operatorData.operator, true);
+    function _transferOperator(address operator) internal {
+        require(isActiveOperator(msg.sender), "only active operator");
+        _setOperator(operator);
     }
 
-    function _deactivate() internal {
-        require(_operatorData.status == true, "already deactivated");
-        _operatorData.status = false;
-        emit StatusUpdated(_operatorData.operator, false);
+    function _renouceOperator() internal {
+        require(hasActiveOperator(), "only when operator active");
+        _operator = address(0);
+        _status = false;
+        emit OperatorUpdated(address(0), false);
+    }
+
+    function _activateOperator() internal {
+        require(!hasActiveOperator(), "only when operator not active");
+        _status = true;
+        emit OperatorUpdated(_operator, true);
+    }
+
+    function _deactivateOperator() internal {
+        require(hasActiveOperator(), "only when operator active");
+        _status = false;
+        emit OperatorUpdated(_operator, false);
     }
 
     // view functions
 
     function getOperator() public view returns (address operator) {
-        operator = _operatorData.operator;
+        operator = _operator;
     }
 
-    function isOperator(address caller) public view returns (bool validity) {
-        validity = (caller == getOperator());
+    function isOperator(address caller) public view returns (bool ok) {
+        return (caller == getOperator());
     }
 
-    function isActive() public view returns (bool status) {
-        status = _operatorData.status;
+    function hasActiveOperator() public view returns (bool ok) {
+        return _status;
     }
 
-    function isActiveOperator(address caller) public view returns (bool validity) {
-        validity = (isOperator(caller) && isActive());
+    function isActiveOperator(address caller) public view returns (bool ok) {
+        return (isOperator(caller) && hasActiveOperator());
     }
 
 }

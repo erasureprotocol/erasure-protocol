@@ -52,7 +52,7 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated {
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);
-            Operated._activate();
+            Operated._activateOperator();
         }
 
         // set token used for staking

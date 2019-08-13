@@ -75,7 +75,7 @@ describe("Post", () => {
       assert.equal(operator, owner);
 
       //  Operator._activate()
-      const operatorIsActive = await this.TestPost.isActive();
+      const operatorIsActive = await this.TestPost.hasActiveOperator();
       assert.equal(operatorIsActive, true);
 
       const [

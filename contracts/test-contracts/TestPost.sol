@@ -81,6 +81,6 @@ contract TestPost is Post {
 
     // backdoor function to deactivate Operator for testing
     function deactivateOperator() public {
-        Operated._deactivate();
+        Operated._deactivateOperator();
     }
 }

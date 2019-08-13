@@ -25,7 +25,7 @@ contract Feed is Operated, Metadata {
 
         // set operator
         Operated._setOperator(operator);
-        Operated._activate();
+        Operated._activateOperator();
 
         // set post registry
         _postRegistry = postRegistry;
