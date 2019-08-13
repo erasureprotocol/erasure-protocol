@@ -10,7 +10,7 @@ contract Feed_Factory is Factory {
         // deploy template contract
         address templateContract = address(new Feed());
         // set instance type
-        bytes4 instanceType = bytes4(keccak256(bytes('Feed')));
+        bytes4 instanceType = bytes4(keccak256(bytes('Post')));
         // set initdataABI
         string memory initdataABI = '(address,bytes)';
         // initialize factory params

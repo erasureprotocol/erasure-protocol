@@ -12,7 +12,7 @@ const poster = posterWallet.signer.signingKey.address;
 
 // variables used in initialize()
 const factoryName = "Feed_Factory";
-const instanceType = "Feed";
+const instanceType = "Post";
 const staticMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("staticMetadata")
 );
