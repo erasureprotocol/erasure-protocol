@@ -103,7 +103,7 @@ describe("Feed", function() {
       assert.equal(operator, owner);
 
       //  Operator._activate()
-      const operatorIsActive = await this.TestFeed.isActive();
+      const operatorIsActive = await this.TestFeed.hasActiveOperator();
       assert.equal(operatorIsActive, true);
 
       const [

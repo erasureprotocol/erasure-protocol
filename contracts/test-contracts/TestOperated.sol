@@ -8,11 +8,13 @@ contract TestOperated is Operated {
         Operated._setOperator(operator);
     }
 
-    function activate() public {
-        Operated._activate();
+    function activateOperator() public {
+    // backdoor function to activate Operator for testing
+        Operated._activateOperator();
     }
 
-    function deactivate() public {
-        Operated._deactivate();
+    function deactivateOperator() public {
+    // backdoor function to deactivate Operator for testing
+        Operated._deactivateOperator();
     }
 }
