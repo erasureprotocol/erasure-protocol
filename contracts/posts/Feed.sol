@@ -66,6 +66,13 @@ contract Feed is Operated, Metadata, Template {
         Metadata._setVariableMetadata(feedVariableMetadata);
     }
 
+    function setPostVariableMetadata(address post, bytes memory postVariableMetadata) public {
+        // only active operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
+
+        Post(post).setVariableMetadata(postVariableMetadata);
+    }
+
     // view functions
 
     function getPosts() public view returns (address[] memory posts) {
