@@ -44,6 +44,14 @@ describe("Erasure_Users", function() {
       const actualUserData = await this.ErasureUsers.getUserData(user);
       assert.equal(actualUserData, userData);
     });
+
+    it("should revert when user is already registered", async () => {
+      const user = accounts[userIndex - 1].signer.signingKey.address;
+      await assert.revertWith(
+        this.ErasureUsers.from(user).registerUser(Buffer.from("revert")),
+        "user already exists"
+      );
+    });
   });
 
   describe("Erasure_Users.getUserCount", () => {
