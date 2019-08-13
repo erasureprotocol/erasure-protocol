@@ -360,9 +360,9 @@ describe("Registry", function() {
       await assert.emit(txn, "InstanceRegistered");
       await assert.emitWithArgs(txn, [
         instanceAddress,
-        instanceIndex,
-        seller,
         factoryAddress,
+        seller,
+        instanceIndex,
         factoryId
       ]);
     });

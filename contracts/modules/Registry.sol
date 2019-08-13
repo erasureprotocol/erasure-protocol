@@ -9,7 +9,7 @@ contract Registry is Ownable {
 
     event FactoryAdded(address owner, address factory, uint256 factoryID, bytes extraData);
     event FactoryRetired(address owner, address factory, uint256 factoryID);
-    event InstanceRegistered(address instance, uint256 instanceIndex, address indexed creator, address indexed factory, uint256 indexed factoryID);
+    event InstanceRegistered(address indexed instance, address indexed factory, address indexed creator, uint256 instanceIndex, uint256 factoryID);
 
     address[] private _factoryList;
     mapping(address => Factory) private _factoryData;
@@ -158,7 +158,7 @@ contract Registry is Ownable {
             })
         );
 
-        emit InstanceRegistered(instance, instanceIndex, creator, msg.sender, factoryID);
+        emit InstanceRegistered(instance, msg.sender, creator, instanceIndex, factoryID);
     }
 
     // instance view functions
