@@ -6,11 +6,12 @@ const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
 
 // test helpers
 const { createDeployer } = require("../helpers/setup");
-const testFactory = require("./Factory");
+const testFactory = require("../modules/Factory");
 const { RATIO_TYPES } = require("../helpers/variables");
 
 // variables used in initialize()
 const factoryName = "OneWayGriefing_Factory";
+const instanceType = "Agreement";
 const ratio = 2;
 const ratioType = RATIO_TYPES.CgtP;
 const countdownLength = 1000;
@@ -62,6 +63,7 @@ function runFactoryTest() {
       testFactory(
         deployer,
         "OneWayGriefing_Factory",
+        instanceType,
         initDataABI,
         callDataABI,
         createTypes,
