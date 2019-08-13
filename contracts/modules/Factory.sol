@@ -7,25 +7,23 @@ import "./iRegistry.sol";
 contract Factory is Spawner {
 
     address[] private _instances;
+    mapping (address => address) private _instanceCreator;
 
     /* NOTE: The following items can be hardcoded as constant to save ~200 gas/create */
     address private _templateContract;
-    string private _calldataABI;
     string private _initdataABI;
     address private _instanceRegistry;
     bytes4 private _instanceType;
 
-    event InstanceCreated(address indexed instance, address indexed creator, string calldataABI, bytes callData);
+    event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
 
-    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, string memory initdataABI, string memory calldataABI) internal {
+    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, string memory initdataABI) internal {
         // set instance registry
         _instanceRegistry = instanceRegistry;
         // set logic contract
         _templateContract = templateContract;
         // set initdataABI
         _initdataABI = initdataABI;
-        // set calldataABI
-        _calldataABI = calldataABI;
         // validate correct instance registry
         require(instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
         // set instanceType
@@ -39,18 +37,20 @@ contract Factory is Spawner {
         instance = Spawner._spawn(getTemplate(), callData);
         // add the instance to the array
         _instances.push(instance);
+        // set instance creator
+        _instanceCreator[instance] = msg.sender;
         // add the instance to the instance registry
         iRegistry(getInstanceRegistry()).register(instance, msg.sender, uint64(0));
         // emit event
-        emit InstanceCreated(instance, msg.sender, getCalldataABI(), callData);
+        emit InstanceCreated(instance, msg.sender, callData);
+    }
+
+    function getInstanceCreator(address instance) public view returns (address creator) {
+        creator = _instanceCreator[instance];
     }
 
     function getInstanceType() public view returns (bytes4 instanceType) {
         instanceType = _instanceType;
-    }
-
-    function getCalldataABI() public view returns (string memory calldataABI) {
-        calldataABI = _calldataABI;
     }
 
     function getInitdataABI() public view returns (string memory initdataABI) {

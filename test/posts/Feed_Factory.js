@@ -21,7 +21,6 @@ const createTypes = ["address", "bytes"];
 const createInstanceTypes = ["address", "address", "bytes"];
 
 const initDataABI = "(address,bytes)";
-const callDataABI = "(bytes4,address,address,bytes)";
 
 let PostRegistry;
 
@@ -42,7 +41,6 @@ function runFactoryTest() {
         factoryName,
         instanceType,
         initDataABI,
-        callDataABI,
         createTypes,
         createArgs,
         FeedFactoryArtifact,

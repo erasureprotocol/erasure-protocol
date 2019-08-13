@@ -1,6 +1,7 @@
 const {
   createInstanceAddress,
   createEip1167RuntimeCode,
+  createSelector,
   getLatestContractAdressFrom
 } = require("../helpers/utils");
 
@@ -9,7 +10,6 @@ function testFactory(
   factoryName, // factory contract's name
   instanceType, // instance type created by factory
   initDataABI, // the init data ABI string stated in factory contract used for matching
-  callDataABI, //  the call data ABI string stated in factory contract, usually just initDataABI but prepended with selector (bytes4)
   createTypes, // the actual types used to encode the init data ABI function parameters
   createArgs, // the actual types used to encode init data values
   factoryArtifact, // the factory artifact
@@ -102,10 +102,6 @@ function testFactory(
         const actualInitdataABI = await this.Factory.getInitdataABI();
         assert.equal(actualInitdataABI, initDataABI);
 
-        // Factory.getCalldataABI
-        const actualCalldataABI = await this.Factory.getCalldataABI();
-        assert.equal(actualCalldataABI, callDataABI);
-
         // Factory.getInstanceRegistry
         const actualInstanceRegistry = await this.Factory.getInstanceRegistry();
         assert.equal(actualInstanceRegistry, this.Registry.contractAddress);
@@ -137,7 +133,6 @@ function testFactory(
 
       assert.isDefined(instanceCreatedEvent);
       assert.equal(instanceCreatedEvent.args.creator, creator);
-      assert.equal(instanceCreatedEvent.args.calldataABI, callDataABI);
 
       // test for correctness of proxy address generation
 
@@ -158,6 +153,20 @@ function testFactory(
     describe(`${factoryName}.create`, () => {
       const abiEncoder = new ethers.utils.AbiCoder();
 
+      it("should create instance correctly", async () => {
+        // const selector = createSelector(
+        //   "initialize",
+        //   createTypes
+        // );
+        // const calldata = abiEncoder.encode(['bytes4', ...createTypes], [selector, ...createArgs]);
+        // const txn = await this.Factory.from(creator).create(calldata);
+        // await validateCreateExplicitTxn(txn);
+      });
+    });
+
+    describe(`${factoryName}.createEncoded`, () => {
+      const abiEncoder = new ethers.utils.AbiCoder();
+
       // TODO FIX THIS
       // Malformed init data actually succeeds because of how abi.decode is called
       // it accept various types of inputs as long as the abi decode call succeeds
@@ -171,7 +180,7 @@ function testFactory(
 
       it("should create instance correctly", async () => {
         const initData = abiEncoder.encode(createTypes, createArgs);
-        const txn = await this.Factory.from(creator).create(initData);
+        const txn = await this.Factory.from(creator).createEncoded(initData);
         await validateCreateExplicitTxn(txn);
       });
     });

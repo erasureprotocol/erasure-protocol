@@ -13,15 +13,18 @@ contract Post_Factory is Factory {
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
         // set initdataABI
         string memory initdataABI = '(bytes,bytes,bytes)';
-        // set calldataABI
-        string memory calldataABI = '(bytes4,address,bytes,bytes,bytes)';
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI, calldataABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
     event ExplicitInitData(bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
-    function create(bytes memory initdata) public returns (address instance) {
+    function create(bytes memory callData) public returns (address instance) {
+        // deploy instance
+        instance = Factory._create(callData);
+    }
+
+    function createEncoded(bytes memory initdata) public returns (address instance) {
         // decode initdata
         (
             bytes memory proofHash,

@@ -3,9 +3,10 @@ pragma solidity ^0.5.0;
 import "../modules/ProofHash.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
+import "../modules/Template.sol";
 
 
-contract Post is ProofHash, Operated, Metadata {
+contract Post is ProofHash, Operated, Metadata, Template {
 
     event Created(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
