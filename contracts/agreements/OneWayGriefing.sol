@@ -130,6 +130,22 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         amount = Staking._takeFullStake(_data.staker, recipient);
     }
 
+    function transferOperator(address operator) public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._transferOperator(operator);
+    }
+
+    function renouceOperator(address operator) public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._renouceOperator();
+    }
+
     // view functions
 
     function isStaker(address caller) public view returns (bool validity) {
