@@ -36,12 +36,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         Griefing.RatioType ratioType,
         uint256 countdownLength,
         bytes memory staticMetadata
-    ) public {
-        // only allow function to be delegatecalled from within a constructor.
-        uint32 codeSize;
-        assembly { codeSize := extcodesize(address) }
-        require(codeSize == 0, "must be called within contract constructor");
-
+    ) public onlyConstructorDelegateCall() {
         // set storage values
         _data.staker = staker;
         _data.counterparty = counterparty;

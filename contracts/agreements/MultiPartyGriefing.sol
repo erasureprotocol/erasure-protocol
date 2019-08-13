@@ -54,12 +54,7 @@ contract MultiPartyGriefing is BurnNMR, Template {
         bool trustedOperator,
         uint256 griefDeadline,
         bytes memory metadata
-    ) public {
-        // only allow function to be delegatecalled from within a constructor.
-        uint32 codeSize;
-        assembly { codeSize := extcodesize(address) }
-        require(codeSize == 0, "must be called within contract constructor");
-
+    ) public onlyConstructorDelegateCall() {
         params.operator = operator;
         BurnNMR._setToken(token);
         params.trustedOperator = trustedOperator;

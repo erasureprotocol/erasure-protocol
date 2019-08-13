@@ -18,12 +18,7 @@ contract Feed is Operated, Metadata, Template {
         address operator,
         address postRegistry,
         bytes memory feedStaticMetadata
-    ) public {
-        // only allow function to be delegatecalled from within a constructor.
-        uint32 codeSize;
-        assembly { codeSize := extcodesize(address) }
-        require(codeSize == 0, "must be called within contract constructor");
-
+    ) public onlyConstructorDelegateCall() {
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);

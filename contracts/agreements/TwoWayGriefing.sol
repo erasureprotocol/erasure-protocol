@@ -32,12 +32,7 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         bytes memory stakeDataB,
         uint256 countdownLength,
         bytes memory staticMetadata
-    ) public {
-        // only allow function to be delegatecalled from within a constructor.
-        uint32 codeSize;
-        assembly { codeSize := extcodesize(address) }
-        require(codeSize == 0, "must be called within contract constructor");
-
+    ) public onlyConstructorDelegateCall() {
         // decode staker data
         (address stakerA, uint256 ratioA, Griefing.RatioType ratioTypeA) = abi.decode(stakeDataA, (address, uint256, Griefing.RatioType));
         (address stakerB, uint256 ratioB, Griefing.RatioType ratioTypeB) = abi.decode(stakeDataB, (address, uint256, Griefing.RatioType));
