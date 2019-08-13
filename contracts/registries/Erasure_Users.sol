@@ -16,6 +16,8 @@ contract Erasure_Users {
     // state functions
 
     function registerUser(bytes memory data) public {
+        require(!_users.exists(msg.sender), "user already exists");
+
         // add user
         _users.insert(msg.sender);
 
