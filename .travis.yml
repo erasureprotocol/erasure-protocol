@@ -19,3 +19,5 @@ before_script:
 script:
   - yarn run compile
   - yarn run test
+  - mv test/modules/Factory.js{,.inactive}; mv test/modules/Registry.js{,.inactive}; yarn run coverage; mv test/modules/Factory.js{.inactive,}; mv test/modules/Registry.js{.inactive,}
+  - yarn run upload-coverage
