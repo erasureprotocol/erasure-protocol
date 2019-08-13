@@ -17,7 +17,6 @@ contract Operated {
     }
 
     function _transferOperator(address operator) internal {
-        require(isActiveOperator(msg.sender), "only active operator");
         _setOperator(operator);
     }
 
