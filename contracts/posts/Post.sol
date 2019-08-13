@@ -15,12 +15,7 @@ contract Post is ProofHash, Operated, Metadata, Template {
         bytes memory proofHash,
         bytes memory staticMetadata,
         bytes memory variableMetadata
-    ) public {
-        // only allow function to be delegatecalled from within a constructor.
-        uint32 codeSize;
-        assembly { codeSize := extcodesize(address) }
-        require(codeSize == 0, "must be called within contract constructor");
-
+    ) public onlyConstructorDelegateCall() {
         // set storage variables
         ProofHash._setProofHash(proofHash);
 
