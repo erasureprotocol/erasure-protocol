@@ -7,15 +7,12 @@ contract Template {
 
     address private _factory;
 
-    // state functions
-
-    constructor() public {
-        _factory = msg.sender;
-    }
-
     // modifiers
 
-    modifier onlyConstructorDelegateCall() {
+    modifier initializeTemplate() {
+        // set factory
+        _factory = msg.sender;
+
         // only allow function to be delegatecalled from within a constructor.
         uint32 codeSize;
         assembly { codeSize := extcodesize(address) }

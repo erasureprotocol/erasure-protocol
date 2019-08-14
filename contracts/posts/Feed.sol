@@ -18,7 +18,7 @@ contract Feed is Operated, Metadata, Template {
         address operator,
         address postRegistry,
         bytes memory feedStaticMetadata
-    ) public onlyConstructorDelegateCall() {
+    ) public initializeTemplate() {
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);
