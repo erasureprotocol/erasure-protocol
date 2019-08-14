@@ -54,7 +54,7 @@ contract MultiPartyGriefing is BurnNMR, Template {
         bool trustedOperator,
         uint256 griefDeadline,
         bytes memory metadata
-    ) public onlyConstructorDelegateCall() {
+    ) public initializeTemplate() {
         params.operator = operator;
         BurnNMR._setToken(token);
         params.trustedOperator = trustedOperator;

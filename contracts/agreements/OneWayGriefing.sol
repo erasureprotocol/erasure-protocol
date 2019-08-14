@@ -36,7 +36,7 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         Griefing.RatioType ratioType,
         uint256 countdownLength,
         bytes memory staticMetadata
-    ) public onlyConstructorDelegateCall() {
+    ) public initializeTemplate() {
         // set storage values
         _data.staker = staker;
         _data.counterparty = counterparty;

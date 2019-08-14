@@ -15,7 +15,7 @@ contract Post is ProofHash, Operated, Metadata, Template {
         bytes memory proofHash,
         bytes memory staticMetadata,
         bytes memory variableMetadata
-    ) public onlyConstructorDelegateCall() {
+    ) public initializeTemplate() {
         // set storage variables
         ProofHash._setProofHash(proofHash);
 
