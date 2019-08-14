@@ -4,7 +4,18 @@
 
 ### Erasure Fractal
 
-#### Rinkeby
+#### Rinkeby v2
+| Contract | Address |
+| - | - |
+| [MockNMR](https://github.com/erasureprotocol/erasure-next-contracts/blob/2c14b52b95c15e686d006b8d34411d1321fcfc81/Fractal/contracts/helpers/mock/MockNMR.sol) | [0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9](https://rinkeby.etherscan.io/address/0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9) |
+| [Erasure_Posts](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/registries/Erasure_Posts.sol) | [0xEd11206a7d07601985DCC4FeD7B3284a928D022B](https://rinkeby.etherscan.io/address/0xEd11206a7d07601985DCC4FeD7B3284a928D022B) |
+| [Erasure_Agreements](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/registries/Erasure_Agreements.sol) | [0xedE872bb4d8B7245D96Ed38CF29bE5116B53B7ae](https://rinkeby.etherscan.io/address/0xedE872bb4d8B7245D96Ed38CF29bE5116B53B7ae) |
+| [Erasure_Users](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/registries/Erasure_Users.sol) | [0x58414777A792CD8E5A3D9f2fA576B16c38378234](https://rinkeby.etherscan.io/address/0x58414777A792CD8E5A3D9f2fA576B16c38378234) |
+| [Post_Factory](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/posts/Post_Factory.sol) | [0x4C90aEF327556a7ca58EAD8B86c8215a247756B6](https://rinkeby.etherscan.io/address/0x4C90aEF327556a7ca58EAD8B86c8215a247756B6) |
+| [Feed_Factory](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/posts/Feed_Factory.sol) | [0xabFe46E50D7A72e17688b44ce4f8B95545020560](https://rinkeby.etherscan.io/address/0xabFe46E50D7A72e17688b44ce4f8B95545020560) |
+| [OneWayGriefing_Factory](https://github.com/erasureprotocol/erasure-next-contracts/blob/master/contracts/agreements/OneWayGriefing_Factory.sol) | [0x91b052E4800DB77d4d0BFE9fe2bE48352695F282](https://rinkeby.etherscan.io/address/0x91b052E4800DB77d4d0BFE9fe2bE48352695F282) |
+
+#### Rinkeby v1
 | Contract | Address |
 | - | - |
 | [MockNMR](https://github.com/erasureprotocol/erasure-next-contracts/blob/2c14b52b95c15e686d006b8d34411d1321fcfc81/Fractal/contracts/helpers/mock/MockNMR.sol) | [0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9](https://rinkeby.etherscan.io/address/0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9) |

@@ -17,7 +17,7 @@
     "coveralls": "^3.0.5",
     "dotenv": "^8.0.0",
     "eip1167-spawner": "0.2.3",
-    "etherlime": "2.1.8",
+    "etherlime": "2.2.0",
     "etherlime-lib": "^1.1.3",
     "ethers": "^4.0.32",
     "web3": "^1.0.0-beta.55"
