@@ -12,7 +12,7 @@ contract Feed_Factory is Factory {
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
         // set initdataABI
-        string memory initdataABI = '(address,bytes)';
+        string memory initdataABI = '(address,address,bytes)';
         // initialize factory params
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
