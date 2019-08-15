@@ -3,7 +3,8 @@ const RATIO_TYPES = {
   CgtP: 1,
   CltP: 2,
   CeqP: 3,
-  Inf: 4
+  Dec: 4,
+  Inf: 5
 };
 
 module.exports = {
