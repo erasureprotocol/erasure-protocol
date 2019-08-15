@@ -1,11 +1,12 @@
 pragma solidity ^0.5.0;
 
+import "../helpers/DecimalMath.sol";
 import "./Staking.sol";
 
 
 contract Griefing is Staking {
 
-    enum RatioType { NaN, CgtP, CltP, CeqP, Inf }
+    enum RatioType { NaN, CgtP, CltP, CeqP, Dec, Inf }
 
     mapping (address => GriefRatio) private _griefRatio;
     struct GriefRatio {
@@ -15,6 +16,8 @@ contract Griefing is Staking {
 
     event RatioSet(address staker, uint256 ratio, RatioType ratioType);
     event Griefed(address punisher, address staker, uint256 punishment, uint256 cost, bytes message);
+
+    uint256 internal constant e18 = uint256(10) ** uint256(18);
 
     // state functions
 
@@ -67,6 +70,7 @@ contract Griefing is Staking {
         /*  CgtP: Cost greater than Punishment
          *  CltP: Cost less than Punishment
          *  CeqP: Cost equal to Punishment
+         *  Dec:  Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18
          *  Inf:  Punishment at no cost
          *  NaN:  No Punishment */
         if (ratioType == RatioType.CgtP)
@@ -75,6 +79,9 @@ contract Griefing is Staking {
             return punishment.div(ratio);
         if (ratioType == RatioType.CeqP)
             return punishment;
+        if (ratioType == RatioType.Dec) {
+            return DecimalMath.mul(SafeMath.mul(punishment, e18), ratio) / e18;
+        }
         if (ratioType == RatioType.Inf)
             return 0;
         if (ratioType == RatioType.NaN)
@@ -85,6 +92,7 @@ contract Griefing is Staking {
         /*  CgtP: Cost greater than Punishment
          *  CltP: Cost less than Punishment
          *  CeqP: Cost equal to Punishment
+         *  Dec: Ratio is a decimal number with 18 decimals
          *  Inf:  Punishment at no cost
          *  NaN:  No Punishment */
         if (ratioType == RatioType.CgtP)
@@ -93,6 +101,9 @@ contract Griefing is Staking {
             return cost.mul(ratio);
         if (ratioType == RatioType.CeqP)
             return cost;
+        if (ratioType == RatioType.Dec) {
+            return DecimalMath.div(SafeMath.mul(cost, e18), ratio) / e18;
+        }
         if (ratioType == RatioType.Inf)
             revert("ratioType cannot be RatioType.Inf");
         if (ratioType == RatioType.NaN)
