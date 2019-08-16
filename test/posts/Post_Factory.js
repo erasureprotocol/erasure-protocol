@@ -8,8 +8,8 @@ const { createDeployer } = require("../helpers/setup");
 const { createMultihashSha256 } = require("../helpers/utils");
 const testFactory = require("../modules/Factory");
 
-const [, , posterWallet] = accounts;
-const poster = posterWallet.signer.signingKey.address;
+const [, , creatorWallet] = accounts;
+const creator = creatorWallet.signer.signingKey.address;
 
 // variables used in initialize()
 const factoryName = "Post_Factory";
@@ -22,13 +22,9 @@ const variableMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("variableMetadata")
 );
 
-const createTypes = ["bytes", "bytes", "bytes"];
-const createArgs = [proofHash, staticMetadata, variableMetadata];
-
-const createInstanceTypes = ["address", ...createTypes];
-const createInstanceArgs = [poster, ...createArgs];
-
-const initDataABI = "(bytes,bytes,bytes)";
+const createTypes = ["address", "bytes", "bytes", "bytes"];
+const createArgs = [creator, proofHash, staticMetadata, variableMetadata];
+const initDataABI = "(address,bytes,bytes,bytes)";
 
 function runFactoryTest() {
   const deployer = createDeployer();
@@ -44,9 +40,7 @@ function runFactoryTest() {
         createArgs,
         PostFactoryArtifact,
         ErasurePostsRegistryArtifact,
-        ErasureAgreementsRegistryArtifact,
-        createInstanceTypes,
-        createInstanceArgs
+        ErasureAgreementsRegistryArtifact
       );
     });
   });
