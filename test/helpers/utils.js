@@ -119,6 +119,25 @@ const getLatestContractAdressFrom = async (provider, address) => {
   return contractAddress;
 };
 
+/**
+ * This function reflects the usage of abi.encodeWithSelector in Solidity.
+ * It prepends the selector to the ABI-encoded values.
+ *
+ * @param {string} functionName
+ * @param {Array<string>} abiTypes
+ * @param {Array<any>} abiValues
+ */
+function abiEncodeWithSelector(functionName, abiTypes, abiValues) {
+  const abiEncoder = new ethers.utils.AbiCoder();
+  const initData = abiEncoder.encode(abiTypes, abiValues);
+  const selector = createSelector(
+    functionName,
+    abiTypes
+  );
+  const encoded = selector + initData.slice(2);
+  return encoded;
+}
+
 module.exports = {
   hexlify,
   createInstanceAddress,
@@ -126,5 +145,6 @@ module.exports = {
   createEip1167RuntimeCode,
   createSelector,
   createMultihashSha256,
-  getLatestContractAdressFrom
+  getLatestContractAdressFrom,
+  abiEncodeWithSelector
 };

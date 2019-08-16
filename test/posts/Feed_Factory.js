@@ -17,7 +17,6 @@ const staticMetadata = ethers.utils.keccak256(
 );
 
 const createTypes = ["address", "address", "bytes"];
-const initDataABI = "(address,address,bytes)";
 
 let PostRegistry;
 
@@ -32,6 +31,8 @@ function runFactoryTest() {
     it("setups test", () => {
       const createArgs = [
         creator,
+        // this PostRegistry will not be used in the Factory.js tests
+        // just used as a placeholder
         PostRegistry.contractAddress,
         staticMetadata
       ];
@@ -40,7 +41,6 @@ function runFactoryTest() {
         deployer,
         factoryName,
         instanceType,
-        initDataABI,
         createTypes,
         createArgs,
         FeedFactoryArtifact,

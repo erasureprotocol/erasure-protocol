@@ -12,7 +12,7 @@ contract OneWayGriefing_Factory is Factory {
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initdataABI
-        string memory initdataABI = '(address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)';
+        string memory initdataABI = '(address,address,address,address,uint256,uint8,uint256,bytes)';
         // initialize factory params
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
@@ -32,7 +32,7 @@ contract OneWayGriefing_Factory is Factory {
             address staker,
             address counterparty,
             uint256 ratio,
-            Griefing.RatioType ratioType,
+            Griefing.RatioType ratioType, // uint8
             uint256 countdownLength,
             bytes memory staticMetadata
         ) = abi.decode(initdata, (address,address,address,address,uint256,Griefing.RatioType,uint256,bytes));
@@ -47,7 +47,7 @@ contract OneWayGriefing_Factory is Factory {
         address staker,
         address counterparty,
         uint256 ratio,
-        Griefing.RatioType ratioType,
+        Griefing.RatioType ratioType, // uint8
         uint256 countdownLength,
         bytes memory staticMetadata
     ) public returns (address instance) {
