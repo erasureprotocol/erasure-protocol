@@ -23,6 +23,7 @@ contract Template {
     // view functions
 
     function getCreator() public view returns (address creator) {
+        // iFactory(...) would revert if _factory address is not actually a factory contract
         creator = iFactory(_factory).getInstanceCreator(address(this));
     }
 
