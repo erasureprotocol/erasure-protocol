@@ -1,15 +1,20 @@
+const etherlime = require("etherlime-lib");
 const { createDeployer } = require("../helpers/setup");
 const { hexlify, createMultihashSha256 } = require("../helpers/utils");
-const PostArtifact = require("../../build/Post.json");
+const PostFactoryArtifact = require("../../build/TestPostFactory.json");
 const TestPostArtifact = require("../../build/TestPost.json");
+const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
+
+const abiEncoder = new ethers.utils.AbiCoder();
 
 describe("Post", () => {
   let deployer;
 
   // wallets and addresses
-  const [ownerWallet, posterWallet] = accounts;
-  const owner = ownerWallet.signer.signingKey.address;
-  const poster = posterWallet.signer.signingKey.address;
+  const [creatorWallet, otherWallet, operatorWallet] = accounts;
+  const creator = creatorWallet.signer.signingKey.address;
+  const other = otherWallet.signer.signingKey.address;
+  const operator = operatorWallet.signer.signingKey.address;
 
   const proofHash = createMultihashSha256("proofHash");
   const invalidProofHash = ethers.utils.keccak256(hexlify("invalidProofHash"));
@@ -23,56 +28,77 @@ describe("Post", () => {
     ethers.utils.toUtf8Bytes("newVariableMetadata")
   );
 
-  const deployTestPost = async (validInit = true) => {
-    const contract = await deployer.deploy(
-      TestPostArtifact,
-      false,
-      this.Post.contractAddress,
-      validInit,
-      owner,
-      proofHash,
-      staticMetadata,
-      variableMetadata
+  const createPostAbiTypes = ["address", "bytes", "bytes", "bytes"];
+  const createPostAbiValues = [
+    operator,
+    proofHash,
+    staticMetadata,
+    variableMetadata
+  ];
+
+  const deployTestPost = async (args = createPostAbiValues) => {
+    const initData = abiEncoder.encode(createPostAbiTypes, args);
+
+    const txn = await this.PostFactory.from(creator).createEncoded(initData);
+
+    const receipt = await this.PostFactory.verboseWaitForTransaction(txn);
+    const expectedEvent = "InstanceCreated";
+    const createFeedEvent = receipt.events.find(
+      emittedEvent => emittedEvent.event === expectedEvent,
+      "There is no such event"
     );
-    return contract;
+    // parse event logs to get new instance address
+    // use new instance address to create contract object
+    const postAddress = createFeedEvent.args.instance;
+
+    const postContract = etherlime.ContractAt(
+      TestPostArtifact,
+      postAddress,
+      creatorWallet.secretKey
+    );
+
+    return postContract;
   };
 
   before(async () => {
     deployer = await createDeployer();
 
-    this.Post = await deployer.deploy(PostArtifact);
+    this.PostRegistry = await deployer.deploy(ErasurePostsArtifact);
+
+    this.PostFactory = await deployer.deploy(
+      PostFactoryArtifact,
+      false,
+      this.PostRegistry.contractAddress
+    );
+
+    await this.PostRegistry.from(creator).addFactory(
+      this.PostFactory.contractAddress,
+      "0x"
+    );
   });
 
   describe("Post.initialize", () => {
     it("should revert when invalid proofHash", async () => {
       await assert.revert(
-        deployer.deploy(
-          TestPostArtifact,
-          false,
-          this.Post.contractAddress,
-          true,
-          owner,
-          Buffer.from(invalidProofHash),
+        deployTestPost([
+          operator,
+          invalidProofHash,
           staticMetadata,
           variableMetadata
-        )
+        ])
       );
     });
 
-    it("should revert when initialize with malformed init data", async () => {
-      await assert.revert(deployTestPost(false));
-    });
-
     it("should initialize post", async () => {
-      this.TestPost = await deployTestPost(true);
+      this.TestPost = await deployTestPost();
 
       // // ProofHash._setProofHash
       const actualProofHash = await this.TestPost.getProofHash();
       assert.equal(actualProofHash, proofHash);
 
       // Operator._setOperator
-      const operator = await this.TestPost.getOperator();
-      assert.equal(operator, owner);
+      const actualOperator = await this.TestPost.getOperator();
+      assert.equal(actualOperator, operator);
 
       //  Operator._activate()
       const operatorIsActive = await this.TestPost.hasActiveOperator();
@@ -85,30 +111,18 @@ describe("Post", () => {
       assert.equal(actualStaticMetadata, staticMetadata);
       assert.equal(actualVariableMetadata, variableMetadata);
     });
-
-    it("should revert when initialize from function", async () => {
-      await assert.revertWith(
-        this.TestPost.initializePost(
-          owner,
-          proofHash,
-          staticMetadata,
-          variableMetadata
-        ),
-        "must be called within contract constructor"
-      );
-    });
   });
 
   describe("Post.setVariableMetadata", () => {
     it("should revert when msg.sender is not operator", async () => {
       await assert.revertWith(
-        this.TestPost.from(poster).setVariableMetadata(newVariableMetadata),
+        this.TestPost.from(other).setVariableMetadata(newVariableMetadata),
         "only active operator or creator"
       );
     });
 
     it("should set variable metadata", async () => {
-      const txn = await this.TestPost.from(owner).setVariableMetadata(
+      const txn = await this.TestPost.from(operator).setVariableMetadata(
         newVariableMetadata
       );
       await assert.emit(txn, "VariableMetadataSet");
@@ -126,7 +140,7 @@ describe("Post", () => {
       await this.TestPost.deactivateOperator();
 
       await assert.revertWith(
-        this.TestPost.from(owner).setVariableMetadata(newVariableMetadata),
+        this.TestPost.from(operator).setVariableMetadata(newVariableMetadata),
         "only active operator or creator"
       );
     });
