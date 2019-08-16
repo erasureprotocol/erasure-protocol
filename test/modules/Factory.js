@@ -26,8 +26,8 @@ function testFactory(
     this.timeout(4000);
 
     // wallets and addresses
-    const [ownerWallet, , creatorWallet] = accounts;
-    const owner = ownerWallet.signer.signingKey.address;
+    const [operatorWallet, , creatorWallet] = accounts;
+    const operator = operatorWallet.signer.signingKey.address;
     const creator = creatorWallet.signer.signingKey.address;
 
     const initializeFunctionName = "initialize";
@@ -49,8 +49,8 @@ function testFactory(
         logicContractAddress,
         creator,
         initializeFunctionName,
-        createInstanceTypes,
-        createInstanceArgs,
+        createTypes,
+        createArgs,
         nonce
       );
 
@@ -115,7 +115,7 @@ function testFactory(
         assert.equal(actualTemplateAddress, logicContractAddress);
 
         // register the factory into the registry
-        await this.Registry.from(owner).addFactory(
+        await this.Registry.from(operator).addFactory(
           this.Factory.contractAddress,
           Buffer.from("")
         );
@@ -130,6 +130,8 @@ function testFactory(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
+
+      // check the emitted event's arguments
 
       assert.isDefined(instanceCreatedEvent);
       assert.equal(instanceCreatedEvent.args.creator, creator);
@@ -150,33 +152,25 @@ function testFactory(
       assert.equal(actualRuntimeCode, runtimeCode);
     };
 
-    describe(`${factoryName}.create`, () => {
-      const abiEncoder = new ethers.utils.AbiCoder();
+    // describe(`${factoryName}.create`, () => {
+    //   const abiEncoder = new ethers.utils.AbiCoder();
 
-      it("should create instance correctly", async () => {
-        // const selector = createSelector(
-        //   "initialize",
-        //   createTypes
-        // );
-        // const calldata = abiEncoder.encode(['bytes4', ...createTypes], [selector, ...createArgs]);
-        // const txn = await this.Factory.from(creator).create(calldata);
-        // await validateCreateExplicitTxn(txn);
-      });
-    });
+    //   it("should create instance correctly", async () => {
+    //     const selector = createSelector(
+    //       "initialize",
+    //       createTypes
+    //     );
+    //     const calldata = abiEncoder.encode(
+    //       ["bytes4", ...createTypes],
+    //       [selector, ...createArgs]
+    //     );
+    //     const txn = await this.Factory.from(creator).create(calldata);
+    //     await validateCreateExplicitTxn(txn);
+    //   });
+    // });
 
     describe(`${factoryName}.createEncoded`, () => {
       const abiEncoder = new ethers.utils.AbiCoder();
-
-      // TODO FIX THIS
-      // Malformed init data actually succeeds because of how abi.decode is called
-      // it accept various types of inputs as long as the abi decode call succeeds
-
-      // it("should revert with missing argument in ABI", async () => {
-      //   const wrongCreateTypes = createTypes.slice(1);
-      //   const wrongCreateArgs = createArgs.slice(1);
-      //   const initData = abiEncoder.encode(wrongCreateTypes, wrongCreateArgs);
-      //   await assert.revert(this.Factory.from(creator).create(initData));
-      // });
 
       it("should create instance correctly", async () => {
         const initData = abiEncoder.encode(createTypes, createArgs);

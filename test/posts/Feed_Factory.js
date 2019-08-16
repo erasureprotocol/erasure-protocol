@@ -1,14 +1,13 @@
 // require artifacts
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
-const ErasureFeedsArtifact = require("../../build/Erasure_Feeds.json");
+const ErasureAgreementsArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
 // test helpers
 const { createDeployer } = require("../helpers/setup");
 const testFactory = require("../modules/Factory");
-
-const [, , posterWallet] = accounts;
-const poster = posterWallet.signer.signingKey.address;
+const [, , creatorWallet] = accounts;
+const creator = creatorWallet.signer.signingKey.address;
 
 // variables used in initialize()
 const factoryName = "Feed_Factory";
@@ -17,10 +16,8 @@ const staticMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("staticMetadata")
 );
 
-const createTypes = ["address", "bytes"];
-const createInstanceTypes = ["address", "address", "bytes"];
-
-const initDataABI = "(address,bytes)";
+const createTypes = ["address", "address", "bytes"];
+const initDataABI = "(address,address,bytes)";
 
 let PostRegistry;
 
@@ -33,8 +30,11 @@ function runFactoryTest() {
 
   describe(factoryName, () => {
     it("setups test", () => {
-      const createArgs = [PostRegistry.contractAddress, staticMetadata];
-      const createInstanceArgs = [poster, ...createArgs];
+      const createArgs = [
+        creator,
+        PostRegistry.contractAddress,
+        staticMetadata
+      ];
 
       testFactory(
         deployer,
@@ -44,10 +44,8 @@ function runFactoryTest() {
         createTypes,
         createArgs,
         FeedFactoryArtifact,
-        ErasureFeedsArtifact,
-        ErasurePostsArtifact,
-        createInstanceTypes,
-        createInstanceArgs
+        ErasurePostsArtifact, // correct registry
+        ErasureAgreementsArtifact // wrong registry
       );
     });
   });
