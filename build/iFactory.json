@@ -198,9 +198,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n/* TODO: Update eip165 interface\n *  bytes4(keccak256('create(bytes)')) == 0xcf5ba53f\n *  bytes4(keccak256('getInstanceType()')) == 0x18c2f4cf\n *  bytes4(keccak256('getInstanceRegistry()')) == 0xa5e13904\n *  bytes4(keccak256('getImplementation()')) == 0xaaf10f42\n *\n *  => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6\n */\n interface iFactory {\n\n     event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);\n\n     function create(bytes calldata initData) external returns (address instance);\n     function getInitdataABI() external view returns (string memory initABI);\n     function getInstanceRegistry() external view returns (address instanceRegistry);\n     function getTemplate() external view returns (address template);\n\n     function getInstanceCreator(address instance) external view returns (address creator);\n     function getInstanceType() external view returns (bytes4 instanceType);\n     function getInstanceCount() external view returns (uint256 count);\n     function getInstance(uint256 index) external view returns (address instance);\n     function getInstances() external view returns (address[] memory instances);\n     function getPaginatedInstances(uint256 startIndex, uint256 endIndex) external view returns (address[] memory instances);\n }\n",
-  "sourcePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iFactory.sol",
+  "sourcePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iFactory.sol",
   "ast": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iFactory.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iFactory.sol",
     "exportedSymbols": {
       "iFactory": [
         7755
@@ -1068,7 +1068,7 @@
     "src": "0:1353:35"
   },
   "legacyAST": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iFactory.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iFactory.sol",
     "exportedSymbols": {
       "iFactory": [
         7755
@@ -1937,11 +1937,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang",
+    "version": "0.5.10+commit.5a6ea5b1.Emscripten.clang",
     "optimizer": false,
     "runs": 200
   },
   "networks": {},
-  "schemaVersion": "2.2.0",
-  "updatedAt": "2019-08-14T21:19:56.873Z"
+  "schemaVersion": "2.1.8",
+  "updatedAt": "2019-08-16T16:53:40.400Z"
 }

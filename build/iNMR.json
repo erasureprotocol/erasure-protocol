@@ -205,9 +205,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n\ncontract iNMR {\n\n    // ERC20\n    function totalSupply() external returns (uint256);\n    function balanceOf(address _owner) external returns (uint256);\n    function allowance(address _owner, address _spender) external returns (uint256);\n\n    function transfer(address _to, uint256 _value) external returns (bool ok);\n    function transferFrom(address _from, address _to, uint256 _value) external returns (bool ok);\n    function approve(address _spender, uint256 _value) external returns (bool ok);\n    function changeApproval(address _spender, uint256 _oldValue, uint256 _newValue) external returns (bool ok);\n\n    // burn\n    function mint(uint256 _value) external returns (bool ok);\n    // burnFrom\n    function numeraiTransfer(address _to, uint256 _value) external returns (bool ok);\n}\n",
-  "sourcePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iNMR.sol",
+  "sourcePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iNMR.sol",
   "ast": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iNMR.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iNMR.sol",
     "exportedSymbols": {
       "iNMR": [
         7835
@@ -1167,7 +1167,7 @@
     "src": "0:815:36"
   },
   "legacyAST": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iNMR.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iNMR.sol",
     "exportedSymbols": {
       "iNMR": [
         7835
@@ -2128,11 +2128,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang",
+    "version": "0.5.10+commit.5a6ea5b1.Emscripten.clang",
     "optimizer": false,
     "runs": 200
   },
   "networks": {},
-  "schemaVersion": "2.2.0",
-  "updatedAt": "2019-08-14T21:19:56.873Z"
+  "schemaVersion": "2.1.8",
+  "updatedAt": "2019-08-16T16:53:40.415Z"
 }
