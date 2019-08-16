@@ -24,7 +24,6 @@ const variableMetadata = ethers.utils.keccak256(
 
 const createTypes = ["address", "bytes", "bytes", "bytes"];
 const createArgs = [creator, proofHash, staticMetadata, variableMetadata];
-const initDataABI = "(address,bytes,bytes,bytes)";
 
 function runFactoryTest() {
   const deployer = createDeployer();
@@ -35,7 +34,6 @@ function runFactoryTest() {
         deployer,
         factoryName,
         instanceType,
-        initDataABI,
         createTypes,
         createArgs,
         PostFactoryArtifact,

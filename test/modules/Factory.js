@@ -1,26 +1,25 @@
 const {
   createInstanceAddress,
   createEip1167RuntimeCode,
-  createSelector,
-  getLatestContractAdressFrom
+  getLatestContractAdressFrom,
+  abiEncodeWithSelector
 } = require("../helpers/utils");
 
 function testFactory(
   deployer, // etherlime's ganache deployer instance
   factoryName, // factory contract's name
   instanceType, // instance type created by factory
-  initDataABI, // the init data ABI string stated in factory contract used for matching
   createTypes, // the actual types used to encode the init data ABI function parameters
   createArgs, // the actual types used to encode init data values
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
-  wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
+  wrongRegistryArtifact // wrong registry for error testing. instanceType must mismatch
 
   // There are cases where the create() call and the instance address creation's
   // ABI types are different. Default to the create call parameters
   // anything else, pass in a different set of ABI
-  createInstanceTypes = createTypes,
-  createInstanceArgs = createArgs
+  // createInstanceTypes = createTypes,
+  // createInstanceArgs = createArgs
 ) {
   describe(factoryName, function() {
     this.timeout(4000);
@@ -30,8 +29,11 @@ function testFactory(
     const operator = operatorWallet.signer.signingKey.address;
     const creator = creatorWallet.signer.signingKey.address;
 
+    // variables used in tests
     const initializeFunctionName = "initialize";
+    const initDataABI = "(" + createTypes.join(",") + ")";
 
+    // variables used to track local instances
     let logicContractAddress;
     let nonce = 0;
     const totalInstanceCount = 5;
@@ -152,22 +154,17 @@ function testFactory(
       assert.equal(actualRuntimeCode, runtimeCode);
     };
 
-    // describe(`${factoryName}.create`, () => {
-    //   const abiEncoder = new ethers.utils.AbiCoder();
-
-    //   it("should create instance correctly", async () => {
-    //     const selector = createSelector(
-    //       "initialize",
-    //       createTypes
-    //     );
-    //     const calldata = abiEncoder.encode(
-    //       ["bytes4", ...createTypes],
-    //       [selector, ...createArgs]
-    //     );
-    //     const txn = await this.Factory.from(creator).create(calldata);
-    //     await validateCreateExplicitTxn(txn);
-    //   });
-    // });
+    describe(`${factoryName}.create`, () => {
+      it("should create instance correctly", async () => {
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          createArgs
+        );
+        const txn = await this.Factory.from(creator).create(callData);
+        await validateCreateExplicitTxn(txn);
+      });
+    });
 
     describe(`${factoryName}.createEncoded`, () => {
       const abiEncoder = new ethers.utils.AbiCoder();

@@ -28,9 +28,6 @@ const createTypes = [
   "bytes"
 ];
 
-const initDataABI =
-  "(address,address,address,address,uint256,Griefing.RatioType,uint256,bytes)";
-
 let MockNMR;
 
 before(async () => {
@@ -40,18 +37,18 @@ before(async () => {
 function runFactoryTest() {
   const deployer = createDeployer();
 
-  const [ownerWallet, buyerWallet, sellerWallet] = accounts;
+  const [ownerWallet, stakerWallet, counterpartyWallet] = accounts;
   const owner = ownerWallet.signer.signingKey.address;
-  const buyer = buyerWallet.signer.signingKey.address;
-  const seller = sellerWallet.signer.signingKey.address;
+  const staker = stakerWallet.signer.signingKey.address;
+  const counterparty = counterpartyWallet.signer.signingKey.address;
 
   describe(factoryName, () => {
     it("setups test", () => {
       const createArgs = [
         MockNMR.contractAddress,
         owner,
-        seller,
-        buyer,
+        staker,
+        counterparty,
         ratio,
         ratioType,
         countdownLength,
@@ -62,7 +59,6 @@ function runFactoryTest() {
         deployer,
         "OneWayGriefing_Factory",
         instanceType,
-        initDataABI,
         createTypes,
         createArgs,
         OneWayGriefing_FactoryArtifact,
