@@ -1,8 +1,11 @@
-// taken from https://github.com/PolymathNetwork/polymath-core, Apache v2 License
 pragma solidity ^0.5.0;
 
 import "./openzeppelin-solidity/math/SafeMath.sol";
 
+/* @title DecimalMath
+ * @dev taken from https://github.com/PolymathNetwork/polymath-core
+ * @dev Apache v2 License
+ */
 library DecimalMath {
     using SafeMath for uint256;
 
