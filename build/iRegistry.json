@@ -380,9 +380,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n\ninterface iRegistry {\n\n    enum FactoryStatus { Unregistered, Registered, Retired }\n\n    event FactoryAdded(address owner, address factory, uint256 factoryID, bytes extraData);\n    event FactoryRetired(address owner, address factory, uint256 factoryID);\n    event InstanceRegistered(address instance, uint256 instanceIndex, address indexed creator, address indexed factory, uint256 indexed factoryID);\n\n    // factory state functions\n\n    function addFactory(address factory, bytes calldata extraData ) external;\n    function retireFactory(address factory) external;\n\n    // factory view functions\n\n    function getFactoryCount() external view returns (uint256 count);\n    function getFactoryStatus(address factory) external view returns (FactoryStatus status);\n    function getFactoryID(address factory) external view returns (uint16 factoryID);\n    function getFactoryData(address factory) external view returns (bytes memory extraData);\n    function getFactoryAddress(uint16 factoryID) external view returns (address factory);\n    function getFactory(address factory) external view returns (FactoryStatus state, uint16 factoryID, bytes memory extraData);\n    function getFactories() external view returns (address[] memory factories);\n    function getPaginatedFactories(uint256 startIndex, uint256 endIndex) external view returns (address[] memory factories);\n\n    // instance state functions\n\n    function register(address instance, address creator, uint80 extraData) external;\n\n    // instance view functions\n\n    function getInstanceType() external view returns (bytes4 instanceType);\n    function getInstanceCount() external view returns (uint256 count);\n    function getInstance(uint256 index) external view returns (address instance);\n    function getInstances() external view returns (address[] memory instances);\n    function getPaginatedInstances(uint256 startIndex, uint256 endIndex) external view returns (address[] memory instances);\n}\n",
-  "sourcePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iRegistry.sol",
+  "sourcePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iRegistry.sol",
   "ast": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iRegistry.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iRegistry.sol",
     "exportedSymbols": {
       "iRegistry": [
         7986
@@ -2146,7 +2146,7 @@
     "src": "0:1977:37"
   },
   "legacyAST": {
-    "absolutePath": "/Users/thegostep/github/erasure-next-contracts/contracts/modules/iRegistry.sol",
+    "absolutePath": "/Users/hao/Desktop/erasure-next-contracts/contracts/modules/iRegistry.sol",
     "exportedSymbols": {
       "iRegistry": [
         7986
@@ -3911,11 +3911,11 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.7+commit.6da8b019.Emscripten.clang",
+    "version": "0.5.10+commit.5a6ea5b1.Emscripten.clang",
     "optimizer": false,
     "runs": 200
   },
   "networks": {},
-  "schemaVersion": "2.2.0",
-  "updatedAt": "2019-08-14T21:19:56.875Z"
+  "schemaVersion": "2.1.8",
+  "updatedAt": "2019-08-16T16:53:40.477Z"
 }
