@@ -15,10 +15,11 @@ describe("OneWayGriefing", function() {
   const staker = stakerWallet.signer.signingKey.address;
 
   // variables used in initialize()
-  const stakerStake = 500;
-  const punishment = 100;
+  const stakerStake = ethers.utils.parseEther("200");
+  const punishment = ethers.utils.parseEther("100");
   const ratio = 2;
-  const ratioType = RATIO_TYPES.CgtP;
+  const ratioE18 = ethers.utils.parseEther(ratio.toString());
+  const ratioType = RATIO_TYPES.Dec;
   const countdownLength = 1000;
   const staticMetadata = "TESTING";
 
@@ -26,7 +27,7 @@ describe("OneWayGriefing", function() {
     operator,
     staker,
     counterparty,
-    ratio,
+    ratioE18,
     ratioType,
     countdownLength,
     Buffer.from(staticMetadata)
@@ -113,8 +114,8 @@ describe("OneWayGriefing", function() {
       const [
         actualRatio,
         actualRatioType
-    ] = await this.TestOneWayGriefing.getRatio(staker);
-      assert.equal(actualRatio, ratio);
+      ] = await this.TestOneWayGriefing.getRatio(staker);
+      assert.equal(actualRatio.toString(), ratioE18.toString());
       assert.equal(actualRatioType, ratioType);
 
       // Countdown._setLength
@@ -147,8 +148,8 @@ describe("OneWayGriefing", function() {
         operator,
         staker,
         counterparty,
-        ratio,
-        RATIO_TYPES.CgtP,
+        ratioE18,
+        ratioType,
         countdownLength,
         Buffer.from(staticMetadata)
       ];
@@ -199,9 +200,9 @@ describe("OneWayGriefing", function() {
     });
 
     it("should set variable metadata when msg.sender is operator", async () => {
-      const txn = await this.TestOneWayGriefing.from(operator).setVariableMetadata(
-        Buffer.from(operatorMetadata)
-      );
+      const txn = await this.TestOneWayGriefing.from(
+        operator
+      ).setVariableMetadata(Buffer.from(operatorMetadata));
       await assert.emit(txn, "VariableMetadataSet");
       await assert.emitWithArgs(
         txn,
@@ -251,7 +252,10 @@ describe("OneWayGriefing", function() {
       await startCountdown(staker));
 
     it("should revert when deadline already set", async () =>
-      await assert.revertWith(startCountdown(operator), "deadline already set"));
+      await assert.revertWith(
+        startCountdown(operator),
+        "deadline already set"
+      ));
 
     it("should start countdown when msg.sender is operator", async () => {
       // it will throw when calling startCountdown again
@@ -304,7 +308,9 @@ describe("OneWayGriefing", function() {
 
     it("should revert when msg.sender is counterparty", async () => {
       // update currentStake
-      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+      currentStake = (await this.TestOneWayGriefing.getStake(
+        staker
+      )).toNumber();
 
       // use the counterparty to be the msg.sender
       await assert.revertWith(
@@ -339,7 +345,6 @@ describe("OneWayGriefing", function() {
     });
 
     it("should revert when countdown over", async () => {
-
       // create snapshot
       let snapshotID = await utils.snapshot(deployer.provider);
 
@@ -373,7 +378,9 @@ describe("OneWayGriefing", function() {
 
     const reward = async sender => {
       // update currentStake
-      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+      currentStake = (await this.TestOneWayGriefing.getStake(
+        staker
+      )).toNumber();
 
       await this.MockNMR.from(sender).approve(
         this.TestOneWayGriefing.contractAddress,
@@ -387,7 +394,10 @@ describe("OneWayGriefing", function() {
 
       currentStake += amountToAdd;
 
-      assert.equal((await this.TestOneWayGriefing.getStake(staker)).toNumber(), currentStake);
+      assert.equal(
+        (await this.TestOneWayGriefing.getStake(staker)).toNumber(),
+        currentStake
+      );
 
       const receipt = await this.TestOneWayGriefing.verboseWaitForTransaction(
         txn
@@ -408,14 +418,13 @@ describe("OneWayGriefing", function() {
 
     it("should revert when msg.sender is staker", async () => {
       // update currentStake
-      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+      currentStake = (await this.TestOneWayGriefing.getStake(
+        staker
+      )).toNumber();
 
       // use the staker to be the msg.sender
       await assert.revertWith(
-        this.TestOneWayGriefing.from(staker).reward(
-          currentStake,
-          amountToAdd
-        ),
+        this.TestOneWayGriefing.from(staker).reward(currentStake, amountToAdd),
         "only counterparty or active operator"
       );
     });
@@ -474,22 +483,21 @@ describe("OneWayGriefing", function() {
     const from = counterparty;
     const message = "I don't like you";
     const punishArgs = [from, punishment, Buffer.from(message)];
-    let currentStake = 0;
-    const amountToAdd = 500;
+    let currentStake = ethers.utils.bigNumberify("0");
 
     const punishStaker = async () => {
       // increase staker's stake to 500
       await this.MockNMR.from(staker).approve(
         this.TestOneWayGriefing.contractAddress,
-        amountToAdd
+        stakerStake
       );
       await this.TestOneWayGriefing.from(staker).increaseStake(
         currentStake,
-        amountToAdd
+        stakerStake
       );
-      currentStake += amountToAdd;
+      currentStake = currentStake.add(stakerStake);
 
-      const expectedCost = punishment * ratio;
+      const expectedCost = punishment.mul(ratio);
 
       await this.MockNMR.from(counterparty).approve(
         this.TestOneWayGriefing.contractAddress,
@@ -504,7 +512,7 @@ describe("OneWayGriefing", function() {
       );
 
       // deducting current stake to be used in subsequent increaseStake call
-      currentStake -= punishment;
+      currentStake = currentStake.sub(punishment);
 
       const expectedEvent = "Griefed";
 
@@ -516,8 +524,11 @@ describe("OneWayGriefing", function() {
       assert.isDefined(griefedEvent);
       assert.equal(griefedEvent.args.punisher, counterparty);
       assert.equal(griefedEvent.args.staker, staker);
-      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
-      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
+      assert.equal(
+        griefedEvent.args.punishment.toString(),
+        punishment.toString()
+      );
+      assert.equal(griefedEvent.args.cost.toString(), expectedCost.toString());
       assert.equal(
         griefedEvent.args.message,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
@@ -525,12 +536,12 @@ describe("OneWayGriefing", function() {
 
       // get the stored delegatecall result
       const griefCost = await this.TestOneWayGriefing.getGriefCost();
-      assert.equal(griefCost, expectedCost);
+      assert.equal(griefCost.toString(), expectedCost.toString());
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
       // update currentStake
-      currentStake = (await this.TestOneWayGriefing.getStake(staker)).toNumber();
+      currentStake = await this.TestOneWayGriefing.getStake(staker);
 
       // staker is not counterparty or operator
       await assert.revertWith(
@@ -671,12 +682,15 @@ describe("OneWayGriefing", function() {
       assert.equal(stakeTakenEvent.args.staker, staker);
       assert.equal(stakeTakenEvent.args.recipient, staker);
 
-      assert.equal(stakeTakenEvent.args.amount.toNumber(), stakerStake);
+      assert.equal(
+        stakeTakenEvent.args.amount.toString(),
+        stakerStake.toString()
+      );
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
 
       // get the stored delegatecall result
       const actualRetrieveAmount = await this.TestOneWayGriefing.getRetrieveStakeAmount();
-      assert.equal(actualRetrieveAmount, stakerStake);
+      assert.equal(actualRetrieveAmount.toString(), stakerStake.toString());
     });
   });
 });
