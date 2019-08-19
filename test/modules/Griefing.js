@@ -1,9 +1,10 @@
 const ethers = require("ethers");
 const { createDeployer } = require("../helpers/setup");
 
+const { hexlify } = require("../helpers/utils");
 const { RATIO_TYPES } = require("../helpers/variables");
 
-describe("Griefing", function () {
+describe("Griefing", function() {
   this.timeout(4000);
 
   let wallets = {
@@ -69,46 +70,19 @@ describe("Griefing", function () {
       );
     });
 
-    it("should getCost for ratioType CgtP correctly", async () => {
-      const cost = await contracts.TestGriefing.instance.getCost(
-        ratio,
-        punishment,
-        RATIO_TYPES.CgtP
-      );
-      assert.equal(cost.toNumber(), punishment * ratio);
-    });
-
-    it("should getCost for ratioType CltP correctly", async () => {
-      const cost = await contracts.TestGriefing.instance.getCost(
-        ratio,
-        punishment,
-        RATIO_TYPES.CltP
-      );
-      assert.equal(cost.toNumber(), punishment / ratio);
-    });
-
-    it("should getCost for ratioType CeqP correctly", async () => {
-      const cost = await contracts.TestGriefing.instance.getCost(
-        ratio,
-        punishment,
-        RATIO_TYPES.CeqP
-      );
-      assert.equal(cost.toNumber(), punishment);
-    });
-
     it("should getCost for ratioType Dec correctly", async () => {
       const cost = await contracts.TestGriefing.instance.getCost(
-        ethers.utils.parseEther(ratio + ''),
+        ethers.utils.parseEther(ratio + ""),
         punishment,
         RATIO_TYPES.Dec
       );
       assert.equal(cost.toNumber(), punishment * ratio);
     });
 
-    const halfRatio = 0.5
+    const halfRatio = 0.5;
     it("should getCost for ratioType Dec correctly with .5 ratio", async () => {
       const cost = await contracts.TestGriefing.instance.getCost(
-        ethers.utils.parseEther(halfRatio + ''),
+        ethers.utils.parseEther(halfRatio + ""),
         punishment,
         RATIO_TYPES.Dec
       );
@@ -153,46 +127,19 @@ describe("Griefing", function () {
       );
     });
 
-    it("should getPunishment for ratioType CgtP correctly", async () => {
-      const punishment = await contracts.TestGriefing.instance.getPunishment(
-        ratio,
-        cost,
-        RATIO_TYPES.CgtP
-      );
-      assert.equal(punishment.toNumber(), cost / ratio);
-    });
-
-    it("should getPunishment for ratioType CltP correctly", async () => {
-      const punishment = await contracts.TestGriefing.instance.getPunishment(
-        ratio,
-        cost,
-        RATIO_TYPES.CltP
-      );
-      assert.equal(punishment.toNumber(), cost * ratio);
-    });
-
-    it("should getPunishment for ratioType CeqP correctly", async () => {
-      const punishment = await contracts.TestGriefing.instance.getPunishment(
-        ratio,
-        cost,
-        RATIO_TYPES.CeqP
-      );
-      assert.equal(punishment.toNumber(), cost);
-    });
-
     it("should getPunishment for ratioType Dec correctly", async () => {
       const punishment = await contracts.TestGriefing.instance.getPunishment(
-        ethers.utils.parseEther(ratio + ''),
+        ethers.utils.parseEther(ratio + ""),
         cost,
         RATIO_TYPES.Dec
       );
       assert.equal(punishment.toNumber(), cost / ratio);
     });
 
-    const halfRatio = 0.5
+    const halfRatio = 0.5;
     it("should getPunishment for ratioType Dec correctly with .5 ratio", async () => {
       const punishment = await contracts.TestGriefing.instance.getPunishment(
-        ethers.utils.parseEther(halfRatio + ''),
+        ethers.utils.parseEther(halfRatio + ""),
         cost,
         RATIO_TYPES.Dec
       );
@@ -204,10 +151,10 @@ describe("Griefing", function () {
 
   describe("Griefing._setRatio", () => {
     const seller = wallets.seller.signer.signingKey.address;
-    const ratio = 2;
-    const ratioType = RATIO_TYPES.CgtP;
+    const ratioType = RATIO_TYPES.Dec;
 
     it("should revert on wrong ratioType", async () => {
+      const ratio = 2;
       const invalidRatioTypeEnumVal = 5;
       const block = await deployer.provider.getBlock("latest");
 
@@ -216,14 +163,51 @@ describe("Griefing", function () {
       await assert.revert(
         contracts.TestGriefing.instance.setRatio(
           seller,
-          ratio,
+          ethers.utils.parseEther(ratio + ""),
           invalidRatioTypeEnumVal,
           { gasLimit: 30000 }
         )
       );
     });
 
-    it("should set ratio correctly", async () => {
+    it("should revert when ratio != 0 when ratioType is NaN", async () => {
+      const ratioType = RATIO_TYPES.NaN;
+      const ratio = ethers.utils.parseEther("2");
+      await assert.revertWith(
+        contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType),
+        "ratio must be 0 when ratioType is NaN or Inf"
+      );
+    });
+
+    it("should revert when ratio != 0 when ratioType is Inf", async () => {
+      const ratioType = RATIO_TYPES.Inf;
+      const ratio = ethers.utils.parseEther("2");
+      await assert.revertWith(
+        contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType),
+        "ratio must be 0 when ratioType is NaN or Inf"
+      );
+    });
+
+    it("should set ratio of 2 correctly", async () => {
+      const ratio = ethers.utils.parseEther("2");
+      const txn = await contracts.TestGriefing.instance.setRatio(
+        seller,
+        ratio.toHexString(),
+        ratioType
+      );
+      await assert.emit(txn, "RatioSet");
+      await assert.emitWithArgs(txn, [seller, ratio, ratioType]);
+
+      const [
+        actualRatio,
+        actualRatioType
+      ] = await contracts.TestGriefing.instance.getRatio(seller);
+      assert.equal(actualRatio.toString(), ratio.toString());
+      assert.equal(actualRatioType, ratioType);
+    });
+
+    it("should set ratio of 0.5 correctly", async () => {
+      const ratio = ethers.utils.parseEther("0.5");
       const txn = await contracts.TestGriefing.instance.setRatio(
         seller,
         ratio,
@@ -236,7 +220,7 @@ describe("Griefing", function () {
         actualRatio,
         actualRatioType
       ] = await contracts.TestGriefing.instance.getRatio(seller);
-      assert.equal(actualRatio, ratio);
+      assert.equal(actualRatio.toString(), ratio.toString());
       assert.equal(actualRatioType, ratioType);
     });
   });
@@ -244,10 +228,10 @@ describe("Griefing", function () {
   describe("Griefing._grief", () => {
     const seller = wallets.seller.signer.signingKey.address;
     const buyer = wallets.buyer.signer.signingKey.address;
-    const ratio = 2;
-    const stakeAmount = 100;
-    const punishment = 10;
-    const ratioType = RATIO_TYPES.CgtP;
+    const ratio = ethers.utils.parseEther("2");
+    const stakeAmount = ethers.utils.parseEther("100");
+    const punishment = ethers.utils.parseEther("10");
+    const ratioType = RATIO_TYPES.Dec;
     const message = "I don't like you";
 
     it("should revert when token not set", async () => {
@@ -264,6 +248,24 @@ describe("Griefing", function () {
     });
 
     it("should revert when grief ratio not set", async () => {
+      await assert.revertWith(
+        contracts.TestGriefing.instance.grief(
+          buyer,
+          seller,
+          punishment,
+          Buffer.from(message)
+        ),
+        "no punishment allowed"
+      );
+    });
+
+    it("should revert when grief ratio is NaN", async () => {
+      await contracts.TestGriefing.instance.setRatio(
+        seller,
+        0,
+        RATIO_TYPES.NaN
+      );
+
       await assert.revertWith(
         contracts.TestGriefing.instance.grief(
           buyer,
@@ -293,7 +295,7 @@ describe("Griefing", function () {
         .from(seller)
         .setRatio(seller, ratio, ratioType);
 
-      const wrongApproveAmount = punishment - 1;
+      const wrongApproveAmount = punishment.sub(1);
       await contracts.MockNMR.instance
         .from(buyer)
         .approve(contractAddress, wrongApproveAmount);
@@ -325,6 +327,7 @@ describe("Griefing", function () {
 
     it("should revert when seller has too little stake", async () => {
       const contractAddress = contracts.TestGriefing.instance.contractAddress;
+      const wrongStakeAmount = punishment.sub(1);
 
       // seller process
       await contracts.TestGriefing.instance
@@ -333,16 +336,16 @@ describe("Griefing", function () {
 
       await contracts.MockNMR.instance
         .from(seller)
-        .approve(contractAddress, punishment - 1);
+        .approve(contractAddress, wrongStakeAmount);
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .addStake(seller, seller, 0, punishment - 1);
+        .addStake(seller, seller, 0, wrongStakeAmount);
 
       // buyer process
       await contracts.MockNMR.instance
         .from(buyer)
-        .approve(contractAddress, punishment * ratio);
+        .approve(contractAddress, punishment.mul(ratio));
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -352,7 +355,9 @@ describe("Griefing", function () {
       );
     });
 
-    it("should grief correctly", async () => {
+    it("should grief correctly for no cost", async () => {
+      const ratio = 0;
+      const ratioType = RATIO_TYPES.Inf;
       const contractAddress = contracts.TestGriefing.instance.contractAddress;
 
       // seller process
@@ -369,9 +374,11 @@ describe("Griefing", function () {
         .addStake(seller, seller, 0, stakeAmount);
 
       // buyer process
+      const expectedCost = 0; // punishment at no cost
+
       await contracts.MockNMR.instance
         .from(buyer)
-        .approve(contractAddress, punishment * ratio);
+        .approve(contractAddress, expectedCost);
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
@@ -379,8 +386,6 @@ describe("Griefing", function () {
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );
-
-      const expectedCost = punishment * ratio;
 
       const griefedEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === "Griefed",
@@ -390,26 +395,27 @@ describe("Griefing", function () {
       assert.isDefined(griefedEvent);
       assert.equal(griefedEvent.args.punisher, buyer);
       assert.equal(griefedEvent.args.staker, seller);
-      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
-      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
       assert.equal(
-        griefedEvent.args.message,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
+        griefedEvent.args.punishment.toString(),
+        punishment.toString()
       );
+      assert.equal(griefedEvent.args.cost.toString(), expectedCost.toString());
+      assert.equal(griefedEvent.args.message, hexlify(message));
 
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
-      assert.equal(griefCost, expectedCost);
+      assert.equal(griefCost.toString(), expectedCost.toString());
     });
 
     it("should grief correctly for decimal", async () => {
       const ratio = 2;
+      const ratioE18 = ethers.utils.parseEther(ratio.toString());
       const ratioType = RATIO_TYPES.Dec;
       const contractAddress = contracts.TestGriefing.instance.contractAddress;
 
       // seller process
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ethers.utils.parseEther(ratio + ''), RATIO_TYPES.Dec);
+        .setRatio(seller, ratioE18, ratioType);
 
       await contracts.MockNMR.instance
         .from(seller)
@@ -420,9 +426,11 @@ describe("Griefing", function () {
         .addStake(seller, seller, 0, stakeAmount);
 
       // buyer process
+      const expectedCost = punishment.mul(ratio);
+
       await contracts.MockNMR.instance
         .from(buyer)
-        .approve(contractAddress, punishment * ratio);
+        .approve(contractAddress, expectedCost);
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
@@ -430,8 +438,6 @@ describe("Griefing", function () {
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );
-
-      const expectedCost = punishment * ratio;
 
       const griefedEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === "Griefed",
@@ -441,15 +447,15 @@ describe("Griefing", function () {
       assert.isDefined(griefedEvent);
       assert.equal(griefedEvent.args.punisher, buyer);
       assert.equal(griefedEvent.args.staker, seller);
-      assert.equal(griefedEvent.args.punishment.toNumber(), punishment);
-      assert.equal(griefedEvent.args.cost.toNumber(), expectedCost);
       assert.equal(
-        griefedEvent.args.message,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
+        griefedEvent.args.punishment.toString(),
+        punishment.toString()
       );
+      assert.equal(griefedEvent.args.cost.toString(), expectedCost.toString());
+      assert.equal(griefedEvent.args.message, hexlify(message));
 
       const griefCost = await contracts.TestGriefing.instance.getGriefCost();
-      assert.equal(griefCost, expectedCost);
+      assert.equal(griefCost.toString(), expectedCost.toString());
     });
   });
 });
