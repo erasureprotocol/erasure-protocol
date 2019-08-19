@@ -12,8 +12,8 @@ const { RATIO_TYPES } = require("../helpers/variables");
 // variables used in initialize()
 const factoryName = "OneWayGriefing_Factory";
 const instanceType = "Agreement";
-const ratio = 2;
-const ratioType = RATIO_TYPES.CgtP;
+const ratio = ethers.utils.parseEther("2");
+const ratioType = RATIO_TYPES.Dec;
 const countdownLength = 1000;
 const staticMetadata = "TESTING";
 
