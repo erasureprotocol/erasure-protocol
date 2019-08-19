@@ -6,13 +6,13 @@ import "./Staking.sol";
 
 contract Griefing is Staking {
 
-    enum RatioType { NaN, CgtP, CltP, CeqP, Dec, Inf }
+    enum RatioType { NaN, Inf, Dec }
 
     mapping (address => GriefRatio) private _griefRatio;
     struct GriefRatio {
         uint256 ratio;
         RatioType ratioType;
-    }
+   }
 
     event RatioSet(address staker, uint256 ratio, RatioType ratioType);
     event Griefed(address punisher, address staker, uint256 punishment, uint256 cost, bytes message);
@@ -22,6 +22,10 @@ contract Griefing is Staking {
     // state functions
 
     function _setRatio(address staker, uint256 ratio, RatioType ratioType) internal {
+        if (ratioType == RatioType.NaN || ratioType == RatioType.Inf) {
+            require(ratio == 0, "ratio must be 0 when ratioType is NaN or Inf");
+        }
+
         // set data in storage
         _griefRatio[staker].ratio = ratio;
         _griefRatio[staker].ratioType = ratioType;
@@ -67,18 +71,9 @@ contract Griefing is Staking {
     // pure functions
 
     function getCost(uint256 ratio, uint256 punishment, RatioType ratioType) public pure returns(uint256 cost) {
-        /*  CgtP: Cost greater than Punishment
-         *  CltP: Cost less than Punishment
-         *  CeqP: Cost equal to Punishment
-         *  Dec:  Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18
+        /*  Dec:  Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18
          *  Inf:  Punishment at no cost
          *  NaN:  No Punishment */
-        if (ratioType == RatioType.CgtP)
-            return punishment.mul(ratio);
-        if (ratioType == RatioType.CltP)
-            return punishment.div(ratio);
-        if (ratioType == RatioType.CeqP)
-            return punishment;
         if (ratioType == RatioType.Dec) {
             return DecimalMath.mul(SafeMath.mul(punishment, e18), ratio) / e18;
         }
@@ -89,18 +84,9 @@ contract Griefing is Staking {
     }
 
     function getPunishment(uint256 ratio, uint256 cost, RatioType ratioType) public pure returns(uint256 punishment) {
-        /*  CgtP: Cost greater than Punishment
-         *  CltP: Cost less than Punishment
-         *  CeqP: Cost equal to Punishment
-         *  Dec: Ratio is a decimal number with 18 decimals
+        /*  Dec: Ratio is a decimal number with 18 decimals
          *  Inf:  Punishment at no cost
          *  NaN:  No Punishment */
-        if (ratioType == RatioType.CgtP)
-            return cost.div(ratio);
-        if (ratioType == RatioType.CltP)
-            return cost.mul(ratio);
-        if (ratioType == RatioType.CeqP)
-            return cost;
         if (ratioType == RatioType.Dec) {
             return DecimalMath.div(SafeMath.mul(cost, e18), ratio) / e18;
         }
