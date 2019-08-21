@@ -21,7 +21,17 @@ contract MultiHashWrapper {
     * @return the base58-encoded full hash
     */
     function _combineMultiHash(MultiHash memory multihash) internal pure returns (bytes memory) {
-        return abi.encode(multihash.hashFunction, multihash.digestSize, multihash.hash);
+        bytes memory out = new bytes(34);
+
+        out[0] = byte(multihash.hashFunction);
+        out[1] = byte(multihash.digestSize);
+
+        uint8 i;
+        for (i = 0; i < 32; i++) {
+          out[i+2] = multihash.hash[i];
+        }
+
+        return out;
     }
 
     /**
@@ -30,7 +40,20 @@ contract MultiHashWrapper {
     * @return MultiHash that has the hashFunction, digestSize and the hash
     */
     function _splitMultiHash(bytes memory source) internal pure returns (MultiHash memory) {
-        (uint8 hashFunction, uint8 digestSize, bytes32 hash) = abi.decode(source, (uint8,uint8,bytes32));
-        return MultiHash(hash, hashFunction, digestSize);
+        require(source.length == 34, "length of source must be 34");
+
+        uint8 hashFunction = uint8(source[0]);
+        uint8 digestSize = uint8(source[1]);
+        bytes32 hash;
+
+        assembly {
+          hash := mload(add(source, 34))
+        }
+
+        return (MultiHash({
+          hashFunction: hashFunction,
+          digestSize: digestSize,
+          hash: hash
+        }));
     }
 }

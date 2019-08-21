@@ -24,6 +24,10 @@ const deploy = async (network, secret) => {
   console.log(`Deployment Wallet: ${wallet.address}`);
 
   if (network == "rinkeby") {
+
+    // connect to rinkeby
+    wallet = await wallet.connect(ethers.getDefaultProvider('rinkeby'));
+
     // initialize deployer
     deployer = await new etherlime.InfuraPrivateKeyDeployer(
       wallet.privateKey,
@@ -31,6 +35,8 @@ const deploy = async (network, secret) => {
       process.env.INFURA_API_KEY
     );
     deployer.setVerifierApiKey(process.env.ETHERSCAN_API_KEY);
+
+    // contracts.Erasure_Posts.instance = await new ethers.Contract('0xEd11206a7d07601985DCC4FeD7B3284a928D022B', contracts.Erasure_Posts.artifact.abi, wallet);
 
     // deploy registries
     contracts.Erasure_Posts.instance = await deployer.deployAndVerify(contracts.Erasure_Posts.artifact, false);
@@ -118,7 +124,7 @@ const deploy = async (network, secret) => {
       userAddress,
       userAddress,
       1,
-      4,
+      2,
       100000000,
       '0x0'
   ).then(async txn => {

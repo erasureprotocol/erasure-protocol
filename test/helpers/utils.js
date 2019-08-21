@@ -4,7 +4,7 @@ const SpawnArtifact = require("../../build/Spawn.json");
 const hexlify = utf8str =>
   ethers.utils.hexlify(ethers.utils.toUtf8Bytes(utf8str));
 
-const createMultihashSha256 = string => {
+const createPaddedMultihashSha256 = string => {
   const hash = ethers.utils.sha256(ethers.utils.toUtf8Bytes(string));
   const sha2_256 = ethers.utils.hexZeroPad("0x12", 8); // uint8
   const bits256 = ethers.utils.hexZeroPad(ethers.utils.hexlify(64), 8);
@@ -14,6 +14,15 @@ const createMultihashSha256 = string => {
     ["uint8", "uint8", "bytes32"],
     [sha2_256, bits256, hash]
   );
+  return multihash;
+};
+
+const createMultihashSha256 = string => {
+  const hash = ethers.utils.sha256(ethers.utils.toUtf8Bytes(string));
+  const sha2_256 = "0x12"; // uint8
+  const bits256 = ethers.utils.hexlify(32);
+  const multihash = sha2_256 + bits256.substr(2) + hash.substr(2);
+
   return multihash;
 };
 
