@@ -8,7 +8,7 @@ contract TestSimpleGriefing is SimpleGriefing {
 
     uint256 private _griefCost;
     uint256 private _deadline;
-    uint256 private _retrieveStakeAmount;
+    uint256 private _releaseStakeAmount;
 
     constructor(
         address griefingContract,
@@ -97,6 +97,16 @@ contract TestSimpleGriefing is SimpleGriefing {
         _griefCost = cost;
     }
 
+    function releaseStake() public returns (uint256 amount) {
+        bytes memory callData = abi.encodeWithSelector(
+            _template.releaseStake.selector
+        );
+        (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
+        require(ok, string(data));
+        amount = abi.decode(data, (uint256));
+        _releaseStakeAmount = amount;
+    }
+
     // backdoor function to activate Operator for testing
     function activateOperator() public {
         Operated._activateOperator();
@@ -110,5 +120,9 @@ contract TestSimpleGriefing is SimpleGriefing {
     // view functions
     function getGriefCost() public view returns(uint256 cost) {
         cost = _griefCost;
+    }
+
+    function getReleaseStakeAmount() public view returns(uint256 releaseStakeAmount) {
+        releaseStakeAmount = _releaseStakeAmount;
     }
 }

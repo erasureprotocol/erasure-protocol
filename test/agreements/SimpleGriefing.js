@@ -9,10 +9,16 @@ describe("SimpleGriefing", function() {
   this.timeout(4000);
 
   // wallets and addresses
-  const [operatorWallet, counterpartyWallet, stakerWallet] = accounts;
+  const [
+    operatorWallet,
+    counterpartyWallet,
+    stakerWallet,
+    newOperatorWallet
+  ] = accounts;
   const operator = operatorWallet.signer.signingKey.address;
   const counterparty = counterpartyWallet.signer.signingKey.address;
   const staker = stakerWallet.signer.signingKey.address;
+  const newOperator = newOperatorWallet.signer.signingKey.address;
 
   // variables used in initialize()
   const stakerStake = ethers.utils.parseEther("200");
@@ -21,6 +27,7 @@ describe("SimpleGriefing", function() {
   const ratioE18 = ethers.utils.parseEther(ratio.toString());
   const ratioType = RATIO_TYPES.Dec;
   const staticMetadata = "TESTING";
+  let currentStake; // to increment as we go
 
   const initArgs = [
     operator,
@@ -210,7 +217,6 @@ describe("SimpleGriefing", function() {
   });
 
   describe("SimpleGriefing.increaseStake", () => {
-    let currentStake; // to increment as we go
     let amountToAdd = 500; // 500 token weis
 
     const increaseStake = async sender => {
@@ -265,7 +271,8 @@ describe("SimpleGriefing", function() {
       await assert.revertWith(
         this.TestSimpleGriefing.from(operator).increaseStake(
           currentStake,
-          amountToAdd
+          amountToAdd,
+          { gasLimit: 30000 }
         ),
         "only staker or active operator"
       );
@@ -366,7 +373,7 @@ describe("SimpleGriefing", function() {
     const from = counterparty;
     const message = "I don't like you";
     const punishArgs = [from, punishment, Buffer.from(message)];
-    let currentStake = ethers.utils.bigNumberify("0");
+    currentStake = ethers.utils.bigNumberify("0");
 
     const punishStaker = async () => {
       // increase staker's stake to 500
@@ -441,5 +448,126 @@ describe("SimpleGriefing", function() {
     });
 
     it("should punish staker", async () => await punishStaker());
+  });
+
+  describe("SimpleGriefing.releaseStake", () => {
+    const releaseStake = async sender => {
+      const txn = await this.TestSimpleGriefing.from(sender).releaseStake();
+      const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
+        txn
+      );
+      const eventLogs = utils.parseLogs(
+        receipt,
+        this.TestSimpleGriefing,
+        "StakeTaken"
+      );
+      assert.equal(eventLogs.length, 1);
+      const [event] = eventLogs;
+      assert.equal(event.staker, staker);
+      assert.equal(event.recipient, staker); // staker's stake is released to staker address
+      assert.equal(event.amount.toString(), currentStake.toString()); // amount released is the full stake amount
+      assert.equal(event.newStake.toNumber(), 0);
+
+      const releaseStakeAmount = await this.TestSimpleGriefing.getReleaseStakeAmount();
+      assert.equal(releaseStakeAmount.toString(), currentStake.toString());
+    };
+
+    it("should revert when msg.sender is not counterparty or active operator", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(staker).releaseStake(),
+        "only counterparty or active operator"
+      );
+    });
+
+    it("should revert when msg.sender is operator but not active", async () => {
+      await this.TestSimpleGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(operator).releaseStake(),
+        "only counterparty or active operator"
+      );
+      await this.TestSimpleGriefing.activateOperator();
+    });
+
+    it("should release stake when msg.sender is counterparty", async () =>
+      await releaseStake(counterparty));
+
+    it("should release stake when msg.sender is active operator", async () => {
+      currentStake = stakerStake;
+
+      // have to re-increase stake to release
+      await this.MockNMR.from(staker).approve(
+        this.TestSimpleGriefing.contractAddress,
+        currentStake
+      );
+      await this.TestSimpleGriefing.from(staker).increaseStake(0, stakerStake);
+
+      await releaseStake(operator);
+    });
+  });
+
+  describe("SimpleGriefing.transferOperator", () => {
+    it("should revert when msg.sender is not operator", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(counterparty).transferOperator(
+          newOperator
+        ),
+        "only active operator"
+      );
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      await this.TestSimpleGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(counterparty).transferOperator(
+          newOperator
+        ),
+        "only active operator"
+      );
+      await this.TestSimpleGriefing.activateOperator();
+    });
+
+    it("should transfer operator", async () => {
+      const txn = await this.TestSimpleGriefing.transferOperator(newOperator);
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [newOperator, true]);
+
+      const actualOperator = await this.TestSimpleGriefing.getOperator();
+      assert.equal(actualOperator, newOperator);
+
+      const isActive = await this.TestSimpleGriefing.hasActiveOperator();
+      assert.equal(isActive, true);
+    });
+  });
+
+  describe("SimpleGriefing.renounceOperator", () => {
+    it("should revert when msg.sender is not operator", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(counterparty).renounceOperator(),
+        "only active operator"
+      );
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      await this.TestSimpleGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(operator).renounceOperator(),
+        "only active operator"
+      );
+      await this.TestSimpleGriefing.activateOperator();
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      const txn = await this.TestSimpleGriefing.from(
+        newOperator
+      ).renounceOperator();
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+
+      const actualOperator = await this.TestSimpleGriefing.getOperator();
+      assert.equal(actualOperator, ethers.constants.AddressZero);
+
+      const isActive = await this.TestSimpleGriefing.hasActiveOperator();
+      assert.equal(isActive, false);
+    });
   });
 });
