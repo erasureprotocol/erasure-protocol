@@ -17,10 +17,12 @@ contract Operated {
     }
 
     function _transferOperator(address operator) internal {
+        // transferring operator-ship implies there was an operator set before this
+        require(_operator != address(0), "operator not set");
         _setOperator(operator);
     }
 
-    function _renouceOperator() internal {
+    function _renounceOperator() internal {
         require(hasActiveOperator(), "only when operator active");
         _operator = address(0);
         _status = false;
