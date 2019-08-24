@@ -133,12 +133,12 @@ contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         Operated._transferOperator(operator);
     }
 
-    function renouceOperator() public {
+    function renounceOperator() public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         // transfer operator
-        Operated._renouceOperator();
+        Operated._renounceOperator();
     }
 
     // view functions
