@@ -9,10 +9,16 @@ describe("OneWayGriefing", function() {
   this.timeout(4000);
 
   // wallets and addresses
-  const [operatorWallet, counterpartyWallet, stakerWallet] = accounts;
+  const [
+    operatorWallet,
+    counterpartyWallet,
+    stakerWallet,
+    newOperatorWallet
+  ] = accounts;
   const operator = operatorWallet.signer.signingKey.address;
   const counterparty = counterpartyWallet.signer.signingKey.address;
   const staker = stakerWallet.signer.signingKey.address;
+  const newOperator = newOperatorWallet.signer.signingKey.address;
 
   // variables used in initialize()
   const stakerStake = ethers.utils.parseEther("200");
@@ -691,6 +697,72 @@ describe("OneWayGriefing", function() {
       // get the stored delegatecall result
       const actualRetrieveAmount = await this.TestOneWayGriefing.getRetrieveStakeAmount();
       assert.equal(actualRetrieveAmount.toString(), stakerStake.toString());
+    });
+  });
+
+  describe("OneWayGriefing.transferOperator", () => {
+    it("should revert when msg.sender is not operator", async () => {
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(counterparty).transferOperator(
+          newOperator
+        ),
+        "only active operator"
+      );
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      await this.TestOneWayGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(counterparty).transferOperator(
+          newOperator
+        ),
+        "only active operator"
+      );
+      await this.TestOneWayGriefing.activateOperator();
+    });
+
+    it("should transfer operator", async () => {
+      const txn = await this.TestOneWayGriefing.transferOperator(newOperator);
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [newOperator, true]);
+
+      const actualOperator = await this.TestOneWayGriefing.getOperator();
+      assert.equal(actualOperator, newOperator);
+
+      const isActive = await this.TestOneWayGriefing.hasActiveOperator();
+      assert.equal(isActive, true);
+    });
+  });
+
+  describe("OneWayGriefing.renounceOperator", () => {
+    it("should revert when msg.sender is not operator", async () => {
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(counterparty).renounceOperator(),
+        "only active operator"
+      );
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      await this.TestOneWayGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestOneWayGriefing.from(operator).renounceOperator(),
+        "only active operator"
+      );
+      await this.TestOneWayGriefing.activateOperator();
+    });
+
+    it("should revert when msg.sender is not active operator", async () => {
+      const txn = await this.TestOneWayGriefing.from(
+        newOperator
+      ).renounceOperator();
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+
+      const actualOperator = await this.TestOneWayGriefing.getOperator();
+      assert.equal(actualOperator, ethers.constants.AddressZero);
+
+      const isActive = await this.TestOneWayGriefing.hasActiveOperator();
+      assert.equal(isActive, false);
     });
   });
 });

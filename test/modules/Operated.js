@@ -1,11 +1,9 @@
 const { createDeployer } = require("../helpers/setup");
 
 describe("Operated", function() {
-  let wallets = {
-    numerai: accounts[0],
-    seller: accounts[1],
-    buyer: accounts[2]
-  };
+  const [operatorWallet, newOperatorWallet] = accounts;
+  const operator = operatorWallet.signer.signingKey.address;
+  const newOperator = newOperatorWallet.signer.signingKey.address;
 
   let contracts = {
     TestOperated: {
@@ -24,9 +22,9 @@ describe("Operated", function() {
     );
   });
 
-  describe("Operator._setOperator", () => {
-    const operator = wallets.seller.signer.signingKey.address;
+  // state functions
 
+  describe("Operator._setOperator", () => {
     it("should setOperator correctly", async () => {
       const txn = await contracts.TestOperated.instance.setOperator(operator);
       await assert.emit(txn, "OperatorUpdated");
@@ -70,12 +68,24 @@ describe("Operated", function() {
   });
 
   describe("Operator._deactivateOperator", () => {
-    it("should deactivateOperator correctly", async () => {
+    it("should deactivateOperator correctly with zero address", async () => {
       await contracts.TestOperated.instance.activateOperator();
 
       const txn = await contracts.TestOperated.instance.deactivateOperator();
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+
+      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
+      assert.equal(actualIsActive, false);
+    });
+
+    it("should deactivateOperator correctly with active operator", async () => {
+      await contracts.TestOperated.instance.setOperator(operator);
+      await contracts.TestOperated.instance.activateOperator();
+
+      const txn = await contracts.TestOperated.instance.deactivateOperator();
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [operator, false]);
 
       const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
       assert.equal(actualIsActive, false);
@@ -89,9 +99,72 @@ describe("Operated", function() {
     });
   });
 
-  describe("Operator.isActiveOperator", () => {
-    const operator = wallets.seller.signer.signingKey.address;
+  describe("Operator._transferOperator", () => {
+    it("should transfer operator correctly", async () => {
+      await contracts.TestOperated.instance.setOperator(operator);
 
+      const txn = await contracts.TestOperated.instance.transferOperator(
+        newOperator
+      );
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [newOperator, false]);
+
+      const actualOperator = await contracts.TestOperated.instance.getOperator();
+      assert.equal(actualOperator, newOperator);
+
+      const isOperator = await contracts.TestOperated.instance.isOperator(
+        newOperator
+      );
+      assert.equal(isOperator, true);
+    });
+
+    it("should revert when no operator was set", async () => {
+      await assert.revertWith(
+        contracts.TestOperated.instance.transferOperator(newOperator),
+        "operator not set"
+      );
+    });
+
+    // other revert cases are covered in Operated._setOperator tests already
+  });
+
+  describe("Operator._renounceOperator", () => {
+    it("should renounce operator correctly", async () => {
+      await contracts.TestOperated.instance.activateOperator();
+
+      const txn = await contracts.TestOperated.instance.renounceOperator();
+      await assert.emit(txn, "OperatorUpdated");
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+
+      const actualOperator = await contracts.TestOperated.instance.getOperator();
+      assert.equal(actualOperator, ethers.constants.AddressZero);
+
+      const status = await contracts.TestOperated.instance.hasActiveOperator();
+      assert.equal(status, false);
+    });
+
+    it("should revert when operator is not active", async () => {
+      await contracts.TestOperated.instance.activateOperator();
+
+      await contracts.TestOperated.instance.deactivateOperator();
+
+      await assert.revertWith(
+        contracts.TestOperated.instance.renounceOperator(),
+        "only when operator active"
+      );
+    });
+
+    it("should revert when no operator is set", async () => {
+      await assert.revertWith(
+        contracts.TestOperated.instance.renounceOperator(),
+        "only when operator active"
+      );
+    });
+  });
+
+  // view functions
+
+  describe("Operator.isActiveOperator", () => {
     it("should get isActiveOperator=true correctly", async () => {
       await contracts.TestOperated.instance.activateOperator();
       await contracts.TestOperated.instance.setOperator(operator);

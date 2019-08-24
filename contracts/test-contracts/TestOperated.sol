@@ -17,4 +17,12 @@ contract TestOperated is Operated {
     // backdoor function to deactivate Operator for testing
         Operated._deactivateOperator();
     }
+
+    function renounceOperator() public {
+        Operated._renounceOperator();
+    }
+
+    function transferOperator(address newOperator) public {
+        Operated._transferOperator(newOperator);
+    }
 }

@@ -245,8 +245,24 @@ describe("Registry", function() {
     });
   });
 
+  describe("Registry.getFactoryAddress", () => {
+    it("gets factory address correctly", async () => {
+      this.timeout(6000); // increase timeout because getFactoryAddress take long
+
+      for (let factoryId = 0; factoryId < factories.length; factoryId++) {
+        const factoryAddress = factories[factoryId];
+        const actualFactoryAddress = await this.Registry.getFactoryAddress(
+          factoryId
+        );
+        assert.equal(factoryAddress, actualFactoryAddress);
+      }
+    });
+  });
+
   describe("Registry.getFactories", () => {
     it("should get factories correctly", async () => {
+      this.timeout(6000); // increase timeout because getFactories take long
+
       const actualFactories = await this.Registry.getFactories();
       assert.deepEqual(actualFactories, factories);
     });
