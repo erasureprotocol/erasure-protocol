@@ -13,12 +13,14 @@ describe("SimpleGriefing", function() {
     operatorWallet,
     counterpartyWallet,
     stakerWallet,
-    newOperatorWallet
+    newOperatorWallet,
+    otherWallet
   ] = accounts;
   const operator = operatorWallet.signer.signingKey.address;
   const counterparty = counterpartyWallet.signer.signingKey.address;
   const staker = stakerWallet.signer.signingKey.address;
   const newOperator = newOperatorWallet.signer.signingKey.address;
+  const otherUser = otherWallet.signer.signingKey.address;
 
   // variables used in initialize()
   const stakerStake = ethers.utils.parseEther("200");
@@ -29,12 +31,23 @@ describe("SimpleGriefing", function() {
   const staticMetadata = "TESTING";
   let currentStake; // to increment as we go
 
+  const abiEncoder = new ethers.utils.AbiCoder();
+
+  const stakeDataA = abiEncoder.encode(
+    ["uint256", "uint8"],
+    [ratioE18, ratioType]
+  );
+  const stakeDataB = abiEncoder.encode(
+    ["uint256", "uint8"],
+    [ratioE18, ratioType]
+  );
+
   const initArgs = [
     operator,
     staker,
     counterparty,
-    ratioE18,
-    ratioType,
+    stakeDataA,
+    stakeDataB,
     Buffer.from(staticMetadata)
   ];
 
@@ -106,8 +119,8 @@ describe("SimpleGriefing", function() {
       const isStaker = await this.TestSimpleGriefing.isStaker(staker);
       assert.equal(isStaker, true);
 
-      // _data.counterparty
-      const isCounterparty = await this.TestSimpleGriefing.isCounterparty(
+      // _data.staker
+      const isCounterparty = await this.TestSimpleGriefing.isStaker(
         counterparty
       );
       assert.equal(isCounterparty, true);
@@ -154,8 +167,8 @@ describe("SimpleGriefing", function() {
         operator,
         staker,
         counterparty,
-        ratioE18,
-        ratioType,
+        stakeDataA,
+        stakeDataB,
         Buffer.from(staticMetadata)
       ];
 
@@ -173,7 +186,7 @@ describe("SimpleGriefing", function() {
     it("should revert when msg.sender is not staker or active operator", async () => {
       // use the counterparty to be the msg.sender
       await assert.revertWith(
-        this.TestSimpleGriefing.from(counterparty).setVariableMetadata(
+        this.TestSimpleGriefing.from(otherUser).setVariableMetadata(
           Buffer.from(stakerMetadata)
         ),
         "only staker or active operator"
@@ -219,13 +232,18 @@ describe("SimpleGriefing", function() {
   describe("SimpleGriefing.increaseStake", () => {
     let amountToAdd = 500; // 500 token weis
 
-    const increaseStake = async sender => {
+    const increaseStake = async (sender, staker) => {
+      currentStake = (await this.TestSimpleGriefing.getStake(
+        staker
+      )).toNumber();
+
       await this.MockNMR.from(sender).approve(
         this.TestSimpleGriefing.contractAddress,
         amountToAdd
       );
 
       const txn = await this.TestSimpleGriefing.from(sender).increaseStake(
+        staker,
         currentStake,
         amountToAdd
       );
@@ -258,6 +276,7 @@ describe("SimpleGriefing", function() {
       // use the counterparty to be the msg.sender
       await assert.revertWith(
         this.TestSimpleGriefing.from(counterparty).increaseStake(
+          staker,
           currentStake,
           amountToAdd
         ),
@@ -270,6 +289,7 @@ describe("SimpleGriefing", function() {
 
       await assert.revertWith(
         this.TestSimpleGriefing.from(operator).increaseStake(
+          staker,
           currentStake,
           amountToAdd,
           { gasLimit: 30000 }
@@ -280,12 +300,37 @@ describe("SimpleGriefing", function() {
       await this.TestSimpleGriefing.from(operator).activateOperator();
     });
 
+    it("should revert when counterparty increase stake for staker", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(counterparty).increaseStake(
+          staker,
+          currentStake,
+          amountToAdd,
+          { gasLimit: 30000 }
+        ),
+        "only staker or active operator"
+      );
+    });
+
+    it("should revert when staker increase stake for counterparty", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(staker).increaseStake(
+          counterparty,
+          currentStake,
+          amountToAdd,
+          { gasLimit: 30000 }
+        ),
+        "only staker or active operator"
+      );
+    });
+
     it("should increase stake when msg.sender is staker", async () => {
-      await increaseStake(staker);
+      await increaseStake(staker, staker);
+      await increaseStake(counterparty, counterparty);
     });
 
     it("should increase stake when msg.sender is operator", async () => {
-      await increaseStake(operator);
+      await increaseStake(operator, staker);
     });
   });
 
@@ -305,6 +350,7 @@ describe("SimpleGriefing", function() {
       );
 
       const txn = await this.TestSimpleGriefing.from(sender).reward(
+        staker,
         currentStake,
         amountToAdd
       );
@@ -333,15 +379,19 @@ describe("SimpleGriefing", function() {
       assert.equal(stakeAddedEvent.args.newStake.toNumber(), currentStake);
     };
 
-    it("should revert when msg.sender is staker", async () => {
+    it("should revert when msg.sender is not staker or operator", async () => {
       // update currentStake
       currentStake = (await this.TestSimpleGriefing.getStake(
         staker
       )).toNumber();
 
-      // use the staker to be the msg.sender
+      // use a random user to be the msg.sender
       await assert.revertWith(
-        this.TestSimpleGriefing.from(staker).reward(currentStake, amountToAdd),
+        this.TestSimpleGriefing.from(otherUser).reward(
+          staker,
+          currentStake,
+          amountToAdd
+        ),
         "only counterparty or active operator"
       );
     });
@@ -351,6 +401,7 @@ describe("SimpleGriefing", function() {
 
       await assert.revertWith(
         this.TestSimpleGriefing.from(operator).reward(
+          staker,
           currentStake,
           amountToAdd
         ),
@@ -358,6 +409,17 @@ describe("SimpleGriefing", function() {
       );
 
       await this.TestSimpleGriefing.from(operator).activateOperator();
+    });
+
+    it("should revert when staker reward self", async () => {
+      await assert.revertWith(
+        this.TestSimpleGriefing.from(staker).reward(
+          staker,
+          currentStake,
+          amountToAdd
+        ),
+        "only counterparty or active operator"
+      );
     });
 
     it("should succeed when msg.sender is counterparty", async () => {
@@ -370,18 +432,20 @@ describe("SimpleGriefing", function() {
   });
 
   describe("SimpleGriefing.punish", () => {
-    const from = counterparty;
+    const target = staker;
     const message = "I don't like you";
-    const punishArgs = [from, punishment, Buffer.from(message)];
-    currentStake = ethers.utils.bigNumberify("0");
+    const punishArgs = [target, punishment, Buffer.from(message)];
 
-    const punishStaker = async () => {
+    const punishStaker = async (staker, counterparty) => {
+      currentStake = await this.TestSimpleGriefing.getStake(staker);
+
       // increase staker's stake to 500
       await this.MockNMR.from(staker).approve(
         this.TestSimpleGriefing.contractAddress,
         stakerStake
       );
       await this.TestSimpleGriefing.from(staker).increaseStake(
+        staker,
         currentStake,
         stakerStake
       );
@@ -447,12 +511,15 @@ describe("SimpleGriefing", function() {
       );
     });
 
-    it("should punish staker", async () => await punishStaker());
+    it("should punish staker", async () =>
+      await punishStaker(staker, counterparty));
   });
 
   describe("SimpleGriefing.releaseStake", () => {
-    const releaseStake = async sender => {
-      const txn = await this.TestSimpleGriefing.from(sender).releaseStake();
+    const releaseStake = async (sender, staker) => {
+      const txn = await this.TestSimpleGriefing.from(sender).releaseStake(
+        staker
+      );
       const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
         txn
       );
@@ -474,7 +541,7 @@ describe("SimpleGriefing", function() {
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
       await assert.revertWith(
-        this.TestSimpleGriefing.from(staker).releaseStake(),
+        this.TestSimpleGriefing.from(staker).releaseStake(staker),
         "only counterparty or active operator"
       );
     });
@@ -482,14 +549,14 @@ describe("SimpleGriefing", function() {
     it("should revert when msg.sender is operator but not active", async () => {
       await this.TestSimpleGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).releaseStake(),
+        this.TestSimpleGriefing.from(operator).releaseStake(staker),
         "only counterparty or active operator"
       );
       await this.TestSimpleGriefing.activateOperator();
     });
 
     it("should release stake when msg.sender is counterparty", async () =>
-      await releaseStake(counterparty));
+      await releaseStake(counterparty, staker));
 
     it("should release stake when msg.sender is active operator", async () => {
       currentStake = stakerStake;
@@ -499,9 +566,13 @@ describe("SimpleGriefing", function() {
         this.TestSimpleGriefing.contractAddress,
         currentStake
       );
-      await this.TestSimpleGriefing.from(staker).increaseStake(0, stakerStake);
+      await this.TestSimpleGriefing.from(staker).increaseStake(
+        staker,
+        0,
+        stakerStake
+      );
 
-      await releaseStake(operator);
+      await releaseStake(operator, staker);
     });
   });
 

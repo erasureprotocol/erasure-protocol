@@ -16,14 +16,16 @@ const ratio = ethers.utils.parseEther("2");
 const ratioType = RATIO_TYPES.Dec;
 const countdownLength = 1000;
 const staticMetadata = "TESTING";
+const abiEncoder = new ethers.utils.AbiCoder();
+const stakeData = abiEncoder.encode(["uint256", "uint8"], [ratio, ratioType]);
 
 const createTypes = [
   "address",
   "address",
   "address",
   "address",
-  "uint256",
-  "uint8",
+  "bytes",
+  "bytes",
   "bytes"
 ];
 
@@ -48,14 +50,14 @@ function runFactoryTest() {
         owner,
         staker,
         counterparty,
-        ratio,
-        ratioType,
+        stakeData,
+        stakeData,
         Buffer.from(staticMetadata)
       ];
 
       testFactory(
         deployer,
-        "SimpleGriefing_Factory",
+        factoryName,
         instanceType,
         createTypes,
         createArgs,

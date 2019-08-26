@@ -14,20 +14,20 @@ contract TestSimpleGriefing is SimpleGriefing {
         address griefingContract,
         address token,
         address operator,
-        address staker,
-        address counterparty,
-        uint256 ratio,
-        Griefing.RatioType ratioType,
+        address stakerA,
+        address stakerB,
+        bytes memory stakeDataA,
+        bytes memory stakeDataB,
         bytes memory staticMetadata) public {
 
         initializeSimpleGriefing(
             griefingContract,
             token,
             operator,
-            staker,
-            counterparty,
-            ratio,
-            ratioType,
+            stakerA,
+            stakerB,
+            stakeDataA,
+            stakeDataB,
             staticMetadata
         );
     }
@@ -36,10 +36,10 @@ contract TestSimpleGriefing is SimpleGriefing {
         address griefingContract,
         address token,
         address operator,
-        address staker,
-        address counterparty,
-        uint256 ratio,
-        Griefing.RatioType ratioType,
+        address stakerA,
+        address stakerB,
+        bytes memory stakeDataA,
+        bytes memory stakeDataB,
         bytes memory staticMetadata
     ) public {
         _griefingContract = griefingContract;
@@ -48,10 +48,10 @@ contract TestSimpleGriefing is SimpleGriefing {
             _template.initialize.selector, // selector
             token,           // token
             operator,        // operator
-            staker,          // staker
-            counterparty,    // counterparty
-            ratio,           // ratio
-            ratioType,       // ratioType
+            stakerA,
+            stakerB,
+            stakeDataA,
+            stakeDataB,
             staticMetadata   // staticMetadata
         );
 
@@ -68,28 +68,28 @@ contract TestSimpleGriefing is SimpleGriefing {
         require(ok, string(data));
     }
 
-    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
+    function increaseStake(address staker, uint256 currentStake, uint256 amountToAdd) public {
         bytes memory callData = abi.encodeWithSelector(
             _template.increaseStake.selector,
-            currentStake, amountToAdd
+            staker, currentStake, amountToAdd
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
     }
 
-    function reward(uint256 currentStake, uint256 amountToAdd) public {
+    function reward(address staker, uint256 currentStake, uint256 amountToAdd) public {
         bytes memory callData = abi.encodeWithSelector(
             _template.reward.selector,
-            currentStake, amountToAdd
+            staker, currentStake, amountToAdd
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
     }
 
-    function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+    function punish(address target, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         bytes memory callData = abi.encodeWithSelector(
             _template.punish.selector,
-            from, punishment, message
+            target, punishment, message
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));
@@ -97,9 +97,10 @@ contract TestSimpleGriefing is SimpleGriefing {
         _griefCost = cost;
     }
 
-    function releaseStake() public returns (uint256 amount) {
+    function releaseStake(address staker) public returns (uint256 amount) {
         bytes memory callData = abi.encodeWithSelector(
-            _template.releaseStake.selector
+            _template.releaseStake.selector,
+            staker
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));

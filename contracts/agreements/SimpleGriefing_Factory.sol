@@ -12,17 +12,17 @@ contract SimpleGriefing_Factory is Factory {
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initdataABI
-        string memory initdataABI = '(address,address,address,address,uint256,uint8,bytes)';
+        string memory initdataABI = '(address,address,address,address,bytes,bytes,bytes)';
         // initialize factory params
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
     event ExplicitInitData(
-        address indexed staker,
-        address indexed counterparty,
+        address indexed stakerA,
+        address indexed stakerB,
         address indexed operator,
-        uint256 ratio,
-        Griefing.RatioType ratioType,
+        bytes stakeDataA,
+        bytes stakeDataB,
         bytes staticMetadata
     );
 
@@ -36,24 +36,24 @@ contract SimpleGriefing_Factory is Factory {
         (
             address token,
             address operator,
-            address staker,
-            address counterparty,
-            uint256 ratio,
-            Griefing.RatioType ratioType, // uint8
+            address stakerA,
+            address stakerB,
+            bytes memory stakeDataA,
+            bytes memory stakeDataB,
             bytes memory staticMetadata
-        ) = abi.decode(initdata, (address,address,address,address,uint256,Griefing.RatioType,bytes));
+        ) = abi.decode(initdata, (address,address,address,address,bytes,bytes,bytes));
 
         // call explicit create
-        instance = createExplicit(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);
+        instance = createExplicit(token, operator, stakerA, stakerB, stakeDataA, stakeDataB, staticMetadata);
     }
 
     function createExplicit(
         address token,
         address operator,
-        address staker,
-        address counterparty,
-        uint256 ratio,
-        Griefing.RatioType ratioType, // uint8
+        address stakerA,
+        address stakerB,
+        bytes memory stakeDataA,
+        bytes memory stakeDataB,
         bytes memory staticMetadata
     ) public returns (address instance) {
         // declare template in memory
@@ -62,20 +62,20 @@ contract SimpleGriefing_Factory is Factory {
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(
             template.initialize.selector, // selector
-            token,           // token
-            operator,        // operator
-            staker,          // staker
-            counterparty,    // counterparty
-            ratio,           // ratio
-            ratioType,       // ratioType
-            staticMetadata   // staticMetadata
+            token,          // token
+            operator,       // operator
+            stakerA,        // first staker
+            stakerB,        // second staker
+            stakeDataA,     // stake data for stakerA
+            stakeDataB,     // stake data for stakerB
+            staticMetadata  // staticMetadata
         );
 
         // deploy instance
         instance = Factory._create(callData);
 
         // emit event
-        emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);
+        emit ExplicitInitData(stakerA, stakerB, operator, stakeDataA, stakeDataB, staticMetadata);
     }
 
 }

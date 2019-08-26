@@ -2,15 +2,13 @@ pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
-import "../modules/Countdown.sol";
 import "../modules/Griefing.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
-/* Immediately engage with specific buyer
- * - Stake can be increased at any time.
- * - Counterparty can greif the staker at predefined ratio.
+/* Agreement between two stakers
+ * - each staker has the ability to grief each other
  *
  * NOTE:
  * - This top level contract should only perform access control and state transitions
@@ -22,22 +20,33 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
 
     Data private _data;
     struct Data {
-        address staker;
-        address counterparty;
+        address stakerA;
+        address stakerB;
     }
 
     function initialize(
         address token,
         address operator,
-        address staker,
-        address counterparty,
-        uint256 ratio,
-        Griefing.RatioType ratioType,
+        address stakerA,
+        address stakerB,
+        bytes memory stakeDataA,
+        bytes memory stakeDataB,
         bytes memory staticMetadata
     ) public initializeTemplate() {
+
         // set storage values
-        _data.staker = staker;
-        _data.counterparty = counterparty;
+        _data.stakerA = stakerA;
+        _data.stakerB = stakerB;
+
+        // decode staker data and set griefing ratios
+        if (stakeDataA.length > 0) {
+            (uint256 ratioA, Griefing.RatioType ratioTypeA) = abi.decode(stakeDataA, (uint256, Griefing.RatioType));
+            Griefing._setRatio(stakerA, ratioA, ratioTypeA);
+        }
+        if (stakeDataB.length > 0) {
+            (uint256 ratioB, Griefing.RatioType ratioTypeB) = abi.decode(stakeDataB, (uint256, Griefing.RatioType));
+            Griefing._setRatio(stakerB, ratioB, ratioTypeB);
+        }
 
         // set operator
         if (operator != address(0)) {
@@ -47,9 +56,6 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
 
         // set token used for staking
         Staking._setToken(token);
-
-        // set griefing ratio
-        Griefing._setRatio(staker, ratio, ratioType);
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
@@ -65,36 +71,58 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         Metadata._setVariableMetadata(variableMetadata);
     }
 
-    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
-        // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
+    function increaseStake(address staker, uint256 currentStake, uint256 amountToAdd) public {
+        // check if valid staker input
+        require(isStaker(staker), "only registered staker");
 
-        // add stake
-        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
+        // restrict access
+        require(staker == msg.sender || Operated.isActiveOperator(msg.sender), "only staker or active operator");
+
+        // add stake from msg.sender
+        Staking._addStake(staker, msg.sender, currentStake, amountToAdd);
     }
 
-    function reward(uint256 currentStake, uint256 amountToAdd) public {
-        // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+    function reward(address staker, uint256 currentStake, uint256 amountToAdd) public {
+        // check if valid staker input
+        require(isStaker(staker), "only registered staker");
 
-        // add stake
-        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
+        // the sender must be the counterparty of the staker rewarded
+        address counterparty = getCounterparty(staker);
+
+        // restrict access
+        require(msg.sender == counterparty || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+
+         // add stake to the counterparty
+        Staking._addStake(staker, msg.sender, currentStake, amountToAdd);
     }
 
-    function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
-        // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+    function punish(address target, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+        // check if valid target input
+        require(isStaker(target), "only registered staker");
 
-        // execute griefing
-        cost = Griefing._grief(from, _data.staker, punishment, message);
+        // the sender must be the counterparty of the target to be punished
+        address counterparty = getCounterparty(target);
+
+        // restrict access
+        require(msg.sender == counterparty || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+
+        // execute griefing from msg.sender
+        cost = Griefing._grief(msg.sender, target, punishment, message);
     }
 
-    function releaseStake() public returns (uint256 amount) {
-        // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+    function releaseStake(address staker) public returns (uint256 amount) {
+        // check if valid staker input
+        require(isStaker(staker), "only registered staker");
 
-        // release stake back to the staker
-        amount = Staking._takeFullStake(_data.staker, _data.staker);
+        // sender must be the counterparty of staker
+        address counterparty = getCounterparty(staker);
+
+        // restrict access
+        require(msg.sender == counterparty || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+
+        if (Staking.getStake(staker) > 0) {
+            amount = Staking._takeFullStake(staker, staker);
+        }
     }
 
     function transferOperator(address operator) public {
@@ -115,11 +143,22 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
 
     // view functions
 
-    function isStaker(address caller) public view returns (bool validity) {
-        validity = (caller == _data.staker);
+    function isStaker(address caller) public view returns (bool ok) {
+        // returns true if caller is one of the registered stakers
+        ok = (caller == _data.stakerA || caller == _data.stakerB);
     }
 
-    function isCounterparty(address caller) public view returns (bool validity) {
-        validity = (caller == _data.counterparty);
+    function getCounterparty(address caller) public view returns (address counterparty) {
+        // if stakerA, return stakerB
+        // if stakerB, return stakerA
+        if (_data.stakerA == caller) {
+            return _data.stakerB;
+        } else if (_data.stakerB == caller) {
+            return _data.stakerA;
+        }
+        // don't revert when `caller` is not a staker
+        // just return empty address and allow higher level functions
+        // to do error-handling with isStaker
+        return address(0);
     }
 }
