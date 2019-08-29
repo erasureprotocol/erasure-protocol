@@ -1,14 +1,14 @@
 pragma solidity ^0.5.0;
 
 import "../modules/Factory.sol";
-import "./OneWayGriefing.sol";
+import "./CountdownGriefing.sol";
 
 
-contract OneWayGriefing_Factory is Factory {
+contract CountdownGriefing_Factory is Factory {
 
     constructor(address instanceRegistry) public {
         // deploy template contract
-        address templateContract = address(new OneWayGriefing());
+        address templateContract = address(new CountdownGriefing());
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initdataABI
@@ -52,7 +52,7 @@ contract OneWayGriefing_Factory is Factory {
         bytes memory staticMetadata
     ) public returns (address instance) {
         // declare template in memory
-        OneWayGriefing template;
+        CountdownGriefing template;
 
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(

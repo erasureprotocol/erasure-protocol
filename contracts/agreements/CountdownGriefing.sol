@@ -17,7 +17,7 @@ import "../modules/Template.sol";
  * - This top level contract should only perform access control and state transitions
  *
  */
-contract OneWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
+contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template {
 
     using SafeMath for uint256;
 

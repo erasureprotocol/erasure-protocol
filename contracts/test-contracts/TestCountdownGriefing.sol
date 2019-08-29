@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
-import "../agreements/OneWayGriefing.sol";
+import "../agreements/CountdownGriefing.sol";
 
-contract TestOneWayGriefing is OneWayGriefing {
-    OneWayGriefing private _template;
+contract TestCountdownGriefing is CountdownGriefing {
+    CountdownGriefing private _template;
     address private _griefingContract;
 
     uint256 private _griefCost;
@@ -21,7 +21,7 @@ contract TestOneWayGriefing is OneWayGriefing {
         uint256 countdownLength,
         bytes memory staticMetadata) public {
 
-        initializeOneWayGriefing(
+        initializeCountdownGriefing(
             griefingContract,
             token,
             operator,
@@ -34,7 +34,7 @@ contract TestOneWayGriefing is OneWayGriefing {
         );
     }
 
-    function initializeOneWayGriefing(
+    function initializeCountdownGriefing(
         address griefingContract,
         address token,
         address operator,
