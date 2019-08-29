@@ -1,23 +1,30 @@
 pragma solidity ^0.5.0;
 
 import "../modules/Factory.sol";
-import "./OneWayGriefing.sol";
+import "./SimpleGriefing.sol";
 
 
-contract OneWayGriefing_Factory is Factory {
+contract SimpleGriefing_Factory is Factory {
 
     constructor(address instanceRegistry) public {
         // deploy template contract
-        address templateContract = address(new OneWayGriefing());
+        address templateContract = address(new SimpleGriefing());
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initdataABI
-        string memory initdataABI = '(address,address,address,address,uint256,uint8,uint256,bytes)';
+        string memory initdataABI = '(address,address,address,address,uint256,uint8,bytes)';
         // initialize factory params
         Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
     }
 
-    event ExplicitInitData(address indexed staker, address indexed counterparty, address indexed operator, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes staticMetadata);
+    event ExplicitInitData(
+        address indexed staker,
+        address indexed counterparty,
+        address indexed operator,
+        uint256 ratio,
+        Griefing.RatioType ratioType,
+        bytes staticMetadata
+    );
 
     function create(bytes memory callData) public returns (address instance) {
         // deploy instance
@@ -33,12 +40,11 @@ contract OneWayGriefing_Factory is Factory {
             address counterparty,
             uint256 ratio,
             Griefing.RatioType ratioType, // uint8
-            uint256 countdownLength,
             bytes memory staticMetadata
-        ) = abi.decode(initdata, (address,address,address,address,uint256,Griefing.RatioType,uint256,bytes));
+        ) = abi.decode(initdata, (address,address,address,address,uint256,Griefing.RatioType,bytes));
 
         // call explicit create
-        instance = createExplicit(token, operator, staker, counterparty, ratio, ratioType, countdownLength, staticMetadata);
+        instance = createExplicit(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);
     }
 
     function createExplicit(
@@ -48,11 +54,10 @@ contract OneWayGriefing_Factory is Factory {
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType, // uint8
-        uint256 countdownLength,
         bytes memory staticMetadata
     ) public returns (address instance) {
         // declare template in memory
-        OneWayGriefing template;
+        SimpleGriefing template;
 
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(
@@ -63,7 +68,6 @@ contract OneWayGriefing_Factory is Factory {
             counterparty,    // counterparty
             ratio,           // ratio
             ratioType,       // ratioType
-            countdownLength, // countdownLength
             staticMetadata   // staticMetadata
         );
 
@@ -71,7 +75,7 @@ contract OneWayGriefing_Factory is Factory {
         instance = Factory._create(callData);
 
         // emit event
-        emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, countdownLength, staticMetadata);
+        emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);
     }
 
 }

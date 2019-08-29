@@ -233,6 +233,7 @@ describe("Griefing", function() {
     const punishment = ethers.utils.parseEther("10");
     const ratioType = RATIO_TYPES.Dec;
     const message = "I don't like you";
+    let currentStake = ethers.utils.bigNumberify("0");
 
     it("should revert when token not set", async () => {
       await contracts.TestGriefing.instance.setToken(
@@ -242,8 +243,23 @@ describe("Griefing", function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
         "token not set"
+      );
+    });
+
+    it("should revert when wrong currentStake", async () => {
+      const currentStake = ethers.utils.parseEther("100");
+
+      await assert.revertWith(
+        contracts.TestGriefing.instance.grief(
+          buyer,
+          seller,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
+        "current stake incorrect"
       );
     });
 
@@ -252,6 +268,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
+          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -270,6 +287,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
+          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -283,7 +301,7 @@ describe("Griefing", function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
         "insufficient allowance"
       );
     });
@@ -303,7 +321,7 @@ describe("Griefing", function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
         "insufficient allowance"
       );
     });
@@ -321,7 +339,7 @@ describe("Griefing", function() {
       await assert.revert(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message))
+          .grief(buyer, seller, currentStake, punishment, Buffer.from(message))
       );
     });
 
@@ -342,6 +360,8 @@ describe("Griefing", function() {
         .from(seller)
         .addStake(seller, seller, 0, wrongStakeAmount);
 
+      currentStake = wrongStakeAmount;
+
       // buyer process
       await contracts.MockNMR.instance
         .from(buyer)
@@ -350,7 +370,7 @@ describe("Griefing", function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
         "cannot burn more than currentStake"
       );
     });
@@ -373,6 +393,8 @@ describe("Griefing", function() {
         .from(seller)
         .addStake(seller, seller, 0, stakeAmount);
 
+      currentStake = stakeAmount;
+
       // buyer process
       const expectedCost = 0; // punishment at no cost
 
@@ -382,7 +404,7 @@ describe("Griefing", function() {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, punishment, Buffer.from(message));
+        .grief(buyer, seller, currentStake, punishment, Buffer.from(message));
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );
@@ -425,6 +447,8 @@ describe("Griefing", function() {
         .from(seller)
         .addStake(seller, seller, 0, stakeAmount);
 
+      currentStake = stakeAmount;
+
       // buyer process
       const expectedCost = punishment.mul(ratio);
 
@@ -434,7 +458,7 @@ describe("Griefing", function() {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, punishment, Buffer.from(message));
+        .grief(buyer, seller, currentStake, punishment, Buffer.from(message));
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );

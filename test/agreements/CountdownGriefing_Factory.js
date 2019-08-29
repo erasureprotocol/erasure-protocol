@@ -1,5 +1,5 @@
 // require artifacts
-const OneWayGriefing_FactoryArtifact = require("../../build/OneWayGriefing_Factory.json");
+const OneWayGriefing_FactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
@@ -10,7 +10,7 @@ const testFactory = require("../modules/Factory");
 const { RATIO_TYPES } = require("../helpers/variables");
 
 // variables used in initialize()
-const factoryName = "OneWayGriefing_Factory";
+const factoryName = "CountdownGriefing_Factory";
 const instanceType = "Agreement";
 const ratio = ethers.utils.parseEther("2");
 const ratioType = RATIO_TYPES.Dec;
@@ -57,7 +57,7 @@ function runFactoryTest() {
 
       testFactory(
         deployer,
-        "OneWayGriefing_Factory",
+        factoryName,
         instanceType,
         createTypes,
         createArgs,

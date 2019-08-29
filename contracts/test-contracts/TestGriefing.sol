@@ -24,7 +24,13 @@ contract TestGriefing is Griefing {
         Griefing._setRatio(staker, ratio, ratioType);
     }
 
-    function grief(address punisher, address staker, uint256 punishment, bytes memory message) public {
-        _griefCost = Griefing._grief(punisher, staker, punishment, message);
+    function grief(
+        address punisher,
+        address staker,
+        uint256 currentStake,
+        uint256 punishment,
+        bytes memory message
+    ) public {
+        _griefCost = Griefing._grief(punisher, staker, currentStake, punishment, message);
     }
 }

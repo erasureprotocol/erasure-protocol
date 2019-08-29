@@ -85,18 +85,21 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         Staking._addStake(staker, msg.sender, currentStake, amountToAdd);
     }
 
-    function punish(address target, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+    function punish(address target, uint256 currentStake, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // check if valid target input
         require(isStaker(target), "only registered staker");
 
+        // only counterparty or operator can grief target
+        address counterparty = getCounterparty(target);
+
         // restrict access - NOTE: currently allows to grief self
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
+        require(msg.sender == counterparty || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require agreement is not ended
         require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing from msg.sender
-        cost = Griefing._grief(msg.sender, target, punishment, message);
+        cost = Griefing._grief(msg.sender, target, currentStake, punishment, message);
     }
 
     function startCountdown() public returns (uint256 deadline) {
@@ -129,5 +132,24 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
     function isStaker(address caller) public view returns (bool ok) {
         // returns true if caller is one of the registered stakers
         ok = (caller == _data.stakerA || caller == _data.stakerB);
+    }
+
+    function getStakers() public view returns (address stakerA, address stakerB) {
+        stakerA = _data.stakerA;
+        stakerB = _data.stakerB;
+    }
+
+    function getCounterparty(address caller) public view returns (address counterparty) {
+        // if stakerA, return stakerB
+        // if stakerB, return stakerA
+        if (_data.stakerA == caller) {
+            return _data.stakerB;
+        } else if (_data.stakerB == caller) {
+            return _data.stakerA;
+        }
+        // don't revert when `caller` is not a staker
+        // just return empty address and allow higher level functions
+        // to do error-handling with isStaker
+        return address(0);
     }
 }
