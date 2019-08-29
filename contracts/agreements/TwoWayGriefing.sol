@@ -85,7 +85,7 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         Staking._addStake(staker, msg.sender, currentStake, amountToAdd);
     }
 
-    function punish(address target, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+    function punish(address target, uint256 currentStake, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // check if valid target input
         require(isStaker(target), "only registered staker");
 
@@ -99,7 +99,7 @@ contract TwoWayGriefing is Countdown, Griefing, Metadata, Operated, Template {
         require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing from msg.sender
-        cost = Griefing._grief(msg.sender, target, punishment, message);
+        cost = Griefing._grief(msg.sender, target, currentStake, punishment, message);
     }
 
     function startCountdown() public returns (uint256 deadline) {

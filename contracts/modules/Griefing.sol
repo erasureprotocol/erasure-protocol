@@ -34,8 +34,19 @@ contract Griefing is Staking {
         emit RatioSet(staker, ratio, ratioType);
     }
 
-    function _grief(address punisher, address staker, uint256 punishment, bytes memory message) internal returns (uint256 cost) {
+    function _grief(
+        address punisher,
+        address staker,
+        uint256 currentStake,
+        uint256 punishment,
+        bytes memory message
+    ) internal returns (uint256 cost) {
         require(BurnNMR.getToken() != address(0), "token not set");
+
+        // get stake from storage
+        uint256 storageStake = Staking.getStake(staker);
+
+        require(currentStake == storageStake, "current stake incorrect");
 
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
@@ -49,9 +60,6 @@ contract Griefing is Staking {
 
         // burn the cost from the punisher's balance
         BurnNMR._burnFrom(punisher, cost);
-
-        // get stake from storage
-        uint256 currentStake = Staking.getStake(staker);
 
         // burn the punishment from the target's stake
         Staking._burnStake(staker, currentStake, punishment);

@@ -395,7 +395,10 @@ describe("SimpleGriefing", function() {
       );
 
       const txn = await this.TestSimpleGriefing.from(counterparty).punish(
-        ...punishArgs
+        from,
+        currentStake,
+        punishment,
+        Buffer.from(message)
       );
       const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
         txn
@@ -435,14 +438,24 @@ describe("SimpleGriefing", function() {
 
       // staker is not counterparty or operator
       await assert.revertWith(
-        this.TestSimpleGriefing.from(staker).punish(...punishArgs),
+        this.TestSimpleGriefing.from(staker).punish(
+          from,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
         "only counterparty or active operator"
       );
     });
 
     it("should revert when no approval to burn tokens", async () => {
       await assert.revertWith(
-        this.TestSimpleGriefing.from(counterparty).punish(...punishArgs),
+        this.TestSimpleGriefing.from(counterparty).punish(
+          from,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
         "insufficient allowance"
       );
     });

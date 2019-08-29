@@ -99,10 +99,10 @@ contract TestCountdownGriefing is CountdownGriefing {
         _deadline = deadline;
     }
 
-    function punish(address from, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+    function punish(address from, uint256 currentStake, uint256 punishment, bytes memory message) public returns (uint256 cost) {
         bytes memory callData = abi.encodeWithSelector(
             _template.punish.selector,
-            from, punishment, message
+            from, currentStake, punishment, message
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));

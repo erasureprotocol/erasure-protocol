@@ -491,7 +491,6 @@ describe("CountdownGriefing", function() {
   describe("CountdownGriefing.punish", () => {
     const from = counterparty;
     const message = "I don't like you";
-    const punishArgs = [from, punishment, Buffer.from(message)];
     let currentStake = ethers.utils.bigNumberify("0");
 
     const punishStaker = async () => {
@@ -514,7 +513,10 @@ describe("CountdownGriefing", function() {
       );
 
       const txn = await this.TestCountdownGriefing.from(counterparty).punish(
-        ...punishArgs
+        from,
+        currentStake,
+        punishment,
+        Buffer.from(message)
       );
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn
@@ -554,7 +556,12 @@ describe("CountdownGriefing", function() {
 
       // staker is not counterparty or operator
       await assert.revertWith(
-        this.TestCountdownGriefing.from(staker).punish(...punishArgs),
+        this.TestCountdownGriefing.from(staker).punish(
+          from,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
         "only counterparty or active operator"
       );
     });
@@ -579,7 +586,12 @@ describe("CountdownGriefing", function() {
       await utils.setTimeTo(deployer.provider, futureTimestamp);
 
       await assert.revertWith(
-        this.TestCountdownGriefing.from(counterparty).punish(...punishArgs),
+        this.TestCountdownGriefing.from(counterparty).punish(
+          from,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
         "agreement ended"
       );
 
@@ -588,9 +600,28 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when no approval to burn tokens", async () => {
+      currentStake = await this.TestCountdownGriefing.getStake(staker);
+
       await assert.revertWith(
-        this.TestCountdownGriefing.from(counterparty).punish(...punishArgs),
+        this.TestCountdownGriefing.from(counterparty).punish(
+          from,
+          currentStake,
+          punishment,
+          Buffer.from(message)
+        ),
         "insufficient allowance"
+      );
+    });
+
+    it("should revert when currentStake is incorrect", async () => {
+      await assert.revertWith(
+        this.TestCountdownGriefing.from(counterparty).punish(
+          from,
+          currentStake.add(1),
+          punishment,
+          Buffer.from(message)
+        ),
+        "current stake incorrect"
       );
     });
 
