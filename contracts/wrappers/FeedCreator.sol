@@ -1,7 +1,12 @@
 pragma solidity ^0.5.0;
 
-import "../posts/Feed_Factory.sol";
 import "../helpers/openzeppelin-solidity/ownership/Ownable.sol";
+
+
+interface IFeed_Factory {
+    function createExplicit(address operator, address postRegistry, bytes calldata feedStaticMetadata) external returns (address instance);
+    function createPost(address postFactory, bytes calldata initData) external returns (address post);
+}
 
 contract FeedManager is Ownable {
 
@@ -19,26 +24,20 @@ contract FeedManager is Ownable {
         address postRegistry,
         bytes memory feedStaticMetadata
     ) public returns (address instance) {
-        // declare template in memory
-        Feed template;
 
-        // construct the data payload used when initializing the new contract.
-        bytes memory callData = abi.encodeWithSelector(
-            template.initialize.selector, // selector
+        // deploy instance
+        instance = IFeed_Factory(_feedFactory).createExplicit(
             operator,
             postRegistry,
             feedStaticMetadata
         );
-
-        // deploy instance
-        instance = Feed_Factory(_feedFactory).create(callData);
 
         // set instance in storage
         _feed = instance;
     }
 
     function createPost(address postFactory, bytes memory initData) public returns (address post) {
-        post = Feed(_feed).createPost(postFactory, initData);
+        post = IFeed_Factory(_feed).createPost(postFactory, initData);
     }
 
     function createPostExplicit(
@@ -57,7 +56,7 @@ contract FeedManager is Ownable {
         );
 
         // deploy instance
-        post = Feed(_feed).createPost(_postFactory, initData);
+        post = IFeed_Factory(_feed).createPost(_postFactory, initData);
     }
 
     function getFeed() public view returns (address feed) {
