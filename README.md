@@ -1,6 +1,6 @@
 # Erasure Next Contracts
 
-[![Build Status](https://travis-ci.com/erasureprotocol/erasure-next-contracts.svg?token=htxVq6Egy28TqXbFnsyf&branch=master)](https://travis-ci.com/erasureprotocol/erasure-next-contracts)
+[![Build Status](https://travis-ci.com/erasureprotocol/erasure-protocol.svg?branch=master)](https://travis-ci.com/erasureprotocol/erasure-protocol)
 
 ## Philosophy of Erasure
 
