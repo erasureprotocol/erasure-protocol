@@ -464,8 +464,16 @@ describe("SimpleGriefing", function() {
   });
 
   describe("SimpleGriefing.releaseStake", () => {
-    const releaseStake = async sender => {
-      const txn = await this.TestSimpleGriefing.from(sender).releaseStake();
+    let currentStake;
+    const releaseAmount = ethers.utils.parseEther("100");
+
+    const releaseStake = async (sender, staker, releaseAmount) => {
+      const currentStake = await this.TestSimpleGriefing.getStake(staker);
+
+      const txn = await this.TestSimpleGriefing.from(sender).releaseStake(
+        currentStake,
+        releaseAmount
+      );
       const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
         txn
       );
@@ -478,16 +486,21 @@ describe("SimpleGriefing", function() {
       const [event] = eventLogs;
       assert.equal(event.staker, staker);
       assert.equal(event.recipient, staker); // staker's stake is released to staker address
-      assert.equal(event.amount.toString(), currentStake.toString()); // amount released is the full stake amount
-      assert.equal(event.newStake.toNumber(), 0);
-
-      const releaseStakeAmount = await this.TestSimpleGriefing.getReleaseStakeAmount();
-      assert.equal(releaseStakeAmount.toString(), currentStake.toString());
+      assert.equal(event.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
+      assert.equal(
+        event.newStake.toString(),
+        currentStake.sub(releaseAmount).toString()
+      );
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
+      currentStake = await this.TestSimpleGriefing.getStake(staker);
+
       await assert.revertWith(
-        this.TestSimpleGriefing.from(staker).releaseStake(),
+        this.TestSimpleGriefing.from(staker).releaseStake(
+          currentStake,
+          releaseAmount
+        ),
         "only counterparty or active operator"
       );
     });
@@ -495,26 +508,38 @@ describe("SimpleGriefing", function() {
     it("should revert when msg.sender is operator but not active", async () => {
       await this.TestSimpleGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).releaseStake(),
+        this.TestSimpleGriefing.from(operator).releaseStake(
+          currentStake,
+          releaseAmount
+        ),
         "only counterparty or active operator"
       );
       await this.TestSimpleGriefing.activateOperator();
     });
 
     it("should release stake when msg.sender is counterparty", async () =>
-      await releaseStake(counterparty));
+      await releaseStake(counterparty, staker, releaseAmount));
+
+    it("should release full stake", async () => {
+      const currentStake = await this.TestSimpleGriefing.getStake(staker);
+      await releaseStake(counterparty, staker, currentStake);
+    });
 
     it("should release stake when msg.sender is active operator", async () => {
-      currentStake = stakerStake;
-
       // have to re-increase stake to release
       await this.MockNMR.from(staker).approve(
         this.TestSimpleGriefing.contractAddress,
-        currentStake
+        stakerStake
       );
-      await this.TestSimpleGriefing.from(staker).increaseStake(0, stakerStake);
 
-      await releaseStake(operator);
+      const currentStake = await this.TestSimpleGriefing.getStake(staker);
+
+      await this.TestSimpleGriefing.from(staker).increaseStake(
+        currentStake,
+        stakerStake
+      );
+
+      await releaseStake(operator, staker, releaseAmount);
     });
   });
 
