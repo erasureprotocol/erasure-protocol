@@ -10,10 +10,10 @@ const deploy = async (network, secret) => {
     Erasure_Escrows: { artifact: require("../build/Erasure_Escrows.json") },
     Erasure_Posts: { artifact: require("../build/Erasure_Posts.json") },
     Erasure_Users: { artifact: require("../build/Erasure_Users.json") },
-    OneWayGriefing_Factory: { artifact: require("../build/OneWayGriefing_Factory.json") },
+    CountdownGriefing_Factory: { artifact: require("../build/CountdownGriefing_Factory.json") },
     Feed_Factory: { artifact: require("../build/Feed_Factory.json") },
     Post_Factory: { artifact: require("../build/Post_Factory.json") },
-    OneWayGriefing: { artifact: require("../build/OneWayGriefing.json") },
+    CountdownGriefing: { artifact: require("../build/CountdownGriefing.json") },
     Feed: { artifact: require("../build/Feed.json") },
     Post: { artifact: require("../build/Post.json") }
   };
@@ -52,7 +52,7 @@ const deploy = async (network, secret) => {
     // deploy factories
     contracts.Post_Factory.instance = await deployer.deployAndVerify(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
     contracts.Feed_Factory.instance = await deployer.deployAndVerify(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
-    contracts.OneWayGriefing_Factory.instance = await deployer.deployAndVerify(contracts.OneWayGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
+    contracts.CountdownGriefing_Factory.instance = await deployer.deployAndVerify(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
 
 } else if (network == "mainnet") {
 
@@ -76,7 +76,7 @@ const deploy = async (network, secret) => {
     // contracts.Erasure_Users.instance = await new ethers.Contract('0xD5fa2751A560b6ca47219224Bc231c56a9849492', contracts.Erasure_Users.artifact.abi, wallet);
     // contracts.Post_Factory.instance = await new ethers.Contract('0x750EC6138205Cf1C36b446Dd540E0464E9C0e6Cd', contracts.Post_Factory.artifact.abi, wallet);
     // contracts.Feed_Factory.instance = await new ethers.Contract('0x276e1fdB65951B8c1d1c16C5B69a72bE3060E7AA', contracts.Feed_Factory.artifact.abi, wallet);
-    // contracts.OneWayGriefing_Factory.instance = await new ethers.Contract('0x3A1a3EfeDf5C3932Bac1b637EA8Ac2D904C58480', contracts.OneWayGriefing_Factory.artifact.abi, wallet);
+    // contracts.CountdownGriefing_Factory.instance = await new ethers.Contract('0x3A1a3EfeDf5C3932Bac1b637EA8Ac2D904C58480', contracts.CountdownGriefing_Factory.artifact.abi, wallet);
 
     // deploy registries
     contracts.Erasure_Posts.instance = await deployer.deployAndVerify(contracts.Erasure_Posts.artifact);
@@ -86,7 +86,7 @@ const deploy = async (network, secret) => {
     // deploy factories
     contracts.Post_Factory.instance = await deployer.deployAndVerify(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
     contracts.Feed_Factory.instance = await deployer.deployAndVerify(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
-    contracts.OneWayGriefing_Factory.instance = await deployer.deployAndVerify(contracts.OneWayGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
+    contracts.CountdownGriefing_Factory.instance = await deployer.deployAndVerify(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
 
 } else if (network == "ganache") {
 
@@ -107,7 +107,7 @@ const deploy = async (network, secret) => {
     // deploy factories
     contracts.Post_Factory.instance = await deployer.deploy(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
     contracts.Feed_Factory.instance = await deployer.deploy(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
-    contracts.OneWayGriefing_Factory.instance = await deployer.deploy(contracts.OneWayGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
+    contracts.CountdownGriefing_Factory.instance = await deployer.deploy(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
   }
 
   console.log(`
@@ -132,11 +132,11 @@ Register Factories
   });
 
   await contracts.Erasure_Agreements.instance.addFactory(
-    contracts.OneWayGriefing_Factory.instance.contractAddress,
+    contracts.CountdownGriefing_Factory.instance.contractAddress,
     ethers.utils.hexlify(0x0),
     { gasPrice: defaultGas }
   ).then(async txn => {
-      console.log(`addFactory() | OneWayGriefing_Factory => Erasure_Agreements`);
+      console.log(`addFactory() | CountdownGriefing_Factory => Erasure_Agreements`);
       const receipt = await contracts.Erasure_Agreements.instance.verboseWaitForTransaction(txn);
   });
 
@@ -200,7 +200,7 @@ Create test instances from factories
       console.log(`createExplicit() | Feed_Factory => ${eventFound.args.instance}`);
   });
 
-  await contracts.OneWayGriefing_Factory.instance.createExplicit(
+  await contracts.CountdownGriefing_Factory.instance.createExplicit(
       tokenAddress,
       userAddress,
       userAddress,
@@ -211,14 +211,14 @@ Create test instances from factories
       '0x0',
       { gasPrice: defaultGas }
   ).then(async txn => {
-      const receipt = await contracts.OneWayGriefing_Factory.instance.verboseWaitForTransaction(txn);
+      const receipt = await contracts.CountdownGriefing_Factory.instance.verboseWaitForTransaction(txn);
       const expectedEvent = "InstanceCreated";
       const eventFound = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
         "There is no such event"
       );
-      contracts.OneWayGriefing.instance = new ethers.Contract(eventFound.args.instance, contracts.OneWayGriefing.artifact.abi, deployer.provider);
-      console.log(`createExplicit() | OneWayGriefing_Factory => ${eventFound.args.instance}`);
+      contracts.CountdownGriefing.instance = new ethers.Contract(eventFound.args.instance, contracts.CountdownGriefing.artifact.abi, deployer.provider);
+      console.log(`createExplicit() | CountdownGriefing_Factory => ${eventFound.args.instance}`);
   });
 
   console.log(``);
