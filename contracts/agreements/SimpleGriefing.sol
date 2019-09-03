@@ -89,12 +89,12 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         cost = Griefing._grief(from, _data.staker, currentStake, punishment, message);
     }
 
-    function releaseStake() public returns (uint256 amount) {
+    function releaseStake(uint256 currentStake, uint256 amountToRelease) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // release stake back to the staker
-        amount = Staking._takeFullStake(_data.staker, _data.staker);
+        Staking._takeStake(_data.staker, _data.staker, currentStake, amountToRelease);
     }
 
     function transferOperator(address operator) public {
