@@ -187,6 +187,16 @@ function testFactory(
           const expectedAddress = await this.Factory.from(creator).getTargetAddressWithSalt(callData, testSalt);
           await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
         });
+
+        it("should revert with duplicate salt", async () => {
+          const callData = abiEncodeWithSelector(
+            initializeFunctionName,
+            createTypes,
+            createArgs
+          );
+          const testSalt = ethers.utils.formatBytes32String("testSalt");
+          await assert.revertWith(this.Factory.from(creator).createWithSalt(callData, testSalt), "contract already deployed with supplied salt");
+        });
       });
 
       describe(`${factoryName}.createExplicitWithSalt`, () => {

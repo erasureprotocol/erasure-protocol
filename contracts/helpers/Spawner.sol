@@ -92,6 +92,13 @@ contract Spawner {
       abi.encode(logicContract, initializationCalldata)
     );
 
+    address target = _computeTargetAddressWithSalt(logicContract, initializationCalldata, salt);
+
+    uint256 codeSize;
+    assembly { codeSize := extcodesize(target) }
+
+    require(codeSize == 0, "contract already deployed with supplied salt");
+
     // spawn the contract using `CREATE2`.
     spawnedContract = _spawnCreate2(initCode, salt);
   }
@@ -129,6 +136,7 @@ contract Spawner {
    * @param initializationCalldata bytes The calldata that will be supplied to
    * the `DELEGATECALL` from the spawned contract to the logic contract during
    * contract creation.
+   * @param salt bytes32 A random salt
    * @return The address of the next spawned minimal proxy contract with the
    * given parameters.
    */
