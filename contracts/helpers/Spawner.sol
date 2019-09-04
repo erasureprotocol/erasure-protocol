@@ -64,8 +64,36 @@ contract Spawner {
       abi.encode(logicContract, initializationCalldata)
     );
 
+    // get salt to use during deployment using the supplied initialization code.
+    (bytes32 salt, ) = _getSaltAndTarget(initCode);
+
     // spawn the contract using `CREATE2`.
-    spawnedContract = _spawnCreate2(initCode);
+    spawnedContract = _spawnCreate2(initCode, salt);
+  }
+
+  /**
+   * @notice Internal function for spawning an eip-1167 minimal proxy using
+   * `CREATE2`.
+   * @param logicContract address The address of the logic contract.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @param salt bytes32 A random salt
+   * @return The address of the newly-spawned contract.
+   */
+  function _spawnWithSalt(
+    address logicContract,
+    bytes memory initializationCalldata,
+    bytes32 salt
+  ) internal returns (address spawnedContract) {
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(Spawn).creationCode,
+      abi.encode(logicContract, initializationCalldata)
+    );
+
+    // spawn the contract using `CREATE2`.
+    spawnedContract = _spawnCreate2(initCode, salt);
   }
 
   /**
@@ -93,6 +121,45 @@ contract Spawner {
     (, target) = _getSaltAndTarget(initCode);
   }
 
+  /**
+   * @notice Internal view function for finding the address of the next standard
+   * eip-1167 minimal proxy created using `CREATE2` with a given logic contract
+   * and initialization calldata payload.
+   * @param logicContract address The address of the logic contract.
+   * @param initializationCalldata bytes The calldata that will be supplied to
+   * the `DELEGATECALL` from the spawned contract to the logic contract during
+   * contract creation.
+   * @return The address of the next spawned minimal proxy contract with the
+   * given parameters.
+   */
+  function _computeTargetAddressWithSalt(
+    address logicContract,
+    bytes memory initializationCalldata,
+    bytes32 salt
+  ) internal view returns (address target) {
+    // place creation code and constructor args of contract to spawn in memory.
+    bytes memory initCode = abi.encodePacked(
+      type(Spawn).creationCode,
+      abi.encode(logicContract, initializationCalldata)
+    );
+    // get the keccak256 hash of the init code for address derivation.
+    bytes32 initCodeHash = keccak256(initCode);
+
+    target = address(    // derive the target deployment address.
+      uint160(                   // downcast to match the address type.
+        uint256(                 // cast to uint to truncate upper digits.
+          keccak256(             // compute CREATE2 hash using 4 inputs.
+            abi.encodePacked(    // pack all inputs to the hash together.
+              bytes1(0xff),      // pass in the control character.
+              address(this),     // pass in the address of this contract.
+              salt,              // pass in the salt from above.
+              initCodeHash       // pass in hash of contract creation code.
+            )
+          )
+        )
+      )
+    );
+  }
 
   /**
    * @notice Private function for spawning a compact eip-1167 minimal proxy
@@ -100,14 +167,13 @@ contract Spawner {
    * salt will also be chosen based on the calling address and a computed nonce
    * that prevents deployments to existing addresses.
    * @param initCode bytes The contract creation code.
+   * @param salt bytes32 A random salt
    * @return The address of the newly-spawned contract.
    */
   function _spawnCreate2(
-    bytes memory initCode
+    bytes memory initCode,
+    bytes32 salt
   ) private returns (address spawnedContract) {
-    // get salt to use during deployment using the supplied initialization code.
-    (bytes32 salt, ) = _getSaltAndTarget(initCode);
-
     assembly {
       let encoded_data := add(0x20, initCode) // load initialization code.
       let encoded_size := mload(initCode)     // load the init code's length.

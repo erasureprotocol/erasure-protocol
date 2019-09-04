@@ -44,7 +44,8 @@ function createInstanceAddressWithInitData(
   sender,
   selector,
   initData,
-  nonce
+  nonce,
+  salt
 ) {
   const abiEncoder = new ethers.utils.AbiCoder();
 
@@ -60,10 +61,12 @@ function createInstanceAddressWithInitData(
     [SpawnArtifact.bytecode, initCallData]
   );
 
-  const salt = ethers.utils.solidityKeccak256(
-    ["address", "uint256"],
-    [sender, nonce]
-  );
+  if (!salt) {
+    salt = ethers.utils.solidityKeccak256(
+      ["address", "uint256"],
+      [sender, nonce]
+    );
+  }
 
   const create2hash = ethers.utils.solidityKeccak256(
     ["bytes1", "address", "bytes32", "bytes32"],
@@ -87,7 +90,8 @@ function createInstanceAddress(
   initializeFunctionName,
   abiTypes,
   abiValues,
-  nonce
+  nonce,
+  salt
 ) {
   const abiEncoder = new ethers.utils.AbiCoder();
 
@@ -104,7 +108,8 @@ function createInstanceAddress(
     sender,
     selector,
     initData,
-    nonce
+    nonce,
+    salt
   );
 }
 

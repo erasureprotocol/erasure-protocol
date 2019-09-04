@@ -45,7 +45,8 @@ function runFactoryTest() {
         createArgs,
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
-        ErasureAgreementsArtifact // wrong registry
+        ErasureAgreementsArtifact, // wrong registry,
+        false,
       );
     });
   });
