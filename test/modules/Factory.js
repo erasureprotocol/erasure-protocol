@@ -9,17 +9,17 @@ function testFactory(
   deployer, // etherlime's ganache deployer instance
   factoryName, // factory contract's name
   instanceType, // instance type created by factory
-  createTypes, // the actual types used to encode the init data ABI function parameters
-  createArgs, // the actual types used to encode init data values
+  createExplicitTypes, // the types used in createExplicit call
+  createExplicitArgs, // the arguments used in createExplicit call
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
-  wrongRegistryArtifact // wrong registry for error testing. instanceType must mismatch
+  wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
 
-  // There are cases where the create() call and the instance address creation's
+  // There are cases where the create() call and the createExplicit() call differ
   // ABI types are different. Default to the create call parameters
   // anything else, pass in a different set of ABI
-  // createInstanceTypes = createTypes,
-  // createInstanceArgs = createArgs
+  createTypes = createExplicitTypes,
+  getCreateArgs = () => createExplicitArgs
 ) {
   describe(factoryName, function() {
     this.timeout(4000);
@@ -42,6 +42,8 @@ function testFactory(
     before(async () => {
       this.Registry = await deployer.deploy(registryArtifact);
       this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact);
+
+      getCreateArgs = getCreateArgs.bind(this);
     });
 
     const createLocalInstance = () => {
@@ -52,7 +54,7 @@ function testFactory(
         creator,
         initializeFunctionName,
         createTypes,
-        createArgs,
+        getCreateArgs(),
         nonce
       );
 
@@ -64,7 +66,7 @@ function testFactory(
 
     const populateInstances = async count => {
       for (let i = 0; i < count; i++) {
-        await this.Factory.from(creator).createExplicit(...createArgs);
+        await this.Factory.from(creator).createExplicit(...createExplicitArgs);
         createLocalInstance();
       }
     };
@@ -159,7 +161,7 @@ function testFactory(
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          createArgs
+          getCreateArgs()
         );
         const txn = await this.Factory.from(creator).create(callData);
         await validateCreateExplicitTxn(txn);
@@ -170,7 +172,10 @@ function testFactory(
       const abiEncoder = new ethers.utils.AbiCoder();
 
       it("should create instance correctly", async () => {
-        const initData = abiEncoder.encode(createTypes, createArgs);
+        const initData = abiEncoder.encode(
+          createExplicitTypes,
+          createExplicitArgs
+        );
         const txn = await this.Factory.from(creator).createEncoded(initData);
         await validateCreateExplicitTxn(txn);
       });
@@ -180,7 +185,7 @@ function testFactory(
       it("should create instance correctly", async () => {
         // creator creates the OneWayGriefing instance
         const txn = await this.Factory.from(creator).createExplicit(
-          ...createArgs
+          ...createExplicitArgs
         );
 
         await validateCreateExplicitTxn(txn);
