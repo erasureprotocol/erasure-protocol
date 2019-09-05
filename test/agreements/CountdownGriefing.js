@@ -495,8 +495,9 @@ describe("CountdownGriefing", function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
-      await this.MockNMR.from(staker).approve(
+      await this.MockNMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
+        (await this.MockNMR.allowance(staker, this.TestCountdownGriefing.contractAddress)),
         stakerStake
       );
       await this.TestCountdownGriefing.from(staker).increaseStake(
@@ -609,7 +610,7 @@ describe("CountdownGriefing", function() {
           punishment,
           Buffer.from(message)
         ),
-        "insufficient allowance"
+        "nmr burnFrom failed"
       );
     });
 
