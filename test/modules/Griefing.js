@@ -284,7 +284,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "insufficient allowance"
+        "nmr burnFrom failed"
       );
     });
 
@@ -304,7 +304,7 @@ describe("Griefing", function() {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, punishment, Buffer.from(message)),
-        "insufficient allowance"
+        "nmr burnFrom failed"
       );
     });
 

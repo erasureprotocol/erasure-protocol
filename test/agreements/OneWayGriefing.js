@@ -493,8 +493,9 @@ describe("OneWayGriefing", function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
-      await this.MockNMR.from(staker).approve(
+      await this.MockNMR.from(staker).changeApproval(
         this.TestOneWayGriefing.contractAddress,
+        (await this.MockNMR.allowance(staker, this.TestOneWayGriefing.contractAddress)),
         stakerStake
       );
       await this.TestOneWayGriefing.from(staker).increaseStake(
@@ -586,8 +587,12 @@ describe("OneWayGriefing", function() {
 
     it("should revert when no approval to burn tokens", async () => {
       await assert.revertWith(
-        this.TestOneWayGriefing.from(counterparty).punish(...punishArgs),
-        "insufficient allowance"
+        this.TestOneWayGriefing.from(counterparty).punish(
+          from,
+          punishment,
+          Buffer.from(message)
+        ),
+        "nmr burnFrom failed"
       );
     });
 
