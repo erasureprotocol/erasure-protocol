@@ -61,7 +61,8 @@ function runFactoryTest() {
         createArgs,
         SimpleGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
-        ErasurePostsRegistryArtifact
+        ErasurePostsRegistryArtifact,
+        true,
       );
     });
   });
