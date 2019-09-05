@@ -16,7 +16,8 @@ const staticMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("staticMetadata")
 );
 
-const createTypes = ["address", "address", "bytes"];
+const createTypes = ["address", "bytes"];
+const localCreateTypes = ["address", "address", "bytes"];
 
 let PostRegistry;
 
@@ -29,13 +30,7 @@ function runFactoryTest() {
 
   describe(factoryName, () => {
     it("setups test", () => {
-      const createArgs = [
-        creator,
-        // this PostRegistry will not be used in the Factory.js tests
-        // just used as a placeholder
-        PostRegistry.contractAddress,
-        staticMetadata
-      ];
+      const createArgs = [creator, staticMetadata];
 
       testFactory(
         deployer,
@@ -45,8 +40,11 @@ function runFactoryTest() {
         createArgs,
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
-        ErasureAgreementsArtifact, // wrong registry,
-        false,
+        ErasureAgreementsArtifact, // wrong registry
+        localCreateTypes,
+        function() {
+          return [creator, this.Registry.contractAddress, staticMetadata];
+        }
       );
     });
   });
