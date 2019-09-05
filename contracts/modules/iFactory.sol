@@ -13,6 +13,7 @@ pragma solidity ^0.5.0;
      event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);
 
      function create(bytes calldata initData) external returns (address instance);
+     function createSalty(bytes calldata initData, bytes32 salt) external returns (address instance);
      function getInitdataABI() external view returns (string memory initABI);
      function getInstanceRegistry() external view returns (address instanceRegistry);
      function getTemplate() external view returns (address template);

@@ -6,11 +6,11 @@
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
-    "compile": "yarn etherlime compile --solcVersion=0.5.7 --deleteCompiledFiles=true",
+    "compile": "yarn etherlime compile --solcVersion=0.5.11 --deleteCompiledFiles=true",
     "flatten": "yarn etherlime flatten",
     "ganache": "yarn etherlime ganache",
-    "test": "yarn etherlime test --solcVersion=0.5.7",
-    "coverage": "yarn etherlime coverage --solcVersion=0.5.7",
+    "test": "yarn etherlime test --solcVersion=0.5.11",
+    "coverage": "yarn etherlime coverage --solcVersion=0.5.11",
     "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false"
   },
   "dependencies": {

@@ -31,9 +31,9 @@ contract SimpleGriefing_Factory is Factory {
         instance = Factory._create(callData);
     }
 
-    function createWithSalt(bytes memory callData, bytes32 salt) public returns (address instance) {
+    function createSalty(bytes memory callData, bytes32 salt) public returns (address instance) {
         // deploy instance
-        instance = Factory._createWithSalt(callData, salt);
+        instance = Factory._create(callData, salt);
     }
 
     function createExplicit(
@@ -67,7 +67,7 @@ contract SimpleGriefing_Factory is Factory {
         emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);
     }
 
-    function createExplicitWithSalt(
+    function createExplicitSalty(
         address token,
         address operator,
         address staker,
@@ -93,7 +93,7 @@ contract SimpleGriefing_Factory is Factory {
         );
 
         // deploy instance
-        instance = Factory._createWithSalt(callData, salt);
+        instance = Factory._create(callData, salt);
 
         // emit event
         emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);

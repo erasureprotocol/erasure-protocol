@@ -45,9 +45,9 @@ contract Factory is Spawner {
         emit InstanceCreated(instance, msg.sender, callData);
     }
 
-    function _createWithSalt(bytes memory callData, bytes32 salt) internal returns (address instance) {
+    function _create(bytes memory callData, bytes32 salt) internal returns (address instance) {
         // deploy new contract: initialize it & write minimal proxy to runtime.
-        instance = Spawner._spawnWithSalt(getTemplate(), callData, salt);
+        instance = Spawner._spawn(getTemplate(), callData, salt);
         // add the instance to the array
         _instances.push(instance);
         // set instance creator
@@ -58,11 +58,11 @@ contract Factory is Spawner {
         emit InstanceCreated(instance, msg.sender, callData);
     }
 
-    function getTargetAddressWithSalt(
+    function getSaltyInstance(
         bytes memory callData,
         bytes32 salt
     ) public view returns (address target) {
-        return _computeTargetAddressWithSalt(getTemplate(), callData, salt);
+        return _computeTargetAddress(getTemplate(), callData, salt);
     }
 
     function getInstanceCreator(address instance) public view returns (address creator) {

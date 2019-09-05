@@ -14,7 +14,7 @@ function testFactory(
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
-  isV2Factory // bool determining if we should test new v2 factory methods, e.g. createWithSalt
+  isV2Factory // bool determining if we should test new v2 factory methods, e.g. create
 
   // There are cases where the create() call and the instance address creation's
   // ABI types are different. Default to the create call parameters
@@ -175,7 +175,7 @@ function testFactory(
     });
 
     if (isV2Factory) {
-      describe(`${factoryName}.createWithSalt`, () => {
+      describe(`${factoryName}.create with salt`, () => {
         it("should create instance correctly", async () => {
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
@@ -183,8 +183,8 @@ function testFactory(
             createArgs
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
-          const txn = await this.Factory.from(creator).createWithSalt(callData, testSalt);
-          const expectedAddress = await this.Factory.from(creator).getTargetAddressWithSalt(callData, testSalt);
+          const txn = await this.Factory.from(creator).createSalty(callData, testSalt);
+          const expectedAddress = await this.Factory.from(creator).getSaltyInstance(callData, testSalt);
           await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
         });
 
@@ -195,16 +195,16 @@ function testFactory(
             createArgs
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
-          await assert.revertWith(this.Factory.from(creator).createWithSalt(callData, testSalt), "contract already deployed with supplied salt");
+          await assert.revertWith(this.Factory.from(creator).createSalty(callData, testSalt), "contract already deployed with supplied salt");
         });
       });
 
-      describe(`${factoryName}.createExplicitWithSalt`, () => {
+      describe(`${factoryName}.createExplicit with salt`, () => {
         it("should create instance correctly", async () => {
           const testSalt2 = ethers.utils.formatBytes32String("testSalt2");
 
           // creator creates the OneWayGriefing instance
-          const txn = await this.Factory.from(creator).createExplicitWithSalt(
+          const txn = await this.Factory.from(creator).createExplicitSalty(
             ...createArgs, testSalt2
           );
 
