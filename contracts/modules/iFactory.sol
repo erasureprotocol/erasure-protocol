@@ -17,6 +17,8 @@ pragma solidity ^0.5.0;
      function getInitdataABI() external view returns (string memory initABI);
      function getInstanceRegistry() external view returns (address instanceRegistry);
      function getTemplate() external view returns (address template);
+     function getSaltyInstance(bytes calldata, bytes32 salt) external view returns (address instance);
+     function getNextInstance(bytes calldata) external view returns (address instance);
 
      function getInstanceCreator(address instance) external view returns (address creator);
      function getInstanceType() external view returns (bytes4 instanceType);

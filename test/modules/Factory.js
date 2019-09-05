@@ -67,8 +67,13 @@ function testFactory(
     };
 
     const populateInstances = async count => {
+      const callData = abiEncodeWithSelector(
+        initializeFunctionName,
+        createTypes,
+        createArgs
+      );
       for (let i = 0; i < count; i++) {
-        await this.Factory.from(creator).createExplicit(...createArgs);
+        await this.Factory.from(creator).create(callData);
         createLocalInstance();
       }
     };
@@ -169,8 +174,9 @@ function testFactory(
           createTypes,
           createArgs
         );
+        const expectedAddress = await this.Factory.from(creator).getNextInstance(callData);
         const txn = await this.Factory.from(creator).create(callData);
-        await validateCreateExplicitTxn(txn);
+        await validateCreateExplicitTxn(txn, null, expectedAddress);
       });
     });
 
@@ -198,19 +204,6 @@ function testFactory(
           await assert.revertWith(this.Factory.from(creator).createSalty(callData, testSalt), "contract already deployed with supplied salt");
         });
       });
-
-      describe(`${factoryName}.createExplicit with salt`, () => {
-        it("should create instance correctly", async () => {
-          const testSalt2 = ethers.utils.formatBytes32String("testSalt2");
-
-          // creator creates the OneWayGriefing instance
-          const txn = await this.Factory.from(creator).createExplicitSalty(
-            ...createArgs, testSalt2
-          );
-
-          await validateCreateExplicitTxn(txn, testSalt2);
-        });
-      });
     } else {
       describe(`${factoryName}.createEncoded`, () => {
         const abiEncoder = new ethers.utils.AbiCoder();
@@ -221,18 +214,18 @@ function testFactory(
           await validateCreateExplicitTxn(txn);
         });
       });
-    }
 
-    describe(`${factoryName}.createExplicit`, () => {
-      it("should create instance correctly", async () => {
-        // creator creates the OneWayGriefing instance
-        const txn = await this.Factory.from(creator).createExplicit(
-          ...createArgs
-        );
+      describe(`${factoryName}.createExplicit`, () => {
+        it("should create instance correctly", async () => {
+          // creator creates the OneWayGriefing instance
+          const txn = await this.Factory.from(creator).createExplicit(
+            ...createArgs
+          );
 
-        await validateCreateExplicitTxn(txn);
+          await validateCreateExplicitTxn(txn);
+        });
       });
-    });
+    }
 
     describe("Factory.getInstanceCount", () => {
       it("should get correct instance count", async () => {

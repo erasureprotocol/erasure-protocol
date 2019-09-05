@@ -116,7 +116,7 @@ contract Spawner {
    * @return The address of the next spawned minimal proxy contract with the
    * given parameters.
    */
-  function _computeNextAddress(
+  function _getNextAddress(
     address logicContract,
     bytes memory initializationCalldata
   ) internal view returns (address target) {
