@@ -13,7 +13,8 @@ function testFactory(
   createArgs, // the actual types used to encode init data values
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
-  wrongRegistryArtifact // wrong registry for error testing. instanceType must mismatch
+  wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
+  isV2Factory // bool determining if we should test new v2 factory methods, e.g. create
 
   // There are cases where the create() call and the instance address creation's
   // ABI types are different. Default to the create call parameters
@@ -21,7 +22,7 @@ function testFactory(
   // createInstanceTypes = createTypes,
   // createInstanceArgs = createArgs
 ) {
-  describe(factoryName, function() {
+  describe(factoryName, function () {
     this.timeout(4000);
 
     // wallets and addresses
@@ -36,7 +37,7 @@ function testFactory(
     // variables used to track local instances
     let logicContractAddress;
     let nonce = 0;
-    const totalInstanceCount = 5;
+    const totalInstanceCount = 4;
     let instances = [];
 
     before(async () => {
@@ -44,7 +45,7 @@ function testFactory(
       this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact);
     });
 
-    const createLocalInstance = () => {
+    const createLocalInstance = (salt) => {
       // this should accomodate tests where createargs is different from initABI
       const { instanceAddress, callData } = createInstanceAddress(
         this.Factory.contractAddress,
@@ -53,11 +54,14 @@ function testFactory(
         initializeFunctionName,
         createTypes,
         createArgs,
-        nonce
+        nonce,
+        salt
       );
 
       instances.push(instanceAddress);
-      nonce++;
+      if (!salt) {
+        nonce++;
+      }
 
       return { instanceAddress, callData };
     };
@@ -124,7 +128,7 @@ function testFactory(
       });
     });
 
-    const validateCreateExplicitTxn = async txn => {
+    const validateCreateExplicitTxn = async (txn, salt, expectedAddress) => {
       const receipt = await this.Factory.verboseWaitForTransaction(txn);
 
       const expectedEvent = "InstanceCreated";
@@ -140,10 +144,14 @@ function testFactory(
 
       // test for correctness of proxy address generation
 
-      const { instanceAddress, callData } = createLocalInstance();
+      const { instanceAddress, callData } = createLocalInstance(salt);
 
       assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
       assert.equal(instanceCreatedEvent.args.callData, callData);
+
+      if (expectedAddress) {
+        assert.equal(instanceCreatedEvent.args.instance, expectedAddress);
+      }
 
       // check the EIP1167 runtime code
 
@@ -166,15 +174,54 @@ function testFactory(
       });
     });
 
-    describe(`${factoryName}.createEncoded`, () => {
-      const abiEncoder = new ethers.utils.AbiCoder();
+    if (isV2Factory) {
+      describe(`${factoryName}.create with salt`, () => {
+        it("should create instance correctly", async () => {
+          const callData = abiEncodeWithSelector(
+            initializeFunctionName,
+            createTypes,
+            createArgs
+          );
+          const testSalt = ethers.utils.formatBytes32String("testSalt");
+          const txn = await this.Factory.from(creator).createSalty(callData, testSalt);
+          const expectedAddress = await this.Factory.from(creator).getSaltyInstance(callData, testSalt);
+          await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
+        });
 
-      it("should create instance correctly", async () => {
-        const initData = abiEncoder.encode(createTypes, createArgs);
-        const txn = await this.Factory.from(creator).createEncoded(initData);
-        await validateCreateExplicitTxn(txn);
+        it("should revert with duplicate salt", async () => {
+          const callData = abiEncodeWithSelector(
+            initializeFunctionName,
+            createTypes,
+            createArgs
+          );
+          const testSalt = ethers.utils.formatBytes32String("testSalt");
+          await assert.revertWith(this.Factory.from(creator).createSalty(callData, testSalt), "contract already deployed with supplied salt");
+        });
       });
-    });
+
+      describe(`${factoryName}.createExplicit with salt`, () => {
+        it("should create instance correctly", async () => {
+          const testSalt2 = ethers.utils.formatBytes32String("testSalt2");
+
+          // creator creates the OneWayGriefing instance
+          const txn = await this.Factory.from(creator).createExplicitSalty(
+            ...createArgs, testSalt2
+          );
+
+          await validateCreateExplicitTxn(txn, testSalt2);
+        });
+      });
+    } else {
+      describe(`${factoryName}.createEncoded`, () => {
+        const abiEncoder = new ethers.utils.AbiCoder();
+
+        it("should create instance correctly", async () => {
+          const initData = abiEncoder.encode(createTypes, createArgs);
+          const txn = await this.Factory.from(creator).createEncoded(initData);
+          await validateCreateExplicitTxn(txn);
+        });
+      });
+    }
 
     describe(`${factoryName}.createExplicit`, () => {
       it("should create instance correctly", async () => {

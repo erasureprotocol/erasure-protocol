@@ -31,20 +31,9 @@ contract SimpleGriefing_Factory is Factory {
         instance = Factory._create(callData);
     }
 
-    function createEncoded(bytes memory initdata) public returns (address instance) {
-        // decode initdata
-        (
-            address token,
-            address operator,
-            address staker,
-            address counterparty,
-            uint256 ratio,
-            Griefing.RatioType ratioType, // uint8
-            bytes memory staticMetadata
-        ) = abi.decode(initdata, (address,address,address,address,uint256,Griefing.RatioType,bytes));
-
-        // call explicit create
-        instance = createExplicit(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);
+    function createSalty(bytes memory callData, bytes32 salt) public returns (address instance) {
+        // deploy instance
+        instance = Factory._create(callData, salt);
     }
 
     function createExplicit(
@@ -73,6 +62,38 @@ contract SimpleGriefing_Factory is Factory {
 
         // deploy instance
         instance = Factory._create(callData);
+
+        // emit event
+        emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);
+    }
+
+    function createExplicitSalty(
+        address token,
+        address operator,
+        address staker,
+        address counterparty,
+        uint256 ratio,
+        Griefing.RatioType ratioType, // uint8
+        bytes memory staticMetadata,
+        bytes32 salt
+    ) public returns (address instance) {
+        // declare template in memory
+        SimpleGriefing template;
+
+        // construct the data payload used when initializing the new contract.
+        bytes memory callData = abi.encodeWithSelector(
+            template.initialize.selector, // selector
+            token,           // token
+            operator,        // operator
+            staker,          // staker
+            counterparty,    // counterparty
+            ratio,           // ratio
+            ratioType,       // ratioType
+            staticMetadata   // staticMetadata
+        );
+
+        // deploy instance
+        instance = Factory._create(callData, salt);
 
         // emit event
         emit ExplicitInitData(staker, counterparty, operator, ratio, ratioType, staticMetadata);

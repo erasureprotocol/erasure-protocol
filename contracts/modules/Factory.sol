@@ -32,9 +32,7 @@ contract Factory is Spawner {
 
     // IFactory methods
 
-    function _create(bytes memory callData) internal returns (address instance) {
-        // deploy new contract: initialize it & write minimal proxy to runtime.
-        instance = Spawner._spawn(getTemplate(), callData);
+    function _createHelper(address instance, bytes memory callData) internal {
         // add the instance to the array
         _instances.push(instance);
         // set instance creator
@@ -43,6 +41,27 @@ contract Factory is Spawner {
         iRegistry(getInstanceRegistry()).register(instance, msg.sender, uint64(0));
         // emit event
         emit InstanceCreated(instance, msg.sender, callData);
+    }
+
+    function _create(bytes memory callData) internal returns (address instance) {
+        // deploy new contract: initialize it & write minimal proxy to runtime.
+        instance = Spawner._spawn(getTemplate(), callData);
+
+        _createHelper(instance, callData);
+    }
+
+    function _create(bytes memory callData, bytes32 salt) internal returns (address instance) {
+        // deploy new contract: initialize it & write minimal proxy to runtime.
+        instance = Spawner._spawn(getTemplate(), callData, salt);
+
+        _createHelper(instance, callData);
+    }
+
+    function getSaltyInstance(
+        bytes memory callData,
+        bytes32 salt
+    ) public view returns (address target) {
+        return _computeTargetAddress(getTemplate(), callData, salt);
     }
 
     function getInstanceCreator(address instance) public view returns (address creator) {
