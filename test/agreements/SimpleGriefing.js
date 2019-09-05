@@ -456,7 +456,7 @@ describe("SimpleGriefing", function() {
           punishment,
           Buffer.from(message)
         ),
-        "insufficient allowance"
+        "nmr burnFrom failed"
       );
     });
 
