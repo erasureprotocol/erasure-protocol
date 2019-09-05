@@ -64,7 +64,7 @@ function runFactoryTest() {
         OneWayGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
         ErasurePostsRegistryArtifact,
-        false,
+        true,
       );
     });
   });

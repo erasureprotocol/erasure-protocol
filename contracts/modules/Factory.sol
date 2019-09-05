@@ -61,7 +61,7 @@ contract Factory is Spawner {
         bytes memory callData,
         bytes32 salt
     ) public view returns (address target) {
-        return _computeTargetAddress(getTemplate(), callData, salt);
+        return Spawner._computeTargetAddress(getTemplate(), callData, salt);
     }
 
     function getNextInstance(
