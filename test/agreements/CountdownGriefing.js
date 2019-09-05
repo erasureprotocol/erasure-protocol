@@ -513,7 +513,6 @@ describe("CountdownGriefing", function() {
       );
 
       const txn = await this.TestCountdownGriefing.from(counterparty).punish(
-        from,
         currentStake,
         punishment,
         Buffer.from(message)
@@ -557,7 +556,6 @@ describe("CountdownGriefing", function() {
       // staker is not counterparty or operator
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).punish(
-          from,
           currentStake,
           punishment,
           Buffer.from(message)
@@ -587,7 +585,6 @@ describe("CountdownGriefing", function() {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
-          from,
           currentStake,
           punishment,
           Buffer.from(message)
@@ -604,7 +601,6 @@ describe("CountdownGriefing", function() {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
-          from,
           currentStake,
           punishment,
           Buffer.from(message)
@@ -616,7 +612,6 @@ describe("CountdownGriefing", function() {
     it("should revert when currentStake is incorrect", async () => {
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
-          from,
           currentStake.add(1),
           punishment,
           Buffer.from(message)

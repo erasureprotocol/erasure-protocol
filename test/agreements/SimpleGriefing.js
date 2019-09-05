@@ -395,7 +395,6 @@ describe("SimpleGriefing", function() {
       );
 
       const txn = await this.TestSimpleGriefing.from(counterparty).punish(
-        from,
         currentStake,
         punishment,
         Buffer.from(message)
@@ -439,7 +438,6 @@ describe("SimpleGriefing", function() {
       // staker is not counterparty or operator
       await assert.revertWith(
         this.TestSimpleGriefing.from(staker).punish(
-          from,
           currentStake,
           punishment,
           Buffer.from(message)
@@ -451,7 +449,6 @@ describe("SimpleGriefing", function() {
     it("should revert when no approval to burn tokens", async () => {
       await assert.revertWith(
         this.TestSimpleGriefing.from(counterparty).punish(
-          from,
           currentStake,
           punishment,
           Buffer.from(message)
