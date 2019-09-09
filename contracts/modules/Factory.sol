@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../helpers/Spawner.sol";
+import "./Spawner.sol";
 import "./iRegistry.sol";
 
 
@@ -11,19 +11,19 @@ contract Factory is Spawner {
 
     /* NOTE: The following items can be hardcoded as constant to save ~200 gas/create */
     address private _templateContract;
-    string private _initdataABI;
+    bytes4 private _initSelector;
     address private _instanceRegistry;
     bytes4 private _instanceType;
 
     event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
 
-    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, string memory initdataABI) internal {
+    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, bytes4 initSelector) internal {
         // set instance registry
         _instanceRegistry = instanceRegistry;
         // set logic contract
         _templateContract = templateContract;
-        // set initdataABI
-        _initdataABI = initdataABI;
+        // set initSelector
+        _initSelector = initSelector;
         // validate correct instance registry
         require(instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
         // set instanceType
@@ -50,9 +50,9 @@ contract Factory is Spawner {
         _createHelper(instance, callData);
     }
 
-    function _create(bytes memory callData, bytes32 salt) internal returns (address instance) {
+    function _createSalty(bytes memory callData, bytes32 salt) internal returns (address instance) {
         // deploy new contract: initialize it & write minimal proxy to runtime.
-        instance = Spawner._spawn(getTemplate(), callData, salt);
+        instance = Spawner._spawnSalty(getTemplate(), callData, salt);
 
         _createHelper(instance, callData);
     }
@@ -78,8 +78,8 @@ contract Factory is Spawner {
         instanceType = _instanceType;
     }
 
-    function getInitdataABI() public view returns (string memory initdataABI) {
-        initdataABI = _initdataABI;
+    function getInitSelector() public view returns (bytes4 initSelector) {
+        initSelector = _initSelector;
     }
 
     function getInstanceRegistry() public view returns (address instanceRegistry) {

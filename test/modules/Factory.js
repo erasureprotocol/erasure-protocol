@@ -2,7 +2,8 @@ const {
   createInstanceAddress,
   createEip1167RuntimeCode,
   getLatestContractAdressFrom,
-  abiEncodeWithSelector
+  abiEncodeWithSelector,
+  createSelector
 } = require("../helpers/utils");
 
 function testFactory(
@@ -32,7 +33,7 @@ function testFactory(
 
     // variables used in tests
     const initializeFunctionName = "initialize";
-    const initDataABI = "(" + createTypes.join(",") + ")";
+    const initSelector = createSelector(initializeFunctionName, createTypes);
 
     // variables used to track local instances
     let logicContractAddress;
@@ -109,9 +110,9 @@ function testFactory(
           )
         );
 
-        // Factory.getInitdataABI
-        const actualInitdataABI = await this.Factory.getInitdataABI();
-        assert.equal(actualInitdataABI, initDataABI);
+        // Factory.getInitSelector
+        const actualInitSelector = await this.Factory.getInitSelector();
+        assert.equal(actualInitSelector, initSelector);
 
         // Factory.getInstanceRegistry
         const actualInstanceRegistry = await this.Factory.getInstanceRegistry();

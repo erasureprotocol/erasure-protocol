@@ -81,7 +81,7 @@ contract Spawner {
    * @param salt bytes32 A random salt
    * @return The address of the newly-spawned contract.
    */
-  function _spawn(
+  function _spawnSalty(
     address logicContract,
     bytes memory initializationCalldata,
     bytes32 salt
@@ -95,10 +95,7 @@ contract Spawner {
     address target = _computeTargetAddress(logicContract, initializationCalldata, salt);
 
     uint256 codeSize;
-    assembly {
-      codeSize := extcodesize(target)
-    }
-
+    assembly { codeSize := extcodesize(target) }
     require(codeSize == 0, "contract already deployed with supplied salt");
 
     // spawn the contract using `CREATE2`.
