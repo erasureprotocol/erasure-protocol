@@ -8,13 +8,14 @@ contract TestPostFactory is Factory {
 
     constructor(address instanceRegistry) public {
         // deploy template contract
-        address templateContract = address(new TestPost());
+        TestPost template = new TestPost();
+        address templateContract = address(template);
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
-        // set initdataABI
-        string memory initdataABI = '(address,bytes,bytes,bytes)';
+        // set initSelector
+        bytes4 initSelector = template.initialize.selector;
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
     event ExplicitInitData(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);

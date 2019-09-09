@@ -8,13 +8,14 @@ contract TestFeedFactory is Factory {
 
     constructor(address instanceRegistry) public {
         // deploy template contract
-        address templateContract = address(new TestFeed());
+        TestFeed template = new TestFeed();
+        address templateContract = address(template);
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
-        // set initdataABI
-        string memory initdataABI = '(address,address,bytes)';
+        // set initSelector
+        bytes4 initSelector = template.initialize.selector;
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
     event ExplicitInitData(address operator, address postRegistry, bytes feedStaticMetadata);

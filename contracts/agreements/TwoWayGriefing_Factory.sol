@@ -8,13 +8,14 @@ contract TwoWayGriefing_Factory is Factory {
 
     constructor(address instanceRegistry) public {
         // deploy template contract
-        address templateContract = address(new TwoWayGriefing());
+        TwoWayGriefing template = new TwoWayGriefing();
+        address templateContract = address(template);
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
-        // set initdataABI
-        string memory initdataABI = '(address,address,bytes,bytes,uint256,bytes)';
+        // set initSelector
+        bytes4 initSelector = template.initialize.selector;
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initdataABI);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
     event ExplicitInitData(address indexed operator, bytes stakeDataA, bytes stakeDataB, uint256 countdownLength, bytes staticMetadata);
