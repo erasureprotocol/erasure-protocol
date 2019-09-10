@@ -23,7 +23,7 @@ function testFactory(
   createTypes = createExplicitTypes,
   getCreateArgs = () => createExplicitArgs
 ) {
-  describe(factoryName, function () {
+  describe(factoryName, function() {
     this.timeout(4000);
 
     // wallets and addresses
@@ -33,7 +33,10 @@ function testFactory(
 
     // variables used in tests
     const initializeFunctionName = "initialize";
-    const initSelector = createSelector(initializeFunctionName, createTypes);
+    const initSelector = createSelector(
+      initializeFunctionName,
+      createTypes
+    );
 
     // variables used to track local instances
     let logicContractAddress;
@@ -48,7 +51,7 @@ function testFactory(
       getCreateArgs = getCreateArgs.bind(this);
     });
 
-    const createLocalInstance = (salt) => {
+    const createLocalInstance = salt => {
       // this should accomodate tests where createargs is different from initABI
       const { instanceAddress, callData } = createInstanceAddress(
         this.Factory.contractAddress,
@@ -72,8 +75,8 @@ function testFactory(
     const populateInstances = async count => {
       const callData = abiEncodeWithSelector(
         initializeFunctionName,
-        createExplicitTypes,
-        createExplicitArgs
+        createTypes,
+        getCreateArgs()
       );
       for (let i = 0; i < count; i++) {
         await this.Factory.from(creator).create(callData);
@@ -177,7 +180,9 @@ function testFactory(
           createTypes,
           getCreateArgs()
         );
-        const expectedAddress = await this.Factory.from(creator).getNextInstance(callData);
+        const expectedAddress = await this.Factory.from(
+          creator
+        ).getNextInstance(callData);
         const txn = await this.Factory.from(creator).create(callData);
         await validateCreateExplicitTxn(txn, null, expectedAddress);
       });
@@ -189,11 +194,16 @@ function testFactory(
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
             createTypes,
-            createArgs
+            getCreateArgs()
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
-          const txn = await this.Factory.from(creator).createSalty(callData, testSalt);
-          const expectedAddress = await this.Factory.from(creator).getSaltyInstance(callData, testSalt);
+          const txn = await this.Factory.from(creator).createSalty(
+            callData,
+            testSalt
+          );
+          const expectedAddress = await this.Factory.from(
+            creator
+          ).getSaltyInstance(callData, testSalt);
           await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
         });
 
@@ -201,32 +211,35 @@ function testFactory(
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
             createTypes,
-            createArgs
+            getCreateArgs()
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
-          await assert.revertWith(this.Factory.from(creator).createSalty(callData, testSalt), "contract already deployed with supplied salt");
+          await assert.revertWith(
+            this.Factory.from(creator).createSalty(callData, testSalt),
+            "contract already deployed with supplied salt"
+          );
         });
       });
     } else {
+      describe(`${factoryName}.createEncoded`, () => {
+        const abiEncoder = new ethers.utils.AbiCoder();
 
-    describe(`${factoryName}.createEncoded`, () => {
-      const abiEncoder = new ethers.utils.AbiCoder();
-
-      it("should create instance correctly", async () => {
-        const initData = abiEncoder.encode(
-          createExplicitTypes,
-          createExplicitArgs
-        );
-        const txn = await this.Factory.from(creator).createEncoded(initData);
-        await validateCreateExplicitTxn(txn);
+        it("should create instance correctly", async () => {
+          const initData = abiEncoder.encode(
+            createExplicitTypes,
+            createExplicitArgs
+          );
+          const txn = await this.Factory.from(creator).createEncoded(initData);
+          await validateCreateExplicitTxn(txn);
+        });
       });
 
-    describe(`${factoryName}.createExplicit`, () => {
-      it("should create instance correctly", async () => {
-        // creator creates the OneWayGriefing instance
-        const txn = await this.Factory.from(creator).createExplicit(
-          ...createExplicitArgs
-        );
+      describe(`${factoryName}.createExplicit`, () => {
+        it("should create instance correctly", async () => {
+          // creator creates the OneWayGriefing instance
+          const txn = await this.Factory.from(creator).createExplicit(
+            ...createExplicitArgs
+          );
 
           await validateCreateExplicitTxn(txn);
         });
