@@ -1,0 +1,69 @@
+= UserXperience
+
+This Topic aims to have a direct contact between devs via git.
+
+== Feedback
+
+=== Person a
+Ubuntu 18.04
+yarn 17.03
+
+Current Workflow worked for me like this.
+
+	$ yarn install
+
+Fine, but got a lot of warnings:
+
+[src, bash]
+----
+[1/4] Resolving packages...
+warning etherlime > ethereum-transaction-debugger > truffle-code-utils@1.1.4: WARNING: This package has been renamed to @truffle/code-utils.
+warning etherlime > ethereum-transaction-debugger > truffle-decode-utils@1.0.4: WARNING: This package has been renamed to @truffle/decode-utils.
+warning etherlime > ethereum-transaction-debugger > truffle-solidity-utils@1.2.2: WARNING: This package has been renamed to @truffle/solidity-utils.
+warning etherlime > ethereum-transaction-debugger > truffle-decoder@2.0.1: WARNING: This package has been renamed to @truffle/decoder.
+warning etherlime > ethereum-transaction-debugger > truffle-decoder > truffle-decode-utils@1.0.17: WARNING: This package has been renamed to @truffle/decode-utils.
+warning etherlime > @0x/sol-coverage > @0x/sol-tracing-utils > istanbul@0.4.5: This module is no longer maintained, try this instead:
+  npm i nyc
+Visit https://istanbul.js.org/integrations for other alternatives.
+warning etherlime > ethereum-transaction-debugger > truffle-decode-utils > web3 > web3-bzz > swarm-js > fs-promise@2.0.3: Use mz or fs-extra^3.0 with Promise Support
+warning etherlime > ethereum-transaction-debugger > truffle-decode-utils > web3 > web3-bzz > swarm-js > tar.gz@1.0.7: ⚠️  WARNING ⚠️ tar.gz module has been deprecated and your application is vulnerable. Please use tar module instead: https://npmjs.com/tar
+warning etherlime > @0x/sol-coverage > web3-provider-engine > ethereumjs-vm > merkle-patricia-tree > level-ws > xtend > object-keys@0.4.0:
+[2/4] Fetching packages...
+info fsevents@2.0.7: The platform "linux" is incompatible with this module.
+info "fsevents@2.0.7" is an optional dependency and failed compatibility check. Excluding it from installation.
+info fsevents@1.2.9: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.9" is an optional dependency and failed compatibility check. Excluding it from installation.
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+----
+
+	$ yarn compile
+
+First run hang up, after reboot Done in 54 s.
+
+	$ yarn flatten
+
+throws. After some research i saw that you have to specifiy a soliditiy file.
+
+	$ yarn ganache
+
+works and creates a Test-environment.
+
+So now
+
+  $ yarn test
+
+runs and all tests are working.
+
+	$ yarn coverage
+
+worked after changing `./contracts/wrappers/FeedCreator.sol` to `FeedManager.sol` until it throws at different stages.
+Mostly it throws at Feed.initialize ...
+
+	$ yarn deploy
+
+also fails. I dont know where and how to set network and secret.
+
+=== Person b
+
