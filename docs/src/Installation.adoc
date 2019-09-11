@@ -1,11 +1,35 @@
 = Installation
 
-...
+To install this project you need `yarn` installed.
 
-WARNING: TODO
+1.	$ git clone <path to the repo, or your fork>
+2.	$ cd erasure-protocol
+3.	$ yarn install
 
-== macOS
+== First steps
 
-== Unix
+First of all you should compile all contracts via:
 
-== Windows
+	$ yarn compile
+
+Now it is time to run a local test environment so we can test-deploy afterwards.
+
+	$ yarn ganache
+
+You will see 10 Addresses and their private Keys. Copy one of the private Keys and open a new terminal. Run `export DEPLOYMENT_PRIV_KEY=<Copied-private-Key>` and last but not least:
+
+	$ yarn deploy ganache
+
+NOTE: Every deployment needs a network and private key. (Checkout deployment/deploy.js)
+
+== Other Commands
+
+For now in `package.json` you see also:
+
+- `yarn flatten`
+- `yarn coverage`
+- `yarn test`
+
+Flatten and coverage are build in commands from `etherlime`, a dependency of this project for develop and deploy solidity files to the Ethereum network.
+
+Give it a shot! https://etherlime.gitbook.io/etherlime/
