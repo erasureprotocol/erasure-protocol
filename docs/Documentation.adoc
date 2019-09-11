@@ -9,8 +9,8 @@ include::./src/Introduction.adoc[]
 
 include::./src/Infrastructure.adoc[]
 
-include::./src/Overview.adoc[]
-
 include::./src/Functions.adoc[]
+
+include::./src/Examples.adoc[]
 
 include::./src/UserXperience.adoc[]

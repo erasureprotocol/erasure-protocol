@@ -11,7 +11,8 @@
     "ganache": "yarn etherlime ganache",
     "test": "yarn etherlime test --solcVersion=0.5.11",
     "coverage": "yarn etherlime coverage --solcVersion=0.5.11",
-    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false"
+    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false",
+    "pdf": "asciidoctor-pdf ./docs/Documentation.adoc"
   },
   "dependencies": {
     "coveralls": "^3.0.5",

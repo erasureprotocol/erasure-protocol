@@ -65,5 +65,9 @@ Mostly it throws at Feed.initialize ...
 
 also fails. I dont know where and how to set network and secret.
 
+Solved by: https://github.com/erasureprotocol/erasure-protocol/issues/193
+
+TIP: First run `export DEPLOYMENT_PRIV_KEY=<priv key from ganache>` and then `yarn deploy ganache`.
+
 === Person b
 

@@ -32,4 +32,4 @@ For now in `package.json` you see also:
 
 Flatten and coverage are build in commands from `etherlime`, a dependency of this project for develop and deploy solidity files to the Ethereum network.
 
-Give it a shot! https://etherlime.gitbook.io/etherlime/
+TIP: Give it a shot! https://etherlime.gitbook.io/etherlime/
