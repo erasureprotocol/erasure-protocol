@@ -1,0 +1,330 @@
+type Feed @entity {
+  id: ID!
+  creator: Bytes!
+  operator: Bytes
+  operatorStatus: Boolean
+  staticMetadata: Bytes
+  staticMetadataB58: String
+  variableMetadata: Bytes
+  variableMetadataB58: String
+  postRegistry: Bytes
+  posts: [Post!]
+  initCallData: Bytes!
+  createdTimestamp: BigInt!
+}
+
+type ExplicitInitDataFeedFactory @entity {
+  id: ID!
+  operator: Bytes! # address
+  postRegistry: Bytes! # address
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InstanceCreatedFeedFactory @entity {
+  id: ID!
+  instance: Bytes! # address of instance
+  creator: Bytes! # address of creator
+  callData: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type PostCreatedFeed @entity {
+  id: ID!
+  instance: Bytes!
+  post: Bytes! # address of post
+  postFactory: Bytes! # address of post factory
+  initData: Bytes! # call data as bytes
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type VariableMetadataSetFeed @entity {
+  id: ID!
+  instance: Bytes!
+  variableMetadata: Bytes!
+  variableMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StaticMetadataSetFeed @entity {
+  id: ID!
+  instance: Bytes!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedFeed @entity {
+  id: ID!
+  instance: Bytes!
+  operator: Bytes!
+  status: Boolean!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type Post @entity {
+  id: ID!
+  feed: Feed
+  creator: Bytes!
+  operator: Bytes
+  operatorStatus: Boolean
+  staticMetadata: Bytes
+  staticMetadataB58: String
+  variableMetadata: Bytes
+  variableMetadataB58: String
+  proofHash: Bytes
+  initCallData: Bytes!
+  createdTimestamp: BigInt!
+}
+
+type ExplicitInitDataPostFactory @entity {
+  id: ID!
+  operator: Bytes!
+  proofHash: Bytes!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  variableMetadata: Bytes!
+  variableMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InstanceCreatedPostFactory @entity {
+  id: ID!
+  instance: Bytes! # address of instance
+  creator: Bytes! # address of creator
+  callData: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type PostCreatedPost @entity {
+  id: ID!
+  instance: Bytes!
+  operator: Bytes!
+  proofHash: Bytes!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  variableMetadata: Bytes!
+  variableMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type VariableMetadataSetPost @entity {
+  id: ID!
+  instance: Bytes!
+  variableMetadata: Bytes!
+  variableMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StaticMetadataSetPost @entity {
+  id: ID!
+  instance: Bytes!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedPost @entity {
+  id: ID!
+  instance: Bytes!
+  operator: Bytes!
+  status: Boolean!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type ProofHashSetPost @entity {
+  id: ID!
+  instance: Bytes!
+  caller: Bytes!
+  proofHash: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OneWayGriefingAgreement @entity {
+  id: ID!
+  creator: Bytes
+  staker: Bytes
+  counterparty: Bytes
+  operator: Bytes
+  operatorStatus: Boolean
+  ratio: BigInt
+  ratioType: Int
+  countdownLength: BigInt
+  staticMetadata: Bytes
+  staticMetadataB58: String
+  variableMetadata: Bytes
+  variableMetadataB58: String
+  stake: BigInt
+  token: Bytes
+  deadline: BigInt
+  initCallData: Bytes!
+  createdTimestamp: BigInt!
+}
+
+type InstanceCreatedOneWayGriefingFactory @entity {
+  id: ID!
+  instance: Bytes! # address of instance
+  creator: Bytes! # address of creator
+  callData: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type ExplicitInitDataOneWayGriefingFactory @entity {
+  id: ID!
+  staker: Bytes!
+  counterparty: Bytes!
+  operator: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  countdownLength: BigInt!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type VariableMetadataSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  variableMetadata: Bytes!
+  variableMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StaticMetadataSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  staticMetadata: Bytes!
+  staticMetadataB58: String!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  operator: Bytes!
+  status: Boolean!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type RatioSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  staker: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type GriefedOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  punisher: Bytes!
+  staker: Bytes!
+  punishment: BigInt!
+  cost: BigInt!
+  message: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type TokenSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  token: Bytes!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeAddedOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  staker: Bytes!
+  funder: Bytes!
+  amount: BigInt!
+  newStake: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeTakenOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  staker: Bytes!
+  recipient: Bytes!
+  amount: BigInt!
+  newStake: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeBurnedOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  staker: Bytes!
+  amount: BigInt!
+  newStake: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type LengthSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  length: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DeadlineSetOneWayGriefing @entity {
+  id: ID!
+  instance: Bytes!
+  deadline: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
