@@ -1,8 +1,7 @@
 {
-  "name": "erasure-next-contracts",
+  "name": "erasure-protocol",
   "version": "1.0.0",
-  "main": "index.js",
-  "repository": "https://github.com/erasureprotocol/erasure-next-contracts.git",
+  "repository": "https://github.com/erasureprotocol/erasure-protocol.git",
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
