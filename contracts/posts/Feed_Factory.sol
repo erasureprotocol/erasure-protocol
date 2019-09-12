@@ -29,21 +29,21 @@ contract Feed_Factory is Factory {
         // decode initdata
         (
             address operator,
-            address postRegistry,
             bytes memory feedStaticMetadata
-        ) = abi.decode(initdata, (address,address,bytes));
+        ) = abi.decode(initdata, (address,bytes));
 
         // call explicit create
-        instance = createExplicit(operator, postRegistry, feedStaticMetadata);
+        instance = createExplicit(operator, feedStaticMetadata);
     }
 
     function createExplicit(
         address operator,
-        address postRegistry,
         bytes memory feedStaticMetadata
     ) public returns (address instance) {
         // declare template in memory
         Feed template;
+
+        address postRegistry = Factory.getInstanceRegistry();
 
         // construct the data payload used when initializing the new contract.
         bytes memory callData = abi.encodeWithSelector(
