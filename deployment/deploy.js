@@ -1,6 +1,7 @@
 const etherlime = require("etherlime-lib");
 const ethers = require("ethers");
-const { createMultihashSha256 } = require("../test/helpers/utils");
+const { createMultihashSha256, abiEncodeWithSelector } = require("../test/helpers/utils");
+
 require("dotenv").config();
 
 const deploy = async (network, secret) => {
@@ -20,13 +21,15 @@ const deploy = async (network, secret) => {
 
   let tokenAddress;
   let deployer;
-  let wallet = new ethers.Wallet(process.env.DEPLOYMENT_PRIV_KEY);
+  let wallet;
   let multisig;
-  console.log(`Deployment Wallet: ${wallet.address}`);
 
   let defaultGas = ethers.utils.parseUnits('10', 'gwei');
 
   if (network == "rinkeby") {
+
+    wallet = new ethers.Wallet(process.env.DEPLOYMENT_PRIV_KEY);
+    console.log(`Deployment Wallet: ${wallet.address}`);
 
     tokenAddress = "0x1eBf22785bffb6B44fEbBc8a41056b1aD43401f9";
     multisig = "0x6087555A70E2F96B7838806e7743041E035a37e5";
@@ -55,6 +58,9 @@ const deploy = async (network, secret) => {
     contracts.CountdownGriefing_Factory.instance = await deployer.deployAndVerify(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
 
 } else if (network == "mainnet") {
+
+    wallet = new ethers.Wallet(process.env.DEPLOYMENT_PRIV_KEY);
+    console.log(`Deployment Wallet: ${wallet.address}`);
 
     tokenAddress = "0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671";
     multisig = "0x0000000000377d181a0ebd08590c6b399b272000";
@@ -90,10 +96,9 @@ const deploy = async (network, secret) => {
 
 } else if (network == "ganache") {
 
-    multisig = wallet.address;
-
     // initialize deployer
     deployer = new etherlime.EtherlimeGanacheDeployer();
+    multisig = deployer.signer.address;
 
     // deploy mock NMR
     contracts.MockNMR.instance = await deployer.deploy(contracts.MockNMR.artifact);
@@ -167,11 +172,12 @@ Create test instances from factories
   const proofHash = createMultihashSha256("proofHash");
   console.log(`multihash: ${proofHash}`);
 
-  await contracts.Post_Factory.instance.createExplicit(
-      userAddress,
-      proofHash,
-      '0x0',
-      '0x0',
+  await contracts.Post_Factory.instance.create(
+      abiEncodeWithSelector(
+          'initialize',
+          ['address', 'bytes', 'bytes', 'bytes'],
+          [userAddress, proofHash, proofHash, proofHash]
+      ),
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.Post_Factory.instance.verboseWaitForTransaction(txn);
@@ -181,13 +187,15 @@ Create test instances from factories
         "There is no such event"
       );
       contracts.Post.instance = new ethers.Contract(eventFound.args.instance, contracts.Post.artifact.abi, deployer.provider);
-      console.log(`createExplicit() | Post_Factory => ${eventFound.args.instance}`);
+      console.log(`create() | ${receipt.gasUsed.toString()} gas | Post_Factory => ${eventFound.args.instance}`);
   });
 
-  await contracts.Feed_Factory.instance.createExplicit(
-      userAddress,
-      contracts.Erasure_Posts.instance.contractAddress,
-      '0x0',
+  await contracts.Feed_Factory.instance.create(
+      abiEncodeWithSelector(
+          'initialize',
+          ['address', 'address', 'bytes'],
+          [userAddress, contracts.Erasure_Posts.instance.contractAddress, proofHash]
+      ),
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.Feed_Factory.instance.verboseWaitForTransaction(txn);
@@ -197,18 +205,15 @@ Create test instances from factories
         "There is no such event"
       );
       contracts.Feed.instance = new ethers.Contract(eventFound.args.instance, contracts.Feed.artifact.abi, deployer.provider);
-      console.log(`createExplicit() | Feed_Factory => ${eventFound.args.instance}`);
+      console.log(`create() | ${receipt.gasUsed.toString()} gas | Feed_Factory => ${eventFound.args.instance}`);
   });
 
-  await contracts.CountdownGriefing_Factory.instance.createExplicit(
-      tokenAddress,
-      userAddress,
-      userAddress,
-      userAddress,
-      1,
-      2,
-      100000000,
-      '0x0',
+  await contracts.CountdownGriefing_Factory.instance.create(
+      abiEncodeWithSelector(
+          'initialize',
+          ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
+          [tokenAddress, userAddress, userAddress, userAddress, 1, 2, 100000000, '0x0']
+      ),
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.CountdownGriefing_Factory.instance.verboseWaitForTransaction(txn);
@@ -218,7 +223,7 @@ Create test instances from factories
         "There is no such event"
       );
       contracts.CountdownGriefing.instance = new ethers.Contract(eventFound.args.instance, contracts.CountdownGriefing.artifact.abi, deployer.provider);
-      console.log(`createExplicit() | CountdownGriefing_Factory => ${eventFound.args.instance}`);
+      console.log(`create() | ${receipt.gasUsed.toString()} gas | CountdownGriefing_Factory => ${eventFound.args.instance}`);
   });
 
   console.log(``);
