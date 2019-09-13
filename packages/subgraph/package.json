@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "graph codegen",
-    "build": "graph build",
+    "build": "graph build"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.15.0",
