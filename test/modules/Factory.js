@@ -10,11 +10,17 @@ function testFactory(
   deployer, // etherlime's ganache deployer instance
   factoryName, // factory contract's name
   instanceType, // instance type created by factory
-  createTypes, // the types used in create call
-  createArgs, // the arguments used in create call
+  createExplicitTypes, // the types used in create call
+  createExplicitArgs, // the arguments used in create call
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
+
+  // There are cases where the create() call and the createExplicit() call differ
+  // ABI types are different. Default to the create call parameters
+  // anything else, pass in a different set of ABI
+  createTypes = createExplicitTypes,
+  getCreateArgs = () => createExplicitArgs
 ) {
   describe(factoryName, function() {
     this.timeout(4000);
@@ -81,7 +87,8 @@ function testFactory(
           deployer.deploy(
             factoryArtifact,
             false,
-            this.WrongRegistry.contractAddress
+            this.WrongRegistry.contractAddress,
+            ...factoryConstructorArgs
           ),
           "incorrect instance type"
         );
@@ -91,7 +98,8 @@ function testFactory(
         this.Factory = await deployer.deploy(
           factoryArtifact,
           false,
-          this.Registry.contractAddress
+          this.Registry.contractAddress,
+          ...factoryConstructorArgs
         );
 
         // Factory.getInstanceType
@@ -115,12 +123,7 @@ function testFactory(
         assert.equal(actualInstanceRegistry, this.Registry.contractAddress);
 
         // Factory.getTemplate
-        logicContractAddress = await getLatestContractAdressFrom(
-          deployer.provider,
-          this.Factory.contractAddress
-        );
-        const actualTemplateAddress = await this.Factory.getTemplate();
-        assert.equal(actualTemplateAddress, logicContractAddress);
+        logicContractAddress = await this.Factory.getTemplate();
 
         // register the factory into the registry
         await this.Registry.from(operator).addFactory(
@@ -179,37 +182,37 @@ function testFactory(
       });
     });
 
-      describe(`${factoryName}.createSalty`, () => {
-        it("should create instance correctly", async () => {
-          const callData = abiEncodeWithSelector(
-            initializeFunctionName,
-            createTypes,
-            createArgs
-          );
-          const testSalt = ethers.utils.formatBytes32String("testSalt");
-          const txn = await this.Factory.from(creator).createSalty(
-            callData,
-            testSalt
-          );
-          const expectedAddress = await this.Factory.from(
-            creator
-          ).getSaltyInstance(callData, testSalt);
-          await validateCreateTxn(txn, testSalt, expectedAddress);
-        });
-
-        it("should revert with duplicate salt", async () => {
-          const callData = abiEncodeWithSelector(
-            initializeFunctionName,
-            createTypes,
-            createArgs
-          );
-          const testSalt = ethers.utils.formatBytes32String("testSalt");
-          await assert.revertWith(
-            this.Factory.from(creator).createSalty(callData, testSalt),
-            "contract already deployed with supplied salt"
-          );
-        });
+    describe(`${factoryName}.createSalty`, () => {
+      it("should create instance correctly", async () => {
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          getCreateArgs()
+        );
+        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        const txn = await this.Factory.from(creator).createSalty(
+          callData,
+          testSalt
+        );
+        const expectedAddress = await this.Factory.from(
+          creator
+        ).getSaltyInstance(callData, testSalt);
+        await validateCreateTxn(txn, testSalt, expectedAddress);
       });
+
+      it("should revert with duplicate salt", async () => {
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          getCreateArgs()
+        );
+        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        await assert.revertWith(
+          this.Factory.from(creator).createSalty(callData, testSalt),
+          "contract already deployed with supplied salt"
+        );
+      });
+    });
 
     describe("Factory.getInstanceCount", () => {
       it("should get correct instance count", async () => {

@@ -30,6 +30,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes metadata);
 
     function initialize(
+        address token,
         address operator,
         address staker,
         address counterparty,
@@ -41,6 +42,8 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         // set storage values
         _data.staker = staker;
         _data.counterparty = counterparty;
+
+        Staking._setToken(token);
 
         // set operator
         if (operator != address(0)) {
