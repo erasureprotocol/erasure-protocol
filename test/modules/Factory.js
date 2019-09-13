@@ -16,6 +16,8 @@ function testFactory(
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
 
+  factoryConstructorArgs = [], // arguments passed to factory constructor on top of registry
+
   // There are cases where the create() call and the createExplicit() call differ
   // ABI types are different. Default to the create call parameters
   // anything else, pass in a different set of ABI
@@ -89,7 +91,8 @@ function testFactory(
           deployer.deploy(
             factoryArtifact,
             false,
-            this.WrongRegistry.contractAddress
+            this.WrongRegistry.contractAddress,
+            ...factoryConstructorArgs
           ),
           "incorrect instance type"
         );
@@ -99,7 +102,8 @@ function testFactory(
         this.Factory = await deployer.deploy(
           factoryArtifact,
           false,
-          this.Registry.contractAddress
+          this.Registry.contractAddress,
+          ...factoryConstructorArgs
         );
 
         // Factory.getInstanceType
@@ -123,12 +127,7 @@ function testFactory(
         assert.equal(actualInstanceRegistry, this.Registry.contractAddress);
 
         // Factory.getTemplate
-        logicContractAddress = await getLatestContractAdressFrom(
-          deployer.provider,
-          this.Factory.contractAddress
-        );
-        const actualTemplateAddress = await this.Factory.getTemplate();
-        assert.equal(actualTemplateAddress, logicContractAddress);
+        logicContractAddress = await this.Factory.getTemplate();
 
         // register the factory into the registry
         await this.Registry.from(operator).addFactory(
@@ -187,37 +186,37 @@ function testFactory(
       });
     });
 
-      describe(`${factoryName}.createSalty`, () => {
-        it("should create instance correctly", async () => {
-          const callData = abiEncodeWithSelector(
-            initializeFunctionName,
-            createTypes,
-            getCreateArgs()
-          );
-          const testSalt = ethers.utils.formatBytes32String("testSalt");
-          const txn = await this.Factory.from(creator).createSalty(
-            callData,
-            testSalt
-          );
-          const expectedAddress = await this.Factory.from(
-            creator
-          ).getSaltyInstance(callData, testSalt);
-          await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
-        });
-
-        it("should revert with duplicate salt", async () => {
-          const callData = abiEncodeWithSelector(
-            initializeFunctionName,
-            createTypes,
-            getCreateArgs()
-          );
-          const testSalt = ethers.utils.formatBytes32String("testSalt");
-          await assert.revertWith(
-            this.Factory.from(creator).createSalty(callData, testSalt),
-            "contract already deployed with supplied salt"
-          );
-        });
+    describe(`${factoryName}.createSalty`, () => {
+      it("should create instance correctly", async () => {
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          getCreateArgs()
+        );
+        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        const txn = await this.Factory.from(creator).createSalty(
+          callData,
+          testSalt
+        );
+        const expectedAddress = await this.Factory.from(
+          creator
+        ).getSaltyInstance(callData, testSalt);
+        await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
       });
+
+      it("should revert with duplicate salt", async () => {
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          getCreateArgs()
+        );
+        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        await assert.revertWith(
+          this.Factory.from(creator).createSalty(callData, testSalt),
+          "contract already deployed with supplied salt"
+        );
+      });
+    });
 
     describe("Factory.getInstanceCount", () => {
       it("should get correct instance count", async () => {
