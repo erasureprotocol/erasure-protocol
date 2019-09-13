@@ -1,5 +1,6 @@
 // require artifacts
 const SimpleGriefing_FactoryArtifact = require("../../build/SimpleGriefing_Factory.json");
+const SimpleGriefingArtifact = require("../../build/SimpleGriefing.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
@@ -21,16 +22,20 @@ const createTypes = [
   "address",
   "address",
   "address",
-  "address",
   "uint256",
   "uint8",
   "bytes"
 ];
 
-let MockNMR;
+let SimpleGriefing;
 
 before(async () => {
   MockNMR = await deployer.deploy(MockNMRArtifact);
+  SimpleGriefing = await deployer.deploy(
+    SimpleGriefingArtifact,
+    false,
+    MockNMR.contractAddress
+  );
 });
 
 function runFactoryTest() {
@@ -44,7 +49,6 @@ function runFactoryTest() {
   describe(factoryName, () => {
     it("setups test", () => {
       const createArgs = [
-        MockNMR.contractAddress,
         owner,
         staker,
         counterparty,
@@ -61,7 +65,8 @@ function runFactoryTest() {
         createArgs,
         SimpleGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
-        ErasurePostsRegistryArtifact
+        ErasurePostsRegistryArtifact,
+        [SimpleGriefing.contractAddress]
       );
     });
   });
