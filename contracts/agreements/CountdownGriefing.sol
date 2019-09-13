@@ -27,10 +27,14 @@ contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template 
         address counterparty;
     }
 
-    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes staticMetadata)
+    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes staticMetadata);
+
+    constructor(address token) public {
+        // set token used for staking
+        Staking._setToken(token);
+    }
 
     function initialize(
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -48,9 +52,6 @@ contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template 
             Operated._setOperator(operator);
             Operated._activateOperator();
         }
-
-        // set token used for staking
-        Staking._setToken(token);
 
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);

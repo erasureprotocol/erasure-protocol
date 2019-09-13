@@ -19,11 +19,10 @@ contract TestCountdownGriefing is CountdownGriefing {
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
-        bytes memory staticMetadata) public {
+        bytes memory staticMetadata) CountdownGriefing(token) public {
 
         initializeCountdownGriefing(
             griefingContract,
-            token,
             operator,
             staker,
             counterparty,
@@ -36,7 +35,6 @@ contract TestCountdownGriefing is CountdownGriefing {
 
     function initializeCountdownGriefing(
         address griefingContract,
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -49,7 +47,6 @@ contract TestCountdownGriefing is CountdownGriefing {
 
         bytes memory initData = abi.encodeWithSelector(
             _template.initialize.selector, // selector
-            token,           // token
             operator,        // operator
             staker,          // staker
             counterparty,    // counterparty

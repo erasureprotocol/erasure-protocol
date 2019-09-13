@@ -57,8 +57,12 @@ describe("CountdownGriefing", function() {
   before(async () => {
     deployer = createDeployer();
 
-    this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
     this.MockNMR = await deployer.deploy(MockNMRArtifact);
+    this.CountdownGriefing = await deployer.deploy(
+      CountdownGriefingArtifact,
+      false,
+      this.MockNMR.contractAddress
+    );
 
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
@@ -76,10 +80,7 @@ describe("CountdownGriefing", function() {
   describe("CountdownGriefing.initialize", () => {
     it("should revert when caller is not contract", async () => {
       await assert.revertWith(
-        this.CountdownGriefing.initialize(
-          this.MockNMR.contractAddress,
-          ...initArgs
-        ),
+        this.CountdownGriefing.initialize(...initArgs),
         "must be called within contract constructor"
       );
     });
@@ -150,7 +151,6 @@ describe("CountdownGriefing", function() {
     it("should revert when not initialized from constructor", async () => {
       const initArgs = [
         this.CountdownGriefing.contractAddress,
-        this.MockNMR.contractAddress,
         operator,
         staker,
         counterparty,
@@ -497,7 +497,10 @@ describe("CountdownGriefing", function() {
       // increase staker's stake to 500
       await this.MockNMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        (await this.MockNMR.allowance(staker, this.TestCountdownGriefing.contractAddress)),
+        await this.MockNMR.allowance(
+          staker,
+          this.TestCountdownGriefing.contractAddress
+        ),
         stakerStake
       );
       await this.TestCountdownGriefing.from(staker).increaseStake(
