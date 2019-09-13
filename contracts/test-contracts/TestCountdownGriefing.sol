@@ -23,7 +23,6 @@ contract TestCountdownGriefing is CountdownGriefing {
 
         initializeCountdownGriefing(
             griefingContract,
-            token,
             operator,
             staker,
             counterparty,
@@ -36,7 +35,6 @@ contract TestCountdownGriefing is CountdownGriefing {
 
     function initializeCountdownGriefing(
         address griefingContract,
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -49,7 +47,6 @@ contract TestCountdownGriefing is CountdownGriefing {
 
         bytes memory initData = abi.encodeWithSelector(
             _template.initialize.selector, // selector
-            token,           // token
             operator,        // operator
             staker,          // staker
             counterparty,    // counterparty
