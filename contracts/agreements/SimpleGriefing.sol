@@ -29,7 +29,6 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, bytes metadata);
 
     function initialize(
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -46,9 +45,6 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
             Operated._setOperator(operator);
             Operated._activateOperator();
         }
-
-        // set token used for staking
-        Staking._setToken(token);
 
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);

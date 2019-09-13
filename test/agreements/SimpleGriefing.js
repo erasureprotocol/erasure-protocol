@@ -56,8 +56,12 @@ describe("SimpleGriefing", function() {
   before(async () => {
     deployer = createDeployer();
 
-    this.SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
     this.MockNMR = await deployer.deploy(MockNMRArtifact);
+    this.SimpleGriefing = await deployer.deploy(
+      SimpleGriefingArtifact,
+      false,
+      this.MockNMR.contractAddress
+    );
 
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
@@ -75,10 +79,7 @@ describe("SimpleGriefing", function() {
   describe("SimpleGriefing.initialize", () => {
     it("should revert when caller is not contract", async () => {
       await assert.revertWith(
-        this.SimpleGriefing.initialize(
-          this.MockNMR.contractAddress,
-          ...initArgs
-        ),
+        this.SimpleGriefing.initialize(...initArgs),
         "must be called within contract constructor"
       );
     });
@@ -139,7 +140,6 @@ describe("SimpleGriefing", function() {
     it("should revert when not initialized from constructor", async () => {
       const initArgs = [
         this.SimpleGriefing.contractAddress,
-        this.MockNMR.contractAddress,
         operator,
         staker,
         counterparty,

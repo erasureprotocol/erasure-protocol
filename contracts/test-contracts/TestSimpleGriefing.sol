@@ -21,7 +21,6 @@ contract TestSimpleGriefing is SimpleGriefing {
 
         initializeSimpleGriefing(
             griefingContract,
-            token,
             operator,
             staker,
             counterparty,
@@ -33,7 +32,6 @@ contract TestSimpleGriefing is SimpleGriefing {
 
     function initializeSimpleGriefing(
         address griefingContract,
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -45,7 +43,6 @@ contract TestSimpleGriefing is SimpleGriefing {
 
         bytes memory initData = abi.encodeWithSelector(
             _template.initialize.selector, // selector
-            token,           // token
             operator,        // operator
             staker,          // staker
             counterparty,    // counterparty
