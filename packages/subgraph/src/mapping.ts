@@ -409,7 +409,7 @@ export function handleGriefedOneWayGriefing(event: GriefedOneWayGriefingEvent): 
   entity.save()
 
   let oneWayGriefing = new OneWayGriefingAgreement(event.address.toHex())
-  oneWayGriefing.stake = oneWayGriefing.stake.minus(entity.punishment)
+  oneWayGriefing.staker = entity.staker
   oneWayGriefing.save()
 }
 
@@ -458,6 +458,7 @@ export function handleStakeTakenOneWayGriefing(event: StakeTakenOneWayGriefingEv
   entity.save()
 
   let oneWayGriefing = new OneWayGriefingAgreement(event.address.toHex())
+  oneWayGriefing.staker = entity.staker
   oneWayGriefing.stake = entity.newStake
   oneWayGriefing.save()
 }
@@ -474,6 +475,7 @@ export function handleStakeBurnedOneWayGriefing(event: StakeBurnedOneWayGriefing
   entity.save()
 
   let oneWayGriefing = new OneWayGriefingAgreement(event.address.toHex())
+  oneWayGriefing.staker = entity.staker
   oneWayGriefing.stake = entity.newStake
   oneWayGriefing.save()
 }
