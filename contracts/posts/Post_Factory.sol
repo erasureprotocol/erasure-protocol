@@ -6,10 +6,10 @@ import "./Post.sol";
 
 contract Post_Factory is Factory {
 
-    constructor(address instanceRegistry) public {
-        // deploy template contract
-        Post template = new Post();
-        address templateContract = address(template);
+    constructor(address instanceRegistry, address templateContract) public {
+        // declare template in memory
+        Post template;
+
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
         // set initSelector

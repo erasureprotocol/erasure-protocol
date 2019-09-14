@@ -2,23 +2,15 @@ const etherlime = require("etherlime-lib");
 
 const { createDeployer } = require("../helpers/setup");
 const {
-<<<<<<< HEAD
-  hexlify,
-  createInstanceAddress,
-  createInstanceAddressWithCallData,
-  createSelector,
-  createMultihashSha256,
-  abiEncodeWithSelector
-=======
   createInstanceAddressWithInitData,
   createSelector,
   abiEncodeWithSelector,
   createMultihashSha256
->>>>>>> Feed_Factory use passed in template
 } = require("../helpers/utils");
 
 // artifacts
 const TestFeedArtifact = require("../../build/TestFeed.json");
+const TestPostArtifact = require("../../build/TestPost.json");
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
@@ -60,7 +52,7 @@ describe("Feed", function() {
     postVariableMetadata
   ];
   const createPostCallData = abiEncodeWithSelector(
-    'initialize',
+    "initialize",
     createPostABITypes,
     createPostABIValues
   );
@@ -83,10 +75,18 @@ describe("Feed", function() {
     let callData;
 
     if (validInit) {
-      callData = abiEncodeWithSelector('initialize', ["address", "address", "bytes"], args);
+      callData = abiEncodeWithSelector(
+        "initialize",
+        ["address", "address", "bytes"],
+        args
+      );
     } else {
       // invalid callData is missing first address
-      callData = abiEncodeWithSelector('initialize', ["bytes"], [feedStaticMetadata]);
+      callData = abiEncodeWithSelector(
+        "initialize",
+        ["bytes"],
+        [feedStaticMetadata]
+      );
     }
 
     const txn = await this.FeedFactory.from(creator).create(callData);
@@ -117,6 +117,7 @@ describe("Feed", function() {
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact);
 
     this.FeedTemplate = await deployer.deploy(TestFeedArtifact);
+    this.PostTemplate = await deployer.deploy(TestPostArtifact);
 
     this.FeedFactory = await deployer.deploy(
       FeedFactoryArtifact,
@@ -133,7 +134,8 @@ describe("Feed", function() {
     this.PostFactory = await deployer.deploy(
       PostFactoryArtifact,
       false,
-      this.PostRegistry.contractAddress
+      this.PostRegistry.contractAddress,
+      this.PostTemplate.contractAddress
     );
   });
 
@@ -323,7 +325,7 @@ describe("Feed", function() {
     // malformed post init data
     it("should revert with malformed post init data", async () => {
       const callData = abiEncodeWithSelector(
-        'initialize',
+        "initialize",
         ["bytes", "bytes"], // missing 1 bytes parameter
         [proofHash, postStaticMetadata]
       );

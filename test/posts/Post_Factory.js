@@ -1,5 +1,6 @@
 // require artifacts
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
+const PostArtifact = require("../../build/TestPost.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
 
@@ -25,6 +26,12 @@ const variableMetadata = ethers.utils.keccak256(
 const createTypes = ["address", "bytes", "bytes", "bytes"];
 const createArgs = [creator, proofHash, staticMetadata, variableMetadata];
 
+let PostTemplate;
+
+before(async () => {
+  PostTemplate = await deployer.deploy(PostArtifact);
+});
+
 function runFactoryTest() {
   const deployer = createDeployer();
 
@@ -38,7 +45,8 @@ function runFactoryTest() {
         createArgs,
         PostFactoryArtifact,
         ErasurePostsRegistryArtifact,
-        ErasureAgreementsRegistryArtifact
+        ErasureAgreementsRegistryArtifact,
+        [PostTemplate.contractAddress]
       );
     });
   });
