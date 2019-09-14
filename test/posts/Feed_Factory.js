@@ -1,4 +1,5 @@
 // require artifacts
+const FeedArtifact = require("../../build/Feed.json");
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const ErasureAgreementsArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
@@ -18,10 +19,10 @@ const staticMetadata = ethers.utils.keccak256(
 
 const createTypes = ["address", "bytes"];
 
-let PostRegistry;
+let FeedTemplate;
 
 before(async () => {
-  PostRegistry = await deployer.deploy(ErasurePostsArtifact);
+  FeedTemplate = await deployer.deploy(FeedArtifact);
 });
 
 function runFactoryTest() {
@@ -40,6 +41,10 @@ function runFactoryTest() {
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
         ErasureAgreementsArtifact, // wrong registry
+        localCreateTypes,
+        function() {
+          return [creator, this.Registry.contractAddress, staticMetadata];
+        }
       );
     });
   });
