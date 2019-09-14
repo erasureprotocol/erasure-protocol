@@ -2,17 +2,24 @@ const etherlime = require("etherlime-lib");
 
 const { createDeployer } = require("../helpers/setup");
 const {
+<<<<<<< HEAD
   hexlify,
   createInstanceAddress,
   createInstanceAddressWithCallData,
   createSelector,
   createMultihashSha256,
   abiEncodeWithSelector
+=======
+  createInstanceAddressWithInitData,
+  createSelector,
+  abiEncodeWithSelector,
+  createMultihashSha256
+>>>>>>> Feed_Factory use passed in template
 } = require("../helpers/utils");
 
 // artifacts
 const TestFeedArtifact = require("../../build/TestFeed.json");
-const FeedFactoryArtifact = require("../../build/TestFeedFactory.json");
+const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
@@ -109,19 +116,19 @@ describe("Feed", function() {
 
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact);
 
+    this.FeedTemplate = await deployer.deploy(TestFeedArtifact);
+
     this.FeedFactory = await deployer.deploy(
       FeedFactoryArtifact,
       false,
-      this.PostRegistry.contractAddress
+      this.PostRegistry.contractAddress,
+      this.FeedTemplate.contractAddress
     );
 
     await this.PostRegistry.from(creator).addFactory(
       this.FeedFactory.contractAddress,
       "0x"
     );
-
-    // // template contract from FeedFactory
-    this.FeedAddress = await this.FeedFactory.getTemplate();
 
     this.PostFactory = await deployer.deploy(
       PostFactoryArtifact,
@@ -135,7 +142,7 @@ describe("Feed", function() {
       await assert.revert(deployTestFeed(false));
     });
 
-    it("should initialize post", async () => {
+    it("should initialize feed", async () => {
       this.TestFeed = await deployTestFeed(true);
 
       // getPostRegistry
