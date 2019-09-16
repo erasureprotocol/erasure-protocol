@@ -13,6 +13,7 @@ contract Feed is Operated, Metadata, Template {
     address private _postRegistry;
 
     event PostCreated(address post, address postFactory, bytes initData);
+    event Initialized(address operator, address postRegistry, bytes feedStaticMetadata);
 
     function initialize(
         address operator,
@@ -30,6 +31,9 @@ contract Feed is Operated, Metadata, Template {
 
         // set static metadata
         Metadata._setStaticMetadata(feedStaticMetadata);
+
+        // log initialization params
+        emit Initialized(operator, postRegistry, feedStaticMetadata);
     }
 
     // state functions

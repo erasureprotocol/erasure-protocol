@@ -8,7 +8,7 @@ import "../modules/Template.sol";
 
 contract Post is ProofHash, Operated, Metadata, Template {
 
-    event Created(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
+    event Initialized(address operator, bytes proofHash, bytes staticMetadata, bytes variableMetadata);
 
     function initialize(
         address operator,
@@ -31,8 +31,8 @@ contract Post is ProofHash, Operated, Metadata, Template {
         // set variable metadata
         Metadata._setVariableMetadata(variableMetadata);
 
-        // emit event
-        emit Created(operator, proofHash, staticMetadata, variableMetadata);
+        // log initialization params
+        emit Initialized(operator, proofHash, staticMetadata, variableMetadata);
     }
 
     // state functions

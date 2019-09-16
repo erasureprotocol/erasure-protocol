@@ -26,6 +26,8 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         address counterparty;
     }
 
+    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, bytes staticMetadata);
+
     function initialize(
         address token,
         address operator,
@@ -53,6 +55,9 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
+
+        // log initialization params
+        emit Initialized(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);
     }
 
     // state functions
