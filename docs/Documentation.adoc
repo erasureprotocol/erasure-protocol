@@ -1,0 +1,16 @@
+= Documentation
+:doctype: book
+:toc:
+:imagesdir: ./src/data/
+
+This aims to be the Documentation of the Erasureprotocol. Just add your information in the fitting section, cd into docs and run `asciidoctor-pdf Documentation.adoc` so the pdf will be generated.
+
+include::./src/Introduction.adoc[]
+
+include::./src/Infrastructure.adoc[]
+
+include::./src/Functions.adoc[]
+
+include::./src/Examples.adoc[]
+
+include::./src/UserXperience.adoc[]
