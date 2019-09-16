@@ -1,7 +1,7 @@
 # Erasure Next Contracts
 
 [![Build Status](https://travis-ci.com/erasureprotocol/erasure-protocol.svg?branch=master)](https://travis-ci.com/erasureprotocol/erasure-protocol)
-[![Build Status](https://github.com/erasureprotocol/erasure-protocol/workflows/Test%20Smart%20Contracts/badge.svg)](https://github.com/erasureprotocol/erasure-protocol/actions)
+[![Build Status](https://github.com/erasureprotocol/erasure-protocol/workflows/CI/badge.svg)](https://github.com/erasureprotocol/erasure-protocol/actions)
 
 
 ## Philosophy of Erasure
