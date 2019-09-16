@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test smart contracts
+    name: Test Smart Contracts
     runs-on: ubuntu-latest
 
     steps:
