@@ -29,11 +29,6 @@ contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template 
 
     event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes staticMetadata);
 
-    constructor(address token) public {
-        // set token used for staking
-        Staking._setToken(token);
-    }
-
     function initialize(
         address operator,
         address staker,
@@ -61,6 +56,12 @@ contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template 
 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
+
+        bytes memory templateData = Template.getTemplateData();
+
+        (address token) = abi.decode(templateData, (address));
+
+        Staking._setToken(token);
 
         // log initialization params
         emit Initialized(token, operator, staker, counterparty, ratio, ratioType, countdownLength, staticMetadata);

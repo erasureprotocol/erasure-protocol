@@ -31,4 +31,8 @@ contract Template {
         ok = (caller == getCreator());
     }
 
+    function getTemplateData() public view returns (bytes memory templateData) {
+        templateData = iFactory(_factory).getTemplateData();
+    }
+
 }

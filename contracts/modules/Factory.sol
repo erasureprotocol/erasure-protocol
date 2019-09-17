@@ -14,10 +14,17 @@ contract Factory is Spawner {
     bytes4 private _initSelector;
     address private _instanceRegistry;
     bytes4 private _instanceType;
+    bytes private _templateData;
 
     event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
 
-    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, bytes4 initSelector) internal {
+    function _initialize(
+        address instanceRegistry,
+        address templateContract,
+        bytes4 instanceType,
+        bytes4 initSelector,
+        bytes memory templateData
+    ) internal {
         // set instance registry
         _instanceRegistry = instanceRegistry;
         // set logic contract
@@ -28,6 +35,8 @@ contract Factory is Spawner {
         require(instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
         // set instanceType
         _instanceType = instanceType;
+        // set metadata bytes string
+        _templateData = templateData;
     }
 
     // IFactory methods
@@ -72,6 +81,10 @@ contract Factory is Spawner {
 
     function getInstanceCreator(address instance) public view returns (address creator) {
         creator = _instanceCreator[instance];
+    }
+
+    function getTemplateData() public view returns (bytes memory templateData) {
+        templateData = _templateData;
     }
 
     function getInstanceType() public view returns (bytes4 instanceType) {

@@ -20,6 +20,7 @@ pragma solidity ^0.5.0;
      function getSaltyInstance(bytes calldata, bytes32 salt) external view returns (address instance);
      function getNextInstance(bytes calldata) external view returns (address instance);
 
+     function getTemplateData() external view returns (bytes memory metadata);
      function getInstanceCreator(address instance) external view returns (address creator);
      function getInstanceType() external view returns (bytes4 instanceType);
      function getInstanceCount() external view returns (uint256 count);
