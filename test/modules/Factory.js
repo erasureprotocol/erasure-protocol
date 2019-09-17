@@ -15,7 +15,6 @@ function testFactory(
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
-  isV2Factory, // bool determining if we should test new v2 factory methods, e.g. create
 
   // There are cases where the create() call and the createExplicit() call differ
   // ABI types are different. Default to the create call parameters
@@ -188,8 +187,7 @@ function testFactory(
       });
     });
 
-    if (isV2Factory) {
-      describe(`${factoryName}.create with salt`, () => {
+      describe(`${factoryName}.createSalty`, () => {
         it("should create instance correctly", async () => {
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
@@ -220,31 +218,6 @@ function testFactory(
           );
         });
       });
-    } else {
-      describe(`${factoryName}.createEncoded`, () => {
-        const abiEncoder = new ethers.utils.AbiCoder();
-
-        it("should create instance correctly", async () => {
-          const initData = abiEncoder.encode(
-            createExplicitTypes,
-            createExplicitArgs
-          );
-          const txn = await this.Factory.from(creator).createEncoded(initData);
-          await validateCreateExplicitTxn(txn);
-        });
-      });
-
-      describe(`${factoryName}.createExplicit`, () => {
-        it("should create instance correctly", async () => {
-          // creator creates the OneWayGriefing instance
-          const txn = await this.Factory.from(creator).createExplicit(
-            ...createExplicitArgs
-          );
-
-          await validateCreateExplicitTxn(txn);
-        });
-      });
-    }
 
     describe("Factory.getInstanceCount", () => {
       it("should get correct instance count", async () => {

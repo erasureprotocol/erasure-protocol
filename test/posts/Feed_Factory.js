@@ -41,7 +41,6 @@ function runFactoryTest() {
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
         ErasureAgreementsArtifact, // wrong registry
-        false,
         localCreateTypes,
         function() {
           return [creator, this.Registry.contractAddress, staticMetadata];

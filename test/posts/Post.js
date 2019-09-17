@@ -1,6 +1,6 @@
 const etherlime = require("etherlime-lib");
 const { createDeployer } = require("../helpers/setup");
-const { hexlify, createMultihashSha256 } = require("../helpers/utils");
+const { hexlify, createMultihashSha256, abiEncodeWithSelector } = require("../helpers/utils");
 const PostFactoryArtifact = require("../../build/TestPostFactory.json");
 const TestPostArtifact = require("../../build/TestPost.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
@@ -37,9 +37,8 @@ describe("Post", () => {
   ];
 
   const deployTestPost = async (args = createPostAbiValues) => {
-    const initData = abiEncoder.encode(createPostAbiTypes, args);
-
-    const txn = await this.PostFactory.from(creator).createEncoded(initData);
+    const callData = abiEncodeWithSelector('initialize', createPostAbiTypes, args);
+    const txn = await this.PostFactory.from(creator).create(callData);
 
     const receipt = await this.PostFactory.verboseWaitForTransaction(txn);
     const expectedEvent = "InstanceCreated";

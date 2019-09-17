@@ -38,22 +38,19 @@ function createSelector(functionName, abiTypes) {
   return selector;
 }
 
-function createInstanceAddressWithInitData(
+function createInstanceAddressWithCallData(
   factoryContractAddress,
   logicContractAddress,
   sender,
-  selector,
-  initData,
+  callData,
   nonce,
   salt
 ) {
   const abiEncoder = new ethers.utils.AbiCoder();
 
-  const callData = selector + initData.slice(2);
-
   const initCallData = abiEncoder.encode(
     ["address", "bytes"],
-    [logicContractAddress, callData] // slice '0x' from initData
+    [logicContractAddress, callData]
   );
 
   const initCodeHash = ethers.utils.solidityKeccak256(
@@ -93,21 +90,12 @@ function createInstanceAddress(
   nonce,
   salt
 ) {
-  const abiEncoder = new ethers.utils.AbiCoder();
-
-  const selector = createSelector(
-    initializeFunctionName,
-    abiTypes
-  );
-
-  const initData = abiEncoder.encode(abiTypes, abiValues);
-
-  return createInstanceAddressWithInitData(
+  const callData = abiEncodeWithSelector(initializeFunctionName, abiTypes, abiValues);
+  return createInstanceAddressWithCallData(
     factoryContractAddress,
     logicContractAddress,
     sender,
-    selector,
-    initData,
+    callData,
     nonce,
     salt
   );
@@ -155,7 +143,7 @@ function abiEncodeWithSelector(functionName, abiTypes, abiValues) {
 module.exports = {
   hexlify,
   createInstanceAddress,
-  createInstanceAddressWithInitData,
+  createInstanceAddressWithCallData,
   createEip1167RuntimeCode,
   createSelector,
   createMultihashSha256,
