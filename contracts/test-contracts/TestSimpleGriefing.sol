@@ -11,13 +11,12 @@ contract TestSimpleGriefing is SimpleGriefing {
 
     constructor(
         address griefingContract,
-        address token,
         address operator,
         address staker,
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType,
-        bytes memory staticMetadata) SimpleGriefing(token) public {
+        bytes memory staticMetadata) public {
 
         initializeSimpleGriefing(
             griefingContract,

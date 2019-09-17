@@ -7,6 +7,7 @@ import "../modules/Griefing.sol";
 import "../modules/Metadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
+import "../modules/iRegistry.sol";
 
 /* Immediately engage with specific buyer
  * - Stake can be increased at any time.
@@ -57,9 +58,10 @@ contract CountdownGriefing is Countdown, Griefing, Metadata, Operated, Template 
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
 
-        bytes memory templateData = Template.getTemplateData();
+        // fetch factoryData from registry
+        bytes memory factoryData = Template.getFactoryData();
 
-        (address token) = abi.decode(templateData, (address));
+        (address token) = abi.decode(factoryData, (address));
 
         Staking._setToken(token);
 

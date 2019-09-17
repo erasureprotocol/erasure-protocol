@@ -2,7 +2,8 @@ const { createDeployer } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
 
 const CountdownGriefingArtifact = require("../../build/CountdownGriefing.json");
-const TestCountdownGriefingArtifact = require("../../build/TestCountdownGriefing.json");
+const CountdownGriefingFactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
+const AgreementRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
 describe("CountdownGriefing", function() {
@@ -58,10 +59,29 @@ describe("CountdownGriefing", function() {
     deployer = createDeployer();
 
     this.MockNMR = await deployer.deploy(MockNMRArtifact);
-    this.CountdownGriefing = await deployer.deploy(
-      CountdownGriefingArtifact,
+    this.AgreementsRegistry = await deployer.deploy(AgreementRegistryArtifact);
+
+    this.CountdownGriefingTemplate = await deployer.deploy(
+      CountdownGriefingArtifact
+    );
+
+    this.CountdownGriefingFactory = await deployer.deploy(
+      CountdownGriefingFactoryArtifact,
       false,
+      this.CountdownGriefingTemplate.contractAddress,
       this.MockNMR.contractAddress
+    );
+
+    const abiEncoder = new ethers.utils.AbiCoder();
+
+    const factoryData = abiEncoder.encode(
+      ["address"],
+      this.MockNMR.contractAddress
+    );
+
+    this.AgreementsRegistry.from(operator).addFactory(
+      this.CountdownGriefingFactory.contractAddress,
+      factoryData
     );
 
     // fill the token balances of the counterparty and staker

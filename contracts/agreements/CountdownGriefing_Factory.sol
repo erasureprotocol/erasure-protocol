@@ -6,7 +6,7 @@ import "./CountdownGriefing.sol";
 
 contract CountdownGriefing_Factory is Factory {
 
-    constructor(address instanceRegistry, address templateContract, address token) public {
+    constructor(address instanceRegistry, address templateContract) public {
         CountdownGriefing template;
 
         // set instance type
@@ -14,10 +14,8 @@ contract CountdownGriefing_Factory is Factory {
         // set initSelector
         bytes4 initSelector = template.initialize.selector;
 
-        bytes memory templateData = abi.encode(token);
-
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector, templateData);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
 }

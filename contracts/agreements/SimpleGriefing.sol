@@ -52,9 +52,10 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         // set static metadata
         Metadata._setStaticMetadata(staticMetadata);
 
-        bytes memory templateData = Template.getTemplateData();
+        // fetch factoryData from registry
+        bytes memory factoryData = Template.getFactoryData();
 
-        (address token) = abi.decode(templateData, (address));
+        (address token) = abi.decode(factoryData, (address));
 
         // log initialization params
         emit Initialized(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);

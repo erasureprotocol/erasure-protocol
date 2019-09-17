@@ -12,14 +12,13 @@ contract TestCountdownGriefing is CountdownGriefing {
 
     constructor(
         address griefingContract,
-        address token,
         address operator,
         address staker,
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
-        bytes memory staticMetadata) CountdownGriefing(token) public {
+        bytes memory staticMetadata) public {
 
         initializeCountdownGriefing(
             griefingContract,

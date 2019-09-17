@@ -14,7 +14,7 @@ contract Feed_Factory is Factory {
         // set initSelector
         bytes4 initSelector = template.initialize.selector;
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector, "");
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
 }

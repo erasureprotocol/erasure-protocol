@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 import "./iFactory.sol";
+import "./iRegistry.sol";
 
 
 contract Template {
@@ -31,8 +32,14 @@ contract Template {
         ok = (caller == getCreator());
     }
 
-    function getTemplateData() public view returns (bytes memory templateData) {
-        templateData = iFactory(_factory).getTemplateData();
+    function getFactory() public view returns (address factory) {
+        factory = _factory;
+    }
+
+    function getFactoryData() public view returns (bytes memory factoryData) {
+        address myFactory = Template.getFactory();
+        address registry = iFactory(myFactory).getInstanceRegistry();
+        factoryData = iRegistry(registry).getFactoryData(myFactory);
     }
 
 }

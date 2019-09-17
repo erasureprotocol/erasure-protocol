@@ -6,16 +6,14 @@ import "./SimpleGriefing.sol";
 
 contract SimpleGriefing_Factory is Factory {
 
-    constructor(address instanceRegistry, address templateContract, address token) public {
+    constructor(address instanceRegistry, address templateContract) public {
         SimpleGriefing template;
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initSelector
         bytes4 initSelector = template.initialize.selector;
-        // pass in template data
-        bytes memory templateData = abi.encode(token);
         // initialize factory params
-        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector, templateData);
+        Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
 }
