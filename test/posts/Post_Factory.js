@@ -38,8 +38,7 @@ function runFactoryTest() {
         createArgs,
         PostFactoryArtifact,
         ErasurePostsRegistryArtifact,
-        ErasureAgreementsRegistryArtifact,
-        false,
+        ErasureAgreementsRegistryArtifact
       );
     });
   });

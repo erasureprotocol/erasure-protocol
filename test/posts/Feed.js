@@ -4,9 +4,10 @@ const { createDeployer } = require("../helpers/setup");
 const {
   hexlify,
   createInstanceAddress,
-  createInstanceAddressWithInitData,
+  createInstanceAddressWithCallData,
   createSelector,
-  createMultihashSha256
+  createMultihashSha256,
+  abiEncodeWithSelector
 } = require("../helpers/utils");
 
 // artifacts
@@ -51,7 +52,8 @@ describe("Feed", function() {
     postStaticMetadata,
     postVariableMetadata
   ];
-  const createPostCallData = abiEncoder.encode(
+  const createPostCallData = abiEncodeWithSelector(
+    'initialize',
     createPostABITypes,
     createPostABIValues
   );
@@ -71,16 +73,16 @@ describe("Feed", function() {
     validInit = true,
     args = [operator, this.PostRegistry.contractAddress, feedStaticMetadata]
   ) => {
-    let initdata;
+    let callData;
 
     if (validInit) {
-      initdata = abiEncoder.encode(["address", "address", "bytes"], args);
+      callData = abiEncodeWithSelector('initialize', ["address", "address", "bytes"], args);
     } else {
-      // invalid initdata is missing first address
-      initdata = abiEncoder.encode(["bytes"], [feedStaticMetadata]);
+      // invalid callData is missing first address
+      callData = abiEncodeWithSelector('initialize', ["bytes"], [feedStaticMetadata]);
     }
 
-    const txn = await this.FeedFactory.from(creator).createEncoded(initdata);
+    const txn = await this.FeedFactory.from(creator).create(callData);
     const receipt = await this.FeedFactory.verboseWaitForTransaction(txn);
     const expectedEvent = "InstanceCreated";
     const createFeedEvent = receipt.events.find(
@@ -222,34 +224,22 @@ describe("Feed", function() {
         "0x"
       );
 
-      const initData = abiEncoder.encode(createPostABITypes, [
-        operator,
-        proofHash,
-        postStaticMetadata,
-        postVariableMetadata
-      ]);
-
       const txn = await this.TestFeed.from(creator).createPost(
         this.PostFactory.contractAddress,
-        initData
+        createPostCallData
       );
 
       const receipt = await this.TestFeed.verboseWaitForTransaction(txn);
 
       const postTemplate = await this.PostFactory.getTemplate();
-      const selector = createSelector(
-        "initialize",
-        createPostABITypes
-      );
 
       const {
         instanceAddress: postAddress
-      } = createInstanceAddressWithInitData(
+      } = createInstanceAddressWithCallData(
         this.PostFactory.contractAddress,
         postTemplate,
         this.TestFeed.contractAddress,
-        selector,
-        initData,
+        createPostCallData,
         nonce
       );
       addPost(postAddress);
@@ -262,7 +252,7 @@ describe("Feed", function() {
       );
 
       assert.isDefined(postCreatedEvent);
-      assert.equal(postCreatedEvent.args.initData, createPostCallData);
+      assert.equal(postCreatedEvent.args.callData, createPostCallData);
       assert.equal(postCreatedEvent.args.post, postAddress);
       assert.equal(
         postCreatedEvent.args.postFactory,
@@ -279,26 +269,14 @@ describe("Feed", function() {
       const receipt = await this.TestFeed.verboseWaitForTransaction(txn);
 
       const postTemplate = await this.PostFactory.getTemplate();
-      const selector = createSelector(
-        "initialize",
-        createPostABITypes
-      );
-
-      const initData = abiEncoder.encode(createPostABITypes, [
-        operator,
-        proofHash,
-        postStaticMetadata,
-        postVariableMetadata
-      ]);
 
       const {
         instanceAddress: postAddress
-      } = createInstanceAddressWithInitData(
+      } = createInstanceAddressWithCallData(
         this.PostFactory.contractAddress,
         postTemplate,
         this.TestFeed.contractAddress,
-        selector,
-        initData,
+        createPostCallData,
         nonce
       );
       addPost(postAddress);
@@ -311,7 +289,7 @@ describe("Feed", function() {
       );
 
       assert.isDefined(postCreatedEvent);
-      assert.equal(postCreatedEvent.args.initData, createPostCallData);
+      assert.equal(postCreatedEvent.args.callData, createPostCallData);
       assert.equal(postCreatedEvent.args.post, postAddress);
       assert.equal(
         postCreatedEvent.args.postFactory,
@@ -337,7 +315,8 @@ describe("Feed", function() {
 
     // malformed post init data
     it("should revert with malformed post init data", async () => {
-      const initData = abiEncoder.encode(
+      const callData = abiEncodeWithSelector(
+        'initialize',
         ["bytes", "bytes"], // missing 1 bytes parameter
         [proofHash, postStaticMetadata]
       );
@@ -345,7 +324,7 @@ describe("Feed", function() {
       await assert.revert(
         this.TestFeed.from(creator).createPost(
           this.PostFactory.contractAddress,
-          initData
+          callData
         )
       );
     });

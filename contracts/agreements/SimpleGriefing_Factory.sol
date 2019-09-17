@@ -18,14 +18,4 @@ contract SimpleGriefing_Factory is Factory {
         Factory._initialize(instanceRegistry, templateContract, instanceType, initSelector);
     }
 
-    function create(bytes memory callData) public returns (address instance) {
-        // deploy instance
-        instance = Factory._create(callData);
-    }
-
-    function createSalty(bytes memory callData, bytes32 salt) public returns (address instance) {
-        // deploy instance
-        instance = Factory._createSalty(callData, salt);
-    }
-
 }

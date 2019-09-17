@@ -12,8 +12,8 @@ contract Feed is Operated, Metadata, Template {
     address[] private _posts;
     address private _postRegistry;
 
-    event PostCreated(address post, address postFactory, bytes initData);
     event Initialized(address operator, address postRegistry, bytes feedStaticMetadata);
+    event PostCreated(address post, address postFactory, bytes callData);
 
     function initialize(
         address operator,
@@ -38,7 +38,7 @@ contract Feed is Operated, Metadata, Template {
 
     // state functions
 
-    function createPost(address postFactory, bytes memory initData) public returns (address post) {
+    function createPost(address postFactory, bytes memory callData) public returns (address post) {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
@@ -49,13 +49,13 @@ contract Feed is Operated, Metadata, Template {
         );
 
         // spawn new post contract
-        post = Post_Factory(postFactory).createEncoded(initData);
+        post = Post_Factory(postFactory).create(callData);
 
         // add to array of posts
         _posts.push(post);
 
         // emit event
-        emit PostCreated(post, postFactory, initData);
+        emit PostCreated(post, postFactory, callData);
     }
 
     function setFeedVariableMetadata(bytes memory feedVariableMetadata) public {
