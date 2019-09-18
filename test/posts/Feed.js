@@ -69,12 +69,12 @@ describe("Feed", function() {
 
   const deployTestFeed = async (
     validInit = true,
-    args = [operator, this.PostRegistry.contractAddress, feedStaticMetadata]
+    args = [operator, feedStaticMetadata]
   ) => {
     let callData;
 
     if (validInit) {
-      callData = abiEncodeWithSelector('initialize', ["address", "address", "bytes"], args);
+      callData = abiEncodeWithSelector('initialize', ["address", "bytes"], args);
     } else {
       // invalid callData is missing first address
       callData = abiEncodeWithSelector('initialize', ["bytes"], [feedStaticMetadata]);
@@ -93,10 +93,9 @@ describe("Feed", function() {
     if (!validInit) {
       assert.equal(feedAddress, undefined);
     } else {
-      const feedContract = etherlime.ContractAt(
+      const feedContract = deployer.wrapDeployedContract(
         TestFeedArtifact,
-        feedAddress,
-        creatorWallet.secretKey
+        feedAddress
       );
       return feedContract;
     }
@@ -136,10 +135,6 @@ describe("Feed", function() {
     it("should initialize post", async () => {
       this.TestFeed = await deployTestFeed(true);
 
-      // getPostRegistry
-      const actualPostRegistry = await this.TestFeed.getPostRegistry();
-      assert.equal(actualPostRegistry, this.PostRegistry.contractAddress);
-
       // Operator._setOperator
       const actualOperator = await this.TestFeed.getOperator();
       assert.equal(actualOperator, operator);
@@ -176,25 +171,6 @@ describe("Feed", function() {
       );
 
       await this.TestFeed.activateOperator();
-    });
-
-    // post registry address does not conform to iregistry
-    it("should revert when postRegistry is not registry", async () => {
-      this.TestFeed = await deployTestFeed(true, [
-        operator,
-        this.PostFactory.contractAddress, // pass in Factory instead of Registry
-        feedStaticMetadata
-      ]);
-
-      await assert.revert(
-        this.TestFeed.from(creator).createPost(
-          this.PostFactory.contractAddress,
-          createPostCallData
-        )
-      );
-
-      // redeploy a valid TestFeed again
-      this.TestFeed = await deployTestFeed(true);
     });
 
     // factory must be registered
