@@ -1,8 +1,10 @@
 const { createDeployer } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
+const { abiEncodeWithSelector } = require("../helpers/utils");
 
-const SimpleGriefingArtifact = require("../../build/SimpleGriefing.json");
-const TestSimpleGriefingArtifact = require("../../build/TestSimpleGriefing.json");
+const SimpleGriefingArtifact = require("../../build/TestSimpleGriefing.json");
+const SimpleGriefingFactoryArtifact = require("../../build/SimpleGriefing_Factory.json");
+const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
 describe("SimpleGriefing", function() {
@@ -29,6 +31,16 @@ describe("SimpleGriefing", function() {
   const staticMetadata = "TESTING";
   let currentStake; // to increment as we go
 
+  const createABITypes = [
+    "address",
+    "address",
+    "address",
+    "address",
+    "uint256",
+    "uint8",
+    "bytes"
+  ];
+
   const initArgs = [
     operator,
     staker,
@@ -39,16 +51,27 @@ describe("SimpleGriefing", function() {
   ];
 
   // helper function to deploy TestSimpleGriefing
-  const deployTestSimpleGriefing = async () => {
-    // sets TestSimpleGriefing property to be used
-    // by rest of the tests
-    const contract = await deployer.deploy(
-      TestSimpleGriefingArtifact,
-      false,
-      this.SimpleGriefing.contractAddress,
+  const deployAgreement = async (args = initArgs) => {
+    const callData = abiEncodeWithSelector("initialize", createABITypes, [
       this.MockNMR.contractAddress,
-      ...initArgs
+      ...args
+    ]);
+    const txn = await this.Factory.from(operator).create(callData);
+
+    const receipt = await this.Factory.verboseWaitForTransaction(txn);
+
+    const eventLogs = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
+    assert.equal(eventLogs.length, 1);
+
+    const [event] = eventLogs;
+    const agreementAddress = event.instance;
+
+    const contract = deployer.wrapDeployedContract(
+      SimpleGriefingArtifact,
+      agreementAddress,
+      operatorWallet.secretKey
     );
+
     return contract;
   };
 
@@ -57,10 +80,17 @@ describe("SimpleGriefing", function() {
     deployer = createDeployer();
 
     this.MockNMR = await deployer.deploy(MockNMRArtifact);
-    this.SimpleGriefing = await deployer.deploy(
-      SimpleGriefingArtifact,
+    this.SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
+    this.Registry = await deployer.deploy(AgreementsRegistryArtifact);
+    this.Factory = await deployer.deploy(
+      SimpleGriefingFactoryArtifact,
       false,
-      this.MockNMR.contractAddress
+      this.Registry.contractAddress,
+      this.SimpleGriefing.contractAddress
+    );
+    await this.Registry.from(operator).addFactory(
+      this.Factory.contractAddress,
+      "0x"
     );
 
     // fill the token balances of the counterparty and staker
@@ -77,15 +107,8 @@ describe("SimpleGriefing", function() {
   });
 
   describe("SimpleGriefing.initialize", () => {
-    it("should revert when caller is not contract", async () => {
-      await assert.revertWith(
-        this.SimpleGriefing.initialize(...initArgs),
-        "must be called within contract constructor"
-      );
-    });
-
     it("should initialize contract", async () => {
-      this.TestSimpleGriefing = await deployTestSimpleGriefing();
+      this.TestSimpleGriefing = await deployAgreement();
 
       // check that SimpleGriefing do not have Countdown contract attributes
       // getLength should not be present in SimpleGriefing
@@ -128,28 +151,14 @@ describe("SimpleGriefing", function() {
       ] = await this.TestSimpleGriefing.getRatio(staker);
       assert.equal(actualRatio.toString(), ratioE18.toString());
       assert.equal(actualRatioType, ratioType);
-
-      // Test for event logs
-      // console.log(this.TestSimpleGriefing);
-      // const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
-      //   this.TestSimpleGriefing.deployTransaction
-      // );
-      // console.log(receipt.events);
     });
 
     it("should revert when not initialized from constructor", async () => {
-      const initArgs = [
-        this.SimpleGriefing.contractAddress,
-        operator,
-        staker,
-        counterparty,
-        ratioE18,
-        ratioType,
-        Buffer.from(staticMetadata)
-      ];
-
       await assert.revertWith(
-        this.TestSimpleGriefing.initializeSimpleGriefing(...initArgs),
+        this.TestSimpleGriefing.initialize(
+          this.MockNMR.contractAddress,
+          ...initArgs
+        ),
         "must be called within contract constructor"
       );
     });
@@ -183,9 +192,9 @@ describe("SimpleGriefing", function() {
     });
 
     it("should set metadata when msg.sender is staker", async () => {
-      const txn = await this.TestSimpleGriefing.from(
-        staker
-      ).setMetadata(Buffer.from(stakerMetadata));
+      const txn = await this.TestSimpleGriefing.from(staker).setMetadata(
+        Buffer.from(stakerMetadata)
+      );
       await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
@@ -194,9 +203,9 @@ describe("SimpleGriefing", function() {
     });
 
     it("should set metadata when msg.sender is operator", async () => {
-      const txn = await this.TestSimpleGriefing.from(
-        operator
-      ).setMetadata(Buffer.from(operatorMetadata));
+      const txn = await this.TestSimpleGriefing.from(operator).setMetadata(
+        Buffer.from(operatorMetadata)
+      );
       await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
