@@ -5,7 +5,7 @@ const { hexlify } = require("../helpers/utils");
 const { RATIO_TYPES } = require("../helpers/variables");
 
 describe("Griefing", function() {
-  this.timeout(4000);
+  this.timeout(6000);
 
   let wallets = {
     numerai: accounts[0],

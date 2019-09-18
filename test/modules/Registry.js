@@ -154,7 +154,8 @@ describe("Registry", function() {
       await assert.revertWith(
         this.Registry.from(owner).addFactory(
           factoryAddress,
-          Buffer.from(factoryExtraData)
+          Buffer.from(factoryExtraData),
+          { gasLimit: 30000 }
         ),
         "factory already exists at the provided factory address"
       );

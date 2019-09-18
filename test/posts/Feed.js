@@ -2,7 +2,7 @@ const etherlime = require("etherlime-lib");
 
 const { createDeployer } = require("../helpers/setup");
 const {
-  createInstanceAddressWithInitData,
+  createInstanceAddressWithCallData,
   createSelector,
   abiEncodeWithSelector,
   createMultihashSha256

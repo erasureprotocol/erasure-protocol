@@ -41,10 +41,7 @@ function runFactoryTest() {
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
         ErasureAgreementsArtifact, // wrong registry
-        localCreateTypes,
-        function() {
-          return [creator, this.Registry.contractAddress, staticMetadata];
-        }
+        [FeedTemplate.contractAddress]
       );
     });
   });
