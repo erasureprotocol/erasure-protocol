@@ -69,6 +69,22 @@ contract Feed is Operated, EventMetadata, Template {
         Post(post).setMetadata(postMetadata);
     }
 
+    function transferOperator(address operator) public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._transferOperator(operator);
+    }
+
+    function renounceOperator() public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._renounceOperator();
+    }
+
     // view functions
 
     function getPosts() public view returns (address[] memory posts) {

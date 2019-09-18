@@ -46,4 +46,20 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
         EventMetadata._setMetadata(metadata);
     }
 
+    function transferOperator(address operator) public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._transferOperator(operator);
+    }
+
+    function renounceOperator() public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._renounceOperator();
+    }
+
 }
