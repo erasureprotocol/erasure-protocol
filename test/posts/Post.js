@@ -28,12 +28,11 @@ describe("Post", () => {
     ethers.utils.toUtf8Bytes("newVariableMetadata")
   );
 
-  const createPostAbiTypes = ["address", "bytes", "bytes", "bytes"];
+  const createPostAbiTypes = ["address", "bytes", "bytes"];
   const createPostAbiValues = [
     operator,
     proofHash,
-    staticMetadata,
-    variableMetadata
+    staticMetadata
   ];
 
   const deployTestPost = async (args = createPostAbiValues) => {
@@ -50,7 +49,8 @@ describe("Post", () => {
     // use new instance address to create contract object
     const postAddress = createFeedEvent.args.instance;
 
-    const postContract = etherlime.ContractAt(
+    const postContract = deployer
+        .wrapDeployedContract(
       TestPostArtifact,
       postAddress,
       creatorWallet.secretKey
@@ -82,8 +82,7 @@ describe("Post", () => {
         deployTestPost([
           operator,
           invalidProofHash,
-          staticMetadata,
-          variableMetadata
+          staticMetadata
         ])
       );
     });
@@ -108,7 +107,7 @@ describe("Post", () => {
         actualVariableMetadata
       ] = await this.TestPost.getMetadata();
       assert.equal(actualStaticMetadata, staticMetadata);
-      assert.equal(actualVariableMetadata, variableMetadata);
+      assert.equal(actualVariableMetadata, '0x');
     });
   });
 
