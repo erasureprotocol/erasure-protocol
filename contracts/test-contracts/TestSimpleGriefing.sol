@@ -17,7 +17,7 @@ contract TestSimpleGriefing is SimpleGriefing {
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType,
-        bytes memory staticMetadata) public {
+        bytes memory metadata) public {
 
         initializeSimpleGriefing(
             griefingContract,
@@ -27,7 +27,7 @@ contract TestSimpleGriefing is SimpleGriefing {
             counterparty,
             ratio,
             ratioType,
-            staticMetadata
+            metadata
         );
     }
 
@@ -39,7 +39,7 @@ contract TestSimpleGriefing is SimpleGriefing {
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType,
-        bytes memory staticMetadata
+        bytes memory metadata
     ) public {
         _griefingContract = griefingContract;
 
@@ -51,17 +51,17 @@ contract TestSimpleGriefing is SimpleGriefing {
             counterparty,    // counterparty
             ratio,           // ratio
             ratioType,       // ratioType
-            staticMetadata   // staticMetadata
+            metadata   // metadata
         );
 
         (bool ok, bytes memory data) = _griefingContract.delegatecall(initData);
         require(ok, string(data));
   }
 
-    function setVariableMetadata(bytes memory variableMetadata) public {
+    function setMetadata(bytes memory metadata) public {
         bytes memory callData = abi.encodeWithSelector(
-            _template.setVariableMetadata.selector,
-            variableMetadata
+            _template.setMetadata.selector,
+            metadata
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));

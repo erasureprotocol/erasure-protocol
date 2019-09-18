@@ -2,23 +2,23 @@ pragma solidity ^0.5.0;
 
 import "./Post_Factory.sol";
 import "../modules/iRegistry.sol";
-import "../modules/Metadata.sol";
+import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
 
-contract Feed is Operated, Metadata, Template {
+contract Feed is Operated, EventMetadata, Template {
 
     address[] private _posts;
     address private _postRegistry;
 
-    event Initialized(address operator, address postRegistry, bytes feedStaticMetadata);
+    event Initialized(address operator, address postRegistry, bytes metadata);
     event PostCreated(address post, address postFactory, bytes callData);
 
     function initialize(
         address operator,
         address postRegistry,
-        bytes memory feedStaticMetadata
+        bytes memory metadata
     ) public initializeTemplate() {
         // set operator
         if (operator != address(0)) {
@@ -29,11 +29,13 @@ contract Feed is Operated, Metadata, Template {
         // set post registry
         _postRegistry = postRegistry;
 
-        // set static metadata
-        Metadata._setStaticMetadata(feedStaticMetadata);
+        // set metadata
+        if (metadata.length != 0) {
+            EventMetadata._setMetadata(metadata);
+        }
 
         // log initialization params
-        emit Initialized(operator, postRegistry, feedStaticMetadata);
+        emit Initialized(operator, postRegistry, metadata);
     }
 
     // state functions
@@ -58,18 +60,18 @@ contract Feed is Operated, Metadata, Template {
         emit PostCreated(post, postFactory, callData);
     }
 
-    function setFeedVariableMetadata(bytes memory feedVariableMetadata) public {
+    function setMetadata(bytes memory metadata) public {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
-        Metadata._setVariableMetadata(feedVariableMetadata);
+        EventMetadata._setMetadata(metadata);
     }
 
-    function setPostVariableMetadata(address post, bytes memory postVariableMetadata) public {
+    function setPostMetadata(address post, bytes memory postMetadata) public {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
-        Post(post).setVariableMetadata(postVariableMetadata);
+        Post(post).setMetadata(postMetadata);
     }
 
     // view functions

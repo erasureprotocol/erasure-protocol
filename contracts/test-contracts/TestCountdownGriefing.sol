@@ -19,7 +19,7 @@ contract TestCountdownGriefing is CountdownGriefing {
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
-        bytes memory staticMetadata) public {
+        bytes memory metadata) public {
 
         initializeCountdownGriefing(
             griefingContract,
@@ -30,7 +30,7 @@ contract TestCountdownGriefing is CountdownGriefing {
             ratio,
             ratioType,
             countdownLength,
-            staticMetadata
+            metadata
         );
     }
 
@@ -43,7 +43,7 @@ contract TestCountdownGriefing is CountdownGriefing {
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
-        bytes memory staticMetadata
+        bytes memory metadata
     ) public {
         _griefingContract = griefingContract;
 
@@ -56,17 +56,17 @@ contract TestCountdownGriefing is CountdownGriefing {
             ratio,           // ratio
             ratioType,       // ratioType
             countdownLength, // countdownLength
-            staticMetadata   // staticMetadata
+            metadata   // metadata
         );
 
         (bool ok, bytes memory data) = _griefingContract.delegatecall(initData);
         require(ok, string(data));
   }
 
-    function setVariableMetadata(bytes memory variableMetadata) public {
+    function setMetadata(bytes memory metadata) public {
         bytes memory callData = abi.encodeWithSelector(
-            _template.setVariableMetadata.selector,
-            variableMetadata
+            _template.setMetadata.selector,
+            metadata
         );
         (bool ok, bytes memory data) = _griefingContract.delegatecall(callData);
         require(ok, string(data));

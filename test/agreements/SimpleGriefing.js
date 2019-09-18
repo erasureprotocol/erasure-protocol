@@ -128,17 +128,6 @@ describe("SimpleGriefing", function() {
       assert.equal(actualRatio.toString(), ratioE18.toString());
       assert.equal(actualRatioType, ratioType);
 
-      // Metadata._setStaticMetadata
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestSimpleGriefing.getMetadata();
-      assert.equal(
-        actualStaticMetadata,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(staticMetadata))
-      );
-      assert.equal(actualVariableMetadata, "0x");
-
       // Test for event logs
       // console.log(this.TestSimpleGriefing);
       // const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
@@ -166,14 +155,14 @@ describe("SimpleGriefing", function() {
     });
   });
 
-  describe("SimpleGriefing.setVariableMetadata", () => {
+  describe("SimpleGriefing.setMetadata", () => {
     const stakerMetadata = "STAKER";
     const operatorMetadata = "OPERATOR";
 
     it("should revert when msg.sender is not staker or active operator", async () => {
       // use the counterparty to be the msg.sender
       await assert.revertWith(
-        this.TestSimpleGriefing.from(counterparty).setVariableMetadata(
+        this.TestSimpleGriefing.from(counterparty).setMetadata(
           Buffer.from(stakerMetadata)
         ),
         "only staker or active operator"
@@ -184,7 +173,7 @@ describe("SimpleGriefing", function() {
       await this.TestSimpleGriefing.from(operator).deactivateOperator();
 
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).setVariableMetadata(
+        this.TestSimpleGriefing.from(operator).setMetadata(
           Buffer.from(stakerMetadata)
         ),
         "only staker or active operator"
@@ -193,22 +182,22 @@ describe("SimpleGriefing", function() {
       await this.TestSimpleGriefing.from(operator).activateOperator();
     });
 
-    it("should set variable metadata when msg.sender is staker", async () => {
+    it("should set metadata when msg.sender is staker", async () => {
       const txn = await this.TestSimpleGriefing.from(
         staker
-      ).setVariableMetadata(Buffer.from(stakerMetadata));
-      await assert.emit(txn, "VariableMetadataSet");
+      ).setMetadata(Buffer.from(stakerMetadata));
+      await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(stakerMetadata))
       );
     });
 
-    it("should set variable metadata when msg.sender is operator", async () => {
+    it("should set metadata when msg.sender is operator", async () => {
       const txn = await this.TestSimpleGriefing.from(
         operator
-      ).setVariableMetadata(Buffer.from(operatorMetadata));
-      await assert.emit(txn, "VariableMetadataSet");
+      ).setMetadata(Buffer.from(operatorMetadata));
+      await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(operatorMetadata))

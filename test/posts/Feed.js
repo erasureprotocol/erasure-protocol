@@ -147,13 +147,6 @@ describe("Feed", function() {
       //  Operator._activateOperator()
       const operatorIsActive = await this.TestFeed.hasActiveOperator();
       assert.equal(operatorIsActive, true);
-
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestFeed.getMetadata();
-      assert.equal(actualStaticMetadata, feedStaticMetadata);
-      assert.equal(actualVariableMetadata, "0x");
     });
   });
 
@@ -341,10 +334,10 @@ describe("Feed", function() {
     });
   });
 
-  describe("Feed.setFeedVariableMetadata", () => {
+  describe("Feed.setMetadata", () => {
     it("should revert when msg.sender not operator or creator", async () => {
       await assert.revertWith(
-        this.TestFeed.from(other).setFeedVariableMetadata(
+        this.TestFeed.from(other).setMetadata(
           newFeedVariableMetadata
         ),
         "only active operator or creator"
@@ -355,7 +348,7 @@ describe("Feed", function() {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(operator).setFeedVariableMetadata(
+        this.TestFeed.from(operator).setMetadata(
           newFeedVariableMetadata
         ),
         "only active operator or creator"
@@ -364,34 +357,20 @@ describe("Feed", function() {
       await this.TestFeed.activateOperator();
     });
 
-    it("should set feed variable metadata from operator when active", async () => {
-      const txn = await this.TestFeed.from(operator).setFeedVariableMetadata(
+    it("should set feed metadata from operator when active", async () => {
+      const txn = await this.TestFeed.from(operator).setMetadata(
         newFeedVariableMetadata
       );
-      await assert.emit(txn, "VariableMetadataSet");
+      await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
-
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestFeed.getMetadata();
-      assert.equal(actualStaticMetadata, feedStaticMetadata);
-      assert.equal(actualVariableMetadata, newFeedVariableMetadata);
     });
 
     it("should set feed variable metadata from creator", async () => {
-      const txn = await this.TestFeed.from(creator).setFeedVariableMetadata(
+      const txn = await this.TestFeed.from(creator).setMetadata(
         newFeedVariableMetadata
       );
-      await assert.emit(txn, "VariableMetadataSet");
+      await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
-
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestFeed.getMetadata();
-      assert.equal(actualStaticMetadata, feedStaticMetadata);
-      assert.equal(actualVariableMetadata, newFeedVariableMetadata);
     });
   });
 
