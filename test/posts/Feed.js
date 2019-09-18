@@ -44,13 +44,11 @@ describe("Feed", function() {
   const postVariableMetadata = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes("feedVariableMetadata")
   );
-  const abiEncoder = new ethers.utils.AbiCoder();
-  const createPostABITypes = ["address", "bytes", "bytes", "bytes"];
+  const createPostABITypes = ["address", "bytes", "bytes"];
   const createPostABIValues = [
     operator,
     proofHash,
-    postStaticMetadata,
-    postVariableMetadata
+    postStaticMetadata
   ];
   const createPostCallData = abiEncodeWithSelector(
     'initialize',

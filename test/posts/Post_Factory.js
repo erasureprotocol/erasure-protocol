@@ -22,8 +22,8 @@ const variableMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("variableMetadata")
 );
 
-const createTypes = ["address", "bytes", "bytes", "bytes"];
-const createArgs = [creator, proofHash, staticMetadata, variableMetadata];
+const createTypes = ["address", "bytes", "bytes"];
+const createArgs = [creator, proofHash, staticMetadata];
 
 function runFactoryTest() {
   const deployer = createDeployer();

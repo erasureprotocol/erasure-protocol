@@ -175,8 +175,8 @@ Create test instances from factories
   await contracts.Post_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
-          ['address', 'bytes', 'bytes', 'bytes'],
-          [userAddress, proofHash, proofHash, proofHash]
+          ['address', 'bytes', 'bytes'],
+          [userAddress, proofHash, proofHash]
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
