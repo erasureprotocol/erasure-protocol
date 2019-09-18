@@ -101,44 +101,30 @@ describe("Post", () => {
       //  Operator._activate()
       const operatorIsActive = await this.TestPost.hasActiveOperator();
       assert.equal(operatorIsActive, true);
-
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestPost.getMetadata();
-      assert.equal(actualStaticMetadata, staticMetadata);
-      assert.equal(actualVariableMetadata, '0x');
     });
   });
 
-  describe("Post.setVariableMetadata", () => {
+  describe("Post.setMetadata", () => {
     it("should revert when msg.sender is not operator", async () => {
       await assert.revertWith(
-        this.TestPost.from(other).setVariableMetadata(newVariableMetadata),
+        this.TestPost.from(other).setMetadata(newVariableMetadata),
         "only active operator or creator"
       );
     });
 
-    it("should set variable metadata", async () => {
-      const txn = await this.TestPost.from(operator).setVariableMetadata(
+    it("should set metadata", async () => {
+      const txn = await this.TestPost.from(operator).setMetadata(
         newVariableMetadata
       );
-      await assert.emit(txn, "VariableMetadataSet");
+      await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(txn, [newVariableMetadata]);
-
-      const [
-        actualStaticMetadata,
-        actualVariableMetadata
-      ] = await this.TestPost.getMetadata();
-      assert.equal(actualStaticMetadata, staticMetadata);
-      assert.equal(actualVariableMetadata, newVariableMetadata);
     });
 
     it("should revert when msg.sender is not active operator", async () => {
       await this.TestPost.deactivateOperator();
 
       await assert.revertWith(
-        this.TestPost.from(operator).setVariableMetadata(newVariableMetadata),
+        this.TestPost.from(operator).setMetadata(newVariableMetadata),
         "only active operator or creator"
       );
     });

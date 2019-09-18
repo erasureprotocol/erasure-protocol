@@ -4,7 +4,7 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 import "../modules/Countdown.sol";
 import "../modules/Griefing.sol";
-import "../modules/Metadata.sol";
+import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
@@ -16,7 +16,7 @@ import "../modules/Template.sol";
  * - This top level contract should only perform access control and state transitions
  *
  */
-contract SimpleGriefing is Griefing, Metadata, Operated, Template {
+contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
 
@@ -26,7 +26,7 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         address counterparty;
     }
 
-    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, bytes staticMetadata);
+    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, bytes metadata);
 
     function initialize(
         address token,
@@ -35,7 +35,7 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         address counterparty,
         uint256 ratio,
         Griefing.RatioType ratioType,
-        bytes memory staticMetadata
+        bytes memory metadata
     ) public initializeTemplate() {
         // set storage values
         _data.staker = staker;
@@ -53,21 +53,23 @@ contract SimpleGriefing is Griefing, Metadata, Operated, Template {
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);
 
-        // set static metadata
-        Metadata._setStaticMetadata(staticMetadata);
+        // set metadata
+        if (metadata.length != 0) {
+            EventMetadata._setMetadata(metadata);
+        }
 
         // log initialization params
-        emit Initialized(token, operator, staker, counterparty, ratio, ratioType, staticMetadata);
+        emit Initialized(token, operator, staker, counterparty, ratio, ratioType, metadata);
     }
 
     // state functions
 
-    function setVariableMetadata(bytes memory variableMetadata) public {
+    function setMetadata(bytes memory metadata) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // update metadata
-        Metadata._setVariableMetadata(variableMetadata);
+        EventMetadata._setMetadata(metadata);
     }
 
     function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
