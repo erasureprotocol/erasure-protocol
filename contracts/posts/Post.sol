@@ -15,8 +15,11 @@ contract Post is ProofHash, Operated, Metadata, Template {
         bytes memory proofHash,
         bytes memory staticMetadata
     ) public initializeTemplate() {
+
         // set storage variables
-        ProofHash._setProofHash(proofHash);
+        if (proofHash.length != 0) {
+            ProofHash._setProofHash(proofHash);
+        }
 
         // set operator
         if (operator != address(0)) {
