@@ -2,17 +2,16 @@ const etherlime = require("etherlime-lib");
 
 const { createDeployer } = require("../helpers/setup");
 const {
-  hexlify,
-  createInstanceAddress,
   createInstanceAddressWithCallData,
   createSelector,
-  createMultihashSha256,
-  abiEncodeWithSelector
+  abiEncodeWithSelector,
+  createMultihashSha256
 } = require("../helpers/utils");
 
 // artifacts
 const TestFeedArtifact = require("../../build/TestFeed.json");
-const FeedFactoryArtifact = require("../../build/TestFeedFactory.json");
+const TestPostArtifact = require("../../build/TestPost.json");
+const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
@@ -45,13 +44,9 @@ describe("Feed", function() {
     ethers.utils.toUtf8Bytes("feedVariableMetadata")
   );
   const createPostABITypes = ["address", "bytes", "bytes"];
-  const createPostABIValues = [
-    operator,
-    proofHash,
-    postStaticMetadata
-  ];
+  const createPostABIValues = [operator, proofHash, postStaticMetadata];
   const createPostCallData = abiEncodeWithSelector(
-    'initialize',
+    "initialize",
     createPostABITypes,
     createPostABIValues
   );
@@ -74,10 +69,18 @@ describe("Feed", function() {
     let callData;
 
     if (validInit) {
-      callData = abiEncodeWithSelector('initialize', ["address", "bytes"], args);
+      callData = abiEncodeWithSelector(
+        "initialize",
+        ["address", "bytes"],
+        args
+      );
     } else {
       // invalid callData is missing first address
-      callData = abiEncodeWithSelector('initialize', ["bytes"], [feedStaticMetadata]);
+      callData = abiEncodeWithSelector(
+        "initialize",
+        ["bytes"],
+        [feedStaticMetadata]
+      );
     }
 
     const txn = await this.FeedFactory.from(creator).create(callData);
@@ -106,10 +109,14 @@ describe("Feed", function() {
 
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact);
 
+    this.FeedTemplate = await deployer.deploy(TestFeedArtifact);
+    this.PostTemplate = await deployer.deploy(TestPostArtifact);
+
     this.FeedFactory = await deployer.deploy(
       FeedFactoryArtifact,
       false,
-      this.PostRegistry.contractAddress
+      this.PostRegistry.contractAddress,
+      this.FeedTemplate.contractAddress
     );
 
     await this.PostRegistry.from(creator).addFactory(
@@ -117,13 +124,11 @@ describe("Feed", function() {
       "0x"
     );
 
-    // // template contract from FeedFactory
-    this.FeedAddress = await this.FeedFactory.getTemplate();
-
     this.PostFactory = await deployer.deploy(
       PostFactoryArtifact,
       false,
-      this.PostRegistry.contractAddress
+      this.PostRegistry.contractAddress,
+      this.PostTemplate.contractAddress
     );
   });
 
@@ -132,7 +137,7 @@ describe("Feed", function() {
       await assert.revert(deployTestFeed(false));
     });
 
-    it("should initialize post", async () => {
+    it("should initialize feed", async () => {
       this.TestFeed = await deployTestFeed(true);
 
       // Operator._setOperator
@@ -283,7 +288,7 @@ describe("Feed", function() {
     // malformed post init data
     it("should revert with malformed post init data", async () => {
       const callData = abiEncodeWithSelector(
-        'initialize',
+        "initialize",
         ["bytes", "bytes"], // missing 1 bytes parameter
         [proofHash, postStaticMetadata]
       );
@@ -313,9 +318,7 @@ describe("Feed", function() {
   describe("Feed.setMetadata", () => {
     it("should revert when msg.sender not operator or creator", async () => {
       await assert.revertWith(
-        this.TestFeed.from(other).setMetadata(
-          newFeedVariableMetadata
-        ),
+        this.TestFeed.from(other).setMetadata(newFeedVariableMetadata),
         "only active operator or creator"
       );
     });
@@ -324,9 +327,7 @@ describe("Feed", function() {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(operator).setMetadata(
-          newFeedVariableMetadata
-        ),
+        this.TestFeed.from(operator).setMetadata(newFeedVariableMetadata),
         "only active operator or creator"
       );
 

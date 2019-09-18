@@ -1,5 +1,6 @@
 // require artifacts
-const OneWayGriefing_FactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
+const CountdownGriefingArtifact = require("../../build/CountdownGriefing.json");
+const CountdownGriefing_FactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
@@ -28,10 +29,12 @@ const createTypes = [
   "bytes"
 ];
 
+let CountdownGriefing;
 let MockNMR;
 
 before(async () => {
   MockNMR = await deployer.deploy(MockNMRArtifact);
+  CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
 });
 
 function runFactoryTest() {
@@ -61,9 +64,10 @@ function runFactoryTest() {
         instanceType,
         createTypes,
         createArgs,
-        OneWayGriefing_FactoryArtifact,
+        CountdownGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
-        ErasurePostsRegistryArtifact
+        ErasurePostsRegistryArtifact,
+        [CountdownGriefing.contractAddress]
       );
     });
   });

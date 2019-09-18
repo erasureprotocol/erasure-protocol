@@ -1,5 +1,6 @@
 // require artifacts
 const SimpleGriefing_FactoryArtifact = require("../../build/SimpleGriefing_Factory.json");
+const SimpleGriefingArtifact = require("../../build/SimpleGriefing.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
@@ -14,7 +15,6 @@ const factoryName = "SimpleGriefing_Factory";
 const instanceType = "Agreement";
 const ratio = ethers.utils.parseEther("2");
 const ratioType = RATIO_TYPES.Dec;
-const countdownLength = 1000;
 const staticMetadata = "TESTING";
 
 const createTypes = [
@@ -27,10 +27,12 @@ const createTypes = [
   "bytes"
 ];
 
+let SimpleGriefing;
 let MockNMR;
 
 before(async () => {
   MockNMR = await deployer.deploy(MockNMRArtifact);
+  SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
 });
 
 function runFactoryTest() {
@@ -61,7 +63,8 @@ function runFactoryTest() {
         createArgs,
         SimpleGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
-        ErasurePostsRegistryArtifact
+        ErasurePostsRegistryArtifact,
+        [SimpleGriefing.contractAddress]
       );
     });
   });

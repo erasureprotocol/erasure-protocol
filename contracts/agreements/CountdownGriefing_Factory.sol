@@ -6,10 +6,9 @@ import "./CountdownGriefing.sol";
 
 contract CountdownGriefing_Factory is Factory {
 
-    constructor(address instanceRegistry) public {
-        // deploy template contract
-        CountdownGriefing template = new CountdownGriefing();
-        address templateContract = address(template);
+    constructor(address instanceRegistry, address templateContract) public {
+        CountdownGriefing template;
+
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Agreement')));
         // set initSelector

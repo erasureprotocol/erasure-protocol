@@ -6,10 +6,9 @@ import "./Feed.sol";
 
 contract Feed_Factory is Factory {
 
-    constructor(address instanceRegistry) public {
-        // deploy template contract
-        Feed template = new Feed();
-        address templateContract = address(template);
+    constructor(address instanceRegistry, address templateContract) public {
+        Feed template;
+
         // set instance type
         bytes4 instanceType = bytes4(keccak256(bytes('Post')));
         // set initSelector

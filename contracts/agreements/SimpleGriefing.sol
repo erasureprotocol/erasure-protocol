@@ -41,14 +41,13 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         _data.staker = staker;
         _data.counterparty = counterparty;
 
+        Staking._setToken(token);
+
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);
             Operated._activateOperator();
         }
-
-        // set token used for staking
-        Staking._setToken(token);
 
         // set griefing ratio
         Griefing._setRatio(staker, ratio, ratioType);
