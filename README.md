@@ -1,4 +1,4 @@
-# Erasure Next Contracts
+# Erasure Protocol
 
 [![Build Status](https://travis-ci.com/erasureprotocol/erasure-protocol.svg?branch=master)](https://travis-ci.com/erasureprotocol/erasure-protocol)
 [![Build Status](https://github.com/erasureprotocol/erasure-protocol/workflows/CI/badge.svg)](https://github.com/erasureprotocol/erasure-protocol/actions)
