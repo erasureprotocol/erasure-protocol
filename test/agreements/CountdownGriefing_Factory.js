@@ -22,6 +22,7 @@ const createTypes = [
   "address",
   "address",
   "address",
+  "address",
   "uint256",
   "uint8",
   "uint256",
@@ -29,14 +30,11 @@ const createTypes = [
 ];
 
 let CountdownGriefing;
+let MockNMR;
 
 before(async () => {
   MockNMR = await deployer.deploy(MockNMRArtifact);
-  CountdownGriefing = await deployer.deploy(
-    CountdownGriefingArtifact,
-    false,
-    MockNMR.contractAddress
-  );
+  CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
 });
 
 function runFactoryTest() {
@@ -50,6 +48,7 @@ function runFactoryTest() {
   describe(factoryName, () => {
     it("setups test", () => {
       const createArgs = [
+        MockNMR.contractAddress,
         owner,
         staker,
         counterparty,

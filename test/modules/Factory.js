@@ -16,6 +16,8 @@ function testFactory(
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
 
+  factoryConstructorArgs,
+
   // There are cases where the create() call and the createExplicit() call differ
   // ABI types are different. Default to the create call parameters
   // anything else, pass in a different set of ABI
@@ -42,10 +44,12 @@ function testFactory(
     let nonce = 0;
     const totalInstanceCount = 4;
     let instances = [];
+    let createArgs;
 
     before(async () => {
       this.Registry = await deployer.deploy(registryArtifact);
       this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact);
+      createArgs = getCreateArgs();
     });
 
     const createLocalInstance = salt => {
@@ -187,7 +191,7 @@ function testFactory(
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          getCreateArgs()
+          createArgs
         );
         const testSalt = ethers.utils.formatBytes32String("testSalt");
         const txn = await this.Factory.from(creator).createSalty(
@@ -204,7 +208,7 @@ function testFactory(
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          getCreateArgs()
+          createArgs
         );
         const testSalt = ethers.utils.formatBytes32String("testSalt");
         await assert.revertWith(

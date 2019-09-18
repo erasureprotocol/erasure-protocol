@@ -15,10 +15,10 @@ const factoryName = "SimpleGriefing_Factory";
 const instanceType = "Agreement";
 const ratio = ethers.utils.parseEther("2");
 const ratioType = RATIO_TYPES.Dec;
-const countdownLength = 1000;
 const staticMetadata = "TESTING";
 
 const createTypes = [
+  "address",
   "address",
   "address",
   "address",
@@ -28,14 +28,11 @@ const createTypes = [
 ];
 
 let SimpleGriefing;
+let MockNMR;
 
 before(async () => {
   MockNMR = await deployer.deploy(MockNMRArtifact);
-  SimpleGriefing = await deployer.deploy(
-    SimpleGriefingArtifact,
-    false,
-    MockNMR.contractAddress
-  );
+  SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
 });
 
 function runFactoryTest() {
@@ -49,6 +46,7 @@ function runFactoryTest() {
   describe(factoryName, () => {
     it("setups test", () => {
       const createArgs = [
+        MockNMR.contractAddress,
         owner,
         staker,
         counterparty,
