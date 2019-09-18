@@ -1,8 +1,10 @@
 const { createDeployer } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
+const { abiEncodeWithSelector } = require("../helpers/utils");
 
-const CountdownGriefingArtifact = require("../../build/CountdownGriefing.json");
-const TestCountdownGriefingArtifact = require("../../build/TestCountdownGriefing.json");
+const CountdownGriefingArtifact = require("../../build/TestCountdownGriefing.json");
+const CountdownGriefingFactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
+const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
 describe("CountdownGriefing", function() {
@@ -29,6 +31,16 @@ describe("CountdownGriefing", function() {
   const countdownLength = 1000;
   const staticMetadata = "TESTING";
 
+  const createABITypes = [
+    "address",
+    "address",
+    "address",
+    "address",
+    "uint256",
+    "uint8",
+    "uint256",
+    "bytes"
+  ];
   const initArgs = [
     operator,
     staker,
@@ -40,16 +52,27 @@ describe("CountdownGriefing", function() {
   ];
 
   // helper function to deploy TestCountdownGriefing
-  const deployTestCountdownGriefing = async () => {
-    // sets TestCountdownGriefing property to be used
-    // by rest of the tests
-    const contract = await deployer.deploy(
-      TestCountdownGriefingArtifact,
-      false,
-      this.CountdownGriefing.contractAddress,
+  const deployAgreement = async (args = initArgs) => {
+    const callData = abiEncodeWithSelector("initialize", createABITypes, [
       this.MockNMR.contractAddress,
-      ...initArgs
+      ...args
+    ]);
+    const txn = await this.Factory.from(operator).create(callData);
+
+    const receipt = await this.Factory.verboseWaitForTransaction(txn);
+
+    const eventLogs = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
+    assert.equal(eventLogs.length, 1);
+
+    const [event] = eventLogs;
+    const agreementAddress = event.instance;
+
+    const contract = deployer.wrapDeployedContract(
+      CountdownGriefingArtifact,
+      agreementAddress,
+      operatorWallet.secretKey
     );
+
     return contract;
   };
 
@@ -58,10 +81,17 @@ describe("CountdownGriefing", function() {
     deployer = createDeployer();
 
     this.MockNMR = await deployer.deploy(MockNMRArtifact);
-    this.CountdownGriefing = await deployer.deploy(
-      CountdownGriefingArtifact,
+    this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
+    this.Registry = await deployer.deploy(AgreementsRegistryArtifact);
+    this.Factory = await deployer.deploy(
+      CountdownGriefingFactoryArtifact,
       false,
-      this.MockNMR.contractAddress
+      this.Registry.contractAddress,
+      this.CountdownGriefing.contractAddress
+    );
+    await this.Registry.from(operator).addFactory(
+      this.Factory.contractAddress,
+      "0x"
     );
 
     // fill the token balances of the counterparty and staker
@@ -80,13 +110,16 @@ describe("CountdownGriefing", function() {
   describe("CountdownGriefing.initialize", () => {
     it("should revert when caller is not contract", async () => {
       await assert.revertWith(
-        this.CountdownGriefing.initialize(...initArgs),
+        this.CountdownGriefing.initialize(
+          this.MockNMR.contractAddress,
+          ...initArgs
+        ),
         "must be called within contract constructor"
       );
     });
 
     it("should initialize contract", async () => {
-      this.TestCountdownGriefing = await deployTestCountdownGriefing();
+      this.TestCountdownGriefing = await deployAgreement();
 
       // check that it's the TestCountdownGriefing state that is changed
       // not the CountdownGriefing logic contract's state
@@ -138,19 +171,11 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when not initialized from constructor", async () => {
-      const initArgs = [
-        this.CountdownGriefing.contractAddress,
-        operator,
-        staker,
-        counterparty,
-        ratioE18,
-        ratioType,
-        countdownLength,
-        Buffer.from(staticMetadata)
-      ];
-
       await assert.revertWith(
-        this.TestCountdownGriefing.initializeCountdownGriefing(...initArgs),
+        this.TestCountdownGriefing.initialize(
+          this.MockNMR.contractAddress,
+          ...initArgs
+        ),
         "must be called within contract constructor"
       );
     });
@@ -184,9 +209,9 @@ describe("CountdownGriefing", function() {
     });
 
     it("should set metadata when msg.sender is staker", async () => {
-      const txn = await this.TestCountdownGriefing.from(
-        staker
-      ).setMetadata(Buffer.from(stakerMetadata));
+      const txn = await this.TestCountdownGriefing.from(staker).setMetadata(
+        Buffer.from(stakerMetadata)
+      );
       await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
@@ -195,9 +220,9 @@ describe("CountdownGriefing", function() {
     });
 
     it("should set metadata when msg.sender is operator", async () => {
-      const txn = await this.TestCountdownGriefing.from(
-        operator
-      ).setMetadata(Buffer.from(operatorMetadata));
+      const txn = await this.TestCountdownGriefing.from(operator).setMetadata(
+        Buffer.from(operatorMetadata)
+      );
       await assert.emit(txn, "MetadataSet");
       await assert.emitWithArgs(
         txn,
@@ -255,7 +280,7 @@ describe("CountdownGriefing", function() {
     it("should start countdown when msg.sender is operator", async () => {
       // it will throw when calling startCountdown again
       // re-deploy a new TestCountdownGriefing and initialize
-      this.TestCountdownGriefing = await deployTestCountdownGriefing();
+      this.TestCountdownGriefing = await deployAgreement();
 
       // create snapshot
       let snapshotID = await utils.snapshot(deployer.provider);
@@ -625,7 +650,7 @@ describe("CountdownGriefing", function() {
   describe("CountdownGriefing.retrieveStake", () => {
     it("should revert when msg.sender is not staker or active operator", async () => {
       // redeploy contract since countdown is started
-      this.TestCountdownGriefing = await deployTestCountdownGriefing();
+      this.TestCountdownGriefing = await deployAgreement();
 
       // counterparty is not staker or operator
       await assert.revertWith(
@@ -665,7 +690,7 @@ describe("CountdownGriefing", function() {
 
     it("should retrieve stake correctly", async () => {
       // redeploy contract since countdown is started
-      this.TestCountdownGriefing = await deployTestCountdownGriefing();
+      this.TestCountdownGriefing = await deployAgreement();
 
       // staker increase stake
 
