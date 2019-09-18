@@ -11,11 +11,13 @@ const deploy = async (network, secret) => {
     Erasure_Escrows: { artifact: require("../build/Erasure_Escrows.json") },
     Erasure_Posts: { artifact: require("../build/Erasure_Posts.json") },
     Erasure_Users: { artifact: require("../build/Erasure_Users.json") },
+    SimpleGriefing_Factory: { artifact: require("../build/SimpleGriefing_Factory.json") },
+    SimpleGriefing: { artifact: require("../build/SimpleGriefing.json") },
     CountdownGriefing_Factory: { artifact: require("../build/CountdownGriefing_Factory.json") },
-    Feed_Factory: { artifact: require("../build/Feed_Factory.json") },
-    Post_Factory: { artifact: require("../build/Post_Factory.json") },
     CountdownGriefing: { artifact: require("../build/CountdownGriefing.json") },
+    Feed_Factory: { artifact: require("../build/Feed_Factory.json") },
     Feed: { artifact: require("../build/Feed.json") },
+    Post_Factory: { artifact: require("../build/Post_Factory.json") },
     Post: { artifact: require("../build/Post.json") }
   };
 
@@ -25,6 +27,7 @@ const deploy = async (network, secret) => {
   let multisig;
 
   let defaultGas = ethers.utils.parseUnits('10', 'gwei');
+  let gasUsed = ethers.constants.Zero;
 
   if (network == "rinkeby") {
 
@@ -77,13 +80,6 @@ const deploy = async (network, secret) => {
     );
     deployer.setVerifierApiKey(process.env.ETHERSCAN_API_KEY);
 
-    // contracts.Erasure_Posts.instance = await new ethers.Contract('0xF9F79CEe69175B51E4aB2b2D231460B61Ebb2688', contracts.Erasure_Posts.artifact.abi, wallet);
-    // contracts.Erasure_Agreements.instance = await new ethers.Contract('0xF9F79CEe69175B51E4aB2b2D231460B61Ebb2688', contracts.Erasure_Agreements.artifact.abi, wallet);
-    // contracts.Erasure_Users.instance = await new ethers.Contract('0xD5fa2751A560b6ca47219224Bc231c56a9849492', contracts.Erasure_Users.artifact.abi, wallet);
-    // contracts.Post_Factory.instance = await new ethers.Contract('0x750EC6138205Cf1C36b446Dd540E0464E9C0e6Cd', contracts.Post_Factory.artifact.abi, wallet);
-    // contracts.Feed_Factory.instance = await new ethers.Contract('0x276e1fdB65951B8c1d1c16C5B69a72bE3060E7AA', contracts.Feed_Factory.artifact.abi, wallet);
-    // contracts.CountdownGriefing_Factory.instance = await new ethers.Contract('0x3A1a3EfeDf5C3932Bac1b637EA8Ac2D904C58480', contracts.CountdownGriefing_Factory.artifact.abi, wallet);
-
     // deploy registries
     contracts.Erasure_Posts.instance = await deployer.deployAndVerify(contracts.Erasure_Posts.artifact);
     contracts.Erasure_Agreements.instance = await deployer.deployAndVerify(contracts.Erasure_Agreements.artifact);
@@ -112,6 +108,7 @@ const deploy = async (network, secret) => {
     // deploy factories
     contracts.Post_Factory.instance = await deployer.deploy(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
     contracts.Feed_Factory.instance = await deployer.deploy(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
+    contracts.SimpleGriefing_Factory.instance = await deployer.deploy(contracts.SimpleGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
     contracts.CountdownGriefing_Factory.instance = await deployer.deploy(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
   }
 
@@ -125,6 +122,9 @@ Register Factories
   ).then(async txn => {
       console.log(`addFactory() | Post_Factory => Erasure_Posts`);
       const receipt = await contracts.Erasure_Posts.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   await contracts.Erasure_Posts.instance.addFactory(
@@ -134,6 +134,21 @@ Register Factories
   ).then(async txn => {
       console.log(`addFactory() | Feed_Factory => Erasure_Posts`);
       const receipt = await contracts.Erasure_Posts.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+  });
+
+  await contracts.Erasure_Agreements.instance.addFactory(
+    contracts.SimpleGriefing_Factory.instance.contractAddress,
+    ethers.utils.hexlify(0x0),
+    { gasPrice: defaultGas }
+  ).then(async txn => {
+      console.log(`addFactory() | SimpleGriefing_Factory => Erasure_Agreements`);
+      const receipt = await contracts.Erasure_Agreements.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   await contracts.Erasure_Agreements.instance.addFactory(
@@ -143,6 +158,9 @@ Register Factories
   ).then(async txn => {
       console.log(`addFactory() | CountdownGriefing_Factory => Erasure_Agreements`);
       const receipt = await contracts.Erasure_Agreements.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   console.log(`
@@ -155,13 +173,20 @@ Transfer Registry Ownership
   ).then(async txn => {
       console.log(`transferOwnership() | Erasure_Posts => ${multisig}`);
       const receipt = await contracts.Erasure_Posts.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
+
   await contracts.Erasure_Agreements.instance.transferOwnership(
       multisig,
       { gasPrice: defaultGas }
   ).then(async txn => {
       console.log(`transferOwnership() | Erasure_Agreements => ${multisig}`);
       const receipt = await contracts.Erasure_Agreements.instance.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   console.log(`
@@ -169,43 +194,76 @@ Create test instances from factories
       `);
 
   const userAddress = '0x6087555A70E2F96B7838806e7743041E035a37e5';
-  const proofHash = createMultihashSha256("proofHash");
-  console.log(`multihash: ${proofHash}`);
+  const multihash = createMultihashSha256("multihash");
+  console.log(`multihash: ${multihash}`);
+  console.log(``);
 
   await contracts.Post_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
           ['address', 'bytes', 'bytes'],
-          [userAddress, proofHash, proofHash]
+          [userAddress, multihash, multihash]
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.Post_Factory.instance.verboseWaitForTransaction(txn);
-      const expectedEvent = "InstanceCreated";
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-      contracts.Post.instance = new ethers.Contract(eventFound.args.instance, contracts.Post.artifact.abi, deployer.provider);
-      console.log(`create() | ${receipt.gasUsed.toString()} gas | Post_Factory => ${eventFound.args.instance}`);
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "InstanceCreated", "There is no such event");
+
+      contracts.Post.instance = deployer.wrapDeployedContract(contracts.Post.artifact, eventFound.args.instance);
+      console.log(`create() | ${receipt.gasUsed} gas | Post_Factory => ${eventFound.args.instance}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   await contracts.Feed_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
           ['address', 'bytes'],
-          [userAddress, proofHash]
+          [userAddress, multihash]
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.Feed_Factory.instance.verboseWaitForTransaction(txn);
-      const expectedEvent = "InstanceCreated";
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-      contracts.Feed.instance = new ethers.Contract(eventFound.args.instance, contracts.Feed.artifact.abi, deployer.provider);
-      console.log(`create() | ${receipt.gasUsed.toString()} gas | Feed_Factory => ${eventFound.args.instance}`);
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "InstanceCreated", "There is no such event");
+
+      contracts.Feed.instance = deployer.wrapDeployedContract(contracts.Feed.artifact, eventFound.args.instance);
+      console.log(`create() | ${receipt.gasUsed} gas | Feed_Factory => ${eventFound.args.instance}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+  });
+
+  await contracts.Feed.instance.createPost(
+      contracts.Post_Factory.instance.contractAddress,
+      abiEncodeWithSelector(
+          'initialize',
+          ['address', 'bytes', 'bytes'],
+          [userAddress, multihash, multihash]
+      ),
+      { gasPrice: defaultGas }
+  ).then(async txn => {
+      const receipt = await contracts.Feed.instance.verboseWaitForTransaction(txn);
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "PostCreated", "There is no such event");
+
+      console.log(`createPost() | ${receipt.gasUsed} gas | Feed => ${eventFound.args.post}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+  });
+
+  await contracts.SimpleGriefing_Factory.instance.create(
+      abiEncodeWithSelector(
+          'initialize',
+          ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
+          [tokenAddress, userAddress, userAddress, userAddress, 1, 2, '0x0']
+      ),
+      { gasPrice: defaultGas }
+  ).then(async txn => {
+      const receipt = await contracts.SimpleGriefing_Factory.instance.verboseWaitForTransaction(txn);
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "InstanceCreated", "There is no such event");
+
+      contracts.SimpleGriefing.instance = deployer.wrapDeployedContract(contracts.SimpleGriefing.artifact, eventFound.args.instance);
+      console.log(`create() | ${receipt.gasUsed} gas | SimpleGriefing_Factory => ${eventFound.args.instance}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   await contracts.CountdownGriefing_Factory.instance.create(
@@ -217,16 +275,16 @@ Create test instances from factories
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.CountdownGriefing_Factory.instance.verboseWaitForTransaction(txn);
-      const expectedEvent = "InstanceCreated";
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-      contracts.CountdownGriefing.instance = new ethers.Contract(eventFound.args.instance, contracts.CountdownGriefing.artifact.abi, deployer.provider);
-      console.log(`create() | ${receipt.gasUsed.toString()} gas | CountdownGriefing_Factory => ${eventFound.args.instance}`);
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "InstanceCreated", "There is no such event");
+
+      contracts.CountdownGriefing.instance = deployer.wrapDeployedContract(contracts.CountdownGriefing.artifact, eventFound.args.instance);
+      console.log(`create() | ${receipt.gasUsed} gas | CountdownGriefing_Factory => ${eventFound.args.instance}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
   console.log(``);
+  console.log(`total gas used: ${gasUsed.toString()}`);
 
 };
 
