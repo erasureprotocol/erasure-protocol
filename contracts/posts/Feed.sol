@@ -10,14 +10,12 @@ import "../modules/Template.sol";
 contract Feed is Operated, EventMetadata, Template {
 
     address[] private _posts;
-    address private _postRegistry;
 
-    event Initialized(address operator, address postRegistry, bytes metadata);
+    event Initialized(address operator, bytes metadata);
     event PostCreated(address post, address postFactory, bytes callData);
 
     function initialize(
         address operator,
-        address postRegistry,
         bytes memory metadata
     ) public initializeTemplate() {
         // set operator
@@ -26,16 +24,13 @@ contract Feed is Operated, EventMetadata, Template {
             Operated._activateOperator();
         }
 
-        // set post registry
-        _postRegistry = postRegistry;
-
         // set metadata
         if (metadata.length != 0) {
             EventMetadata._setMetadata(metadata);
         }
 
         // log initialization params
-        emit Initialized(operator, postRegistry, metadata);
+        emit Initialized(operator, metadata);
     }
 
     // state functions
@@ -46,7 +41,7 @@ contract Feed is Operated, EventMetadata, Template {
 
         // validate factory is registered
         require(
-            iRegistry(_postRegistry).getFactoryStatus(postFactory) == iRegistry.FactoryStatus.Registered,
+            iRegistry(iFactory(Template.getFactory()).getInstanceRegistry()).getFactoryStatus(postFactory) == iRegistry.FactoryStatus.Registered,
             "factory is not actively registered"
         );
 
@@ -78,10 +73,6 @@ contract Feed is Operated, EventMetadata, Template {
 
     function getPosts() public view returns (address[] memory posts) {
         posts = _posts;
-    }
-
-    function getPostRegistry() public view returns (address postRegistry) {
-        postRegistry = _postRegistry;
     }
 
 }

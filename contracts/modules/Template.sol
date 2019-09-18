@@ -31,4 +31,8 @@ contract Template {
         ok = (caller == getCreator());
     }
 
+    function getFactory() public view returns (address factory) {
+        factory = _factory;
+    }
+
 }

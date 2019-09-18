@@ -193,8 +193,8 @@ Create test instances from factories
   await contracts.Feed_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
-          ['address', 'address', 'bytes'],
-          [userAddress, contracts.Erasure_Posts.instance.contractAddress, proofHash]
+          ['address', 'bytes'],
+          [userAddress, proofHash]
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {

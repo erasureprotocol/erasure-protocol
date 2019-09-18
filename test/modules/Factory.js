@@ -10,17 +10,11 @@ function testFactory(
   deployer, // etherlime's ganache deployer instance
   factoryName, // factory contract's name
   instanceType, // instance type created by factory
-  createExplicitTypes, // the types used in createExplicit call
-  createExplicitArgs, // the arguments used in createExplicit call
+  createTypes, // the types used in create call
+  createArgs, // the arguments used in create call
   factoryArtifact, // the factory artifact
   registryArtifact, // correct registry used to store instances & factories. instanceType must match
   wrongRegistryArtifact, // wrong registry for error testing. instanceType must mismatch
-
-  // There are cases where the create() call and the createExplicit() call differ
-  // ABI types are different. Default to the create call parameters
-  // anything else, pass in a different set of ABI
-  createTypes = createExplicitTypes,
-  getCreateArgs = () => createExplicitArgs
 ) {
   describe(factoryName, function() {
     this.timeout(4000);
@@ -46,8 +40,6 @@ function testFactory(
     before(async () => {
       this.Registry = await deployer.deploy(registryArtifact);
       this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact);
-
-      getCreateArgs = getCreateArgs.bind(this);
     });
 
     const createLocalInstance = salt => {
@@ -58,7 +50,7 @@ function testFactory(
         creator,
         initializeFunctionName,
         createTypes,
-        getCreateArgs(),
+        createArgs,
         nonce,
         salt
       );
@@ -75,7 +67,7 @@ function testFactory(
       const callData = abiEncodeWithSelector(
         initializeFunctionName,
         createTypes,
-        getCreateArgs()
+        createArgs
       );
       for (let i = 0; i < count; i++) {
         await this.Factory.from(creator).create(callData);
@@ -138,7 +130,7 @@ function testFactory(
       });
     });
 
-    const validateCreateExplicitTxn = async (txn, salt, expectedAddress) => {
+    const validateCreateTxn = async (txn, salt, expectedAddress) => {
       const receipt = await this.Factory.verboseWaitForTransaction(txn);
 
       const expectedEvent = "InstanceCreated";
@@ -177,13 +169,13 @@ function testFactory(
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          getCreateArgs()
+          createArgs
         );
         const expectedAddress = await this.Factory.from(
           creator
         ).getNextInstance(callData);
         const txn = await this.Factory.from(creator).create(callData);
-        await validateCreateExplicitTxn(txn, null, expectedAddress);
+        await validateCreateTxn(txn, null, expectedAddress);
       });
     });
 
@@ -192,7 +184,7 @@ function testFactory(
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
             createTypes,
-            getCreateArgs()
+            createArgs
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
           const txn = await this.Factory.from(creator).createSalty(
@@ -202,14 +194,14 @@ function testFactory(
           const expectedAddress = await this.Factory.from(
             creator
           ).getSaltyInstance(callData, testSalt);
-          await validateCreateExplicitTxn(txn, testSalt, expectedAddress);
+          await validateCreateTxn(txn, testSalt, expectedAddress);
         });
 
         it("should revert with duplicate salt", async () => {
           const callData = abiEncodeWithSelector(
             initializeFunctionName,
             createTypes,
-            getCreateArgs()
+            createArgs
           );
           const testSalt = ethers.utils.formatBytes32String("testSalt");
           await assert.revertWith(

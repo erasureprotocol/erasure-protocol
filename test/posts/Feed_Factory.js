@@ -17,7 +17,6 @@ const staticMetadata = ethers.utils.keccak256(
 );
 
 const createTypes = ["address", "bytes"];
-const localCreateTypes = ["address", "address", "bytes"];
 
 let PostRegistry;
 
@@ -41,10 +40,6 @@ function runFactoryTest() {
         FeedFactoryArtifact,
         ErasurePostsArtifact, // correct registry
         ErasureAgreementsArtifact, // wrong registry
-        localCreateTypes,
-        function() {
-          return [creator, this.Registry.contractAddress, staticMetadata];
-        }
       );
     });
   });
