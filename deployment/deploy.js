@@ -105,11 +105,17 @@ const deploy = async (network, secret) => {
     contracts.Erasure_Agreements.instance = await deployer.deploy(contracts.Erasure_Agreements.artifact);
     contracts.Erasure_Users.instance = await deployer.deploy(contracts.Erasure_Users.artifact);
 
+    // deploy templates
+    contracts.Post.template = await deployer.deploy(contracts.Post.artifact);
+    contracts.Feed.template = await deployer.deploy(contracts.Feed.artifact);
+    contracts.SimpleGriefing.template = await deployer.deploy(contracts.SimpleGriefing.artifact);
+    contracts.CountdownGriefing.template = await deployer.deploy(contracts.CountdownGriefing.artifact);
+
     // deploy factories
-    contracts.Post_Factory.instance = await deployer.deploy(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
-    contracts.Feed_Factory.instance = await deployer.deploy(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress);
-    contracts.SimpleGriefing_Factory.instance = await deployer.deploy(contracts.SimpleGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
-    contracts.CountdownGriefing_Factory.instance = await deployer.deploy(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress);
+    contracts.Post_Factory.instance = await deployer.deploy(contracts.Post_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress, contracts.Post.template.contractAddress);
+    contracts.Feed_Factory.instance = await deployer.deploy(contracts.Feed_Factory.artifact, false, contracts.Erasure_Posts.instance.contractAddress, contracts.Feed.template.contractAddress);
+    contracts.SimpleGriefing_Factory.instance = await deployer.deploy(contracts.SimpleGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress, contracts.SimpleGriefing.template.contractAddress);
+    contracts.CountdownGriefing_Factory.instance = await deployer.deploy(contracts.CountdownGriefing_Factory.artifact, false, contracts.Erasure_Agreements.instance.contractAddress, contracts.CountdownGriefing.template.contractAddress);
   }
 
   console.log(`
@@ -253,7 +259,7 @@ Create test instances from factories
       abiEncodeWithSelector(
           'initialize',
           ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
-          [tokenAddress, userAddress, userAddress, userAddress, 1, 2, '0x0']
+          [tokenAddress, userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, '0x0']
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
@@ -270,7 +276,7 @@ Create test instances from factories
       abiEncodeWithSelector(
           'initialize',
           ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
-          [tokenAddress, userAddress, userAddress, userAddress, 1, 2, 100000000, '0x0']
+          [tokenAddress, userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, 100000000, '0x0']
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
