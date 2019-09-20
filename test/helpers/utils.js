@@ -148,5 +148,5 @@ module.exports = {
   createSelector,
   createMultihashSha256,
   getLatestContractAdressFrom,
-  abiEncodeWithSelector
+  abiEncodeWithSelector,
 };

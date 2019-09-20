@@ -6,7 +6,6 @@ require("dotenv").config();
 
 const deploy = async (network, secret) => {
   let contracts = {
-    MockNMR: {artifact: require('../build/MockNMR.json')},
     Erasure_Agreements: { artifact: require("../build/Erasure_Agreements.json") },
     Erasure_Escrows: { artifact: require("../build/Erasure_Escrows.json") },
     Erasure_Posts: { artifact: require("../build/Erasure_Posts.json") },
@@ -95,10 +94,7 @@ const deploy = async (network, secret) => {
     // initialize deployer
     deployer = new etherlime.EtherlimeGanacheDeployer();
     multisig = deployer.signer.address;
-
-    // deploy mock NMR
-    contracts.MockNMR.instance = await deployer.deploy(contracts.MockNMR.artifact);
-    tokenAddress = contracts.MockNMR.instance.contractAddress;
+    tokenAddress = "0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671";
 
     // deploy registries
     contracts.Erasure_Posts.instance = await deployer.deploy(contracts.Erasure_Posts.artifact);
@@ -258,8 +254,8 @@ Create test instances from factories
   await contracts.SimpleGriefing_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
-          ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
-          [tokenAddress, userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, '0x0']
+          ['address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
+          [userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, '0x0']
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
@@ -275,8 +271,8 @@ Create test instances from factories
   await contracts.CountdownGriefing_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
-          ['address', 'address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
-          [tokenAddress, userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, 100000000, '0x0']
+          ['address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
+          [userAddress, userAddress, userAddress, ethers.utils.parseEther('1'), 2, 100000000, '0x0']
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {

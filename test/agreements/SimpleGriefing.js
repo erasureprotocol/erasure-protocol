@@ -1,4 +1,4 @@
-const { createDeployer } = require("../helpers/setup");
+const { createDeployer, initDeployment } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
 const { abiEncodeWithSelector } = require("../helpers/utils");
 
@@ -7,8 +7,7 @@ const SimpleGriefingFactoryArtifact = require("../../build/SimpleGriefing_Factor
 const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
-describe("SimpleGriefing", function() {
-  this.timeout(4000);
+describe("SimpleGriefing", function () {
 
   // wallets and addresses
   const [
@@ -35,7 +34,6 @@ describe("SimpleGriefing", function() {
     "address",
     "address",
     "address",
-    "address",
     "uint256",
     "uint8",
     "bytes"
@@ -52,10 +50,7 @@ describe("SimpleGriefing", function() {
 
   // helper function to deploy TestSimpleGriefing
   const deployAgreement = async (args = initArgs) => {
-    const callData = abiEncodeWithSelector("initialize", createABITypes, [
-      this.MockNMR.contractAddress,
-      ...args
-    ]);
+    const callData = abiEncodeWithSelector("initialize", createABITypes, args);
     const txn = await this.Factory.from(operator).create(callData);
 
     const receipt = await this.Factory.verboseWaitForTransaction(txn);
@@ -77,9 +72,10 @@ describe("SimpleGriefing", function() {
 
   let deployer;
   before(async () => {
-    deployer = createDeployer();
+    // [this.deployer, this.MockNMR] = await setupDeployment();
+    [this.deployer, this.MockNMR] = await initDeployment();
+    deployer = this.deployer;
 
-    this.MockNMR = await deployer.deploy(MockNMRArtifact);
     this.SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact);
     this.Factory = await deployer.deploy(
@@ -88,7 +84,7 @@ describe("SimpleGriefing", function() {
       this.Registry.contractAddress,
       this.SimpleGriefing.contractAddress
     );
-    await this.Registry.from(operator).addFactory(
+    await this.Registry.from(deployer.signer).addFactory(
       this.Factory.contractAddress,
       "0x"
     );
@@ -96,11 +92,11 @@ describe("SimpleGriefing", function() {
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
     const startingBalance = "1000";
-    await this.MockNMR.from(operator).transfer(
+    await this.MockNMR.from(counterparty).mintMockTokens(
       counterparty,
       ethers.utils.parseEther(startingBalance)
     );
-    await this.MockNMR.from(operator).transfer(
+    await this.MockNMR.from(staker).mintMockTokens(
       staker,
       ethers.utils.parseEther(startingBalance)
     );
@@ -156,7 +152,6 @@ describe("SimpleGriefing", function() {
     it("should revert when not initialized from constructor", async () => {
       await assert.revertWith(
         this.TestSimpleGriefing.initialize(
-          this.MockNMR.contractAddress,
           ...initArgs
         ),
         "must be called within contract constructor"
@@ -560,7 +555,7 @@ describe("SimpleGriefing", function() {
     });
 
     it("should transfer operator", async () => {
-      const txn = await this.TestSimpleGriefing.transferOperator(newOperator);
+      const txn = await this.TestSimpleGriefing.from(operator).transferOperator(newOperator);
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [newOperator, true]);
 
@@ -581,7 +576,7 @@ describe("SimpleGriefing", function() {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestSimpleGriefing.deactivateOperator();
+      await this.TestSimpleGriefing.from(operator).deactivateOperator();
       await assert.revertWith(
         this.TestSimpleGriefing.from(operator).renounceOperator(),
         "only active operator"
@@ -589,7 +584,7 @@ describe("SimpleGriefing", function() {
       await this.TestSimpleGriefing.activateOperator();
     });
 
-    it("should revert when msg.sender is not active operator", async () => {
+    it("should succeed", async () => {
       const txn = await this.TestSimpleGriefing.from(
         newOperator
       ).renounceOperator();

@@ -58,11 +58,11 @@ describe("Post", () => {
     const postAddress = createFeedEvent.args.instance;
 
     const postContract = deployer
-        .wrapDeployedContract(
-      TestPostArtifact,
-      postAddress,
-      creatorWallet.secretKey
-    );
+      .wrapDeployedContract(
+        TestPostArtifact,
+        postAddress,
+        creatorWallet.secretKey
+      );
 
     return postContract;
   };
@@ -81,7 +81,7 @@ describe("Post", () => {
       this.PostTemplate.contractAddress
     );
 
-    await this.PostRegistry.from(creator).addFactory(
+    await this.PostRegistry.addFactory(
       this.PostFactory.contractAddress,
       "0x"
     );

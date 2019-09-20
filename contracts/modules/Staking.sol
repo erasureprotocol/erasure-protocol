@@ -11,27 +11,11 @@ contract Staking is BurnNMR {
 
     mapping (address => uint256) private _stake;
 
-    event TokenSet(address token);
     event StakeAdded(address staker, address funder, uint256 amount, uint256 newStake);
     event StakeTaken(address staker, address recipient, uint256 amount, uint256 newStake);
     event StakeBurned(address staker, uint256 amount, uint256 newStake);
 
-    modifier tokenMustBeSet() {
-        require(BurnNMR.getToken() != address(0), "token not set yet");
-        _;
-    }
-
-    // state functions
-
-    function _setToken(address token) internal {
-        // set storage
-        BurnNMR._setToken(token);
-
-        // emit event
-        emit TokenSet(token);
-    }
-
-    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal tokenMustBeSet {
+    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -51,7 +35,7 @@ contract Staking is BurnNMR {
         emit StakeAdded(staker, funder, amountToAdd, newStake);
     }
 
-    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal tokenMustBeSet {
+    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -74,7 +58,7 @@ contract Staking is BurnNMR {
         emit StakeTaken(staker, recipient, amountToTake, newStake);
     }
 
-    function _takeFullStake(address staker, address recipient) internal tokenMustBeSet returns (uint256 stake) {
+    function _takeFullStake(address staker, address recipient) internal returns (uint256 stake) {
         // get stake from storage
         stake = _stake[staker];
 
@@ -82,7 +66,7 @@ contract Staking is BurnNMR {
         _takeStake(staker, recipient, stake, stake);
     }
 
-    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) tokenMustBeSet internal {
+    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) internal {
         // require current stake amount matches expected amount
         require(currentStake == _stake[staker], "current stake incorrect");
 
@@ -105,7 +89,7 @@ contract Staking is BurnNMR {
         emit StakeBurned(staker, amountToBurn, newStake);
     }
 
-    function _burnFullStake(address staker) internal tokenMustBeSet returns (uint256 stake) {
+    function _burnFullStake(address staker) internal returns (uint256 stake) {
         // get stake from storage
         stake = _stake[staker];
 

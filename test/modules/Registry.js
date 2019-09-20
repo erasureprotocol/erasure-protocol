@@ -3,8 +3,7 @@ const { createDeployer } = require("../helpers/setup");
 const { hexlify } = require("../helpers/utils");
 const RegistryArtifact = require("../../build/Registry.json");
 
-describe("Registry", function() {
-  this.timeout(4000);
+describe("Registry", function () {
 
   const instanceType = "TestRegistry";
   const factoryExtraData = "FACTORY_EXTRA_DATA";
@@ -16,8 +15,8 @@ describe("Registry", function() {
   };
 
   // wallets and addresses
-  const [ownerWallet, buyerWallet, sellerWallet] = accounts;
-  const owner = ownerWallet.signer.signingKey.address; // normalize address
+  let [ownerWallet, buyerWallet, sellerWallet] = accounts;
+  let owner = ownerWallet.signer.signingKey.address; // normalize address
   const buyer = buyerWallet.signer.signingKey.address; // normalize address
   const seller = sellerWallet.signer.signingKey.address; // normalize address
   // nonce used to generate random address
@@ -80,6 +79,8 @@ describe("Registry", function() {
   let deployer;
   before(async () => {
     deployer = await createDeployer();
+    ownerWallet = deployer;
+    owner = ownerWallet.signer.signingKey.address;
   });
 
   describe("Registry.constructor", () => {
@@ -118,7 +119,7 @@ describe("Registry", function() {
     });
 
     it("should add factory correctly", async () => {
-      const txn = await this.Registry.from(owner).addFactory(
+      const txn = await this.Registry.addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData)
       );
@@ -138,7 +139,7 @@ describe("Registry", function() {
 
     it("should revert when factory already added", async () => {
       await assert.revertWith(
-        this.Registry.from(owner).addFactory(
+        this.Registry.addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData)
         ),
@@ -148,11 +149,11 @@ describe("Registry", function() {
 
     it("should revert when factory is retired", async () => {
       // retire the added factory
-      await this.Registry.from(owner).retireFactory(factoryAddress);
+      await this.Registry.retireFactory(factoryAddress);
       retireLocalFactory(factoryAddress);
 
       await assert.revertWith(
-        this.Registry.from(owner).addFactory(
+        this.Registry.addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData),
           { gasLimit: 30000 }
@@ -174,23 +175,23 @@ describe("Registry", function() {
 
     it("should revert when factory is not added", async () => {
       await assert.revertWith(
-        this.Registry.from(owner).retireFactory(factoryAddress),
+        this.Registry.retireFactory(factoryAddress),
         "factory is not currently registered"
       );
     });
 
     it("should revert when factory is already retired", async () => {
-      await this.Registry.from(owner).addFactory(
+      await this.Registry.addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData)
       );
       addLocalFactory(factoryAddress);
 
-      await this.Registry.from(owner).retireFactory(factoryAddress);
+      await this.Registry.retireFactory(factoryAddress);
       retireLocalFactory(factoryAddress);
 
       await assert.revertWith(
-        this.Registry.from(owner).retireFactory(factoryAddress),
+        this.Registry.retireFactory(factoryAddress),
         "factory is not currently registered"
       );
     });
@@ -198,13 +199,13 @@ describe("Registry", function() {
     it("should retire factory correctly", async () => {
       const factoryAddress = generateRandomAddress();
 
-      await this.Registry.from(owner).addFactory(
+      await this.Registry.addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData)
       );
       const factoryId = addLocalFactory(factoryAddress);
 
-      const txn = await this.Registry.from(owner).retireFactory(factoryAddress);
+      const txn = await this.Registry.retireFactory(factoryAddress);
       retireLocalFactory(factoryAddress);
 
       assert.emit(txn, "FactoryRetired");
@@ -223,7 +224,7 @@ describe("Registry", function() {
 
       for (let i = 0; i < populateCount; i++) {
         const factoryAddress = generateRandomAddress();
-        await this.Registry.from(owner).addFactory(
+        await this.Registry.addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData)
         );
@@ -248,7 +249,6 @@ describe("Registry", function() {
 
   describe("Registry.getFactoryAddress", () => {
     it("gets factory address correctly", async () => {
-      this.timeout(6000); // increase timeout because getFactoryAddress take long
 
       for (let factoryId = 0; factoryId < factories.length; factoryId++) {
         const factoryAddress = factories[factoryId];
@@ -262,7 +262,6 @@ describe("Registry", function() {
 
   describe("Registry.getFactories", () => {
     it("should get factories correctly", async () => {
-      this.timeout(6000); // increase timeout because getFactories take long
 
       const actualFactories = await this.Registry.getFactories();
       assert.deepEqual(actualFactories, factories);
@@ -337,11 +336,11 @@ describe("Registry", function() {
     it("should revert when factory is retired", async () => {
       const factoryAddress = seller;
 
-      await this.Registry.from(owner).addFactory(
+      await this.Registry.addFactory(
         seller,
         Buffer.from(factoryExtraData)
       );
-      await this.Registry.from(owner).retireFactory(seller);
+      await this.Registry.retireFactory(seller);
 
       addLocalFactory(factoryAddress);
 
@@ -358,7 +357,7 @@ describe("Registry", function() {
     });
 
     it("should register instance correctly", async () => {
-      await this.Registry.from(owner).addFactory(
+      await this.Registry.addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData)
       );

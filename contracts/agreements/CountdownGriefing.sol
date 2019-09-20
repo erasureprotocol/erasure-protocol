@@ -27,10 +27,9 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address counterparty;
     }
 
-    event Initialized(address token, address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes metadata);
+    event Initialized(address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes metadata);
 
     function initialize(
-        address token,
         address operator,
         address staker,
         address counterparty,
@@ -42,8 +41,6 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         // set storage values
         _data.staker = staker;
         _data.counterparty = counterparty;
-
-        Staking._setToken(token);
 
         // set operator
         if (operator != address(0)) {
@@ -63,7 +60,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         }
 
         // log initialization params
-        emit Initialized(token, operator, staker, counterparty, ratio, ratioType, countdownLength, metadata);
+        emit Initialized(operator, staker, counterparty, ratio, ratioType, countdownLength, metadata);
     }
 
     // state functions

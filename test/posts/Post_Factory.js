@@ -27,13 +27,15 @@ const createTypes = ["address", "bytes", "bytes"];
 const createArgs = [creator, proofHash, staticMetadata];
 
 let PostTemplate;
+let deployer;
 
 before(async () => {
+  deployer = createDeployer();
   PostTemplate = await deployer.deploy(PostArtifact);
 });
 
 function runFactoryTest() {
-  const deployer = createDeployer();
+  // const deployer = createDeployer();
 
   describe(factoryName, () => {
     it("setups test", () => {

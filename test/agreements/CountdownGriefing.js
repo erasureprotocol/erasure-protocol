@@ -1,4 +1,4 @@
-const { createDeployer } = require("../helpers/setup");
+const { setupDeployment, initDeployment } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
 const { abiEncodeWithSelector } = require("../helpers/utils");
 
@@ -7,8 +7,7 @@ const CountdownGriefingFactoryArtifact = require("../../build/CountdownGriefing_
 const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
-describe("CountdownGriefing", function() {
-  this.timeout(4000);
+describe("CountdownGriefing", function () {
 
   // wallets and addresses
   const [
@@ -35,7 +34,6 @@ describe("CountdownGriefing", function() {
     "address",
     "address",
     "address",
-    "address",
     "uint256",
     "uint8",
     "uint256",
@@ -53,10 +51,7 @@ describe("CountdownGriefing", function() {
 
   // helper function to deploy TestCountdownGriefing
   const deployAgreement = async (args = initArgs) => {
-    const callData = abiEncodeWithSelector("initialize", createABITypes, [
-      this.MockNMR.contractAddress,
-      ...args
-    ]);
+    const callData = abiEncodeWithSelector("initialize", createABITypes, args);
     const txn = await this.Factory.from(operator).create(callData);
 
     const receipt = await this.Factory.verboseWaitForTransaction(txn);
@@ -69,8 +64,7 @@ describe("CountdownGriefing", function() {
 
     const contract = deployer.wrapDeployedContract(
       CountdownGriefingArtifact,
-      agreementAddress,
-      operatorWallet.secretKey
+      agreementAddress
     );
 
     return contract;
@@ -78,9 +72,10 @@ describe("CountdownGriefing", function() {
 
   let deployer;
   before(async () => {
-    deployer = createDeployer();
+    [this.deployer, this.MockNMR] = await initDeployment();
+    deployer = this.deployer;
 
-    this.MockNMR = await deployer.deploy(MockNMRArtifact);
+    // this.MockNMR = await deployer.deploy(MockNMRArtifact);
     this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact);
     this.Factory = await deployer.deploy(
@@ -89,7 +84,7 @@ describe("CountdownGriefing", function() {
       this.Registry.contractAddress,
       this.CountdownGriefing.contractAddress
     );
-    await this.Registry.from(operator).addFactory(
+    await this.Registry.from(deployer.signer).addFactory(
       this.Factory.contractAddress,
       "0x"
     );
@@ -97,12 +92,16 @@ describe("CountdownGriefing", function() {
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
     const startingBalance = "1000";
-    await this.MockNMR.from(operator).transfer(
+    await this.MockNMR.from(counterparty).mintMockTokens(
       counterparty,
       ethers.utils.parseEther(startingBalance)
     );
-    await this.MockNMR.from(operator).transfer(
+    await this.MockNMR.from(staker).mintMockTokens(
       staker,
+      ethers.utils.parseEther(startingBalance)
+    );
+    await this.MockNMR.from(operator).mintMockTokens(
+      operator,
       ethers.utils.parseEther(startingBalance)
     );
   });
@@ -111,7 +110,6 @@ describe("CountdownGriefing", function() {
     it("should revert when caller is not contract", async () => {
       await assert.revertWith(
         this.CountdownGriefing.initialize(
-          this.MockNMR.contractAddress,
           ...initArgs
         ),
         "must be called within contract constructor"
@@ -173,7 +171,6 @@ describe("CountdownGriefing", function() {
     it("should revert when not initialized from constructor", async () => {
       await assert.revertWith(
         this.TestCountdownGriefing.initialize(
-          this.MockNMR.contractAddress,
           ...initArgs
         ),
         "must be called within contract constructor"
@@ -273,7 +270,7 @@ describe("CountdownGriefing", function() {
 
     it("should revert when deadline already set", async () =>
       await assert.revertWith(
-        startCountdown(operator),
+        startCountdown(staker),
         "deadline already set"
       ));
 
@@ -297,8 +294,10 @@ describe("CountdownGriefing", function() {
     let amountToAdd = 500; // 500 token weis
 
     const increaseStake = async sender => {
-      await this.MockNMR.from(sender).approve(
+
+      await this.MockNMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
+        await this.MockNMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd
       );
 
@@ -368,7 +367,7 @@ describe("CountdownGriefing", function() {
       // create snapshot
       let snapshotID = await utils.snapshot(deployer.provider);
 
-      await this.TestCountdownGriefing.startCountdown();
+      await this.TestCountdownGriefing.from(staker).startCountdown();
 
       // get current blockTimestamp so we can reset later
       const block = await deployer.provider.getBlock("latest");
@@ -402,8 +401,9 @@ describe("CountdownGriefing", function() {
         staker
       )).toNumber();
 
-      await this.MockNMR.from(sender).approve(
+      await this.MockNMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
+        await this.MockNMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd
       );
 
@@ -478,7 +478,7 @@ describe("CountdownGriefing", function() {
       // create snapshot
       let snapshotID = await utils.snapshot(deployer.provider);
 
-      await this.TestCountdownGriefing.startCountdown();
+      await this.TestCountdownGriefing.from(staker).startCountdown();
 
       // get current blockTimestamp so we can reset later
       const block = await deployer.provider.getBlock("latest");
@@ -508,15 +508,14 @@ describe("CountdownGriefing", function() {
     let currentStake = ethers.utils.bigNumberify("0");
 
     const punishStaker = async () => {
+
       // increase staker's stake to 500
       await this.MockNMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          staker,
-          this.TestCountdownGriefing.contractAddress
-        ),
+        await this.MockNMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake
       );
+
       await this.TestCountdownGriefing.from(staker).increaseStake(
         currentStake,
         stakerStake
@@ -525,8 +524,9 @@ describe("CountdownGriefing", function() {
 
       const expectedCost = punishment.mul(ratio);
 
-      await this.MockNMR.from(counterparty).approve(
+      await this.MockNMR.from(counterparty).changeApproval(
         this.TestCountdownGriefing.contractAddress,
+        await this.MockNMR.allowance(counterparty, this.TestCountdownGriefing.contractAddress),
         expectedCost
       );
 
@@ -642,7 +642,7 @@ describe("CountdownGriefing", function() {
       await punishStaker());
 
     it("should punish staker when countdown not ended", async () => {
-      await this.TestCountdownGriefing.startCountdown();
+      await this.TestCountdownGriefing.from(staker).startCountdown();
       await punishStaker();
     });
   });
@@ -694,8 +694,9 @@ describe("CountdownGriefing", function() {
 
       // staker increase stake
 
-      await this.MockNMR.from(staker).approve(
+      await this.MockNMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
+        await this.MockNMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake
       );
 
@@ -765,7 +766,7 @@ describe("CountdownGriefing", function() {
     it("should revert when msg.sender is not active operator", async () => {
       await this.TestCountdownGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestCountdownGriefing.from(counterparty).transferOperator(
+        this.TestCountdownGriefing.from(operator).transferOperator(
           newOperator
         ),
         "only active operator"
@@ -774,7 +775,7 @@ describe("CountdownGriefing", function() {
     });
 
     it("should transfer operator", async () => {
-      const txn = await this.TestCountdownGriefing.transferOperator(
+      const txn = await this.TestCountdownGriefing.from(operator).transferOperator(
         newOperator
       );
       await assert.emit(txn, "OperatorUpdated");
@@ -805,9 +806,11 @@ describe("CountdownGriefing", function() {
       await this.TestCountdownGriefing.activateOperator();
     });
 
-    it("should revert when msg.sender is not active operator", async () => {
+    it("should succeed", async () => {
+      this.TestCountdownGriefing = await deployAgreement();
+
       const txn = await this.TestCountdownGriefing.from(
-        newOperator
+        operator
       ).renounceOperator();
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);

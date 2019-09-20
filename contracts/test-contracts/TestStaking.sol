@@ -9,14 +9,6 @@ contract TestStaking is Staking {
         fullStake = _fullStake;
     }
 
-    function getToken() public view returns(address token) {
-        return BurnNMR.getToken();
-    }
-
-    function setToken(address token) public {
-        Staking._setToken(token);
-    }
-
     function addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) public {
         Staking._addStake(staker, funder, currentStake, amountToAdd);
     }

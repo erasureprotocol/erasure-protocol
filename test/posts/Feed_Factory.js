@@ -20,13 +20,14 @@ const staticMetadata = ethers.utils.keccak256(
 const createTypes = ["address", "bytes"];
 
 let FeedTemplate;
+let deployer;
 
 before(async () => {
+  deployer = createDeployer();
   FeedTemplate = await deployer.deploy(FeedArtifact);
 });
 
 function runFactoryTest() {
-  const deployer = createDeployer();
 
   describe(factoryName, () => {
     it("setups test", () => {
