@@ -106,6 +106,14 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         cost = Griefing._grief(msg.sender, _data.staker, currentStake, punishment, message);
     }
 
+    function releaseStake(uint256 currentStake, uint256 amountToRelease) public {
+        // restrict access
+        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+
+        // release stake back to the staker
+        Staking._takeStake(_data.staker, _data.staker, currentStake, amountToRelease);
+    }
+
     function startCountdown() public returns (uint256 deadline) {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
