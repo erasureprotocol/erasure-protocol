@@ -5,7 +5,7 @@
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
-    "compile": "yarn etherlime compile --solcVersion=0.5.11 --deleteCompiledFiles=true",
+    "compile": "yarn etherlime compile --solcVersion=0.5.11 --runs=200 --deleteCompiledFiles=true",
     "flatten": "yarn etherlime flatten",
     "ganache": "ganache-cli --port 8545 --deterministic --secure -u 0x9608010323ed882a38ede9211d7691102b4f0ba0 --defaultBalanceEther 1000",
     "test": "bash run-ganache-tests.sh",

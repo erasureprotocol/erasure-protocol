@@ -4,16 +4,15 @@ import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 import "../modules/ProofHashes.sol";
-import "../modules/MultiHashWrapper.sol";
 
 
-contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Template {
+contract Feed is ProofHashes, Operated, EventMetadata, Template {
 
-    event Initialized(address operator, bytes multihash, bytes metadata);
+    event Initialized(address operator, bytes proofHash, bytes metadata);
 
     function initialize(
         address operator,
-        bytes memory multihash,
+        bytes memory proofHash,
         bytes memory metadata
     ) public initializeTemplate() {
         // set operator
@@ -22,16 +21,9 @@ contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Templat
             Operated._activateOperator();
         }
 
-        // add multihash to storage
-        if (multihash.length != 0) {
-            // unpack multihash
-            MultiHashWrapper.MultiHash memory multihashObj = MultiHashWrapper._splitMultiHash(multihash);
-
-            // set multihash format
-            ProofHashes._setMultiHashFormat(multihashObj.hashFunction, multihashObj.digestSize);
-
-            // submit hash
-            ProofHashes._submitHash(multihashObj.hash);
+        // add proofHash to storage
+        if (proofHash.length != 0) {
+            ProofHashes._addProofHash(proofHash);
         }
 
         // set metadata
@@ -40,17 +32,17 @@ contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Templat
         }
 
         // log initialization params
-        emit Initialized(operator, multihash, metadata);
+        emit Initialized(operator, proofHash, metadata);
     }
 
     // state functions
 
-    function submitHash(bytes32 multihash) public {
+    function submitProofHash(bytes memory proofHash) public {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
-        // add multihash to storage
-        ProofHashes._submitHash(multihash);
+        // add proofHash to storage
+        ProofHashes._addProofHash(proofHash);
     }
 
     function setMetadata(bytes memory metadata) public {

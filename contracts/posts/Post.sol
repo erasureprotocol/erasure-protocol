@@ -8,17 +8,17 @@ import "../modules/Template.sol";
 
 contract Post is ProofHash, Operated, EventMetadata, Template {
 
-    event Initialized(address operator, bytes proofHash, bytes metadata);
+    event Initialized(address operator, bytes multihash, bytes metadata);
 
     function initialize(
         address operator,
-        bytes memory proofHash,
+        bytes memory multihash,
         bytes memory metadata
     ) public initializeTemplate() {
 
         // set storage variables
-        if (proofHash.length != 0) {
-            ProofHash._setProofHash(proofHash);
+        if (multihash.length != 0) {
+            ProofHash._setProofHash(multihash);
         }
 
         // set operator
@@ -33,7 +33,7 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
         }
 
         // log initialization params
-        emit Initialized(operator, proofHash, metadata);
+        emit Initialized(operator, multihash, metadata);
     }
 
     // state functions
