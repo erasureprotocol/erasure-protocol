@@ -2,17 +2,15 @@ const etherlime = require("etherlime-lib");
 
 const { createDeployer } = require("../helpers/setup");
 const {
-  createInstanceAddressWithCallData,
-  createSelector,
+  hexlify,
+  createMultihashSha256,
   abiEncodeWithSelector,
-  createMultihashSha256
+  assertEvent
 } = require("../helpers/utils");
 
 // artifacts
 const TestFeedArtifact = require("../../build/TestFeed.json");
-const TestPostArtifact = require("../../build/TestPost.json");
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
-const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
 describe("Feed", function () {
@@ -27,59 +25,41 @@ describe("Feed", function () {
 
   // local Post array
   let posts = [];
-  const addPost = postAddress => {
-    posts.push(postAddress);
+  const addPost = (proofHash, metadata) => {
+    const postID = posts.push({ proofHash, metadata }) - 1;
+    return postID;
   };
 
   // post variables
-  let nonce = 0;
-
+  const feedMetadata = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("feedMetadata")
+  );
+  const newFeedMetadata = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("newFeedMetadata")
+  );
   const proofHash = createMultihashSha256("proofHash");
-
-  const postStaticMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("feedStaticMetadata")
-  );
-  const postVariableMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("feedVariableMetadata")
-  );
-  const createPostABITypes = ["address", "bytes", "bytes"];
-  const createPostABIValues = [operator, proofHash, postStaticMetadata];
-  const createPostCallData = abiEncodeWithSelector(
-    "initialize",
-    createPostABITypes,
-    createPostABIValues
-  );
-
-  // feed variables
-  const feedStaticMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("feedStaticMetadata")
-  );
-  const feedVariableMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("feedVariableMetadata")
-  );
-  const newFeedVariableMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("newFeedVariableMetadata")
+  const hash =  ethers.utils.keccak256(hexlify("proofHash"));
+  const invalidProofHash = ethers.utils.keccak256(hexlify("invalidProofHash"));
+  const postMetadata = ethers.utils.keccak256(
+    ethers.utils.toUtf8Bytes("postMetadata")
   );
 
   const deployTestFeed = async (
     validInit = true,
-    args = [operator, feedStaticMetadata]
+    args = [operator, proofHash, feedMetadata]
   ) => {
     let callData;
 
     if (validInit) {
       callData = abiEncodeWithSelector(
         "initialize",
-        ["address", "bytes"],
+        ["address", "bytes", "bytes"],
         args
       );
+      const postID = addPost(proofHash);
     } else {
       // invalid callData is missing first address
-      callData = abiEncodeWithSelector(
-        "initialize",
-        ["bytes"],
-        [feedStaticMetadata]
-      );
+      callData = abiEncodeWithSelector("initialize", ["bytes"], [feedMetadata]);
     }
 
     const txn = await this.FeedFactory.from(creator).create(callData);
@@ -109,7 +89,6 @@ describe("Feed", function () {
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact);
 
     this.FeedTemplate = await deployer.deploy(TestFeedArtifact);
-    this.PostTemplate = await deployer.deploy(TestPostArtifact);
 
     this.FeedFactory = await deployer.deploy(
       FeedFactoryArtifact,
@@ -118,16 +97,9 @@ describe("Feed", function () {
       this.FeedTemplate.contractAddress
     );
 
-    await this.PostRegistry.addFactory(
+    await this.PostRegistry.from(deployer.signer).addFactory(
       this.FeedFactory.contractAddress,
       "0x"
-    );
-
-    this.PostFactory = await deployer.deploy(
-      PostFactoryArtifact,
-      false,
-      this.PostRegistry.contractAddress,
-      this.PostTemplate.contractAddress
     );
   });
 
@@ -149,15 +121,12 @@ describe("Feed", function () {
     });
   });
 
-  describe("Feed.createPost", () => {
+  describe("Feed.submitHash", () => {
     // check operator access control
     it("should revert when msg.sender is not operator or creator", async () => {
       // Factory has to be the sender here
       await assert.revertWith(
-        this.TestFeed.from(other).createPost(
-          this.PostFactory.contractAddress,
-          createPostCallData
-        ),
+        this.TestFeed.from(other).submitHash(hash),
         "only active operator or creator"
       );
     });
@@ -167,157 +136,35 @@ describe("Feed", function () {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(operator).createPost(
-          this.PostFactory.contractAddress,
-          createPostCallData
-        ),
+        this.TestFeed.from(operator).submitHash(hash),
         "only active operator or creator"
       );
 
       await this.TestFeed.activateOperator();
     });
 
-    // factory must be registered
-    it("should revert when factory not registered", async () => {
-      await assert.revertWith(
-        this.TestFeed.from(creator).createPost(
-          this.PostFactory.contractAddress,
-          createPostCallData
-        ),
-        "factory is not actively registered"
-      );
-    });
-
     // success case
-    it("should create post successfully from creator", async () => {
-      await this.PostRegistry.addFactory(
-        this.PostFactory.contractAddress,
-        "0x"
-      );
+    it("should submit hash successfully from creator", async () => {
+      const hash =  ethers.utils.keccak256(hexlify("proofHash1"));
+      const postID = addPost(hash);
 
-      const txn = await this.TestFeed.from(creator).createPost(
-        this.PostFactory.contractAddress,
-        createPostCallData
-      );
-
-      const receipt = await this.TestFeed.verboseWaitForTransaction(txn);
-
-      const postTemplate = await this.PostFactory.getTemplate();
-
-      const {
-        instanceAddress: postAddress
-      } = createInstanceAddressWithCallData(
-        this.PostFactory.contractAddress,
-        postTemplate,
-        this.TestFeed.contractAddress,
-        createPostCallData,
-        nonce
-      );
-      addPost(postAddress);
-      nonce++;
-
-      let expectedEvent = "PostCreated";
-      const postCreatedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-
-      assert.isDefined(postCreatedEvent);
-      assert.equal(postCreatedEvent.args.callData, createPostCallData);
-      assert.equal(postCreatedEvent.args.post, postAddress);
-      assert.equal(
-        postCreatedEvent.args.postFactory,
-        this.PostFactory.contractAddress
-      );
+      const txn = await this.TestFeed.from(creator).submitHash(hash);
+      assertEvent(this.TestFeed, txn, "HashSubmitted", [hash]);
     });
 
-    it("should create post successfully from operator", async () => {
-      const txn = await this.TestFeed.from(operator).createPost(
-        this.PostFactory.contractAddress,
-        createPostCallData
-      );
+    it("should submit hash successfully from operator", async () => {
+      const hash =  ethers.utils.keccak256(hexlify("proofHash2"));
+      const postID = addPost(hash);
 
-      const receipt = await this.TestFeed.verboseWaitForTransaction(txn);
-
-      const postTemplate = await this.PostFactory.getTemplate();
-
-      const {
-        instanceAddress: postAddress
-      } = createInstanceAddressWithCallData(
-        this.PostFactory.contractAddress,
-        postTemplate,
-        this.TestFeed.contractAddress,
-        createPostCallData,
-        nonce
-      );
-      addPost(postAddress);
-      nonce++;
-
-      let expectedEvent = "PostCreated";
-      const postCreatedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
-
-      assert.isDefined(postCreatedEvent);
-      assert.equal(postCreatedEvent.args.callData, createPostCallData);
-      assert.equal(postCreatedEvent.args.post, postAddress);
-      assert.equal(
-        postCreatedEvent.args.postFactory,
-        this.PostFactory.contractAddress
-      );
-    });
-
-    // post factory does not conform to Post_Factory
-    it("should revert when Post_Factory address is not Post_Factory", async () => {
-      // register the Feed contract as an invalid factory
-      await this.PostRegistry.addFactory(
-        this.TestFeed.contractAddress,
-        "0x"
-      );
-
-      await assert.revert(
-        this.TestFeed.from(creator).createPost(
-          this.TestFeed.contractAddress,
-          createPostCallData
-        )
-      );
-    });
-
-    // malformed post init data
-    it("should revert with malformed post init data", async () => {
-      const callData = abiEncodeWithSelector(
-        "initialize",
-        ["bytes", "bytes"], // missing 1 bytes parameter
-        [proofHash, postStaticMetadata]
-      );
-
-      await assert.revert(
-        this.TestFeed.from(creator).createPost(
-          this.PostFactory.contractAddress,
-          callData
-        )
-      );
-    });
-
-    // factory must not be retired
-    it("should revert when factory is retired", async () => {
-      await this.PostRegistry.retireFactory(this.PostFactory.contractAddress);
-
-      await assert.revertWith(
-        this.TestFeed.from(creator).createPost(
-          this.PostFactory.contractAddress,
-          "0x"
-        ),
-        "factory is not actively registered"
-      );
+      const txn = await this.TestFeed.from(operator).submitHash(hash);
+      assertEvent(this.TestFeed, txn, "HashSubmitted", [hash]);
     });
   });
 
   describe("Feed.setMetadata", () => {
     it("should revert when msg.sender not operator or creator", async () => {
       await assert.revertWith(
-        this.TestFeed.from(other).setMetadata(newFeedVariableMetadata),
+        this.TestFeed.from(other).setMetadata(newFeedMetadata),
         "only active operator or creator"
       );
     });
@@ -326,7 +173,7 @@ describe("Feed", function () {
       await this.TestFeed.deactivateOperator();
 
       await assert.revertWith(
-        this.TestFeed.from(operator).setMetadata(newFeedVariableMetadata),
+        this.TestFeed.from(operator).setMetadata(newFeedMetadata),
         "only active operator or creator"
       );
 
@@ -335,25 +182,18 @@ describe("Feed", function () {
 
     it("should set feed metadata from operator when active", async () => {
       const txn = await this.TestFeed.from(operator).setMetadata(
-        newFeedVariableMetadata
+        newFeedMetadata
       );
       await assert.emit(txn, "MetadataSet");
-      await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
+      await assert.emitWithArgs(txn, [newFeedMetadata]);
     });
 
-    it("should set feed variable metadata from creator", async () => {
+    it("should set feed metadata from creator", async () => {
       const txn = await this.TestFeed.from(creator).setMetadata(
-        newFeedVariableMetadata
+        newFeedMetadata
       );
       await assert.emit(txn, "MetadataSet");
-      await assert.emitWithArgs(txn, [newFeedVariableMetadata]);
-    });
-  });
-
-  describe("Feed.getPosts", () => {
-    it("should get posts", async () => {
-      const actualPosts = await this.TestFeed.getPosts();
-      assert.deepEqual(actualPosts, posts);
+      await assert.emitWithArgs(txn, [newFeedMetadata]);
     });
   });
 });

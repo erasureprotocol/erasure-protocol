@@ -90,7 +90,11 @@ function createInstanceAddress(
   nonce,
   salt
 ) {
-  const callData = abiEncodeWithSelector(initializeFunctionName, abiTypes, abiValues);
+  const callData = abiEncodeWithSelector(
+    initializeFunctionName,
+    abiTypes,
+    abiValues
+  );
   return createInstanceAddressWithCallData(
     factoryContractAddress,
     logicContractAddress,
@@ -140,6 +144,23 @@ function abiEncodeWithSelector(functionName, abiTypes, abiValues) {
   return encoded;
 }
 
+async function assertEvent(contract, txn, eventName, expectedArgs) {
+  const receipt = await contract.verboseWaitForTransaction(txn);
+
+  const eventLogs = utils.parseLogs(receipt, contract, eventName);
+
+  // assert that the event with eventName only happened once
+  assert.equal(eventLogs.length, 1);
+
+  const [eventArgs] = eventLogs;
+
+  assert.equal(eventArgs.length, expectedArgs.length);
+
+  expectedArgs.forEach((expectedArg, index) =>
+    assert.equal(eventArgs[index], expectedArg)
+  );
+}
+
 module.exports = {
   hexlify,
   createInstanceAddress,
@@ -149,4 +170,5 @@ module.exports = {
   createMultihashSha256,
   getLatestContractAdressFrom,
   abiEncodeWithSelector,
+  assertEvent
 };

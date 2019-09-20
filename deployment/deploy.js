@@ -1,6 +1,6 @@
 const etherlime = require("etherlime-lib");
 const ethers = require("ethers");
-const { createMultihashSha256, abiEncodeWithSelector } = require("../test/helpers/utils");
+const { hexlify, createMultihashSha256, abiEncodeWithSelector } = require("../test/helpers/utils");
 
 require("dotenv").config();
 
@@ -197,7 +197,9 @@ Create test instances from factories
 
   const userAddress = '0x6087555A70E2F96B7838806e7743041E035a37e5';
   const multihash = createMultihashSha256("multihash");
+  const hash =  ethers.utils.keccak256(hexlify("multihash"));
   console.log(`multihash: ${multihash}`);
+  console.log(`hash: ${hash}`);
   console.log(``);
 
   await contracts.Post_Factory.instance.create(
@@ -220,8 +222,8 @@ Create test instances from factories
   await contracts.Feed_Factory.instance.create(
       abiEncodeWithSelector(
           'initialize',
-          ['address', 'bytes'],
-          [userAddress, multihash]
+          ['address', 'bytes', 'bytes'],
+          [userAddress, multihash, multihash]
       ),
       { gasPrice: defaultGas }
   ).then(async txn => {
@@ -234,19 +236,14 @@ Create test instances from factories
       gasUsed = gasUsed.add(receipt.gasUsed);
   });
 
-  await contracts.Feed.instance.createPost(
-      contracts.Post_Factory.instance.contractAddress,
-      abiEncodeWithSelector(
-          'initialize',
-          ['address', 'bytes', 'bytes'],
-          [userAddress, multihash, multihash]
-      ),
+  await contracts.Feed.instance.submitHash(
+      hash,
       { gasPrice: defaultGas }
   ).then(async txn => {
       const receipt = await contracts.Feed.instance.verboseWaitForTransaction(txn);
-      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "PostCreated", "There is no such event");
+      const eventFound = receipt.events.find(emittedEvent => emittedEvent.event === "HashSubmitted", "There is no such event");
 
-      console.log(`createPost() | ${receipt.gasUsed} gas | Feed => ${eventFound.args.post}`);
+      console.log(`submitHash() | ${receipt.gasUsed} gas | Feed => ${eventFound.args.index}`);
       console.log(``);
       gasUsed = gasUsed.add(receipt.gasUsed);
   });
