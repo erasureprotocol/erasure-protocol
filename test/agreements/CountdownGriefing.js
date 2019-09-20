@@ -647,6 +647,86 @@ describe("CountdownGriefing", function () {
     });
   });
 
+  describe("CountdownGriefing.releaseStake", () => {
+    let currentStake;
+    const releaseAmount = ethers.utils.parseEther("100");
+
+    const releaseStake = async (sender, staker, releaseAmount) => {
+      const currentStake = await this.TestCountdownGriefing.getStake(staker);
+
+      const txn = await this.TestCountdownGriefing.from(sender).releaseStake(
+        currentStake,
+        releaseAmount
+      );
+      const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
+        txn
+      );
+      const eventLogs = utils.parseLogs(
+        receipt,
+        this.TestCountdownGriefing,
+        "StakeTaken"
+      );
+      assert.equal(eventLogs.length, 1);
+      const [event] = eventLogs;
+      assert.equal(event.staker, staker);
+      assert.equal(event.recipient, staker); // staker's stake is released to staker address
+      assert.equal(event.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
+      assert.equal(
+        event.newStake.toString(),
+        currentStake.sub(releaseAmount).toString()
+      );
+    };
+
+    it("should revert when msg.sender is not counterparty or active operator", async () => {
+      currentStake = await this.TestCountdownGriefing.getStake(staker);
+
+      await assert.revertWith(
+        this.TestCountdownGriefing.from(staker).releaseStake(
+          currentStake,
+          releaseAmount
+        ),
+        "only counterparty or active operator"
+      );
+    });
+
+    it("should revert when msg.sender is operator but not active", async () => {
+      await this.TestCountdownGriefing.deactivateOperator();
+      await assert.revertWith(
+        this.TestCountdownGriefing.from(operator).releaseStake(
+          currentStake,
+          releaseAmount
+        ),
+        "only counterparty or active operator"
+      );
+      await this.TestCountdownGriefing.activateOperator();
+    });
+
+    it("should release stake when msg.sender is counterparty", async () =>
+      await releaseStake(counterparty, staker, releaseAmount));
+
+    it("should release full stake", async () => {
+      const currentStake = await this.TestCountdownGriefing.getStake(staker);
+      await releaseStake(counterparty, staker, currentStake);
+    });
+
+    it("should release stake when msg.sender is active operator", async () => {
+      // have to re-increase stake to release
+      await this.MockNMR.from(staker).approve(
+        this.TestCountdownGriefing.contractAddress,
+        stakerStake
+      );
+
+      const currentStake = await this.TestCountdownGriefing.getStake(staker);
+
+      await this.TestCountdownGriefing.from(staker).increaseStake(
+        currentStake,
+        stakerStake
+      );
+
+      await releaseStake(operator, staker, releaseAmount);
+    });
+  });
+
   describe("CountdownGriefing.retrieveStake", () => {
     it("should revert when msg.sender is not staker or active operator", async () => {
       // redeploy contract since countdown is started
