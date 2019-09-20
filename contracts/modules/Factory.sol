@@ -52,7 +52,7 @@ contract Factory is Spawner {
         // set instance creator
         _instanceCreator[instance] = msg.sender;
         // add the instance to the instance registry
-        iRegistry(getInstanceRegistry()).register(instance, msg.sender, uint64(0));
+        iRegistry(getInstanceRegistry()).register(instance, msg.sender, uint80(0));
         // emit event
         emit InstanceCreated(instance, msg.sender, callData);
     }

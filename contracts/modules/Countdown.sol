@@ -17,6 +17,7 @@ contract Countdown is Deadline {
     // state functions
 
     function _setLength(uint256 length) internal {
+        require(length != 0, "length cannot be zero");
         _length = length;
         emit LengthSet(length);
     }

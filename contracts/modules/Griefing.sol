@@ -42,10 +42,9 @@ contract Griefing is Staking {
         bytes memory message
     ) internal returns (uint256 cost) {
 
-        // get stake from storage
-        uint256 storageStake = Staking.getStake(staker);
-
-        require(currentStake == storageStake, "current stake incorrect");
+        // prevent accidental double punish
+        // cannot be strict equality to prevent frontrunning
+        require(currentStake <= Staking.getStake(staker), "current stake incorrect");
 
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
