@@ -17,11 +17,9 @@ jobs:
         sudo apt-get install -y -qq yarn
     - name: Install
       run: yarn install
-    - name: Run Ganache
-      run: (yarn run ganache &) > /dev/null 2>&1
     - name: Test Compilation
       run: yarn run compile
     - name: Test Deployment
-      run: yarn run deploy ganache
+      run: yarn run deploy_ganache
     - name: Test Contracts
       run: yarn run test

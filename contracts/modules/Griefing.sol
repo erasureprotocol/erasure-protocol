@@ -41,7 +41,6 @@ contract Griefing is Staking {
         uint256 punishment,
         bytes memory message
     ) internal returns (uint256 cost) {
-        require(BurnNMR.getToken() != address(0), "token not set");
 
         // get stake from storage
         uint256 storageStake = Staking.getStake(staker);

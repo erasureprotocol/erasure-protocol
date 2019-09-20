@@ -1,7 +1,6 @@
-const { createDeployer } = require("../helpers/setup");
+const { initDeployment } = require("../helpers/setup");
 
-describe("Staking", function() {
-  this.timeout(6000);
+describe("Staking", function () {
 
   let wallets = {
     numerai: accounts[0],
@@ -19,54 +18,21 @@ describe("Staking", function() {
   };
 
   let deployer;
-  before(() => {
-    deployer = createDeployer();
+  before(async () => {
+    [this.deployer, this.MockNMR] = await initDeployment();
+    deployer = this.deployer;
   });
 
   beforeEach(async () => {
     contracts.TestStaking.instance = await deployer.deploy(
       contracts.TestStaking.artifact
     );
-    contracts.MockNMR.instance = await deployer.deploy(
-      contracts.MockNMR.artifact
-    );
-
-    const tokenAddress = contracts.MockNMR.instance.contractAddress;
-    await contracts.TestStaking.instance.setToken(tokenAddress);
-  });
-
-  describe("Staking._setToken", () => {
-    it("should setToken successfully", async () => {
-      const tokenAddress = contracts.MockNMR.instance.contractAddress;
-      const txn = await contracts.TestStaking.instance.setToken(tokenAddress);
-      assert.emit(txn, "TokenSet");
-      assert.emitWithArgs(txn, [tokenAddress]);
-
-      const newToken = await contracts.TestStaking.instance.getToken();
-      assert.equal(newToken, tokenAddress);
-    });
   });
 
   describe("Staking._addStake", () => {
     // funder has funds to fund for the staker's stake
     const staker = wallets.seller.signer.signingKey.address;
     const funder = wallets.numerai.signer.signingKey.address;
-
-    it("should fail when token is not set", async () => {
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
-
-      // reset back to initial token value
-      await contracts.TestStaking.instance.setToken(
-        ethers.constants.AddressZero
-      );
-
-      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
-
-      await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
-        "token not set yet"
-      );
-    });
 
     it("should fail when no allowance", async () => {
       await assert.revertWith(
@@ -85,7 +51,7 @@ describe("Staking", function() {
       );
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
+      await this.MockNMR.from(funder).approve(stakingAddress, 10);
 
       await contracts.TestStaking.instance.addStake(staker, funder, 0, 10);
 
@@ -100,7 +66,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance.from(funder).approve(stakingAddress, 10);
+      await this.MockNMR.from(funder).approve(stakingAddress, 10);
 
       await assert.revertWith(
         contracts.TestStaking.instance.addStake(staker, funder, 0, 0),
@@ -114,9 +80,11 @@ describe("Staking", function() {
       const amountToAdd = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountToAdd);
+
+      const originalBalance = await this.MockNMR.balanceOf(funder);
 
       // add stake of 10 tokens
       const txn = await contracts.TestStaking.instance.addStake(
@@ -144,13 +112,12 @@ describe("Staking", function() {
       assert.equal(stakeAddedEvent.args.newStake.toNumber(), amountToAdd);
 
       // check updated token balances, 10000 * 10**18 - 10
-      const originalBalance = ethers.utils.parseEther("10000");
       const expectedBalance = originalBalance.sub(amountToAdd).toString(10);
-      const actualBalance = await contracts.MockNMR.instance.balanceOf(funder);
+      const actualBalance = await this.MockNMR.balanceOf(funder);
       assert.equal(actualBalance.toString(10), expectedBalance);
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+      const stakingBalance = await this.MockNMR.balanceOf(
         stakingAddress
       );
       assert.equal(stakingBalance.toString(10), amountToAdd);
@@ -165,24 +132,12 @@ describe("Staking", function() {
     const staker = wallets.seller.signer.signingKey.address;
     const recipient = wallets.numerai.signer.signingKey.address;
 
-    it("should fail when token is not set", async () => {
-      // reset back to initial token value
-      await contracts.TestStaking.instance.setToken(
-        ethers.constants.AddressZero
-      );
-
-      await assert.revertWith(
-        contracts.TestStaking.instance.takeStake(staker, recipient, 0, 10),
-        "token not set yet"
-      );
-    });
-
     it("should fail when currentStake is wrong", async () => {
       const amountStaked = 10;
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(recipient)
         .approve(stakingAddress, amountStaked);
 
@@ -211,7 +166,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(recipient)
         .approve(stakingAddress, amountStaked);
 
@@ -241,7 +196,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(recipient)
         .approve(stakingAddress, amountStaked);
 
@@ -272,9 +227,11 @@ describe("Staking", function() {
       const amountTaken = 5;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(recipient)
         .approve(stakingAddress, amountToAdd);
+
+      const originalBalance = await this.MockNMR.balanceOf(recipient);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -309,15 +266,14 @@ describe("Staking", function() {
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), amountTaken);
 
       // check updated token balances, 10000 * 10**18 - 10
-      const originalBalance = ethers.utils.parseEther("10000");
       const expectedBalance = originalBalance.sub(amountTaken).toString(10);
-      const actualBalance = await contracts.MockNMR.instance.balanceOf(
+      const actualBalance = await this.MockNMR.balanceOf(
         recipient
       );
       assert.equal(actualBalance.toString(10), expectedBalance);
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+      const stakingBalance = await this.MockNMR.balanceOf(
         stakingAddress
       );
       assert.equal(stakingBalance.toString(10), amountTaken);
@@ -339,9 +295,11 @@ describe("Staking", function() {
       const amountStaked = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(recipient)
         .approve(stakingAddress, amountStaked);
+
+      const originalBalance = await this.MockNMR.balanceOf(recipient);
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -378,14 +336,13 @@ describe("Staking", function() {
       assert.equal(returnVal.toString(10), amountStaked);
 
       // check updated token balances, should be 10000 * 10**18
-      const expectedBalance = ethers.utils.parseEther("10000");
-      const actualBalance = await contracts.MockNMR.instance.balanceOf(
+      const actualBalance = await this.MockNMR.balanceOf(
         recipient
       );
-      assert.equal(actualBalance.toString(10), expectedBalance);
+      assert.equal(actualBalance.toString(10), originalBalance);
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+      const stakingBalance = await this.MockNMR.balanceOf(
         stakingAddress
       );
       assert.equal(stakingBalance.toString(10), 0);
@@ -400,24 +357,12 @@ describe("Staking", function() {
     const staker = wallets.seller.signer.signingKey.address;
     const funder = wallets.numerai.signer.signingKey.address;
 
-    it("should fail when token is not set", async () => {
-      // reset back to initial token value
-      await contracts.TestStaking.instance.setToken(
-        ethers.constants.AddressZero
-      );
-
-      await assert.revertWith(
-        contracts.TestStaking.instance.burnStake(staker, 0, 10),
-        "token not set yet"
-      );
-    });
-
     it("should fail when currentStake is wrong", async () => {
       const amountBurnt = 10;
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountBurnt);
 
@@ -441,7 +386,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountStaked);
 
@@ -465,7 +410,7 @@ describe("Staking", function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountStaked);
 
@@ -495,7 +440,7 @@ describe("Staking", function() {
       const amountBurn = 5;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountToAdd);
 
@@ -530,7 +475,7 @@ describe("Staking", function() {
       assert.equal(stakeBurnedEvent.args.newStake.toNumber(), amountBurn);
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+      const stakingBalance = await this.MockNMR.balanceOf(
         stakingAddress
       );
       assert.equal(stakingBalance.toString(10), amountBurn);
@@ -551,7 +496,7 @@ describe("Staking", function() {
       const amountToAdd = 10;
 
       // approve staking contract to transferFrom
-      await contracts.MockNMR.instance
+      await this.MockNMR
         .from(funder)
         .approve(stakingAddress, amountToAdd);
 
@@ -586,7 +531,7 @@ describe("Staking", function() {
       assert.equal(returnVal.toString(10), amountToAdd);
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await contracts.MockNMR.instance.balanceOf(
+      const stakingBalance = await this.MockNMR.balanceOf(
         stakingAddress
       );
       assert.equal(stakingBalance.toString(10), 0);

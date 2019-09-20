@@ -7,10 +7,12 @@
   "scripts": {
     "compile": "yarn etherlime compile --solcVersion=0.5.11 --deleteCompiledFiles=true",
     "flatten": "yarn etherlime flatten",
-    "ganache": "yarn etherlime ganache",
-    "test": "yarn etherlime test --solcVersion=0.5.11",
+    "ganache": "ganache-cli --port 8545 --deterministic --secure -u 0x9608010323ed882a38ede9211d7691102b4f0ba0 --defaultBalanceEther 1000",
+    "test": "bash run-ganache-tests.sh",
+    "test_etherlime": "yarn etherlime test --solcVersion=0.5.11 --timeout=10000",
     "coverage": "yarn etherlime coverage --solcVersion=0.5.11",
-    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false"
+    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false",
+    "deploy_ganache": "bash run-ganache-deploy.sh"
   },
   "dependencies": {
     "coveralls": "^3.0.5",
@@ -18,6 +20,7 @@
     "etherlime": "2.2.0",
     "etherlime-lib": "^1.1.3",
     "ethers": "^4.0.32",
+    "ganache-cli": "6.5.1",
     "web3": "^1.0.0-beta.55"
   }
 }

@@ -15,8 +15,7 @@ const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
-describe("Feed", function() {
-  this.timeout(4000);
+describe("Feed", function () {
 
   let deployer;
 
@@ -119,7 +118,7 @@ describe("Feed", function() {
       this.FeedTemplate.contractAddress
     );
 
-    await this.PostRegistry.from(creator).addFactory(
+    await this.PostRegistry.addFactory(
       this.FeedFactory.contractAddress,
       "0x"
     );
@@ -191,7 +190,7 @@ describe("Feed", function() {
 
     // success case
     it("should create post successfully from creator", async () => {
-      await this.PostRegistry.from(creator).addFactory(
+      await this.PostRegistry.addFactory(
         this.PostFactory.contractAddress,
         "0x"
       );
@@ -272,7 +271,7 @@ describe("Feed", function() {
     // post factory does not conform to Post_Factory
     it("should revert when Post_Factory address is not Post_Factory", async () => {
       // register the Feed contract as an invalid factory
-      await this.PostRegistry.from(creator).addFactory(
+      await this.PostRegistry.addFactory(
         this.TestFeed.contractAddress,
         "0x"
       );

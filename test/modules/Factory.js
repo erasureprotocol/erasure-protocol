@@ -24,8 +24,7 @@ function testFactory(
   createTypes = createExplicitTypes,
   getCreateArgs = () => createExplicitArgs
 ) {
-  describe(factoryName, function() {
-    this.timeout(4000);
+  describe(factoryName, function () {
 
     // wallets and addresses
     const [operatorWallet, , creatorWallet] = accounts;
@@ -130,7 +129,7 @@ function testFactory(
         logicContractAddress = await this.Factory.getTemplate();
 
         // register the factory into the registry
-        await this.Registry.from(operator).addFactory(
+        await this.Registry.addFactory(
           this.Factory.contractAddress,
           Buffer.from("")
         );

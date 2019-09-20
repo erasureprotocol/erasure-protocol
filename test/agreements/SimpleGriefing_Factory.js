@@ -6,7 +6,7 @@ const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreement
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
 
 // test helpers
-const { createDeployer } = require("../helpers/setup");
+const { createDeployer, initDeployment } = require("../helpers/setup");
 const testFactory = require("../modules/Factory");
 const { RATIO_TYPES } = require("../helpers/variables");
 
@@ -21,23 +21,20 @@ const createTypes = [
   "address",
   "address",
   "address",
-  "address",
   "uint256",
   "uint8",
   "bytes"
 ];
 
 let SimpleGriefing;
-let MockNMR;
+let deployer, MockNMR;
 
 before(async () => {
-  MockNMR = await deployer.deploy(MockNMRArtifact);
+  [deployer, MockNMR] = await initDeployment();
   SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact);
 });
 
 function runFactoryTest() {
-  const deployer = createDeployer();
-
   const [ownerWallet, stakerWallet, counterpartyWallet] = accounts;
   const owner = ownerWallet.signer.signingKey.address;
   const staker = stakerWallet.signer.signingKey.address;
@@ -46,7 +43,6 @@ function runFactoryTest() {
   describe(factoryName, () => {
     it("setups test", () => {
       const createArgs = [
-        MockNMR.contractAddress,
         owner,
         staker,
         counterparty,

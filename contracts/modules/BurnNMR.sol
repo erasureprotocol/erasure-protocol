@@ -9,12 +9,7 @@ import "./iNMR.sol";
 contract BurnNMR {
 
     // address of the token
-    address private _Token; // can be hardcoded on mainnet deployment to reduce cost
-
-    function _setToken(address token) internal {
-        // set storage
-        _Token = token;
-    }
+    address private constant _Token = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);
 
     /**
      * @dev Burns a specific amount of tokens.
@@ -33,7 +28,7 @@ contract BurnNMR {
         require(iNMR(_Token).numeraiTransfer(from, value), "nmr burnFrom failed");
     }
 
-    function getToken() public view returns (address token) {
+    function getToken() public pure returns (address token) {
         token = _Token;
     }
 
