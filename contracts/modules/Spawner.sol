@@ -191,6 +191,7 @@ contract Spawner {
    * that prevents deployments to existing addresses.
    * @param initCode bytes The contract creation code.
    * @param salt bytes32 A random salt
+   * @param target address The expected address of the new contract
    * @return The address of the newly-spawned contract.
    */
   function _spawnCreate2(
@@ -215,7 +216,7 @@ contract Spawner {
       }
     }
 
-    require(spawnedContract == target, "contract deployed to unexpected address");
+    require(spawnedContract == target, "attempted deployment to unexpected address");
   }
 
   /**
