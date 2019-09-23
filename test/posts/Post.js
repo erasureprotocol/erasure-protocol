@@ -6,7 +6,7 @@ const {
   abiEncodeWithSelector
 } = require("../helpers/utils");
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
-const TestPostArtifact = require("../../build/TestPost.json");
+const TestPostArtifact = require("../../build/Post.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
 const abiEncoder = new ethers.utils.AbiCoder();
@@ -33,11 +33,7 @@ describe("Post", () => {
   );
 
   const createPostAbiTypes = ["address", "bytes", "bytes"];
-  const createPostAbiValues = [
-    operator,
-    proofHash,
-    staticMetadata
-  ];
+  const createPostAbiValues = [operator, proofHash, staticMetadata];
 
   const deployTestPost = async (args = createPostAbiValues) => {
     const callData = abiEncodeWithSelector(
@@ -57,14 +53,18 @@ describe("Post", () => {
     // use new instance address to create contract object
     const postAddress = createFeedEvent.args.instance;
 
-    const postContract = deployer
-      .wrapDeployedContract(
-        TestPostArtifact,
-        postAddress,
-        creatorWallet.secretKey
-      );
+    const postContract = deployer.wrapDeployedContract(
+      TestPostArtifact,
+      postAddress,
+      creatorWallet.secretKey
+    );
 
     return postContract;
+  };
+  const deployDeactivatedPost = async () => {
+    const post = await deployTestPost();
+    await post.from(operator).renounceOperator();
+    return post;
   };
 
   before(async () => {
@@ -81,20 +81,14 @@ describe("Post", () => {
       this.PostTemplate.contractAddress
     );
 
-    await this.PostRegistry.addFactory(
-      this.PostFactory.contractAddress,
-      "0x"
-    );
+    await this.PostRegistry.addFactory(this.PostFactory.contractAddress, "0x");
+    this.DeactivatedPost = await deployDeactivatedPost();
   });
 
   describe("Post.initialize", () => {
     it("should revert when invalid proofHash", async () => {
       await assert.revert(
-        deployTestPost([
-          operator,
-          invalidProofHash,
-          staticMetadata
-        ])
+        deployTestPost([operator, invalidProofHash, staticMetadata])
       );
     });
 
@@ -132,10 +126,8 @@ describe("Post", () => {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestPost.deactivateOperator();
-
       await assert.revertWith(
-        this.TestPost.from(operator).setMetadata(newVariableMetadata),
+        this.DeactivatedPost.from(operator).setMetadata(newVariableMetadata),
         "only active operator or creator"
       );
     });

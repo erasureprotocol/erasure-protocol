@@ -1,6 +1,6 @@
 // require artifacts
 const PostFactoryArtifact = require("../../build/Post_Factory.json");
-const PostArtifact = require("../../build/TestPost.json");
+const PostArtifact = require("../../build/Post.json");
 const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
 

@@ -2,13 +2,12 @@ const { createDeployer, initDeployment } = require("../helpers/setup");
 const { RATIO_TYPES } = require("../helpers/variables");
 const { abiEncodeWithSelector } = require("../helpers/utils");
 
-const SimpleGriefingArtifact = require("../../build/TestSimpleGriefing.json");
+const SimpleGriefingArtifact = require("../../build/SimpleGriefing.json");
 const SimpleGriefingFactoryArtifact = require("../../build/SimpleGriefing_Factory.json");
 const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
-describe("SimpleGriefing", function () {
-
+describe("SimpleGriefing", function() {
   // wallets and addresses
   const [
     operatorWallet,
@@ -69,6 +68,11 @@ describe("SimpleGriefing", function () {
 
     return contract;
   };
+  const deployDeactivatedAgreement = async () => {
+    const agreement = await deployAgreement();
+    await agreement.from(operator).renounceOperator();
+    return agreement;
+  };
 
   let deployer;
   before(async () => {
@@ -88,6 +92,7 @@ describe("SimpleGriefing", function () {
       this.Factory.contractAddress,
       "0x"
     );
+    this.DeactivatedGriefing = await deployDeactivatedAgreement();
 
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
@@ -151,9 +156,7 @@ describe("SimpleGriefing", function () {
 
     it("should revert when not initialized from constructor", async () => {
       await assert.revertWith(
-        this.TestSimpleGriefing.initialize(
-          ...initArgs
-        ),
+        this.TestSimpleGriefing.initialize(...initArgs),
         "must be called within contract constructor"
       );
     });
@@ -174,16 +177,12 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestSimpleGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).setMetadata(
+        this.DeactivatedGriefing.from(operator).setMetadata(
           Buffer.from(stakerMetadata)
         ),
         "only staker or active operator"
       );
-
-      await this.TestSimpleGriefing.from(operator).activateOperator();
     });
 
     it("should set metadata when msg.sender is staker", async () => {
@@ -259,18 +258,14 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestSimpleGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).increaseStake(
+        this.DeactivatedGriefing.from(operator).increaseStake(
           currentStake,
           amountToAdd,
           { gasLimit: 30000 }
         ),
         "only staker or active operator"
       );
-
-      await this.TestSimpleGriefing.from(operator).activateOperator();
     });
 
     it("should increase stake when msg.sender is staker", async () => {
@@ -340,17 +335,13 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestSimpleGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).reward(
+        this.DeactivatedGriefing.from(operator).reward(
           currentStake,
           amountToAdd
         ),
         "only counterparty or active operator"
       );
-
-      await this.TestSimpleGriefing.from(operator).activateOperator();
     });
 
     it("should succeed when msg.sender is counterparty", async () => {
@@ -418,10 +409,6 @@ describe("SimpleGriefing", function () {
         griefedEvent.args.message,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
       );
-
-      // get the stored delegatecall result
-      const griefCost = await this.TestSimpleGriefing.getGriefCost();
-      assert.equal(griefCost.toString(), expectedCost.toString());
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
@@ -496,15 +483,13 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is operator but not active", async () => {
-      await this.TestSimpleGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).releaseStake(
+        this.DeactivatedGriefing.from(operator).releaseStake(
           currentStake,
           releaseAmount
         ),
         "only counterparty or active operator"
       );
-      await this.TestSimpleGriefing.activateOperator();
     });
 
     it("should release stake when msg.sender is counterparty", async () =>
@@ -544,18 +529,18 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestSimpleGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestSimpleGriefing.from(counterparty).transferOperator(
+        this.DeactivatedGriefing.from(counterparty).transferOperator(
           newOperator
         ),
         "only active operator"
       );
-      await this.TestSimpleGriefing.activateOperator();
     });
 
     it("should transfer operator", async () => {
-      const txn = await this.TestSimpleGriefing.from(operator).transferOperator(newOperator);
+      const txn = await this.TestSimpleGriefing.from(operator).transferOperator(
+        newOperator
+      );
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [newOperator, true]);
 
@@ -576,12 +561,10 @@ describe("SimpleGriefing", function () {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestSimpleGriefing.from(operator).deactivateOperator();
       await assert.revertWith(
-        this.TestSimpleGriefing.from(operator).renounceOperator(),
+        this.DeactivatedGriefing.from(operator).renounceOperator(),
         "only active operator"
       );
-      await this.TestSimpleGriefing.activateOperator();
     });
 
     it("should succeed", async () => {

@@ -9,12 +9,11 @@ const {
 } = require("../helpers/utils");
 
 // artifacts
-const TestFeedArtifact = require("../../build/TestFeed.json");
+const TestFeedArtifact = require("../../build/Feed.json");
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
-describe("Feed", function () {
-
+describe("Feed", function() {
   let deployer;
 
   // wallets and addresses
@@ -38,7 +37,7 @@ describe("Feed", function () {
     ethers.utils.toUtf8Bytes("newFeedMetadata")
   );
   const proofHash = createMultihashSha256("proofHash");
-  const hash =  ethers.utils.keccak256(hexlify("proofHash"));
+  const hash = ethers.utils.keccak256(hexlify("proofHash"));
   const invalidProofHash = ethers.utils.keccak256(hexlify("invalidProofHash"));
   const postMetadata = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes("postMetadata")
@@ -82,6 +81,11 @@ describe("Feed", function () {
       return feedContract;
     }
   };
+  const deployDeactivatedFeed = async () => {
+    const feed = await deployTestFeed();
+    await feed.from(operator).renounceOperator();
+    return feed;
+  };
 
   before(async () => {
     deployer = await createDeployer();
@@ -101,6 +105,7 @@ describe("Feed", function () {
       this.FeedFactory.contractAddress,
       "0x"
     );
+    this.DeactivatedFeed = await deployDeactivatedFeed();
   });
 
   describe("Feed.initialize", () => {
@@ -133,19 +138,15 @@ describe("Feed", function () {
 
     // check deactivated operator
     it("should revert when msg.sender is operator but not active", async () => {
-      await this.TestFeed.deactivateOperator();
-
       await assert.revertWith(
-        this.TestFeed.from(operator).submitHash(hash),
+        this.DeactivatedFeed.from(operator).submitHash(hash),
         "only active operator or creator"
       );
-
-      await this.TestFeed.activateOperator();
     });
 
     // success case
     it("should submit hash successfully from creator", async () => {
-      const hash =  ethers.utils.keccak256(hexlify("proofHash1"));
+      const hash = ethers.utils.keccak256(hexlify("proofHash1"));
       const postID = addPost(hash);
 
       const txn = await this.TestFeed.from(creator).submitHash(hash);
@@ -153,7 +154,7 @@ describe("Feed", function () {
     });
 
     it("should submit hash successfully from operator", async () => {
-      const hash =  ethers.utils.keccak256(hexlify("proofHash2"));
+      const hash = ethers.utils.keccak256(hexlify("proofHash2"));
       const postID = addPost(hash);
 
       const txn = await this.TestFeed.from(operator).submitHash(hash);
@@ -170,14 +171,10 @@ describe("Feed", function () {
     });
 
     it("should revert when msg.sender is operator but not active", async () => {
-      await this.TestFeed.deactivateOperator();
-
       await assert.revertWith(
-        this.TestFeed.from(operator).setMetadata(newFeedMetadata),
+        this.DeactivatedFeed.from(operator).setMetadata(newFeedMetadata),
         "only active operator or creator"
       );
-
-      await this.TestFeed.activateOperator();
     });
 
     it("should set feed metadata from operator when active", async () => {
