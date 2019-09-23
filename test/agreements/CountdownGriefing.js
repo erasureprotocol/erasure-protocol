@@ -69,6 +69,12 @@ describe("CountdownGriefing", function() {
     return contract;
   };
 
+  const deployDeactivatedAgreement = async () => {
+    const agreement = await deployAgreement();
+    await agreement.from(operator).renounceOperator();
+    return agreement;
+  };
+
   let deployer;
   before(async () => {
     [this.deployer, this.MockNMR] = await initDeployment();
@@ -87,6 +93,8 @@ describe("CountdownGriefing", function() {
       this.Factory.contractAddress,
       "0x"
     );
+
+    this.DeactivatedGriefing = await deployDeactivatedAgreement();
 
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
@@ -194,8 +202,6 @@ describe("CountdownGriefing", function() {
         ),
         "only staker or active operator"
       );
-
-      await this.TestCountdownGriefing.from(operator).activateOperator();
     });
 
     it("should set metadata when msg.sender is staker", async () => {
@@ -233,10 +239,6 @@ describe("CountdownGriefing", function() {
 
       await assert.emit(txn, "DeadlineSet");
       await assert.emitWithArgs(txn, deadline);
-
-      // get the stored delegatecall result
-      const actualDeadline = await this.TestCountdownGriefing.getDeadline();
-      assert.equal(actualDeadline.toNumber(), deadline);
     };
 
     it("should revert when msg.sender is not staker or active operator", async () => {
@@ -248,14 +250,10 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestCountdownGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).startCountdown(),
+        this.DeactivatedGriefing.from(operator).startCountdown(),
         "only staker or active operator"
       );
-
-      await this.TestCountdownGriefing.from(operator).activateOperator();
     });
 
     it("should start countdown when msg.sender is staker", async () =>
@@ -334,17 +332,13 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestCountdownGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).increaseStake(
+        this.DeactivatedGriefing.from(operator).increaseStake(
           currentStake,
           amountToAdd
         ),
         "only staker or active operator"
       );
-
-      await this.TestCountdownGriefing.from(operator).activateOperator();
     });
 
     it("should increase stake when msg.sender is staker", async () => {
@@ -448,17 +442,13 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestCountdownGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).reward(
+        this.DeactivatedGriefing.from(operator).reward(
           currentStake,
           amountToAdd
         ),
         "only counterparty or active operator"
       );
-
-      await this.TestCountdownGriefing.from(operator).activateOperator();
     });
 
     it("should succeed when msg.sender is counterparty", async () => {
@@ -561,10 +551,6 @@ describe("CountdownGriefing", function() {
         griefedEvent.args.message,
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message))
       );
-
-      // get the stored delegatecall result
-      const griefCost = await this.TestCountdownGriefing.getGriefCost();
-      assert.equal(griefCost.toString(), expectedCost.toString());
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
@@ -690,15 +676,13 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is operator but not active", async () => {
-      await this.TestCountdownGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).releaseStake(
+        this.DeactivatedGriefing.from(operator).releaseStake(
           currentStake,
           releaseAmount
         ),
         "only counterparty or active operator"
       );
-      await this.TestCountdownGriefing.activateOperator();
     });
 
     it("should release stake when msg.sender is counterparty", async () =>
@@ -742,14 +726,10 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
-      await this.TestCountdownGriefing.from(operator).deactivateOperator();
-
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).retrieveStake(counterparty),
+        this.DeactivatedGriefing.from(operator).retrieveStake(counterparty),
         "only staker or active operator"
       );
-
-      await this.TestCountdownGriefing.from(operator).activateOperator();
     });
 
     it("should revert when start countdown not called", async () => {
@@ -829,10 +809,6 @@ describe("CountdownGriefing", function() {
         stakerStake.toString()
       );
       assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
-
-      // get the stored delegatecall result
-      const actualRetrieveAmount = await this.TestCountdownGriefing.getRetrieveStakeAmount();
-      assert.equal(actualRetrieveAmount.toString(), stakerStake.toString());
     });
   });
 
@@ -847,12 +823,10 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestCountdownGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).transferOperator(newOperator),
+        this.DeactivatedGriefing.from(operator).transferOperator(newOperator),
         "only active operator"
       );
-      await this.TestCountdownGriefing.activateOperator();
     });
 
     it("should transfer operator", async () => {
@@ -879,12 +853,10 @@ describe("CountdownGriefing", function() {
     });
 
     it("should revert when msg.sender is not active operator", async () => {
-      await this.TestCountdownGriefing.deactivateOperator();
       await assert.revertWith(
-        this.TestCountdownGriefing.from(operator).renounceOperator(),
+        this.DeactivatedGriefing.from(operator).renounceOperator(),
         "only active operator"
       );
-      await this.TestCountdownGriefing.activateOperator();
     });
 
     it("should succeed", async () => {
