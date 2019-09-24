@@ -1,7 +1,6 @@
 const { createDeployer } = require("../helpers/setup");
 
 describe("Countdown", function() {
-
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
@@ -83,11 +82,17 @@ describe("Countdown", function() {
   });
 
   describe("Countdown._start", () => {
-    it("reverts when length not set", async () => {
-      await assert.revertWith(
-        contracts.TestCountdown.instance.start(),
-        "length not set"
-      );
+    it("starts countdown when length not set", async () => {
+      const txn = await contracts.TestCountdown.instance.start();
+      await assert.emit(txn, "DeadlineSet");
+    });
+
+    it("starts countdown when length=0", async () => {
+      const length = 0;
+      await contracts.TestCountdown.instance.setLength(length);
+
+      const txn = await contracts.TestCountdown.instance.start();
+      await assert.emit(txn, "DeadlineSet");
     });
 
     it("starts countdown correctly", async () => {
