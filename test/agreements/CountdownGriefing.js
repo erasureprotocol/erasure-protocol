@@ -121,6 +121,24 @@ describe("CountdownGriefing", function() {
       );
     });
 
+    it("should initialize contract with countdownLength=0", async () => {
+      const countdownLength = 0;
+
+      this.TestCountdownGriefing = await deployAgreement([
+        operator,
+        staker,
+        counterparty,
+        ratioE18,
+        ratioType,
+        countdownLength,
+        Buffer.from(staticMetadata)
+      ]);
+
+      // Countdown._setLength
+      const actualLength = await this.TestCountdownGriefing.getLength();
+      assert.equal(actualLength, countdownLength);
+    });
+
     it("should initialize contract", async () => {
       this.TestCountdownGriefing = await deployAgreement();
 
@@ -164,13 +182,6 @@ describe("CountdownGriefing", function() {
       // Countdown._setLength
       const actualLength = await this.TestCountdownGriefing.getLength();
       assert.equal(actualLength, countdownLength);
-
-      // Test for event logs
-      // console.log(this.TestCountdownGriefing);
-      // const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
-      //   this.TestCountdownGriefing.deployTransaction
-      // );
-      // console.log(receipt.events);
     });
 
     it("should revert when not initialized from constructor", async () => {

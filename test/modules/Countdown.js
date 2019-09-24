@@ -87,6 +87,14 @@ describe("Countdown", function() {
       await assert.emit(txn, "DeadlineSet");
     });
 
+    it("starts countdown when length=0", async () => {
+      const length = 0;
+      await contracts.TestCountdown.instance.setLength(length);
+
+      const txn = await contracts.TestCountdown.instance.start();
+      await assert.emit(txn, "DeadlineSet");
+    });
+
     it("starts countdown correctly", async () => {
       const length = 1000;
       await contracts.TestCountdown.instance.setLength(length);
