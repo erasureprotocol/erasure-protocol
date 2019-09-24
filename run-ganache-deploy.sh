@@ -9,4 +9,10 @@ cp etherlime-setup.json node_modules/etherlime-config/ganacheSetup.json
 
 yarn run ganache > ganache.log &
 
-yarn run deploy ganache
+OUTPUT="$(yarn run deploy ganache)"
+
+echo -e "$OUTPUT"
+
+if echo OUTPUT | grep 'Error'; then
+  exit 1
+fi
