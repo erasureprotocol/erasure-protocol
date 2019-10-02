@@ -1,0 +1,329 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "iFactory",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInstanceType",
+				"outputs": [
+					{
+						"internalType": "bytes4",
+						"name": "instanceType",
+						"type": "bytes4"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getTemplate",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "template",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInitSelector",
+				"outputs": [
+					{
+						"internalType": "bytes4",
+						"name": "initSelector",
+						"type": "bytes4"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "initData",
+						"type": "bytes"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "salt",
+						"type": "bytes32"
+					}
+				],
+				"name": "createSalty",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"name": "getInstanceCreator",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
+					}
+				],
+				"name": "getNextInstance",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInstanceRegistry",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instanceRegistry",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInstanceCount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "count",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "startIndex",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endIndex",
+						"type": "uint256"
+					}
+				],
+				"name": "getPaginatedInstances",
+				"outputs": [
+					{
+						"internalType": "address[]",
+						"name": "instances",
+						"type": "address[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "initData",
+						"type": "bytes"
+					}
+				],
+				"name": "create",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInstances",
+				"outputs": [
+					{
+						"internalType": "address[]",
+						"name": "instances",
+						"type": "address[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
+					}
+				],
+				"name": "getInstance",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "salt",
+						"type": "bytes32"
+					}
+				],
+				"name": "getSaltyInstance",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "instance",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "initABI",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "bytes",
+						"name": "initData",
+						"type": "bytes"
+					}
+				],
+				"name": "InstanceCreated",
+				"type": "event"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x",
+				"opcodes": "",
+				"sourceMap": ""
+			}
+		}
+	},
+	"sources": {
+		"modules/iFactory.sol": {
+			"id": 31
+		}
+	},
+	"sourceCodes": {
+		"modules/iFactory.sol": "pragma solidity ^0.5.0;\n\n/* TODO: Update eip165 interface\n *  bytes4(keccak256('create(bytes)')) == 0xcf5ba53f\n *  bytes4(keccak256('getInstanceType()')) == 0x18c2f4cf\n *  bytes4(keccak256('getInstanceRegistry()')) == 0xa5e13904\n *  bytes4(keccak256('getImplementation()')) == 0xaaf10f42\n *\n *  => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6\n */\n interface iFactory {\n\n     event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);\n\n     function create(bytes calldata initData) external returns (address instance);\n     function createSalty(bytes calldata initData, bytes32 salt) external returns (address instance);\n     function getInitSelector() external view returns (bytes4 initSelector);\n     function getInstanceRegistry() external view returns (address instanceRegistry);\n     function getTemplate() external view returns (address template);\n     function getSaltyInstance(bytes calldata, bytes32 salt) external view returns (address instance);\n     function getNextInstance(bytes calldata) external view returns (address instance);\n\n     function getInstanceCreator(address instance) external view returns (address creator);\n     function getInstanceType() external view returns (bytes4 instanceType);\n     function getInstanceCount() external view returns (uint256 count);\n     function getInstance(uint256 index) external view returns (address instance);\n     function getInstances() external view returns (address[] memory instances);\n     function getPaginatedInstances(uint256 startIndex, uint256 endIndex) external view returns (address[] memory instances);\n }\n"
+	},
+	"sourceTreeHashHex": "0xd7986b391f94bd9938106fe29b7f1e2924bac88e214ccba0c3bf5092f11727aa",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}

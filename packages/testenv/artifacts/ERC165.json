@@ -1,0 +1,77 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "ERC165",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "bytes4",
+						"name": "interfaceId",
+						"type": "bytes4"
+					}
+				],
+				"name": "supportsInterface",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x",
+				"opcodes": "",
+				"sourceMap": ""
+			}
+		}
+	},
+	"sources": {
+		"helpers/openzeppelin-solidity/introspection/ERC165.sol": {
+			"id": 9
+		},
+		"helpers/openzeppelin-solidity/introspection/IERC165.sol": {
+			"id": 11
+		}
+	},
+	"sourceCodes": {
+		"helpers/openzeppelin-solidity/introspection/ERC165.sol": "pragma solidity ^0.5.0;\n\nimport \"./IERC165.sol\";\n\n/**\n * @dev Implementation of the {IERC165} interface.\n *\n * Contracts may inherit from this and call {_registerInterface} to declare\n * their support of an interface.\n */\ncontract ERC165 is IERC165 {\n    /*\n     * bytes4(keccak256('supportsInterface(bytes4)')) == 0x01ffc9a7\n     */\n    bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;\n\n    /**\n     * @dev Mapping of interface ids to whether or not it's supported.\n     */\n    mapping(bytes4 => bool) private _supportedInterfaces;\n\n    constructor () internal {\n        // Derived contracts need only register support for their own interfaces,\n        // we register support for ERC165 itself here\n        _registerInterface(_INTERFACE_ID_ERC165);\n    }\n\n    /**\n     * @dev See {IERC165-supportsInterface}.\n     *\n     * Time complexity O(1), guaranteed to always use less than 30 000 gas.\n     */\n    function supportsInterface(bytes4 interfaceId) external view returns (bool) {\n        return _supportedInterfaces[interfaceId];\n    }\n\n    /**\n     * @dev Registers the contract as an implementer of the interface defined by\n     * `interfaceId`. Support of the actual ERC165 interface is automatic and\n     * registering its interface id is not required.\n     *\n     * See {IERC165-supportsInterface}.\n     *\n     * Requirements:\n     *\n     * - `interfaceId` cannot be the ERC165 invalid interface (`0xffffffff`).\n     */\n    function _registerInterface(bytes4 interfaceId) internal {\n        require(interfaceId != 0xffffffff, \"ERC165: invalid interface id\");\n        _supportedInterfaces[interfaceId] = true;\n    }\n}",
+		"helpers/openzeppelin-solidity/introspection/IERC165.sol": "pragma solidity ^0.5.0;\n\n/**\n * @dev Interface of the ERC165 standard, as defined in the\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\n *\n * Implementers can declare support of contract interfaces, which can then be\n * queried by others ({ERC165Checker}).\n *\n * For an implementation, see {ERC165}.\n */\ninterface IERC165 {\n    /**\n     * @dev Returns true if this contract implements the interface defined by\n     * `interfaceId`. See the corresponding\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\n     * to learn more about how these ids are created.\n     *\n     * This function call must use less than 30 000 gas.\n     */\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\n}\n"
+	},
+	"sourceTreeHashHex": "0x6aa43312e5a6744d091d78ecfd2c18748435a12446e4b9225bdc6e40d309b2f0",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}

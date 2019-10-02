@@ -1,0 +1,185 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "Staking",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getToken",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					}
+				],
+				"name": "getStake",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "stake",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "funder",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeTaken",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeBurned",
+				"type": "event"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x608060405234801561001057600080fd5b5061011d806100206000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806321df0da71460375780637a766460146066575b600080fd5b603d60a8565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b609660048036036020811015607a57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c0565b60408051918252519081900360200190f35b731776e1f26f98b1a5df9cd347953a26dd3cb4667190565b73ffffffffffffffffffffffffffffffffffffffff166000908152602081905260409020549056fea265627a7a723158204718bfb80299faff89519b015ac224ea50f9a0310259ec6ac9534ab0db07407464736f6c634300050b0032",
+				"opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH2 0x11D DUP1 PUSH2 0x20 PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN INVALID PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH1 0xF JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x4 CALLDATASIZE LT PUSH1 0x32 JUMPI PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR DUP1 PUSH4 0x21DF0DA7 EQ PUSH1 0x37 JUMPI DUP1 PUSH4 0x7A766460 EQ PUSH1 0x66 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH1 0x3D PUSH1 0xA8 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP1 SWAP3 AND DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH1 0x96 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH1 0x7A JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH1 0xC0 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH20 0x1776E1F26F98B1A5DF9CD347953A26DD3CB46671 SWAP1 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x20 DUP2 SWAP1 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD SWAP1 JUMP INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 0x47 XOR 0xbf 0xb8 MUL SWAP10 STATICCALL SELFDESTRUCT DUP10 MLOAD SWAP12 ADD GAS 0xc2 0x24 0xea POP 0xf9 LOG0 BALANCE MUL MSIZE 0xec PUSH11 0xC9534AB0DB07407464736F PUSH13 0x634300050B0032000000000000 ",
+				"sourceMap": "178:3466:29:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;178:3466:29;;;;;;;"
+			}
+		}
+	},
+	"sources": {
+		"modules/Staking.sol": {
+			"id": 29
+		},
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": {
+			"id": 12
+		},
+		"helpers/openzeppelin-solidity/token/ERC20/IERC20.sol": {
+			"id": 15
+		},
+		"modules/BurnNMR.sol": {
+			"id": 16
+		},
+		"modules/iNMR.sol": {
+			"id": 32
+		}
+	},
+	"sourceCodes": {
+		"modules/Staking.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/openzeppelin-solidity/math/SafeMath.sol\";\nimport \"../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol\";\nimport \"./BurnNMR.sol\";\n\n\ncontract Staking is BurnNMR {\n\n    using SafeMath for uint256;\n\n    mapping (address => uint256) private _stake;\n\n    event StakeAdded(address staker, address funder, uint256 amount, uint256 newStake);\n    event StakeTaken(address staker, address recipient, uint256 amount, uint256 newStake);\n    event StakeBurned(address staker, uint256 amount, uint256 newStake);\n\n    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to add\n        require(amountToAdd > 0, \"no stake to add\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.add(amountToAdd);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // transfer the stake amount\n        require(IERC20(BurnNMR.getToken()).transferFrom(funder, address(this), amountToAdd), \"token transfer failed\");\n\n        // emit event\n        emit StakeAdded(staker, funder, amountToAdd, newStake);\n    }\n\n    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to take\n        require(amountToTake > 0, \"no stake to take\");\n\n        // amountToTake has to be less than equal currentStake\n        require(amountToTake <= currentStake, \"cannot take more than currentStake\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.sub(amountToTake);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // transfer the stake amount\n        require(IERC20(BurnNMR.getToken()).transfer(recipient, amountToTake), \"token transfer failed\");\n\n        // emit event\n        emit StakeTaken(staker, recipient, amountToTake, newStake);\n    }\n\n    function _takeFullStake(address staker, address recipient) internal returns (uint256 stake) {\n        // get stake from storage\n        stake = _stake[staker];\n\n        // take full stake\n        _takeStake(staker, recipient, stake, stake);\n    }\n\n    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to burn\n        require(amountToBurn > 0, \"no stake to burn\");\n\n        // amountToTake has to be less than equal currentStake\n        require(amountToBurn <= currentStake, \"cannot burn more than currentStake\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.sub(amountToBurn);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // burn the stake amount\n        BurnNMR._burn(amountToBurn);\n\n        // emit event\n        emit StakeBurned(staker, amountToBurn, newStake);\n    }\n\n    function _burnFullStake(address staker) internal returns (uint256 stake) {\n        // get stake from storage\n        stake = _stake[staker];\n\n        // burn full stake\n        _burnStake(staker, stake, stake);\n    }\n\n    // view functions\n\n    function getStake(address staker) public view returns (uint256 stake) {\n        stake = _stake[staker];\n    }\n\n}\n",
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": "pragma solidity ^0.5.0;\n\n/**\n * @title SafeMath\n * @dev Unsigned math operations with safety checks that revert on error.\n */\nlibrary SafeMath {\n    /**\n     * @dev Multiplies two unsigned integers, reverts on overflow.\n     */\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\n        // benefit is lost if 'b' is also tested.\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n        if (a == 0) {\n            return 0;\n        }\n\n        uint256 c = a * b;\n        require(c / a == b, \"SafeMath: multiplication overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.\n     */\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Solidity only automatically asserts when dividing by 0\n        require(b > 0, \"SafeMath: division by zero\");\n        uint256 c = a / b;\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\n\n        return c;\n    }\n\n    /**\n     * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).\n     */\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b <= a, \"SafeMath: subtraction overflow\");\n        uint256 c = a - b;\n\n        return c;\n    }\n\n    /**\n     * @dev Adds two unsigned integers, reverts on overflow.\n     */\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\n        uint256 c = a + b;\n        require(c >= a, \"SafeMath: addition overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),\n     * reverts when dividing by zero.\n     */\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b != 0, \"SafeMath: modulo by zero\");\n        return a % b;\n    }\n}\n",
+		"helpers/openzeppelin-solidity/token/ERC20/IERC20.sol": "pragma solidity ^0.5.0;\n\n/**\n * @title ERC20 interface\n * @dev see https://eips.ethereum.org/EIPS/eip-20\n */\ninterface IERC20 {\n    function transfer(address to, uint256 value) external returns (bool);\n\n    function approve(address spender, uint256 value) external returns (bool);\n\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\n\n    function totalSupply() external view returns (uint256);\n\n    function balanceOf(address who) external view returns (uint256);\n\n    function allowance(address owner, address spender) external view returns (uint256);\n\n    event Transfer(address indexed from, address indexed to, uint256 value);\n\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n}\n",
+		"modules/BurnNMR.sol": "pragma solidity ^0.5.0;\n\nimport \"./iNMR.sol\";\n\n/**\n * @title NMR token burning helper\n * @dev Allows for calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.\n */\ncontract BurnNMR {\n\n    // address of the token\n    address private constant _Token = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);\n\n    /**\n     * @dev Burns a specific amount of tokens.\n     * @param value The amount of token to be burned.\n     */\n    function _burn(uint256 value) internal {\n        require(iNMR(_Token).mint(value), \"nmr burn failed\");\n    }\n\n    /**\n     * @dev Burns a specific amount of tokens from the target address and decrements allowance.\n     * @param from address The account whose tokens will be burned.\n     * @param value uint256 The amount of token to be burned.\n     */\n    function _burnFrom(address from, uint256 value) internal {\n        require(iNMR(_Token).numeraiTransfer(from, value), \"nmr burnFrom failed\");\n    }\n\n    function getToken() public pure returns (address token) {\n        token = _Token;\n    }\n\n}\n",
+		"modules/iNMR.sol": "pragma solidity ^0.5.0;\n\n\ncontract iNMR {\n\n    // ERC20\n    function totalSupply() external returns (uint256);\n    function balanceOf(address _owner) external returns (uint256);\n    function allowance(address _owner, address _spender) external returns (uint256);\n\n    function transfer(address _to, uint256 _value) external returns (bool ok);\n    function transferFrom(address _from, address _to, uint256 _value) external returns (bool ok);\n    function approve(address _spender, uint256 _value) external returns (bool ok);\n    function changeApproval(address _spender, uint256 _oldValue, uint256 _newValue) external returns (bool ok);\n\n    // burn\n    function mint(uint256 _value) external returns (bool ok);\n    // burnFrom\n    function numeraiTransfer(address _to, uint256 _value) external returns (bool ok);\n}\n"
+	},
+	"sourceTreeHashHex": "0xdc489e66c5ab13f4dec9eefe3412f68a28d668d99cb6cb335e595772868b342b",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}

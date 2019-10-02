@@ -1,0 +1,155 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "Countdown",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getDeadline",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "isAfterDeadline",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "isOver",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getLength",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "length",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "timeRemaining",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "time",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "length",
+						"type": "uint256"
+					}
+				],
+				"name": "LengthSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"name": "DeadlineSet",
+				"type": "event"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x608060405234801561001057600080fd5b506101e0806100206000396000f3fe608060405234801561001057600080fd5b50600436106100675760003560e01c8063b4bd9e2711610050578063b4bd9e27146100a2578063be1c766b146100aa578063e3cfef60146100b257610067565b80635f8d96de1461006c5780637878f25714610086575b600080fd5b6100746100ba565b60408051918252519081900360200190f35b61008e6100c0565b604080519115158252519081900360200190f35b61008e6100db565b6100746100fe565b610074610104565b60005490565b600080546100d0575060006100d8565b506000544210155b90565b60006100e56100ba565b6100f1575060006100d8565b6100f96100c0565b905090565b60015490565b600061010e6100ba565b421061011c575060006100d8565b6100f9426101286100ba565b9063ffffffff61013416565b6000828211156101a557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f536166654d6174683a207375627472616374696f6e206f766572666c6f770000604482015290519081900360640190fd5b5090039056fea265627a7a723158201fae5ef83af3380bde373220761efec5294e4d9a08457d7d0b2836384c4c22a864736f6c634300050b0032",
+				"opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH2 0x1E0 DUP1 PUSH2 0x20 PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN INVALID PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x4 CALLDATASIZE LT PUSH2 0x67 JUMPI PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR DUP1 PUSH4 0xB4BD9E27 GT PUSH2 0x50 JUMPI DUP1 PUSH4 0xB4BD9E27 EQ PUSH2 0xA2 JUMPI DUP1 PUSH4 0xBE1C766B EQ PUSH2 0xAA JUMPI DUP1 PUSH4 0xE3CFEF60 EQ PUSH2 0xB2 JUMPI PUSH2 0x67 JUMP JUMPDEST DUP1 PUSH4 0x5F8D96DE EQ PUSH2 0x6C JUMPI DUP1 PUSH4 0x7878F257 EQ PUSH2 0x86 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH2 0x74 PUSH2 0xBA JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x8E PUSH2 0xC0 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 ISZERO ISZERO DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x8E PUSH2 0xDB JUMP JUMPDEST PUSH2 0x74 PUSH2 0xFE JUMP JUMPDEST PUSH2 0x74 PUSH2 0x104 JUMP JUMPDEST PUSH1 0x0 SLOAD SWAP1 JUMP JUMPDEST PUSH1 0x0 DUP1 SLOAD PUSH2 0xD0 JUMPI POP PUSH1 0x0 PUSH2 0xD8 JUMP JUMPDEST POP PUSH1 0x0 SLOAD TIMESTAMP LT ISZERO JUMPDEST SWAP1 JUMP JUMPDEST PUSH1 0x0 PUSH2 0xE5 PUSH2 0xBA JUMP JUMPDEST PUSH2 0xF1 JUMPI POP PUSH1 0x0 PUSH2 0xD8 JUMP JUMPDEST PUSH2 0xF9 PUSH2 0xC0 JUMP JUMPDEST SWAP1 POP SWAP1 JUMP JUMPDEST PUSH1 0x1 SLOAD SWAP1 JUMP JUMPDEST PUSH1 0x0 PUSH2 0x10E PUSH2 0xBA JUMP JUMPDEST TIMESTAMP LT PUSH2 0x11C JUMPI POP PUSH1 0x0 PUSH2 0xD8 JUMP JUMPDEST PUSH2 0xF9 TIMESTAMP PUSH2 0x128 PUSH2 0xBA JUMP JUMPDEST SWAP1 PUSH4 0xFFFFFFFF PUSH2 0x134 AND JUMP JUMPDEST PUSH1 0x0 DUP3 DUP3 GT ISZERO PUSH2 0x1A5 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x536166654D6174683A207375627472616374696F6E206F766572666C6F770000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST POP SWAP1 SUB SWAP1 JUMP INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 0x1f 0xae 0x5e 0xf8 GASPRICE RETURN CODESIZE SIGNEXTEND 0xde CALLDATACOPY ORIGIN KECCAK256 PUSH23 0x1EFEC5294E4D9A08457D7D0B2836384C4C22A864736F6C PUSH4 0x4300050B STOP ORIGIN ",
+				"sourceMap": "136:1303:17:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;136:1303:17;;;;;;;"
+			}
+		}
+	},
+	"sources": {
+		"modules/Countdown.sol": {
+			"id": 17
+		},
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": {
+			"id": 12
+		},
+		"modules/Deadline.sol": {
+			"id": 18
+		}
+	},
+	"sourceCodes": {
+		"modules/Countdown.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/openzeppelin-solidity/math/SafeMath.sol\";\nimport \"./Deadline.sol\";\n\n\n/* Countdown timer\n */\ncontract Countdown is Deadline {\n\n    using SafeMath for uint256;\n\n    uint256 private _length;\n\n    event LengthSet(uint256 length);\n\n    // state functions\n\n    function _setLength(uint256 length) internal {\n        _length = length;\n        emit LengthSet(length);\n    }\n\n    function _start() internal returns (uint256 deadline) {\n        deadline = _length.add(now);\n        Deadline._setDeadline(deadline);\n    }\n\n    // view functions\n\n    function getLength() public view returns (uint256 length) {\n        length = _length;\n    }\n\n    // if Deadline._setDeadline or Countdown._setLength is not called,\n    // isOver will yield false\n    function isOver() public view returns (bool status) {\n        // when deadline not set,\n        // countdown has not started, hence not isOver\n        if (Deadline.getDeadline() == 0) {\n            status = false;\n        } else {\n            status = Deadline.isAfterDeadline();\n        }\n    }\n\n    // timeRemaining will default to 0 if _setDeadline is not called\n    // if the now exceeds deadline, just return 0 as the timeRemaining\n    function timeRemaining() public view returns (uint256 time) {\n        if (now >= Deadline.getDeadline()) {\n            time = 0;\n        } else {\n            time = Deadline.getDeadline().sub(now);\n        }\n    }\n\n}\n",
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": "pragma solidity ^0.5.0;\n\n/**\n * @title SafeMath\n * @dev Unsigned math operations with safety checks that revert on error.\n */\nlibrary SafeMath {\n    /**\n     * @dev Multiplies two unsigned integers, reverts on overflow.\n     */\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\n        // benefit is lost if 'b' is also tested.\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n        if (a == 0) {\n            return 0;\n        }\n\n        uint256 c = a * b;\n        require(c / a == b, \"SafeMath: multiplication overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.\n     */\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Solidity only automatically asserts when dividing by 0\n        require(b > 0, \"SafeMath: division by zero\");\n        uint256 c = a / b;\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\n\n        return c;\n    }\n\n    /**\n     * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).\n     */\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b <= a, \"SafeMath: subtraction overflow\");\n        uint256 c = a - b;\n\n        return c;\n    }\n\n    /**\n     * @dev Adds two unsigned integers, reverts on overflow.\n     */\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\n        uint256 c = a + b;\n        require(c >= a, \"SafeMath: addition overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),\n     * reverts when dividing by zero.\n     */\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b != 0, \"SafeMath: modulo by zero\");\n        return a % b;\n    }\n}\n",
+		"modules/Deadline.sol": "pragma solidity ^0.5.0;\n\n\n/* Deadline\n *\n */\ncontract Deadline {\n\n    uint256 private _deadline;\n\n    event DeadlineSet(uint256 deadline);\n\n    // state functions\n\n    function _setDeadline(uint256 deadline) internal {\n        _deadline = deadline;\n        emit DeadlineSet(deadline);\n    }\n\n    // view functions\n\n    function getDeadline() public view returns (uint256 deadline) {\n        deadline = _deadline;\n    }\n\n    // if the _deadline is not set yet, isAfterDeadline will return true\n    // due to now - 0 = now\n    function isAfterDeadline() public view returns (bool status) {\n        if (_deadline == 0) {\n            status = false;\n        } else {\n            status = (now >= _deadline);\n        }\n    }\n\n}\n"
+	},
+	"sourceTreeHashHex": "0x255c33aa7d6b75eb4674eef8e8483fdb5fd4f1fa280d93a9d5136050e3f760c2",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}

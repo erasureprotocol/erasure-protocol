@@ -1,0 +1,929 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "CountdownGriefing",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getCreator",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "currentStake",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "punishment",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "message",
+						"type": "bytes"
+					}
+				],
+				"name": "punish",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getToken",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					}
+				],
+				"name": "transferOperator",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "renounceOperator",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "caller",
+						"type": "address"
+					}
+				],
+				"name": "isActiveOperator",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "ok",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					}
+				],
+				"name": "retrieveStake",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "punishment",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					}
+				],
+				"name": "getCost",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "currentStake",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amountToRelease",
+						"type": "uint256"
+					}
+				],
+				"name": "releaseStake",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					}
+				],
+				"name": "getPunishment",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "punishment",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [],
+				"name": "startCountdown",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getDeadline",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "caller",
+						"type": "address"
+					}
+				],
+				"name": "isOperator",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "ok",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "caller",
+						"type": "address"
+					}
+				],
+				"name": "isStaker",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "validity",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "caller",
+						"type": "address"
+					}
+				],
+				"name": "isCounterparty",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "validity",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					}
+				],
+				"name": "getRatio",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "isAfterDeadline",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					}
+				],
+				"name": "getStake",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "stake",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getFactory",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "factory",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "hasActiveOperator",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "ok",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "currentStake",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amountToAdd",
+						"type": "uint256"
+					}
+				],
+				"name": "reward",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "isOver",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "counterparty",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "countdownLength",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "metadata",
+						"type": "bytes"
+					}
+				],
+				"name": "initialize",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getLength",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "length",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "currentStake",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amountToAdd",
+						"type": "uint256"
+					}
+				],
+				"name": "increaseStake",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "timeRemaining",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "time",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getOperator",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "metadata",
+						"type": "bytes"
+					}
+				],
+				"name": "setMetadata",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "caller",
+						"type": "address"
+					}
+				],
+				"name": "isCreator",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "ok",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "counterparty",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "countdownLength",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "bytes",
+						"name": "metadata",
+						"type": "bytes"
+					}
+				],
+				"name": "Initialized",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"name": "OperatorUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "bytes",
+						"name": "metadata",
+						"type": "bytes"
+					}
+				],
+				"name": "MetadataSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "ratio",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "enum Griefing.RatioType",
+						"name": "ratioType",
+						"type": "uint8"
+					}
+				],
+				"name": "RatioSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "punisher",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "punishment",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "bytes",
+						"name": "message",
+						"type": "bytes"
+					}
+				],
+				"name": "Griefed",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "funder",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeTaken",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "staker",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "newStake",
+						"type": "uint256"
+					}
+				],
+				"name": "StakeBurned",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "length",
+						"type": "uint256"
+					}
+				],
+				"name": "LengthSet",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"name": "DeadlineSet",
+				"type": "event"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x608060405234801561001057600080fd5b50612a9d806100206000396000f3fe608060405234801561001057600080fd5b50600436106101cf5760003560e01c806373f500af11610104578063b4bd9e27116100a2578063e3cfef6011610071578063e3cfef6014610695578063e7f43c681461069d578063ee57e36f146106a5578063efd460651461074b576101cf565b8063b4bd9e2714610578578063b6ef428414610580578063be1c766b1461066a578063bec10cde14610672576101cf565b80637a766460116100de5780637a7664601461051257806388cc58e414610545578063923b17621461054d578063a4fa8d5714610555576101cf565b806373f500af14610479578063754b2707146104ac5780637878f2571461050a576101cf565b8063465b414e116101715780635e5365c11161014b5780635e5365c1146104035780635f8d96de1461040b5780636d70f7ae146104135780636f1e853314610446576101cf565b8063465b414e146103885780634a66db95146103b45780635baeb806146103d7576101cf565b806329605e77116101ad57806329605e77146102d15780632ab6f8db146103065780633367cca51461030e57806341ce287814610355576101cf565b80630ee2cb10146101d45780630fc15f201461020557806321df0da7146102c9575b600080fd5b6101dc61077e565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b6102b76004803603606081101561021b57600080fd5b81359160208101359181019060608101604082013564010000000081111561024257600080fd5b82018360208201111561025457600080fd5b8035906020019184600183028401116401000000008311171561027657600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610820945050505050565b60408051918252519081900360200190f35b6101dc610932565b610304600480360360208110156102e757600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661094a565b005b6103046109ca565b6103416004803603602081101561032457600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610a48565b604080519115158252519081900360200190f35b6102b76004803603602081101561036b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610a68565b6102b76004803603606081101561039e57600080fd5b508035906020810135906040013560ff16610b83565b610304600480360360408110156103ca57600080fd5b5080359060200135610c4c565b6102b7600480360360608110156103ed57600080fd5b508035906020810135906040013560ff16610ce2565b6102b7610d79565b6102b7610e7f565b6103416004803603602081101561042957600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610e85565b6103416004803603602081101561045c57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610ec4565b6103416004803603602081101561048f57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610ee5565b6104df600480360360208110156104c257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610f06565b604051808381526020018260028111156104f557fe5b60ff1681526020019250505060405180910390f35b610341610f3c565b6102b76004803603602081101561052857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610f57565b6101dc610f7f565b610341610f9b565b6103046004803603604081101561056b57600080fd5b5080359060200135610fbc565b6103416110c2565b610304600480360360e081101561059657600080fd5b73ffffffffffffffffffffffffffffffffffffffff8235811692602081013582169260408201359092169160608201359160ff6080820135169160a0820135919081019060e0810160c08201356401000000008111156105f557600080fd5b82018360208201111561060757600080fd5b8035906020019184600183028401116401000000008311171561062957600080fd5b91908080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152509295506110e0945050505050565b6102b761135d565b6103046004803603604081101561068857600080fd5b5080359060200135611363565b6102b76113e6565b6101dc611416565b610304600480360360208110156106bb57600080fd5b8101906020810181356401000000008111156106d657600080fd5b8201836020820111156106e857600080fd5b8035906020019184600183028401116401000000008311171561070a57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550611432945050505050565b6103416004803603602081101561076157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166114be565b600554604080517f6bf71982000000000000000000000000000000000000000000000000000000008152306004820152905160009273ffffffffffffffffffffffffffffffffffffffff1691636bf71982916024808301926020929190829003018186803b1580156107ef57600080fd5b505afa158015610803573d6000803e3d6000fd5b505050506040513d602081101561081957600080fd5b5051919050565b600061082b33610ee5565b8061083a575061083a33610a48565b61088f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602481526020018061298b6024913960400191505060405180910390fd5b6108976110c2565b1561090357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f61677265656d656e7420656e6465640000000000000000000000000000000000604482015290519081900360640190fd5b60065461092a90339073ffffffffffffffffffffffffffffffffffffffff168686866114c8565b949350505050565b731776e1f26f98b1a5df9cd347953a26dd3cb4667190565b61095333610a48565b6109be57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601460248201527f6f6e6c7920616374697665206f70657261746f72000000000000000000000000604482015290519081900360640190fd5b6109c78161172d565b50565b6109d333610a48565b610a3e57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601460248201527f6f6e6c7920616374697665206f70657261746f72000000000000000000000000604482015290519081900360640190fd5b610a466117ba565b565b6000610a5382610e85565b8015610a625750610a62610f9b565b92915050565b6000610a7333610ec4565b80610a825750610a8233610a48565b610aed57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f6f6e6c79207374616b6572206f7220616374697665206f70657261746f720000604482015290519081900360640190fd5b610af5610f3c565b610b6057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601360248201527f646561646c696e65206e6f742070617373656400000000000000000000000000604482015290519081900360640190fd5b600654610a629073ffffffffffffffffffffffffffffffffffffffff1683611892565b60006002826002811115610b9357fe5b1415610bc457670de0b6b3a7640000610bb5610baf85836118c4565b86611937565b81610bbc57fe5b049050610c45565b6001826002811115610bd257fe5b1415610be057506000610c45565b6000826002811115610bee57fe5b1415610c45576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526021815260200180612a1c6021913960400191505060405180910390fd5b9392505050565b610c5533610ee5565b80610c645750610c6433610a48565b610cb9576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602481526020018061298b6024913960400191505060405180910390fd5b600654610cde9073ffffffffffffffffffffffffffffffffffffffff16808484611970565b5050565b60006002826002811115610cf257fe5b1415610d1457670de0b6b3a7640000610bb5610d0e85836118c4565b86611c91565b6001826002811115610d2257fe5b1415610be0576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260218152602001806129486021913960400191505060405180910390fd5b6000610d8433610ec4565b80610d935750610d9333610a48565b610dfe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f6f6e6c79207374616b6572206f7220616374697665206f70657261746f720000604482015290519081900360640190fd5b610e06610e7f565b15610e7257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601460248201527f646561646c696e6520616c726561647920736574000000000000000000000000604482015290519081900360640190fd5b610e7a611cb1565b905090565b60005490565b6000610e8f611416565b73ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16149050919050565b60065473ffffffffffffffffffffffffffffffffffffffff91821691161490565b60075473ffffffffffffffffffffffffffffffffffffffff91821691161490565b73ffffffffffffffffffffffffffffffffffffffff1660009081526003602052604090208054600190910154909160ff90911690565b60008054610f4c57506000610f54565b506000544210155b90565b73ffffffffffffffffffffffffffffffffffffffff1660009081526002602052604090205490565b60055473ffffffffffffffffffffffffffffffffffffffff1690565b60045474010000000000000000000000000000000000000000900460ff1690565b610fc533610ee5565b80610fd45750610fd433610a48565b611029576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602481526020018061298b6024913960400191505060405180910390fd5b6110316110c2565b1561109d57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f61677265656d656e7420656e6465640000000000000000000000000000000000604482015290519081900360640190fd5b600654610cde9073ffffffffffffffffffffffffffffffffffffffff16338484611cd2565b60006110cc610e7f565b6110d857506000610f54565b610e7a610f3c565b600580547fffffffffffffffffffffffff00000000000000000000000000000000000000001633179055303b63ffffffff811615611169576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602a8152602001806129f2602a913960400191505060405180910390fd5b6006805473ffffffffffffffffffffffffffffffffffffffff808a167fffffffffffffffffffffffff0000000000000000000000000000000000000000928316179092556007805489841692169190911790558816156111d4576111cc88611f94565b6111d46120ba565b6111df8786866121c2565b6111e883612330565b8151156111f8576111f88261236b565b7f664ded22802a39a33ce123e5d663871dacea1984cc7ec83e5b8b850118649f6488888888888888604051808873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018581526020018460028111156112cc57fe5b60ff16815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b838110156113135781810151838201526020016112fb565b50505050905090810190601f1680156113405780820380516001836020036101000a031916815260200191505b509850505050505050505060405180910390a15050505050505050565b60015490565b61136c33610ec4565b8061137b575061137b33610a48565b61102957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f6f6e6c79207374616b6572206f7220616374697665206f70657261746f720000604482015290519081900360640190fd5b60006113f0610e7f565b42106113fe57506000610f54565b610e7a4261140a610e7f565b9063ffffffff61240716565b60045473ffffffffffffffffffffffffffffffffffffffff1690565b61143b33610ec4565b8061144a575061144a33610a48565b6114b557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f6f6e6c79207374616b6572206f7220616374697665206f70657261746f720000604482015290519081900360640190fd5b6109c78161236b565b6000610e8f61077e565b60006114d385610f57565b84111561154157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601760248201527f63757272656e74207374616b6520696e636f7272656374000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff851660009081526003602052604081208054600190910154909160ff9091169081600281111561158257fe5b14156115ef57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601560248201527f6e6f2070756e6973686d656e7420616c6c6f7765640000000000000000000000604482015290519081900360640190fd5b6115fa828683610b83565b9250611606888461247e565b61161187878761259e565b7fca93c648a4546f2ae486b9140f0082ced75a2664a663c8882b8b3545cddfeeb18888878688604051808673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200184815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b838110156116e45781810151838201526020016116cc565b50505050905090810190601f1680156117115780820380516001836020036101000a031916815260200191505b50965050505050505060405180910390a1505095945050505050565b60045473ffffffffffffffffffffffffffffffffffffffff166117b157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601060248201527f6f70657261746f72206e6f742073657400000000000000000000000000000000604482015290519081900360640190fd5b6109c781611f94565b6117c2610f9b565b61182d57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601960248201527f6f6e6c79207768656e206f70657261746f722061637469766500000000000000604482015290519081900360640190fd5b600480547fffffffffffffffffffffff000000000000000000000000000000000000000000169055604080516000808252602082015281517f966c160e1c4dbc7df8d69af4ace01e9297c3cf016397b7914971f2fbfa32672d929181900390910190a1565b73ffffffffffffffffffffffffffffffffffffffff8216600090815260026020526040902054610a6283838380611970565b6000826118d357506000610a62565b828202828482816118e057fe5b0414610c45576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260218152602001806129af6021913960400191505060405180910390fd5b6000670de0b6b3a764000061196161194f85856118c4565b6002670de0b6b3a76400005b0461279a565b8161196857fe5b049392505050565b73ffffffffffffffffffffffffffffffffffffffff84166000908152600260205260409020548214611a0357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601760248201527f63757272656e74207374616b6520696e636f7272656374000000000000000000604482015290519081900360640190fd5b60008111611a7257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601060248201527f6e6f207374616b6520746f2074616b6500000000000000000000000000000000604482015290519081900360640190fd5b81811115611acb576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260228152602001806129696022913960400191505060405180910390fd5b6000611add838363ffffffff61240716565b73ffffffffffffffffffffffffffffffffffffffff861660009081526002602052604090208190559050611b0f610932565b73ffffffffffffffffffffffffffffffffffffffff1663a9059cbb85846040518363ffffffff1660e01b8152600401808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050602060405180830381600087803b158015611b9557600080fd5b505af1158015611ba9573d6000803e3d6000fd5b505050506040513d6020811015611bbf57600080fd5b5051611c2c57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601560248201527f746f6b656e207472616e73666572206661696c65640000000000000000000000604482015290519081900360640190fd5b6040805173ffffffffffffffffffffffffffffffffffffffff8088168252861660208201528082018490526060810183905290517f79cb01d8e263c1d344176f9a596b5a6aa14a7df350a227e2e7df836a087b56619181900360800190a15050505050565b600081611961611ca985670de0b6b3a76400006118c4565b60028561195b565b600154600090611cc7904263ffffffff61279a16565b9050610f548161280e565b73ffffffffffffffffffffffffffffffffffffffff84166000908152600260205260409020548214611d6557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601760248201527f63757272656e74207374616b6520696e636f7272656374000000000000000000604482015290519081900360640190fd5b60008111611dd457604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f6e6f207374616b6520746f206164640000000000000000000000000000000000604482015290519081900360640190fd5b6000611de6838363ffffffff61279a16565b73ffffffffffffffffffffffffffffffffffffffff861660009081526002602052604090208190559050611e18610932565b604080517f23b872dd00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff878116600483015230602483015260448201869052915192909116916323b872dd916064808201926020929091908290030181600087803b158015611e9857600080fd5b505af1158015611eac573d6000803e3d6000fd5b505050506040513d6020811015611ec257600080fd5b5051611f2f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601560248201527f746f6b656e207472616e73666572206661696c65640000000000000000000000604482015290519081900360640190fd5b6040805173ffffffffffffffffffffffffffffffffffffffff8088168252861660208201528082018490526060810183905290517fef7c8dfef14cbefdf829b8f066b068b677992411137321d64b3ed4538c2b36379181900360800190a15050505050565b60045473ffffffffffffffffffffffffffffffffffffffff8281169116141561201e57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601860248201527f63616e6e6f74207365742073616d65206f70657261746f720000000000000000604482015290519081900360640190fd5b600480547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff83161790557f966c160e1c4dbc7df8d69af4ace01e9297c3cf016397b7914971f2fbfa32672d81612088610f9b565b6040805173ffffffffffffffffffffffffffffffffffffffff909316835290151560208301528051918290030190a150565b6120c2610f9b565b1561212e57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601d60248201527f6f6e6c79207768656e206f70657261746f72206e6f7420616374697665000000604482015290519081900360640190fd5b600480547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff167401000000000000000000000000000000000000000017908190556040805173ffffffffffffffffffffffffffffffffffffffff90921682526001602083015280517f966c160e1c4dbc7df8d69af4ace01e9297c3cf016397b7914971f2fbfa32672d9281900390910190a1565b60008160028111156121d057fe5b14806121e7575060018160028111156121e557fe5b145b15612243578115612243576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602c815260200180612a3d602c913960400191505060405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff831660009081526003602052604090208281556001908101805483927fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00909116908360028111156122a557fe5b02179055507fc964ed8af672f908dc7ba57f61d45a87a7e179cecf5198e7b7d53c920d898f06838383604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200183815260200182600281111561231657fe5b60ff168152602001935050505060405180910390a1505050565b60018190556040805182815290517f7caceb1091bbaa84d09ab116a1fd72387eaab8a33d70fc39168b9b75686ee32c9181900360200190a150565b7fbb39ebb37e60fb5d606ffdb749d2336e56b88e6c88c4bd6513b308f643186eed816040518080602001828103825283818151815260200191508051906020019080838360005b838110156123ca5781810151838201526020016123b2565b50505050905090810190601f1680156123f75780820380516001836020036101000a031916815260200191505b509250505060405180910390a150565b60008282111561247857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f536166654d6174683a207375627472616374696f6e206f766572666c6f770000604482015290519081900360640190fd5b50900390565b604080517f7c8d56b800000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff84166004820152602481018390529051731776e1f26f98b1a5df9cd347953a26dd3cb4667191637c8d56b89160448083019260209291908290030181600087803b15801561250757600080fd5b505af115801561251b573d6000803e3d6000fd5b505050506040513d602081101561253157600080fd5b5051610cde57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601360248201527f6e6d72206275726e46726f6d206661696c656400000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff8316600090815260026020526040902054821461263157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601760248201527f63757272656e74207374616b6520696e636f7272656374000000000000000000604482015290519081900360640190fd5b600081116126a057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601060248201527f6e6f207374616b6520746f206275726e00000000000000000000000000000000604482015290519081900360640190fd5b818111156126f9576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260228152602001806129d06022913960400191505060405180910390fd5b600061270b838363ffffffff61240716565b73ffffffffffffffffffffffffffffffffffffffff85166000908152600260205260409020819055905061273e82612849565b6040805173ffffffffffffffffffffffffffffffffffffffff861681526020810184905280820183905290517ff470d7f6c239014b63db190652ebe51433a828b65e06d9972143c34c2e2ca3bc9181900360600190a150505050565b600082820183811015610c4557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601b60248201527f536166654d6174683a206164646974696f6e206f766572666c6f770000000000604482015290519081900360640190fd5b60008190556040805182815290517f337b880688eb06df8adb77036a6c8def1da2b520bc901c04b3a5a23f9ae130399181900360200190a150565b731776e1f26f98b1a5df9cd347953a26dd3cb4667173ffffffffffffffffffffffffffffffffffffffff1663a0712d68826040518263ffffffff1660e01b815260040180828152602001915050602060405180830381600087803b1580156128b057600080fd5b505af11580156128c4573d6000803e3d6000fd5b505050506040513d60208110156128da57600080fd5b50516109c757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f6e6d72206275726e206661696c65640000000000000000000000000000000000604482015290519081900360640190fdfe726174696f547970652063616e6e6f7420626520526174696f547970652e496e6663616e6e6f742074616b65206d6f7265207468616e2063757272656e745374616b656f6e6c7920636f756e7465727061727479206f7220616374697665206f70657261746f72536166654d6174683a206d756c7469706c69636174696f6e206f766572666c6f7763616e6e6f74206275726e206d6f7265207468616e2063757272656e745374616b656d7573742062652063616c6c65642077697468696e20636f6e747261637420636f6e7374727563746f72726174696f547970652063616e6e6f7420626520526174696f547970652e4e614e726174696f206d7573742062652030207768656e20726174696f54797065206973204e614e206f7220496e66a265627a7a72315820920c715f786a7c9b758bd6b791cb5a6900cac38b35aabacbe493954076f1137264736f6c634300050b0032",
+				"opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH2 0x2A9D DUP1 PUSH2 0x20 PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN INVALID PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x4 CALLDATASIZE LT PUSH2 0x1CF JUMPI PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR DUP1 PUSH4 0x73F500AF GT PUSH2 0x104 JUMPI DUP1 PUSH4 0xB4BD9E27 GT PUSH2 0xA2 JUMPI DUP1 PUSH4 0xE3CFEF60 GT PUSH2 0x71 JUMPI DUP1 PUSH4 0xE3CFEF60 EQ PUSH2 0x695 JUMPI DUP1 PUSH4 0xE7F43C68 EQ PUSH2 0x69D JUMPI DUP1 PUSH4 0xEE57E36F EQ PUSH2 0x6A5 JUMPI DUP1 PUSH4 0xEFD46065 EQ PUSH2 0x74B JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0xB4BD9E27 EQ PUSH2 0x578 JUMPI DUP1 PUSH4 0xB6EF4284 EQ PUSH2 0x580 JUMPI DUP1 PUSH4 0xBE1C766B EQ PUSH2 0x66A JUMPI DUP1 PUSH4 0xBEC10CDE EQ PUSH2 0x672 JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0x7A766460 GT PUSH2 0xDE JUMPI DUP1 PUSH4 0x7A766460 EQ PUSH2 0x512 JUMPI DUP1 PUSH4 0x88CC58E4 EQ PUSH2 0x545 JUMPI DUP1 PUSH4 0x923B1762 EQ PUSH2 0x54D JUMPI DUP1 PUSH4 0xA4FA8D57 EQ PUSH2 0x555 JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0x73F500AF EQ PUSH2 0x479 JUMPI DUP1 PUSH4 0x754B2707 EQ PUSH2 0x4AC JUMPI DUP1 PUSH4 0x7878F257 EQ PUSH2 0x50A JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0x465B414E GT PUSH2 0x171 JUMPI DUP1 PUSH4 0x5E5365C1 GT PUSH2 0x14B JUMPI DUP1 PUSH4 0x5E5365C1 EQ PUSH2 0x403 JUMPI DUP1 PUSH4 0x5F8D96DE EQ PUSH2 0x40B JUMPI DUP1 PUSH4 0x6D70F7AE EQ PUSH2 0x413 JUMPI DUP1 PUSH4 0x6F1E8533 EQ PUSH2 0x446 JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0x465B414E EQ PUSH2 0x388 JUMPI DUP1 PUSH4 0x4A66DB95 EQ PUSH2 0x3B4 JUMPI DUP1 PUSH4 0x5BAEB806 EQ PUSH2 0x3D7 JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0x29605E77 GT PUSH2 0x1AD JUMPI DUP1 PUSH4 0x29605E77 EQ PUSH2 0x2D1 JUMPI DUP1 PUSH4 0x2AB6F8DB EQ PUSH2 0x306 JUMPI DUP1 PUSH4 0x3367CCA5 EQ PUSH2 0x30E JUMPI DUP1 PUSH4 0x41CE2878 EQ PUSH2 0x355 JUMPI PUSH2 0x1CF JUMP JUMPDEST DUP1 PUSH4 0xEE2CB10 EQ PUSH2 0x1D4 JUMPI DUP1 PUSH4 0xFC15F20 EQ PUSH2 0x205 JUMPI DUP1 PUSH4 0x21DF0DA7 EQ PUSH2 0x2C9 JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH2 0x1DC PUSH2 0x77E JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP1 SWAP3 AND DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x2B7 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x60 DUP2 LT ISZERO PUSH2 0x21B JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP2 CALLDATALOAD SWAP2 PUSH1 0x20 DUP2 ADD CALLDATALOAD SWAP2 DUP2 ADD SWAP1 PUSH1 0x60 DUP2 ADD PUSH1 0x40 DUP3 ADD CALLDATALOAD PUSH5 0x100000000 DUP2 GT ISZERO PUSH2 0x242 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP3 ADD DUP4 PUSH1 0x20 DUP3 ADD GT ISZERO PUSH2 0x254 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD SWAP2 DUP5 PUSH1 0x1 DUP4 MUL DUP5 ADD GT PUSH5 0x100000000 DUP4 GT OR ISZERO PUSH2 0x276 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST SWAP2 SWAP1 DUP1 DUP1 PUSH1 0x1F ADD PUSH1 0x20 DUP1 SWAP2 DIV MUL PUSH1 0x20 ADD PUSH1 0x40 MLOAD SWAP1 DUP2 ADD PUSH1 0x40 MSTORE DUP1 SWAP4 SWAP3 SWAP2 SWAP1 DUP2 DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP4 DUP1 DUP3 DUP5 CALLDATACOPY PUSH1 0x0 SWAP3 ADD SWAP2 SWAP1 SWAP2 MSTORE POP SWAP3 SWAP6 POP PUSH2 0x820 SWAP5 POP POP POP POP POP JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x1DC PUSH2 0x932 JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x2E7 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0x94A JUMP JUMPDEST STOP JUMPDEST PUSH2 0x304 PUSH2 0x9CA JUMP JUMPDEST PUSH2 0x341 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x324 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xA48 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 ISZERO ISZERO DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH2 0x2B7 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x36B JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xA68 JUMP JUMPDEST PUSH2 0x2B7 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x60 DUP2 LT ISZERO PUSH2 0x39E JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 DUP2 ADD CALLDATALOAD SWAP1 PUSH1 0x40 ADD CALLDATALOAD PUSH1 0xFF AND PUSH2 0xB83 JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x40 DUP2 LT ISZERO PUSH2 0x3CA JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD CALLDATALOAD PUSH2 0xC4C JUMP JUMPDEST PUSH2 0x2B7 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x60 DUP2 LT ISZERO PUSH2 0x3ED JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 DUP2 ADD CALLDATALOAD SWAP1 PUSH1 0x40 ADD CALLDATALOAD PUSH1 0xFF AND PUSH2 0xCE2 JUMP JUMPDEST PUSH2 0x2B7 PUSH2 0xD79 JUMP JUMPDEST PUSH2 0x2B7 PUSH2 0xE7F JUMP JUMPDEST PUSH2 0x341 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x429 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xE85 JUMP JUMPDEST PUSH2 0x341 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x45C JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xEC4 JUMP JUMPDEST PUSH2 0x341 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x48F JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xEE5 JUMP JUMPDEST PUSH2 0x4DF PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x4C2 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xF06 JUMP JUMPDEST PUSH1 0x40 MLOAD DUP1 DUP4 DUP2 MSTORE PUSH1 0x20 ADD DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x4F5 JUMPI INVALID JUMPDEST PUSH1 0xFF AND DUP2 MSTORE PUSH1 0x20 ADD SWAP3 POP POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 RETURN JUMPDEST PUSH2 0x341 PUSH2 0xF3C JUMP JUMPDEST PUSH2 0x2B7 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x528 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0xF57 JUMP JUMPDEST PUSH2 0x1DC PUSH2 0xF7F JUMP JUMPDEST PUSH2 0x341 PUSH2 0xF9B JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x40 DUP2 LT ISZERO PUSH2 0x56B JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD CALLDATALOAD PUSH2 0xFBC JUMP JUMPDEST PUSH2 0x341 PUSH2 0x10C2 JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0xE0 DUP2 LT ISZERO PUSH2 0x596 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP3 CALLDATALOAD DUP2 AND SWAP3 PUSH1 0x20 DUP2 ADD CALLDATALOAD DUP3 AND SWAP3 PUSH1 0x40 DUP3 ADD CALLDATALOAD SWAP1 SWAP3 AND SWAP2 PUSH1 0x60 DUP3 ADD CALLDATALOAD SWAP2 PUSH1 0xFF PUSH1 0x80 DUP3 ADD CALLDATALOAD AND SWAP2 PUSH1 0xA0 DUP3 ADD CALLDATALOAD SWAP2 SWAP1 DUP2 ADD SWAP1 PUSH1 0xE0 DUP2 ADD PUSH1 0xC0 DUP3 ADD CALLDATALOAD PUSH5 0x100000000 DUP2 GT ISZERO PUSH2 0x5F5 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP3 ADD DUP4 PUSH1 0x20 DUP3 ADD GT ISZERO PUSH2 0x607 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD SWAP2 DUP5 PUSH1 0x1 DUP4 MUL DUP5 ADD GT PUSH5 0x100000000 DUP4 GT OR ISZERO PUSH2 0x629 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST SWAP2 SWAP1 DUP1 DUP1 PUSH1 0x1F ADD PUSH1 0x20 DUP1 SWAP2 DIV MUL PUSH1 0x20 ADD PUSH1 0x40 MLOAD SWAP1 DUP2 ADD PUSH1 0x40 MSTORE DUP1 SWAP4 SWAP3 SWAP2 SWAP1 DUP2 DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP4 DUP1 DUP3 DUP5 CALLDATACOPY PUSH1 0x0 SWAP3 ADD SWAP2 SWAP1 SWAP2 MSTORE POP SWAP3 SWAP6 POP PUSH2 0x10E0 SWAP5 POP POP POP POP POP JUMP JUMPDEST PUSH2 0x2B7 PUSH2 0x135D JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x40 DUP2 LT ISZERO PUSH2 0x688 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD CALLDATALOAD PUSH2 0x1363 JUMP JUMPDEST PUSH2 0x2B7 PUSH2 0x13E6 JUMP JUMPDEST PUSH2 0x1DC PUSH2 0x1416 JUMP JUMPDEST PUSH2 0x304 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x6BB JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP2 ADD SWAP1 PUSH1 0x20 DUP2 ADD DUP2 CALLDATALOAD PUSH5 0x100000000 DUP2 GT ISZERO PUSH2 0x6D6 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP3 ADD DUP4 PUSH1 0x20 DUP3 ADD GT ISZERO PUSH2 0x6E8 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST DUP1 CALLDATALOAD SWAP1 PUSH1 0x20 ADD SWAP2 DUP5 PUSH1 0x1 DUP4 MUL DUP5 ADD GT PUSH5 0x100000000 DUP4 GT OR ISZERO PUSH2 0x70A JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST SWAP2 SWAP1 DUP1 DUP1 PUSH1 0x1F ADD PUSH1 0x20 DUP1 SWAP2 DIV MUL PUSH1 0x20 ADD PUSH1 0x40 MLOAD SWAP1 DUP2 ADD PUSH1 0x40 MSTORE DUP1 SWAP4 SWAP3 SWAP2 SWAP1 DUP2 DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP4 DUP1 DUP3 DUP5 CALLDATACOPY PUSH1 0x0 SWAP3 ADD SWAP2 SWAP1 SWAP2 MSTORE POP SWAP3 SWAP6 POP PUSH2 0x1432 SWAP5 POP POP POP POP POP JUMP JUMPDEST PUSH2 0x341 PUSH1 0x4 DUP1 CALLDATASIZE SUB PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x761 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP CALLDATALOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0x14BE JUMP JUMPDEST PUSH1 0x5 SLOAD PUSH1 0x40 DUP1 MLOAD PUSH32 0x6BF7198200000000000000000000000000000000000000000000000000000000 DUP2 MSTORE ADDRESS PUSH1 0x4 DUP3 ADD MSTORE SWAP1 MLOAD PUSH1 0x0 SWAP3 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND SWAP2 PUSH4 0x6BF71982 SWAP2 PUSH1 0x24 DUP1 DUP4 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 DUP7 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x7EF JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS STATICCALL ISZERO DUP1 ISZERO PUSH2 0x803 JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x819 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD SWAP2 SWAP1 POP JUMP JUMPDEST PUSH1 0x0 PUSH2 0x82B CALLER PUSH2 0xEE5 JUMP JUMPDEST DUP1 PUSH2 0x83A JUMPI POP PUSH2 0x83A CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0x88F JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x24 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x298B PUSH1 0x24 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH2 0x897 PUSH2 0x10C2 JUMP JUMPDEST ISZERO PUSH2 0x903 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0xF PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x61677265656D656E7420656E6465640000000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x6 SLOAD PUSH2 0x92A SWAP1 CALLER SWAP1 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP7 DUP7 DUP7 PUSH2 0x14C8 JUMP JUMPDEST SWAP5 SWAP4 POP POP POP POP JUMP JUMPDEST PUSH20 0x1776E1F26F98B1A5DF9CD347953A26DD3CB46671 SWAP1 JUMP JUMPDEST PUSH2 0x953 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0x9BE JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x14 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C7920616374697665206F70657261746F72000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0x9C7 DUP2 PUSH2 0x172D JUMP JUMPDEST POP JUMP JUMPDEST PUSH2 0x9D3 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0xA3E JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x14 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C7920616374697665206F70657261746F72000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0xA46 PUSH2 0x17BA JUMP JUMPDEST JUMP JUMPDEST PUSH1 0x0 PUSH2 0xA53 DUP3 PUSH2 0xE85 JUMP JUMPDEST DUP1 ISZERO PUSH2 0xA62 JUMPI POP PUSH2 0xA62 PUSH2 0xF9B JUMP JUMPDEST SWAP3 SWAP2 POP POP JUMP JUMPDEST PUSH1 0x0 PUSH2 0xA73 CALLER PUSH2 0xEC4 JUMP JUMPDEST DUP1 PUSH2 0xA82 JUMPI POP PUSH2 0xA82 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0xAED JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207374616B6572206F7220616374697665206F70657261746F720000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0xAF5 PUSH2 0xF3C JUMP JUMPDEST PUSH2 0xB60 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x13 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x646561646C696E65206E6F742070617373656400000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x6 SLOAD PUSH2 0xA62 SWAP1 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP4 PUSH2 0x1892 JUMP JUMPDEST PUSH1 0x0 PUSH1 0x2 DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0xB93 JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0xBC4 JUMPI PUSH8 0xDE0B6B3A7640000 PUSH2 0xBB5 PUSH2 0xBAF DUP6 DUP4 PUSH2 0x18C4 JUMP JUMPDEST DUP7 PUSH2 0x1937 JUMP JUMPDEST DUP2 PUSH2 0xBBC JUMPI INVALID JUMPDEST DIV SWAP1 POP PUSH2 0xC45 JUMP JUMPDEST PUSH1 0x1 DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0xBD2 JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0xBE0 JUMPI POP PUSH1 0x0 PUSH2 0xC45 JUMP JUMPDEST PUSH1 0x0 DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0xBEE JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0xC45 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x21 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x2A1C PUSH1 0x21 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST SWAP4 SWAP3 POP POP POP JUMP JUMPDEST PUSH2 0xC55 CALLER PUSH2 0xEE5 JUMP JUMPDEST DUP1 PUSH2 0xC64 JUMPI POP PUSH2 0xC64 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0xCB9 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x24 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x298B PUSH1 0x24 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x6 SLOAD PUSH2 0xCDE SWAP1 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP1 DUP5 DUP5 PUSH2 0x1970 JUMP JUMPDEST POP POP JUMP JUMPDEST PUSH1 0x0 PUSH1 0x2 DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0xCF2 JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0xD14 JUMPI PUSH8 0xDE0B6B3A7640000 PUSH2 0xBB5 PUSH2 0xD0E DUP6 DUP4 PUSH2 0x18C4 JUMP JUMPDEST DUP7 PUSH2 0x1C91 JUMP JUMPDEST PUSH1 0x1 DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0xD22 JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0xBE0 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x21 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x2948 PUSH1 0x21 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH2 0xD84 CALLER PUSH2 0xEC4 JUMP JUMPDEST DUP1 PUSH2 0xD93 JUMPI POP PUSH2 0xD93 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0xDFE JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207374616B6572206F7220616374697665206F70657261746F720000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0xE06 PUSH2 0xE7F JUMP JUMPDEST ISZERO PUSH2 0xE72 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x14 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x646561646C696E6520616C726561647920736574000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0xE7A PUSH2 0x1CB1 JUMP JUMPDEST SWAP1 POP SWAP1 JUMP JUMPDEST PUSH1 0x0 SLOAD SWAP1 JUMP JUMPDEST PUSH1 0x0 PUSH2 0xE8F PUSH2 0x1416 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP3 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND EQ SWAP1 POP SWAP2 SWAP1 POP JUMP JUMPDEST PUSH1 0x6 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP2 DUP3 AND SWAP2 AND EQ SWAP1 JUMP JUMPDEST PUSH1 0x7 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP2 DUP3 AND SWAP2 AND EQ SWAP1 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x3 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 DUP1 SLOAD PUSH1 0x1 SWAP1 SWAP2 ADD SLOAD SWAP1 SWAP2 PUSH1 0xFF SWAP1 SWAP2 AND SWAP1 JUMP JUMPDEST PUSH1 0x0 DUP1 SLOAD PUSH2 0xF4C JUMPI POP PUSH1 0x0 PUSH2 0xF54 JUMP JUMPDEST POP PUSH1 0x0 SLOAD TIMESTAMP LT ISZERO JUMPDEST SWAP1 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD SWAP1 JUMP JUMPDEST PUSH1 0x5 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND SWAP1 JUMP JUMPDEST PUSH1 0x4 SLOAD PUSH21 0x10000000000000000000000000000000000000000 SWAP1 DIV PUSH1 0xFF AND SWAP1 JUMP JUMPDEST PUSH2 0xFC5 CALLER PUSH2 0xEE5 JUMP JUMPDEST DUP1 PUSH2 0xFD4 JUMPI POP PUSH2 0xFD4 CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0x1029 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x24 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x298B PUSH1 0x24 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH2 0x1031 PUSH2 0x10C2 JUMP JUMPDEST ISZERO PUSH2 0x109D JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0xF PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x61677265656D656E7420656E6465640000000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x6 SLOAD PUSH2 0xCDE SWAP1 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND CALLER DUP5 DUP5 PUSH2 0x1CD2 JUMP JUMPDEST PUSH1 0x0 PUSH2 0x10CC PUSH2 0xE7F JUMP JUMPDEST PUSH2 0x10D8 JUMPI POP PUSH1 0x0 PUSH2 0xF54 JUMP JUMPDEST PUSH2 0xE7A PUSH2 0xF3C JUMP JUMPDEST PUSH1 0x5 DUP1 SLOAD PUSH32 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000 AND CALLER OR SWAP1 SSTORE ADDRESS EXTCODESIZE PUSH4 0xFFFFFFFF DUP2 AND ISZERO PUSH2 0x1169 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x2A DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x29F2 PUSH1 0x2A SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x6 DUP1 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP1 DUP11 AND PUSH32 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000 SWAP3 DUP4 AND OR SWAP1 SWAP3 SSTORE PUSH1 0x7 DUP1 SLOAD DUP10 DUP5 AND SWAP3 AND SWAP2 SWAP1 SWAP2 OR SWAP1 SSTORE DUP9 AND ISZERO PUSH2 0x11D4 JUMPI PUSH2 0x11CC DUP9 PUSH2 0x1F94 JUMP JUMPDEST PUSH2 0x11D4 PUSH2 0x20BA JUMP JUMPDEST PUSH2 0x11DF DUP8 DUP7 DUP7 PUSH2 0x21C2 JUMP JUMPDEST PUSH2 0x11E8 DUP4 PUSH2 0x2330 JUMP JUMPDEST DUP2 MLOAD ISZERO PUSH2 0x11F8 JUMPI PUSH2 0x11F8 DUP3 PUSH2 0x236B JUMP JUMPDEST PUSH32 0x664DED22802A39A33CE123E5D663871DACEA1984CC7EC83E5B8B850118649F64 DUP9 DUP9 DUP9 DUP9 DUP9 DUP9 DUP9 PUSH1 0x40 MLOAD DUP1 DUP9 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP8 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP7 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP6 DUP2 MSTORE PUSH1 0x20 ADD DUP5 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x12CC JUMPI INVALID JUMPDEST PUSH1 0xFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE DUP4 DUP2 DUP2 MLOAD DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP DUP1 MLOAD SWAP1 PUSH1 0x20 ADD SWAP1 DUP1 DUP4 DUP4 PUSH1 0x0 JUMPDEST DUP4 DUP2 LT ISZERO PUSH2 0x1313 JUMPI DUP2 DUP2 ADD MLOAD DUP4 DUP3 ADD MSTORE PUSH1 0x20 ADD PUSH2 0x12FB JUMP JUMPDEST POP POP POP POP SWAP1 POP SWAP1 DUP2 ADD SWAP1 PUSH1 0x1F AND DUP1 ISZERO PUSH2 0x1340 JUMPI DUP1 DUP3 SUB DUP1 MLOAD PUSH1 0x1 DUP4 PUSH1 0x20 SUB PUSH2 0x100 EXP SUB NOT AND DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP JUMPDEST POP SWAP9 POP POP POP POP POP POP POP POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 LOG1 POP POP POP POP POP POP POP POP JUMP JUMPDEST PUSH1 0x1 SLOAD SWAP1 JUMP JUMPDEST PUSH2 0x136C CALLER PUSH2 0xEC4 JUMP JUMPDEST DUP1 PUSH2 0x137B JUMPI POP PUSH2 0x137B CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0x1029 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207374616B6572206F7220616374697665206F70657261746F720000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH2 0x13F0 PUSH2 0xE7F JUMP JUMPDEST TIMESTAMP LT PUSH2 0x13FE JUMPI POP PUSH1 0x0 PUSH2 0xF54 JUMP JUMPDEST PUSH2 0xE7A TIMESTAMP PUSH2 0x140A PUSH2 0xE7F JUMP JUMPDEST SWAP1 PUSH4 0xFFFFFFFF PUSH2 0x2407 AND JUMP JUMPDEST PUSH1 0x4 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND SWAP1 JUMP JUMPDEST PUSH2 0x143B CALLER PUSH2 0xEC4 JUMP JUMPDEST DUP1 PUSH2 0x144A JUMPI POP PUSH2 0x144A CALLER PUSH2 0xA48 JUMP JUMPDEST PUSH2 0x14B5 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207374616B6572206F7220616374697665206F70657261746F720000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0x9C7 DUP2 PUSH2 0x236B JUMP JUMPDEST PUSH1 0x0 PUSH2 0xE8F PUSH2 0x77E JUMP JUMPDEST PUSH1 0x0 PUSH2 0x14D3 DUP6 PUSH2 0xF57 JUMP JUMPDEST DUP5 GT ISZERO PUSH2 0x1541 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x17 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x63757272656E74207374616B6520696E636F7272656374000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP6 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x3 PUSH1 0x20 MSTORE PUSH1 0x40 DUP2 KECCAK256 DUP1 SLOAD PUSH1 0x1 SWAP1 SWAP2 ADD SLOAD SWAP1 SWAP2 PUSH1 0xFF SWAP1 SWAP2 AND SWAP1 DUP2 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x1582 JUMPI INVALID JUMPDEST EQ ISZERO PUSH2 0x15EF JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x15 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6F2070756E6973686D656E7420616C6C6F7765640000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0x15FA DUP3 DUP7 DUP4 PUSH2 0xB83 JUMP JUMPDEST SWAP3 POP PUSH2 0x1606 DUP9 DUP5 PUSH2 0x247E JUMP JUMPDEST PUSH2 0x1611 DUP8 DUP8 DUP8 PUSH2 0x259E JUMP JUMPDEST PUSH32 0xCA93C648A4546F2AE486B9140F0082CED75A2664A663C8882B8B3545CDDFEEB1 DUP9 DUP9 DUP8 DUP7 DUP9 PUSH1 0x40 MLOAD DUP1 DUP7 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP6 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP5 DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE DUP4 DUP2 DUP2 MLOAD DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP DUP1 MLOAD SWAP1 PUSH1 0x20 ADD SWAP1 DUP1 DUP4 DUP4 PUSH1 0x0 JUMPDEST DUP4 DUP2 LT ISZERO PUSH2 0x16E4 JUMPI DUP2 DUP2 ADD MLOAD DUP4 DUP3 ADD MSTORE PUSH1 0x20 ADD PUSH2 0x16CC JUMP JUMPDEST POP POP POP POP SWAP1 POP SWAP1 DUP2 ADD SWAP1 PUSH1 0x1F AND DUP1 ISZERO PUSH2 0x1711 JUMPI DUP1 DUP3 SUB DUP1 MLOAD PUSH1 0x1 DUP4 PUSH1 0x20 SUB PUSH2 0x100 EXP SUB NOT AND DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP JUMPDEST POP SWAP7 POP POP POP POP POP POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 LOG1 POP POP SWAP6 SWAP5 POP POP POP POP POP JUMP JUMPDEST PUSH1 0x4 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH2 0x17B1 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x10 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F70657261746F72206E6F742073657400000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH2 0x9C7 DUP2 PUSH2 0x1F94 JUMP JUMPDEST PUSH2 0x17C2 PUSH2 0xF9B JUMP JUMPDEST PUSH2 0x182D JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x19 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207768656E206F70657261746F722061637469766500000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x4 DUP1 SLOAD PUSH32 0xFFFFFFFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000 AND SWAP1 SSTORE PUSH1 0x40 DUP1 MLOAD PUSH1 0x0 DUP1 DUP3 MSTORE PUSH1 0x20 DUP3 ADD MSTORE DUP2 MLOAD PUSH32 0x966C160E1C4DBC7DF8D69AF4ACE01E9297C3CF016397B7914971F2FBFA32672D SWAP3 SWAP2 DUP2 SWAP1 SUB SWAP1 SWAP2 ADD SWAP1 LOG1 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP3 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD PUSH2 0xA62 DUP4 DUP4 DUP4 DUP1 PUSH2 0x1970 JUMP JUMPDEST PUSH1 0x0 DUP3 PUSH2 0x18D3 JUMPI POP PUSH1 0x0 PUSH2 0xA62 JUMP JUMPDEST DUP3 DUP3 MUL DUP3 DUP5 DUP3 DUP2 PUSH2 0x18E0 JUMPI INVALID JUMPDEST DIV EQ PUSH2 0xC45 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x21 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x29AF PUSH1 0x21 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH8 0xDE0B6B3A7640000 PUSH2 0x1961 PUSH2 0x194F DUP6 DUP6 PUSH2 0x18C4 JUMP JUMPDEST PUSH1 0x2 PUSH8 0xDE0B6B3A7640000 JUMPDEST DIV PUSH2 0x279A JUMP JUMPDEST DUP2 PUSH2 0x1968 JUMPI INVALID JUMPDEST DIV SWAP4 SWAP3 POP POP POP JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP5 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD DUP3 EQ PUSH2 0x1A03 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x17 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x63757272656E74207374616B6520696E636F7272656374000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 DUP2 GT PUSH2 0x1A72 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x10 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6F207374616B6520746F2074616B6500000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST DUP2 DUP2 GT ISZERO PUSH2 0x1ACB JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x22 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x2969 PUSH1 0x22 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH2 0x1ADD DUP4 DUP4 PUSH4 0xFFFFFFFF PUSH2 0x2407 AND JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP7 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 DUP2 SWAP1 SSTORE SWAP1 POP PUSH2 0x1B0F PUSH2 0x932 JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH4 0xA9059CBB DUP6 DUP5 PUSH1 0x40 MLOAD DUP4 PUSH4 0xFFFFFFFF AND PUSH1 0xE0 SHL DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP4 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP3 DUP2 MSTORE PUSH1 0x20 ADD SWAP3 POP POP POP PUSH1 0x20 PUSH1 0x40 MLOAD DUP1 DUP4 SUB DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x1B95 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x1BA9 JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x1BBF JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH2 0x1C2C JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x15 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x746F6B656E207472616E73666572206661696C65640000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP1 DUP9 AND DUP3 MSTORE DUP7 AND PUSH1 0x20 DUP3 ADD MSTORE DUP1 DUP3 ADD DUP5 SWAP1 MSTORE PUSH1 0x60 DUP2 ADD DUP4 SWAP1 MSTORE SWAP1 MLOAD PUSH32 0x79CB01D8E263C1D344176F9A596B5A6AA14A7DF350A227E2E7DF836A087B5661 SWAP2 DUP2 SWAP1 SUB PUSH1 0x80 ADD SWAP1 LOG1 POP POP POP POP POP JUMP JUMPDEST PUSH1 0x0 DUP2 PUSH2 0x1961 PUSH2 0x1CA9 DUP6 PUSH8 0xDE0B6B3A7640000 PUSH2 0x18C4 JUMP JUMPDEST PUSH1 0x2 DUP6 PUSH2 0x195B JUMP JUMPDEST PUSH1 0x1 SLOAD PUSH1 0x0 SWAP1 PUSH2 0x1CC7 SWAP1 TIMESTAMP PUSH4 0xFFFFFFFF PUSH2 0x279A AND JUMP JUMPDEST SWAP1 POP PUSH2 0xF54 DUP2 PUSH2 0x280E JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP5 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD DUP3 EQ PUSH2 0x1D65 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x17 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x63757272656E74207374616B6520696E636F7272656374000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 DUP2 GT PUSH2 0x1DD4 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0xF PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6F207374616B6520746F206164640000000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH2 0x1DE6 DUP4 DUP4 PUSH4 0xFFFFFFFF PUSH2 0x279A AND JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP7 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 DUP2 SWAP1 SSTORE SWAP1 POP PUSH2 0x1E18 PUSH2 0x932 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH32 0x23B872DD00000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP8 DUP2 AND PUSH1 0x4 DUP4 ADD MSTORE ADDRESS PUSH1 0x24 DUP4 ADD MSTORE PUSH1 0x44 DUP3 ADD DUP7 SWAP1 MSTORE SWAP2 MLOAD SWAP3 SWAP1 SWAP2 AND SWAP2 PUSH4 0x23B872DD SWAP2 PUSH1 0x64 DUP1 DUP3 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP1 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x1E98 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x1EAC JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x1EC2 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH2 0x1F2F JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x15 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x746F6B656E207472616E73666572206661696C65640000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP1 DUP9 AND DUP3 MSTORE DUP7 AND PUSH1 0x20 DUP3 ADD MSTORE DUP1 DUP3 ADD DUP5 SWAP1 MSTORE PUSH1 0x60 DUP2 ADD DUP4 SWAP1 MSTORE SWAP1 MLOAD PUSH32 0xEF7C8DFEF14CBEFDF829B8F066B068B677992411137321D64B3ED4538C2B3637 SWAP2 DUP2 SWAP1 SUB PUSH1 0x80 ADD SWAP1 LOG1 POP POP POP POP POP JUMP JUMPDEST PUSH1 0x4 SLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP3 DUP2 AND SWAP2 AND EQ ISZERO PUSH2 0x201E JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x18 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x63616E6E6F74207365742073616D65206F70657261746F720000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x4 DUP1 SLOAD PUSH32 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000 AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP4 AND OR SWAP1 SSTORE PUSH32 0x966C160E1C4DBC7DF8D69AF4ACE01E9297C3CF016397B7914971F2FBFA32672D DUP2 PUSH2 0x2088 PUSH2 0xF9B JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP1 SWAP4 AND DUP4 MSTORE SWAP1 ISZERO ISZERO PUSH1 0x20 DUP4 ADD MSTORE DUP1 MLOAD SWAP2 DUP3 SWAP1 SUB ADD SWAP1 LOG1 POP JUMP JUMPDEST PUSH2 0x20C2 PUSH2 0xF9B JUMP JUMPDEST ISZERO PUSH2 0x212E JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1D PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6F6E6C79207768656E206F70657261746F72206E6F7420616374697665000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x4 DUP1 SLOAD PUSH32 0xFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH21 0x10000000000000000000000000000000000000000 OR SWAP1 DUP2 SWAP1 SSTORE PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF SWAP1 SWAP3 AND DUP3 MSTORE PUSH1 0x1 PUSH1 0x20 DUP4 ADD MSTORE DUP1 MLOAD PUSH32 0x966C160E1C4DBC7DF8D69AF4ACE01E9297C3CF016397B7914971F2FBFA32672D SWAP3 DUP2 SWAP1 SUB SWAP1 SWAP2 ADD SWAP1 LOG1 JUMP JUMPDEST PUSH1 0x0 DUP2 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x21D0 JUMPI INVALID JUMPDEST EQ DUP1 PUSH2 0x21E7 JUMPI POP PUSH1 0x1 DUP2 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x21E5 JUMPI INVALID JUMPDEST EQ JUMPDEST ISZERO PUSH2 0x2243 JUMPI DUP2 ISZERO PUSH2 0x2243 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x2C DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x2A3D PUSH1 0x2C SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP4 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x3 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 DUP3 DUP2 SSTORE PUSH1 0x1 SWAP1 DUP2 ADD DUP1 SLOAD DUP4 SWAP3 PUSH32 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00 SWAP1 SWAP2 AND SWAP1 DUP4 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x22A5 JUMPI INVALID JUMPDEST MUL OR SWAP1 SSTORE POP PUSH32 0xC964ED8AF672F908DC7BA57F61D45A87A7E179CECF5198E7B7D53C920D898F06 DUP4 DUP4 DUP4 PUSH1 0x40 MLOAD DUP1 DUP5 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND DUP2 MSTORE PUSH1 0x20 ADD DUP4 DUP2 MSTORE PUSH1 0x20 ADD DUP3 PUSH1 0x2 DUP2 GT ISZERO PUSH2 0x2316 JUMPI INVALID JUMPDEST PUSH1 0xFF AND DUP2 MSTORE PUSH1 0x20 ADD SWAP4 POP POP POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 LOG1 POP POP POP JUMP JUMPDEST PUSH1 0x1 DUP2 SWAP1 SSTORE PUSH1 0x40 DUP1 MLOAD DUP3 DUP2 MSTORE SWAP1 MLOAD PUSH32 0x7CACEB1091BBAA84D09AB116A1FD72387EAAB8A33D70FC39168B9B75686EE32C SWAP2 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 LOG1 POP JUMP JUMPDEST PUSH32 0xBB39EBB37E60FB5D606FFDB749D2336E56B88E6C88C4BD6513B308F643186EED DUP2 PUSH1 0x40 MLOAD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE DUP4 DUP2 DUP2 MLOAD DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP DUP1 MLOAD SWAP1 PUSH1 0x20 ADD SWAP1 DUP1 DUP4 DUP4 PUSH1 0x0 JUMPDEST DUP4 DUP2 LT ISZERO PUSH2 0x23CA JUMPI DUP2 DUP2 ADD MLOAD DUP4 DUP3 ADD MSTORE PUSH1 0x20 ADD PUSH2 0x23B2 JUMP JUMPDEST POP POP POP POP SWAP1 POP SWAP1 DUP2 ADD SWAP1 PUSH1 0x1F AND DUP1 ISZERO PUSH2 0x23F7 JUMPI DUP1 DUP3 SUB DUP1 MLOAD PUSH1 0x1 DUP4 PUSH1 0x20 SUB PUSH2 0x100 EXP SUB NOT AND DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP JUMPDEST POP SWAP3 POP POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 LOG1 POP JUMP JUMPDEST PUSH1 0x0 DUP3 DUP3 GT ISZERO PUSH2 0x2478 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1E PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x536166654D6174683A207375627472616374696F6E206F766572666C6F770000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST POP SWAP1 SUB SWAP1 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH32 0x7C8D56B800000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP5 AND PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x24 DUP2 ADD DUP4 SWAP1 MSTORE SWAP1 MLOAD PUSH20 0x1776E1F26F98B1A5DF9CD347953A26DD3CB46671 SWAP2 PUSH4 0x7C8D56B8 SWAP2 PUSH1 0x44 DUP1 DUP4 ADD SWAP3 PUSH1 0x20 SWAP3 SWAP2 SWAP1 DUP3 SWAP1 SUB ADD DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x2507 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x251B JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x2531 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH2 0xCDE JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x13 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6D72206275726E46726F6D206661696C656400000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP4 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 SLOAD DUP3 EQ PUSH2 0x2631 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x17 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x63757272656E74207374616B6520696E636F7272656374000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 DUP2 GT PUSH2 0x26A0 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x10 PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6F207374616B6520746F206275726E00000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST DUP2 DUP2 GT ISZERO PUSH2 0x26F9 JUMPI PUSH1 0x40 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP1 PUSH1 0x20 ADD DUP3 DUP2 SUB DUP3 MSTORE PUSH1 0x22 DUP2 MSTORE PUSH1 0x20 ADD DUP1 PUSH2 0x29D0 PUSH1 0x22 SWAP2 CODECOPY PUSH1 0x40 ADD SWAP2 POP POP PUSH1 0x40 MLOAD DUP1 SWAP2 SUB SWAP1 REVERT JUMPDEST PUSH1 0x0 PUSH2 0x270B DUP4 DUP4 PUSH4 0xFFFFFFFF PUSH2 0x2407 AND JUMP JUMPDEST PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP6 AND PUSH1 0x0 SWAP1 DUP2 MSTORE PUSH1 0x2 PUSH1 0x20 MSTORE PUSH1 0x40 SWAP1 KECCAK256 DUP2 SWAP1 SSTORE SWAP1 POP PUSH2 0x273E DUP3 PUSH2 0x2849 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF DUP7 AND DUP2 MSTORE PUSH1 0x20 DUP2 ADD DUP5 SWAP1 MSTORE DUP1 DUP3 ADD DUP4 SWAP1 MSTORE SWAP1 MLOAD PUSH32 0xF470D7F6C239014B63DB190652EBE51433A828B65E06D9972143C34C2E2CA3BC SWAP2 DUP2 SWAP1 SUB PUSH1 0x60 ADD SWAP1 LOG1 POP POP POP POP JUMP JUMPDEST PUSH1 0x0 DUP3 DUP3 ADD DUP4 DUP2 LT ISZERO PUSH2 0xC45 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0x1B PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x536166654D6174683A206164646974696F6E206F766572666C6F770000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT JUMPDEST PUSH1 0x0 DUP2 SWAP1 SSTORE PUSH1 0x40 DUP1 MLOAD DUP3 DUP2 MSTORE SWAP1 MLOAD PUSH32 0x337B880688EB06DF8ADB77036A6C8DEF1DA2B520BC901C04B3A5A23F9AE13039 SWAP2 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 LOG1 POP JUMP JUMPDEST PUSH20 0x1776E1F26F98B1A5DF9CD347953A26DD3CB46671 PUSH20 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF AND PUSH4 0xA0712D68 DUP3 PUSH1 0x40 MLOAD DUP3 PUSH4 0xFFFFFFFF AND PUSH1 0xE0 SHL DUP2 MSTORE PUSH1 0x4 ADD DUP1 DUP3 DUP2 MSTORE PUSH1 0x20 ADD SWAP2 POP POP PUSH1 0x20 PUSH1 0x40 MLOAD DUP1 DUP4 SUB DUP2 PUSH1 0x0 DUP8 DUP1 EXTCODESIZE ISZERO DUP1 ISZERO PUSH2 0x28B0 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP GAS CALL ISZERO DUP1 ISZERO PUSH2 0x28C4 JUMPI RETURNDATASIZE PUSH1 0x0 DUP1 RETURNDATACOPY RETURNDATASIZE PUSH1 0x0 REVERT JUMPDEST POP POP POP POP PUSH1 0x40 MLOAD RETURNDATASIZE PUSH1 0x20 DUP2 LT ISZERO PUSH2 0x28DA JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP MLOAD PUSH2 0x9C7 JUMPI PUSH1 0x40 DUP1 MLOAD PUSH32 0x8C379A000000000000000000000000000000000000000000000000000000000 DUP2 MSTORE PUSH1 0x20 PUSH1 0x4 DUP3 ADD MSTORE PUSH1 0xF PUSH1 0x24 DUP3 ADD MSTORE PUSH32 0x6E6D72206275726E206661696C65640000000000000000000000000000000000 PUSH1 0x44 DUP3 ADD MSTORE SWAP1 MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x64 ADD SWAP1 REVERT INVALID PUSH19 0x6174696F547970652063616E6E6F7420626520 MSTORE PUSH2 0x7469 PUSH16 0x547970652E496E6663616E6E6F742074 PUSH2 0x6B65 KECCAK256 PUSH14 0x6F7265207468616E206375727265 PUSH15 0x745374616B656F6E6C7920636F756E PUSH21 0x65727061727479206F7220616374697665206F7065 PUSH19 0x61746F72536166654D6174683A206D756C7469 PUSH17 0x6C69636174696F6E206F766572666C6F77 PUSH4 0x616E6E6F PUSH21 0x206275726E206D6F7265207468616E206375727265 PUSH15 0x745374616B656D7573742062652063 PUSH2 0x6C6C PUSH6 0x642077697468 PUSH10 0x6E20636F6E7472616374 KECCAK256 PUSH4 0x6F6E7374 PUSH19 0x7563746F72726174696F547970652063616E6E PUSH16 0x7420626520526174696F547970652E4E PUSH2 0x4E72 PUSH2 0x7469 PUSH16 0x206D7573742062652030207768656E20 PUSH19 0x6174696F54797065206973204E614E206F7220 0x49 PUSH15 0x66A265627A7A72315820920C715F78 PUSH11 0x7C9B758BD6B791CB5A6900 0xca 0xc3 DUP12 CALLDATALOAD 0xaa 0xba 0xcb 0xe4 SWAP4 SWAP6 BLOCKHASH PUSH23 0xF1137264736F6C634300050B0032000000000000000000 ",
+				"sourceMap": "663:4975:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;663:4975:0;;;;;;;"
+			}
+		}
+	},
+	"sources": {
+		"agreements/CountdownGriefing.sol": {
+			"id": 0
+		},
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": {
+			"id": 12
+		},
+		"helpers/openzeppelin-solidity/token/ERC20/IERC20.sol": {
+			"id": 15
+		},
+		"modules/Countdown.sol": {
+			"id": 17
+		},
+		"modules/Deadline.sol": {
+			"id": 18
+		},
+		"modules/Griefing.sol": {
+			"id": 21
+		},
+		"helpers/DecimalMath.sol": {
+			"id": 4
+		},
+		"modules/Staking.sol": {
+			"id": 29
+		},
+		"modules/BurnNMR.sol": {
+			"id": 16
+		},
+		"modules/iNMR.sol": {
+			"id": 32
+		},
+		"modules/EventMetadata.sol": {
+			"id": 19
+		},
+		"modules/Operated.sol": {
+			"id": 24
+		},
+		"modules/Template.sol": {
+			"id": 30
+		},
+		"modules/iFactory.sol": {
+			"id": 31
+		}
+	},
+	"sourceCodes": {
+		"agreements/CountdownGriefing.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/openzeppelin-solidity/math/SafeMath.sol\";\nimport \"../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol\";\nimport \"../modules/Countdown.sol\";\nimport \"../modules/Griefing.sol\";\nimport \"../modules/EventMetadata.sol\";\nimport \"../modules/Operated.sol\";\nimport \"../modules/Template.sol\";\n\n/* Immediately engage with specific buyer\n * - Stake can be increased at any time.\n * - Request to end agreement and recover stake requires cooldown period to complete.\n * - Counterparty can greif the staker at predefined ratio.\n *\n * NOTE:\n * - This top level contract should only perform access control and state transitions\n *\n */\ncontract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Template {\n\n    using SafeMath for uint256;\n\n    Data private _data;\n    struct Data {\n        address staker;\n        address counterparty;\n    }\n\n    event Initialized(address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes metadata);\n\n    function initialize(\n        address operator,\n        address staker,\n        address counterparty,\n        uint256 ratio,\n        Griefing.RatioType ratioType,\n        uint256 countdownLength,\n        bytes memory metadata\n    ) public initializeTemplate() {\n        // set storage values\n        _data.staker = staker;\n        _data.counterparty = counterparty;\n\n        // set operator\n        if (operator != address(0)) {\n            Operated._setOperator(operator);\n            Operated._activateOperator();\n        }\n\n        // set griefing ratio\n        Griefing._setRatio(staker, ratio, ratioType);\n\n        // set countdown length\n        Countdown._setLength(countdownLength);\n\n        // set metadata\n        if (metadata.length != 0) {\n            EventMetadata._setMetadata(metadata);\n        }\n\n        // log initialization params\n        emit Initialized(operator, staker, counterparty, ratio, ratioType, countdownLength, metadata);\n    }\n\n    // state functions\n\n    function setMetadata(bytes memory metadata) public {\n        // restrict access\n        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), \"only staker or active operator\");\n\n        // update metadata\n        EventMetadata._setMetadata(metadata);\n    }\n\n    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {\n        // restrict access\n        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), \"only staker or active operator\");\n\n        // require agreement is not ended\n        require(!Countdown.isOver(), \"agreement ended\");\n\n        // add stake\n        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);\n    }\n\n    function reward(uint256 currentStake, uint256 amountToAdd) public {\n        // restrict access\n        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), \"only counterparty or active operator\");\n\n        // require agreement is not ended\n        require(!Countdown.isOver(), \"agreement ended\");\n\n        // add stake\n        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);\n    }\n\n    function punish(uint256 currentStake, uint256 punishment, bytes memory message) public returns (uint256 cost) {\n        // restrict access\n        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), \"only counterparty or active operator\");\n\n        // require agreement is not ended\n        require(!Countdown.isOver(), \"agreement ended\");\n\n        // execute griefing\n        cost = Griefing._grief(msg.sender, _data.staker, currentStake, punishment, message);\n    }\n\n    function releaseStake(uint256 currentStake, uint256 amountToRelease) public {\n        // restrict access\n        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), \"only counterparty or active operator\");\n\n        // release stake back to the staker\n        Staking._takeStake(_data.staker, _data.staker, currentStake, amountToRelease);\n    }\n\n    function startCountdown() public returns (uint256 deadline) {\n        // restrict access\n        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), \"only staker or active operator\");\n\n        // require countdown is not started\n        require(Deadline.getDeadline() == 0, \"deadline already set\");\n\n        // start countdown\n        deadline = Countdown._start();\n    }\n\n    function retrieveStake(address recipient) public returns (uint256 amount) {\n        // restrict access\n        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), \"only staker or active operator\");\n\n        // require deadline is passed\n        require(Deadline.isAfterDeadline(),\"deadline not passed\");\n\n        // retrieve stake\n        amount = Staking._takeFullStake(_data.staker, recipient);\n    }\n\n    function transferOperator(address operator) public {\n        // restrict access\n        require(Operated.isActiveOperator(msg.sender), \"only active operator\");\n\n        // transfer operator\n        Operated._transferOperator(operator);\n    }\n\n    function renounceOperator() public {\n        // restrict access\n        require(Operated.isActiveOperator(msg.sender), \"only active operator\");\n\n        // transfer operator\n        Operated._renounceOperator();\n    }\n\n    // view functions\n\n    function isStaker(address caller) public view returns (bool validity) {\n        validity = (caller == _data.staker);\n    }\n\n    function isCounterparty(address caller) public view returns (bool validity) {\n        validity = (caller == _data.counterparty);\n    }\n}\n",
+		"helpers/openzeppelin-solidity/math/SafeMath.sol": "pragma solidity ^0.5.0;\n\n/**\n * @title SafeMath\n * @dev Unsigned math operations with safety checks that revert on error.\n */\nlibrary SafeMath {\n    /**\n     * @dev Multiplies two unsigned integers, reverts on overflow.\n     */\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\n        // benefit is lost if 'b' is also tested.\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n        if (a == 0) {\n            return 0;\n        }\n\n        uint256 c = a * b;\n        require(c / a == b, \"SafeMath: multiplication overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.\n     */\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Solidity only automatically asserts when dividing by 0\n        require(b > 0, \"SafeMath: division by zero\");\n        uint256 c = a / b;\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\n\n        return c;\n    }\n\n    /**\n     * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).\n     */\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b <= a, \"SafeMath: subtraction overflow\");\n        uint256 c = a - b;\n\n        return c;\n    }\n\n    /**\n     * @dev Adds two unsigned integers, reverts on overflow.\n     */\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\n        uint256 c = a + b;\n        require(c >= a, \"SafeMath: addition overflow\");\n\n        return c;\n    }\n\n    /**\n     * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),\n     * reverts when dividing by zero.\n     */\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b != 0, \"SafeMath: modulo by zero\");\n        return a % b;\n    }\n}\n",
+		"helpers/openzeppelin-solidity/token/ERC20/IERC20.sol": "pragma solidity ^0.5.0;\n\n/**\n * @title ERC20 interface\n * @dev see https://eips.ethereum.org/EIPS/eip-20\n */\ninterface IERC20 {\n    function transfer(address to, uint256 value) external returns (bool);\n\n    function approve(address spender, uint256 value) external returns (bool);\n\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\n\n    function totalSupply() external view returns (uint256);\n\n    function balanceOf(address who) external view returns (uint256);\n\n    function allowance(address owner, address spender) external view returns (uint256);\n\n    event Transfer(address indexed from, address indexed to, uint256 value);\n\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n}\n",
+		"modules/Countdown.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/openzeppelin-solidity/math/SafeMath.sol\";\nimport \"./Deadline.sol\";\n\n\n/* Countdown timer\n */\ncontract Countdown is Deadline {\n\n    using SafeMath for uint256;\n\n    uint256 private _length;\n\n    event LengthSet(uint256 length);\n\n    // state functions\n\n    function _setLength(uint256 length) internal {\n        _length = length;\n        emit LengthSet(length);\n    }\n\n    function _start() internal returns (uint256 deadline) {\n        deadline = _length.add(now);\n        Deadline._setDeadline(deadline);\n    }\n\n    // view functions\n\n    function getLength() public view returns (uint256 length) {\n        length = _length;\n    }\n\n    // if Deadline._setDeadline or Countdown._setLength is not called,\n    // isOver will yield false\n    function isOver() public view returns (bool status) {\n        // when deadline not set,\n        // countdown has not started, hence not isOver\n        if (Deadline.getDeadline() == 0) {\n            status = false;\n        } else {\n            status = Deadline.isAfterDeadline();\n        }\n    }\n\n    // timeRemaining will default to 0 if _setDeadline is not called\n    // if the now exceeds deadline, just return 0 as the timeRemaining\n    function timeRemaining() public view returns (uint256 time) {\n        if (now >= Deadline.getDeadline()) {\n            time = 0;\n        } else {\n            time = Deadline.getDeadline().sub(now);\n        }\n    }\n\n}\n",
+		"modules/Deadline.sol": "pragma solidity ^0.5.0;\n\n\n/* Deadline\n *\n */\ncontract Deadline {\n\n    uint256 private _deadline;\n\n    event DeadlineSet(uint256 deadline);\n\n    // state functions\n\n    function _setDeadline(uint256 deadline) internal {\n        _deadline = deadline;\n        emit DeadlineSet(deadline);\n    }\n\n    // view functions\n\n    function getDeadline() public view returns (uint256 deadline) {\n        deadline = _deadline;\n    }\n\n    // if the _deadline is not set yet, isAfterDeadline will return true\n    // due to now - 0 = now\n    function isAfterDeadline() public view returns (bool status) {\n        if (_deadline == 0) {\n            status = false;\n        } else {\n            status = (now >= _deadline);\n        }\n    }\n\n}\n",
+		"modules/Griefing.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/DecimalMath.sol\";\nimport \"./Staking.sol\";\n\n\ncontract Griefing is Staking {\n\n    enum RatioType { NaN, Inf, Dec }\n\n    mapping (address => GriefRatio) private _griefRatio;\n    struct GriefRatio {\n        uint256 ratio;\n        RatioType ratioType;\n   }\n\n    event RatioSet(address staker, uint256 ratio, RatioType ratioType);\n    event Griefed(address punisher, address staker, uint256 punishment, uint256 cost, bytes message);\n\n    uint256 internal constant e18 = uint256(10) ** uint256(18);\n\n    // state functions\n\n    function _setRatio(address staker, uint256 ratio, RatioType ratioType) internal {\n        if (ratioType == RatioType.NaN || ratioType == RatioType.Inf) {\n            require(ratio == 0, \"ratio must be 0 when ratioType is NaN or Inf\");\n        }\n\n        // set data in storage\n        _griefRatio[staker].ratio = ratio;\n        _griefRatio[staker].ratioType = ratioType;\n\n        // emit event\n        emit RatioSet(staker, ratio, ratioType);\n    }\n\n    function _grief(\n        address punisher,\n        address staker,\n        uint256 currentStake,\n        uint256 punishment,\n        bytes memory message\n    ) internal returns (uint256 cost) {\n\n        // prevent accidental double punish\n        // cannot be strict equality to prevent frontrunning\n        require(currentStake <= Staking.getStake(staker), \"current stake incorrect\");\n\n        // get grief data from storage\n        uint256 ratio = _griefRatio[staker].ratio;\n        RatioType ratioType = _griefRatio[staker].ratioType;\n\n        require(ratioType != RatioType.NaN, \"no punishment allowed\");\n\n        // calculate cost\n        // getCost also acts as a guard when _setRatio is not called before\n        cost = getCost(ratio, punishment, ratioType);\n\n        // burn the cost from the punisher's balance\n        BurnNMR._burnFrom(punisher, cost);\n\n        // burn the punishment from the target's stake\n        Staking._burnStake(staker, currentStake, punishment);\n\n        // emit event\n        emit Griefed(punisher, staker, punishment, cost, message);\n    }\n\n    // view functions\n\n    function getRatio(address staker) public view returns (uint256 ratio, RatioType ratioType) {\n        // get stake data from storage\n        ratio = _griefRatio[staker].ratio;\n        ratioType = _griefRatio[staker].ratioType;\n    }\n\n    // pure functions\n\n    function getCost(uint256 ratio, uint256 punishment, RatioType ratioType) public pure returns(uint256 cost) {\n        /*  Dec:  Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18\n         *  Inf:  Punishment at no cost\n         *  NaN:  No Punishment */\n        if (ratioType == RatioType.Dec) {\n            return DecimalMath.mul(SafeMath.mul(punishment, e18), ratio) / e18;\n        }\n        if (ratioType == RatioType.Inf)\n            return 0;\n        if (ratioType == RatioType.NaN)\n            revert(\"ratioType cannot be RatioType.NaN\");\n    }\n\n    function getPunishment(uint256 ratio, uint256 cost, RatioType ratioType) public pure returns(uint256 punishment) {\n        /*  Dec: Ratio is a decimal number with 18 decimals\n         *  Inf:  Punishment at no cost\n         *  NaN:  No Punishment */\n        if (ratioType == RatioType.Dec) {\n            return DecimalMath.div(SafeMath.mul(cost, e18), ratio) / e18;\n        }\n        if (ratioType == RatioType.Inf)\n            revert(\"ratioType cannot be RatioType.Inf\");\n        if (ratioType == RatioType.NaN)\n            revert(\"ratioType cannot be RatioType.NaN\");\n    }\n\n}\n",
+		"helpers/DecimalMath.sol": "pragma solidity ^0.5.0;\n\nimport \"./openzeppelin-solidity/math/SafeMath.sol\";\n\n/* @title DecimalMath\n * @dev taken from https://github.com/PolymathNetwork/polymath-core\n * @dev Apache v2 License\n */\nlibrary DecimalMath {\n    using SafeMath for uint256;\n\n    uint256 internal constant e18 = uint256(10) ** uint256(18);\n\n    /**\n     * @notice This function multiplies two decimals represented as (decimal * 10**DECIMALS)\n     * @return uint256 Result of multiplication represented as (decimal * 10**DECIMALS)\n     */\n    function mul(uint256 x, uint256 y) internal pure returns(uint256 z) {\n        z = SafeMath.add(SafeMath.mul(x, y), (e18) / 2) / (e18);\n    }\n\n    /**\n     * @notice This function divides two decimals represented as (decimal * 10**DECIMALS)\n     * @return uint256 Result of division represented as (decimal * 10**DECIMALS)\n     */\n    function div(uint256 x, uint256 y) internal pure returns(uint256 z) {\n        z = SafeMath.add(SafeMath.mul(x, (e18)), y / 2) / y;\n    }\n\n}\n",
+		"modules/Staking.sol": "pragma solidity ^0.5.0;\n\nimport \"../helpers/openzeppelin-solidity/math/SafeMath.sol\";\nimport \"../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol\";\nimport \"./BurnNMR.sol\";\n\n\ncontract Staking is BurnNMR {\n\n    using SafeMath for uint256;\n\n    mapping (address => uint256) private _stake;\n\n    event StakeAdded(address staker, address funder, uint256 amount, uint256 newStake);\n    event StakeTaken(address staker, address recipient, uint256 amount, uint256 newStake);\n    event StakeBurned(address staker, uint256 amount, uint256 newStake);\n\n    function _addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to add\n        require(amountToAdd > 0, \"no stake to add\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.add(amountToAdd);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // transfer the stake amount\n        require(IERC20(BurnNMR.getToken()).transferFrom(funder, address(this), amountToAdd), \"token transfer failed\");\n\n        // emit event\n        emit StakeAdded(staker, funder, amountToAdd, newStake);\n    }\n\n    function _takeStake(address staker, address recipient, uint256 currentStake, uint256 amountToTake) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to take\n        require(amountToTake > 0, \"no stake to take\");\n\n        // amountToTake has to be less than equal currentStake\n        require(amountToTake <= currentStake, \"cannot take more than currentStake\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.sub(amountToTake);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // transfer the stake amount\n        require(IERC20(BurnNMR.getToken()).transfer(recipient, amountToTake), \"token transfer failed\");\n\n        // emit event\n        emit StakeTaken(staker, recipient, amountToTake, newStake);\n    }\n\n    function _takeFullStake(address staker, address recipient) internal returns (uint256 stake) {\n        // get stake from storage\n        stake = _stake[staker];\n\n        // take full stake\n        _takeStake(staker, recipient, stake, stake);\n    }\n\n    function _burnStake(address staker, uint256 currentStake, uint256 amountToBurn) internal {\n        // require current stake amount matches expected amount\n        require(currentStake == _stake[staker], \"current stake incorrect\");\n\n        // require non-zero stake to burn\n        require(amountToBurn > 0, \"no stake to burn\");\n\n        // amountToTake has to be less than equal currentStake\n        require(amountToBurn <= currentStake, \"cannot burn more than currentStake\");\n\n        // calculate new stake amount\n        uint256 newStake = currentStake.sub(amountToBurn);\n\n        // set new stake to storage\n        _stake[staker] = newStake;\n\n        // burn the stake amount\n        BurnNMR._burn(amountToBurn);\n\n        // emit event\n        emit StakeBurned(staker, amountToBurn, newStake);\n    }\n\n    function _burnFullStake(address staker) internal returns (uint256 stake) {\n        // get stake from storage\n        stake = _stake[staker];\n\n        // burn full stake\n        _burnStake(staker, stake, stake);\n    }\n\n    // view functions\n\n    function getStake(address staker) public view returns (uint256 stake) {\n        stake = _stake[staker];\n    }\n\n}\n",
+		"modules/BurnNMR.sol": "pragma solidity ^0.5.0;\n\nimport \"./iNMR.sol\";\n\n/**\n * @title NMR token burning helper\n * @dev Allows for calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.\n */\ncontract BurnNMR {\n\n    // address of the token\n    address private constant _Token = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);\n\n    /**\n     * @dev Burns a specific amount of tokens.\n     * @param value The amount of token to be burned.\n     */\n    function _burn(uint256 value) internal {\n        require(iNMR(_Token).mint(value), \"nmr burn failed\");\n    }\n\n    /**\n     * @dev Burns a specific amount of tokens from the target address and decrements allowance.\n     * @param from address The account whose tokens will be burned.\n     * @param value uint256 The amount of token to be burned.\n     */\n    function _burnFrom(address from, uint256 value) internal {\n        require(iNMR(_Token).numeraiTransfer(from, value), \"nmr burnFrom failed\");\n    }\n\n    function getToken() public pure returns (address token) {\n        token = _Token;\n    }\n\n}\n",
+		"modules/iNMR.sol": "pragma solidity ^0.5.0;\n\n\ncontract iNMR {\n\n    // ERC20\n    function totalSupply() external returns (uint256);\n    function balanceOf(address _owner) external returns (uint256);\n    function allowance(address _owner, address _spender) external returns (uint256);\n\n    function transfer(address _to, uint256 _value) external returns (bool ok);\n    function transferFrom(address _from, address _to, uint256 _value) external returns (bool ok);\n    function approve(address _spender, uint256 _value) external returns (bool ok);\n    function changeApproval(address _spender, uint256 _oldValue, uint256 _newValue) external returns (bool ok);\n\n    // burn\n    function mint(uint256 _value) external returns (bool ok);\n    // burnFrom\n    function numeraiTransfer(address _to, uint256 _value) external returns (bool ok);\n}\n",
+		"modules/EventMetadata.sol": "pragma solidity ^0.5.0;\n\n\ncontract EventMetadata {\n\n    event MetadataSet(bytes metadata);\n\n    // state functions\n\n    function _setMetadata(bytes memory metadata) internal {\n        emit MetadataSet(metadata);\n    }\n}\n",
+		"modules/Operated.sol": "pragma solidity ^0.5.0;\n\n\ncontract Operated {\n\n    address private _operator;\n    bool private _status;\n\n    event OperatorUpdated(address operator, bool status);\n\n    // state functions\n\n    function _setOperator(address operator) internal {\n        require(_operator != operator, \"cannot set same operator\");\n        _operator = operator;\n        emit OperatorUpdated(operator, hasActiveOperator());\n    }\n\n    function _transferOperator(address operator) internal {\n        // transferring operator-ship implies there was an operator set before this\n        require(_operator != address(0), \"operator not set\");\n        _setOperator(operator);\n    }\n\n    function _renounceOperator() internal {\n        require(hasActiveOperator(), \"only when operator active\");\n        _operator = address(0);\n        _status = false;\n        emit OperatorUpdated(address(0), false);\n    }\n\n    function _activateOperator() internal {\n        require(!hasActiveOperator(), \"only when operator not active\");\n        _status = true;\n        emit OperatorUpdated(_operator, true);\n    }\n\n    function _deactivateOperator() internal {\n        require(hasActiveOperator(), \"only when operator active\");\n        _status = false;\n        emit OperatorUpdated(_operator, false);\n    }\n\n    // view functions\n\n    function getOperator() public view returns (address operator) {\n        operator = _operator;\n    }\n\n    function isOperator(address caller) public view returns (bool ok) {\n        return (caller == getOperator());\n    }\n\n    function hasActiveOperator() public view returns (bool ok) {\n        return _status;\n    }\n\n    function isActiveOperator(address caller) public view returns (bool ok) {\n        return (isOperator(caller) && hasActiveOperator());\n    }\n\n}\n",
+		"modules/Template.sol": "pragma solidity ^0.5.0;\n\nimport \"./iFactory.sol\";\n\n\ncontract Template {\n\n    address private _factory;\n\n    // modifiers\n\n    modifier initializeTemplate() {\n        // set factory\n        _factory = msg.sender;\n\n        // only allow function to be delegatecalled from within a constructor.\n        uint32 codeSize;\n        assembly { codeSize := extcodesize(address) }\n        require(codeSize == 0, \"must be called within contract constructor\");\n        _;\n    }\n\n    // view functions\n\n    function getCreator() public view returns (address creator) {\n        // iFactory(...) would revert if _factory address is not actually a factory contract\n        creator = iFactory(_factory).getInstanceCreator(address(this));\n    }\n\n    function isCreator(address caller) public view returns (bool ok) {\n        ok = (caller == getCreator());\n    }\n\n    function getFactory() public view returns (address factory) {\n        factory = _factory;\n    }\n\n}\n",
+		"modules/iFactory.sol": "pragma solidity ^0.5.0;\n\n/* TODO: Update eip165 interface\n *  bytes4(keccak256('create(bytes)')) == 0xcf5ba53f\n *  bytes4(keccak256('getInstanceType()')) == 0x18c2f4cf\n *  bytes4(keccak256('getInstanceRegistry()')) == 0xa5e13904\n *  bytes4(keccak256('getImplementation()')) == 0xaaf10f42\n *\n *  => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6\n */\n interface iFactory {\n\n     event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);\n\n     function create(bytes calldata initData) external returns (address instance);\n     function createSalty(bytes calldata initData, bytes32 salt) external returns (address instance);\n     function getInitSelector() external view returns (bytes4 initSelector);\n     function getInstanceRegistry() external view returns (address instanceRegistry);\n     function getTemplate() external view returns (address template);\n     function getSaltyInstance(bytes calldata, bytes32 salt) external view returns (address instance);\n     function getNextInstance(bytes calldata) external view returns (address instance);\n\n     function getInstanceCreator(address instance) external view returns (address creator);\n     function getInstanceType() external view returns (bytes4 instanceType);\n     function getInstanceCount() external view returns (uint256 count);\n     function getInstance(uint256 index) external view returns (address instance);\n     function getInstances() external view returns (address[] memory instances);\n     function getPaginatedInstances(uint256 startIndex, uint256 endIndex) external view returns (address[] memory instances);\n }\n"
+	},
+	"sourceTreeHashHex": "0xcb88e0eb47de62c842f4bd80ce569768c25cebc0bf9e13ef6918c20fa6ffc978",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}
