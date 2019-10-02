@@ -9,8 +9,6 @@ const assert = require("assert");
 
 require("dotenv").config();
 
-let c = require("ethers");
-
 const deploy = async (network, secret) => {
   let c = {
     NMR: {

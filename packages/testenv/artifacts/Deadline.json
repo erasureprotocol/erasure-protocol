@@ -1,0 +1,89 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "Deadline",
+	"compilerOutput": {
+		"abi": [
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getDeadline",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "isAfterDeadline",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "status",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					}
+				],
+				"name": "DeadlineSet",
+				"type": "event"
+			}
+		],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x608060405234801561001057600080fd5b5060bd8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80635f8d96de1460375780637878f25714604f575b600080fd5b603d6069565b60408051918252519081900360200190f35b6055606f565b604080519115158252519081900360200190f35b60005490565b60008054607d575060006085565b506000544210155b9056fea265627a7a723158205b599700a71567746447a8d6600c9a624bc50b0afec51cf81c77fdb329bcd22a64736f6c634300050b0032",
+				"opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH2 0x10 JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0xBD DUP1 PUSH2 0x1F PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN INVALID PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH1 0xF JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x4 CALLDATASIZE LT PUSH1 0x32 JUMPI PUSH1 0x0 CALLDATALOAD PUSH1 0xE0 SHR DUP1 PUSH4 0x5F8D96DE EQ PUSH1 0x37 JUMPI DUP1 PUSH4 0x7878F257 EQ PUSH1 0x4F JUMPI JUMPDEST PUSH1 0x0 DUP1 REVERT JUMPDEST PUSH1 0x3D PUSH1 0x69 JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH1 0x55 PUSH1 0x6F JUMP JUMPDEST PUSH1 0x40 DUP1 MLOAD SWAP2 ISZERO ISZERO DUP3 MSTORE MLOAD SWAP1 DUP2 SWAP1 SUB PUSH1 0x20 ADD SWAP1 RETURN JUMPDEST PUSH1 0x0 SLOAD SWAP1 JUMP JUMPDEST PUSH1 0x0 DUP1 SLOAD PUSH1 0x7D JUMPI POP PUSH1 0x0 PUSH1 0x85 JUMP JUMPDEST POP PUSH1 0x0 SLOAD TIMESTAMP LT ISZERO JUMPDEST SWAP1 JUMP INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 JUMPDEST MSIZE SWAP8 STOP 0xa7 ISZERO PUSH8 0x746447A8D6600C9A PUSH3 0x4BC50B EXP INVALID 0xc5 SHR 0xf8 SHR PUSH24 0xFDB329BCD22A64736F6C634300050B003200000000000000 ",
+				"sourceMap": "45:677:18:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;45:677:18;;;;;;;"
+			}
+		}
+	},
+	"sources": {
+		"modules/Deadline.sol": {
+			"id": 18
+		}
+	},
+	"sourceCodes": {
+		"modules/Deadline.sol": "pragma solidity ^0.5.0;\n\n\n/* Deadline\n *\n */\ncontract Deadline {\n\n    uint256 private _deadline;\n\n    event DeadlineSet(uint256 deadline);\n\n    // state functions\n\n    function _setDeadline(uint256 deadline) internal {\n        _deadline = deadline;\n        emit DeadlineSet(deadline);\n    }\n\n    // view functions\n\n    function getDeadline() public view returns (uint256 deadline) {\n        deadline = _deadline;\n    }\n\n    // if the _deadline is not set yet, isAfterDeadline will return true\n    // due to now - 0 = now\n    function isAfterDeadline() public view returns (bool status) {\n        if (_deadline == 0) {\n            status = false;\n        } else {\n            status = (now >= _deadline);\n        }\n    }\n\n}\n"
+	},
+	"sourceTreeHashHex": "0x06f062ad0f6d7935c1db7c06b2bfb99dad3d32f3aa029afff01ad597c3e0fda4",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}

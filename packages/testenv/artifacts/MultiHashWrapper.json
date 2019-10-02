@@ -1,0 +1,45 @@
+{
+	"schemaVersion": "2.0.0",
+	"contractName": "MultiHashWrapper",
+	"compilerOutput": {
+		"abi": [],
+		"evm": {
+			"bytecode": {
+				"linkReferences": {},
+				"object": "0x6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72315820319776dffb995ee02243d21bc96aacc718efb9defcc67143ebd1e0317a730dc964736f6c634300050b0032",
+				"opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE CALLVALUE DUP1 ISZERO PUSH1 0xF JUMPI PUSH1 0x0 DUP1 REVERT JUMPDEST POP PUSH1 0x3E DUP1 PUSH1 0x1D PUSH1 0x0 CODECOPY PUSH1 0x0 RETURN INVALID PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 BALANCE SWAP8 PUSH23 0xDFFB995EE02243D21BC96AACC718EFB9DEFCC67143EBD1 0xe0 BALANCE PUSH27 0x730DC964736F6C634300050B003200000000000000000000000000 ",
+				"sourceMap": "204:1496:23:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;204:1496:23;;;;;;;"
+			}
+		}
+	},
+	"sources": {
+		"modules/MultiHashWrapper.sol": {
+			"id": 23
+		}
+	},
+	"sourceCodes": {
+		"modules/MultiHashWrapper.sol": "pragma solidity ^0.5.0;\n\n\n/**\n * @title MultiHashWrapper\n * @dev Contract that handles multi hash data structures and encoding/decoding\n *   Learn more here: https://github.com/multiformats/multihash\n */\ncontract MultiHashWrapper {\n\n    // bytes32 hash first to fill the first storage slot\n    struct MultiHash {\n        bytes32 hash;\n        uint8 hashFunction;\n        uint8 digestSize;\n    }\n\n    /**\n    * @dev Given a multihash struct, returns the full base58-encoded hash\n    * @param multihash MultiHash struct that has the hashFunction, digestSize and the hash\n    * @return the base58-encoded full hash\n    */\n    function _combineMultiHash(MultiHash memory multihash) internal pure returns (bytes memory) {\n        bytes memory out = new bytes(34);\n\n        out[0] = byte(multihash.hashFunction);\n        out[1] = byte(multihash.digestSize);\n\n        uint8 i;\n        for (i = 0; i < 32; i++) {\n          out[i+2] = multihash.hash[i];\n        }\n\n        return out;\n    }\n\n    /**\n    * @dev Given a base58-encoded  hash, divides into its individual parts and returns a struct\n    * @param source base58-encoded  hash\n    * @return MultiHash that has the hashFunction, digestSize and the hash\n    */\n    function _splitMultiHash(bytes memory source) internal pure returns (MultiHash memory) {\n        require(source.length == 34, \"length of source must be 34\");\n\n        uint8 hashFunction = uint8(source[0]);\n        uint8 digestSize = uint8(source[1]);\n        bytes32 hash;\n\n        assembly {\n          hash := mload(add(source, 34))\n        }\n\n        return (MultiHash({\n          hashFunction: hashFunction,\n          digestSize: digestSize,\n          hash: hash\n        }));\n    }\n}\n"
+	},
+	"sourceTreeHashHex": "0xf4cd5dc045c8d997513db49fe380ef62f088ef5878ab9257f38c9894091bbe98",
+	"compiler": {
+		"name": "solc",
+		"version": "soljson-v0.5.11+commit.c082d0b4.js",
+		"settings": {
+			"optimizer": {
+				"enabled": true,
+				"runs": 999999999
+			},
+			"outputSelection": {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode.object"
+					]
+				}
+			},
+			"evmVersion": "constantinople",
+			"remappings": []
+		}
+	},
+	"networks": {}
+}
