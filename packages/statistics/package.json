@@ -1,0 +1,15 @@
+{
+  "name": "@erasure/statistics",
+  "version": "1.0.0",
+  "description": "Fetch statistics about the erasure protocol from the blockchain.",
+  "homepage": "https://github.com/erasureprotocol/erasure-protocol/packages/statistics/README.md",
+  "author": "Stephane Gosselin <stephane@numer.ai>",
+  "license": "MIT",
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "dotenv": "^8.2.0",
+    "jquery": "^3.4.1",
+    "jsdom": "^15.2.1",
+    "web3": "^1.2.2"
+  }
+}
