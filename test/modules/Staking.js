@@ -254,7 +254,7 @@ describe("Staking", function () {
       );
       const StakeTakenEventLogs = utils.parseLogs(
         receipt,
-        contracts.TestStaking,
+        contracts.TestStaking.instance,
         "StakeTaken"
       );
       assert.equal(StakeTakenEventLogs.length, 1);
@@ -265,7 +265,7 @@ describe("Staking", function () {
 
       const StakeRemovedEventLogs = utils.parseLogs(
         receipt,
-        contracts.TestStaking,
+        contracts.TestStaking.instance,
         "StakeRemoved"
       );
       assert.equal(StakeRemovedEventLogs.length, 1);
@@ -329,7 +329,7 @@ describe("Staking", function () {
       );
       const StakeTakenEventLogs = utils.parseLogs(
         receipt,
-        contracts.TestStaking,
+        contracts.TestStaking.instance,
         "StakeTaken"
       );
       assert.equal(StakeTakenEventLogs.length, 1);
@@ -340,7 +340,7 @@ describe("Staking", function () {
 
       const StakeRemovedEventLogs = utils.parseLogs(
         receipt,
-        contracts.TestStaking,
+        contracts.TestStaking.instance,
         "StakeRemoved"
       );
       assert.equal(StakeRemovedEventLogs.length, 1);
