@@ -39,6 +39,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         bytes agreementParams
     );
     event DataSubmitted(bytes data);
+    event StakeDeposited(address seller, uint256 stake);
+    event PaymentDeposited(address buyer, uint256 payment);
+    event Finalized();
+    event Cancelled();
 
     /// Constructor
     /// Access control: factory
@@ -90,6 +94,17 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit Initialized(buyer, seller, paymentAmount, stakeAmount, countdownLength, metadata, agreementParams);
     }
 
+    /// Emit metadata event
+    /// Access control: seller OR buyer OR operator
+    /// State Machine: always
+    function setMetadata(bytes memory metadata) public {
+        // restrict access
+        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or buyer or active operator");
+
+        // update metadata
+        EventMetadata._setMetadata(metadata);
+    }
+
     /// Deposit Stake
     /// - if seller not already set, make msg.sender the seller
     /// - if buyer already deposited the payment, finalize the escrow
@@ -112,6 +127,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // If payment is deposited, finalize the escrow
         if (isPaymentDeposited())
             finalize();
+
+        // emit event
+        emit StakeDeposited(_data.seller, _data.stakeAmount);
     }
 
     /// Deposit Payment
@@ -136,6 +154,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // If stake is deposited, start countdown for seller to finalize
         if (isStakeDeposited())
             Countdown._start();
+
+        // emit event
+        emit PaymentDeposited(_data.buyer, _data.paymentAmount);
     }
 
     /// Finalize escrow and execute completion script
@@ -156,9 +177,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         (
             uint256 ratio,
             uint8 ratioType,
-            uint256 countdownLength,
-            bytes memory metadata
-        ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256, bytes));
+            uint256 countdownLength
+        ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256));
 
         bytes memory initCalldata = abi.encodeWithSignature(
             'initialize',
@@ -168,7 +188,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             ratio,
             ratioType,
             countdownLength,
-            metadata
+            bytes("0x")
         );
         
         _data.agreement = iFactory(_data.agreementFactory).create(initCalldata);
@@ -190,6 +210,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // disable operator
 
         CountdownGriefing(_data.agreement).renounceOperator();
+
+        // emit event
+        emit Finalized();
     }
 
     /// Submit data to the buyer
@@ -227,6 +250,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // close escrow
         _data.cancelled = true;
+
+        // emit event
+        emit Cancelled();
     }
 
     /// View functions
