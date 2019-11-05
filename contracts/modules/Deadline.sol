@@ -29,10 +29,10 @@ contract Deadline {
     // timeRemaining will default to 0 if _setDeadline is not called
     // if the now exceeds deadline, just return 0 as the timeRemaining
     function getTimeRemaining() public view returns (uint256 time) {
-        if (getDeadlineStatus() == DeadlineStatus.isOver)
-            return 0;
-        else
+        if (Deadline.getDeadline() > now)
             return Deadline.getDeadline().sub(now);
+        else
+            return 0;
     }
 
     enum DeadlineStatus { isNull, isSet, isOver }

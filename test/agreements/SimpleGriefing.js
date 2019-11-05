@@ -7,7 +7,7 @@ const SimpleGriefingFactoryArtifact = require("../../build/SimpleGriefing_Factor
 const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
-describe("SimpleGriefing", function() {
+describe("SimpleGriefing", function () {
   // wallets and addresses
   const [
     operatorWallet,
@@ -454,20 +454,27 @@ describe("SimpleGriefing", function() {
       const receipt = await this.TestSimpleGriefing.verboseWaitForTransaction(
         txn
       );
-      const eventLogs = utils.parseLogs(
+      const StakeTakenEventLogs = utils.parseLogs(
         receipt,
         this.TestSimpleGriefing,
         "StakeTaken"
       );
-      assert.equal(eventLogs.length, 1);
-      const [event] = eventLogs;
-      assert.equal(event.staker, staker);
-      assert.equal(event.recipient, staker); // staker's stake is released to staker address
-      assert.equal(event.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
-      assert.equal(
-        event.newStake.toString(),
-        currentStake.sub(releaseAmount).toString()
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.recipient, staker);
+      assert.equal(StakeTakenEvent.amount.toString(), releaseAmount.toString());
+
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        this.TestSimpleGriefing,
+        "StakeRemoved"
       );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toString(), releaseAmount.toString());
+      assert.equal(StakeRemovedEvent.newStake.toString(), currentStake.sub(releaseAmount).toString());
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {

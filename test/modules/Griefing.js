@@ -351,7 +351,7 @@ describe("Griefing", function () {
         contracts.TestGriefing.instance
           .from(buyer)
           .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
-        "cannot burn more than currentStake"
+        "cannot remove more than currentStake"
       );
     });
 
