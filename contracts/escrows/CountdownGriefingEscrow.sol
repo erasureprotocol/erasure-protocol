@@ -4,13 +4,16 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 import "../agreements/CountdownGriefing.sol";
 import "../modules/iFactory.sol";
+import "../modules/iRegistry.sol";
 import "../modules/Countdown.sol";
 import "../modules/Staking.sol";
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
-
+/// @title CountdownGriefingEscrow
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contract: security@numer.ai
 contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
@@ -20,12 +23,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address buyer;
         address seller;
         address operator;
-        address agreementFactory;
-        address agreement;
         uint256 paymentAmount;
         uint256 stakeAmount;
         uint256 countdownLength;
-        bool cancelled;
+        EscrowStatus status;
         bytes agreementParams;
     }
 
@@ -44,14 +45,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     event Finalized();
     event Cancelled();
 
-    /// Constructor
-    /// Access control: factory
-    /// State Machine: before all
+    /// @notice Constructor
+    /// @dev Access Control: only factory
+    ///      State Machine: before all
     function initialize(
         address buyer,
         address seller,
         address operator,
-        address agreementFactory,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 countdownLength,
@@ -69,9 +69,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             Operated._setOperator(operator);
             Operated._activateOperator();
         }
-
-        // set agreement factory
-        _data.agreementFactory = agreementFactory;
 
         // set amounts if defined
         if (paymentAmount != uint256(0))
@@ -94,9 +91,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit Initialized(buyer, seller, paymentAmount, stakeAmount, countdownLength, metadata, agreementParams);
     }
 
-    /// Emit metadata event
-    /// Access control: seller OR buyer OR operator
-    /// State Machine: always
+    /// @notice Emit metadata event
+    /// @dev Access Control: seller OR buyer OR operator
+    ///      State Machine: always
     function setMetadata(bytes memory metadata) public {
         // restrict access
         require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or buyer or active operator");
@@ -105,11 +102,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         EventMetadata._setMetadata(metadata);
     }
 
-    /// Deposit Stake
-    /// - if seller not already set, make msg.sender the seller
-    /// - if buyer already deposited the payment, finalize the escrow
-    /// Access control: buyer OR operator
-    /// State Machine: before finalize() OR before cancel()
+    /// @notice Deposit Stake
+    ///          - if seller not already set, make msg.sender the seller
+    ///          - if buyer already deposited the payment, finalize the escrow
+    /// @dev Access Control: buyer OR operator
+    ///      State Machine: before finalize() OR before cancel()
     function depositStake() public {
         // restrict access control
         // set msg.sender as seller if not already set
@@ -126,17 +123,18 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // If payment is deposited, finalize the escrow
         if (isPaymentDeposited())
+            _data.status = EscrowStatus.isDeposited;
             finalize();
 
         // emit event
         emit StakeDeposited(_data.seller, _data.stakeAmount);
     }
 
-    /// Deposit Payment
-    /// - if buyer not already set, make msg.sender the buyer
-    /// - if seller already deposited the stake, start the finalization countdown
-    /// Access control: buyer OR operator
-    /// State Machine: before finalize() OR before cancel()
+    /// @notice Deposit Payment
+    ///          - if buyer not already set, make msg.sender the buyer
+    ///          - if seller already deposited the stake, start the finalization countdown
+    /// @dev Access Control: buyer OR operator
+    ///      State Machine: before finalize() OR before cancel()
     function depositPayment() public {
         // restrict access control
         // set msg.sender as buyer if not already set
@@ -153,19 +151,20 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // If stake is deposited, start countdown for seller to finalize
         if (isStakeDeposited())
+            _data.status = EscrowStatus.isDeposited;
             Countdown._start();
 
         // emit event
         emit PaymentDeposited(_data.buyer, _data.paymentAmount);
     }
 
-    /// Finalize escrow and execute completion script
-    /// - create the agreement
-    /// - transfer stake and payment to agreement
-    /// - start agreement countdown
-    /// - disable agreement operator
-    /// Access control: seller or operator
-    /// State Machine: after depositStake() AND after depositPayment()
+    /// @notice Finalize escrow and execute completion script
+    ///          - create the agreement
+    ///          - transfer stake and payment to agreement
+    ///          - start agreement countdown
+    ///          - disable agreement operator
+    /// @dev Access Control: seller OR operator
+    ///      State Machine: after depositStake() AND after depositPayment()
     function finalize() public {
         // restrict access control
         require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
@@ -174,12 +173,17 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // create the agreement
 
+        // get the agreement factory address
+        address escrowFactory = Template.getFactory();
+        address escrowRegistry = iFactory(escrowFactory).getInstanceRegistry();
+        address agreementFactory = abi.decode(iRegistry(escrowRegistry).getFactoryData(escrowFactory), (address));
+        // decode agreement initialization parameters
         (
             uint256 ratio,
             uint8 ratioType,
             uint256 countdownLength
         ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256));
-
+        // encode initialization function
         bytes memory initCalldata = abi.encodeWithSignature(
             'initialize',
             address(this),
@@ -190,8 +194,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             countdownLength,
             bytes("0x")
         );
-        
-        _data.agreement = iFactory(_data.agreementFactory).create(initCalldata);
+        // deploy and initialize agreement contract
+        address agreement = iFactory(agreementFactory).create(initCalldata);
 
         // transfer stake and payment to the agreement
 
@@ -201,23 +205,26 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             Staking._removeFullStake(_data.seller);
         uint256 totalStake = _data.paymentAmount.add(_data.stakeAmount);
 
-        CountdownGriefing(_data.agreement).increaseStake(0, totalStake);
+        CountdownGriefing(agreement).increaseStake(0, totalStake);
 
         // start agreement countdown
 
-        CountdownGriefing(_data.agreement).startCountdown();
+        CountdownGriefing(agreement).startCountdown();
 
         // disable operator
 
-        CountdownGriefing(_data.agreement).renounceOperator();
+        CountdownGriefing(agreement).renounceOperator();
+
+        // update status
+        _data.status = EscrowStatus.isFinalized;
 
         // emit event
         emit Finalized();
     }
 
-    /// Submit data to the buyer
-    /// Access control: seller or operator
-    /// State Machine: after finalize()
+    /// @notice Submit data to the buyer
+    /// @dev Access Control: seller OR operator
+    ///      State Machine: after finalize()
     function submitData(bytes memory data) public {
         // restrict access control
         require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
@@ -228,12 +235,12 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit DataSubmitted(data);
     }
 
-    /// Finalize escrow and execute completion script
-    /// - return stake to seller
-    /// - return payment to buyer
-    /// - close escrow
-    /// Access control: seller OR buyer OR operator
-    /// State Machine: before depositStake() OR before depositPayment() OR after Countdown.isOver()
+    /// @notice Finalize escrow and execute completion script
+    ///          - return stake to seller
+    ///          - return payment to buyer
+    ///          - close escrow
+    /// @dev Access Control: seller OR buyer OR operator
+    ///      State Machine: before depositStake() OR before depositPayment() OR after Countdown.isOver()
     function cancel() public {
         // restrict access control
         require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
@@ -248,8 +255,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         if (_data.paymentAmount != uint256(0))
             Staking._takeFullStake(_data.buyer, _data.buyer);
 
-        // close escrow
-        _data.cancelled = true;
+        // update status
+        _data.status = EscrowStatus.isCancelled;
 
         // emit event
         emit Cancelled();
@@ -257,41 +264,34 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     /// View functions
 
-    /// Return true iff caller is seller
+    /// @notice Return true iff caller is seller
     function isSeller(address caller) public view returns (bool validity) {
         return caller == _data.seller;
     }
 
-    /// Return true iff caller is buyer
+    /// @notice Return true iff caller is buyer
     function isBuyer(address caller) public view returns (bool validity) {
         return caller == _data.buyer;
     }
 
-    /// Return true iff depositStake() has been called successfully
+    /// @notice Return true iff depositStake() has been called successfully
     function isStakeDeposited() public view returns (bool validity) {
         return Staking.getStake(_data.seller) == _data.stakeAmount;
     }
 
-    /// Return true iff depositPayment() has been called successfully
+    /// @notice Return true iff depositPayment() has been called successfully
     function isPaymentDeposited() public view returns (bool validity) {
         return Staking.getStake(_data.buyer) == _data.paymentAmount;
     }
 
     enum EscrowStatus { isOpen, isDeposited, isFinalized, isCancelled }
-    /// Return the status of the state machine
-    /// - isOpen: deposits are not completed
-    /// - isDeposited: both payment and stake deposit is completed
-    /// - isFinalized: the escrow completed successfully
-    /// - isCancelled: the escrow was cancelled
+    /// @notice Return the status of the state machine
+    ///          - isOpen: deposits are not completed
+    ///          - isDeposited: both payment and stake deposit is completed
+    ///          - isFinalized: the escrow completed successfully
+    ///          - isCancelled: the escrow was cancelled
     function getEscrowStatus() public view returns (EscrowStatus status) {
-        if (_data.cancelled)
-            return EscrowStatus.isCancelled;
-        if (_data.agreement != address(0))
-            return EscrowStatus.isFinalized;
-        if (isStakeDeposited() && isPaymentDeposited())
-            return EscrowStatus.isDeposited;
-        else
-            return EscrowStatus.isOpen;
+        return _data.status;
     }
 
     function isOpen() public view returns (bool validity) {
