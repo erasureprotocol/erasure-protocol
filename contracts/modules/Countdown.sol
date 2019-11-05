@@ -32,26 +32,42 @@ contract Countdown is Deadline {
         length = _length;
     }
 
-    // if Deadline._setDeadline or Countdown._setLength is not called,
-    // isOver will yield false
-    function isOver() public view returns (bool status) {
-        // when deadline not set,
-        // countdown has not started, hence not isOver
-        if (Deadline.getDeadline() == 0) {
-            status = false;
-        } else {
-            status = Deadline.isAfterDeadline();
-        }
+    enum CountdownStatus { isNull, isSet, isActive, isOver }
+    /// Return the status of the state machine
+    /// - isNull: the length has not been set
+    /// - isSet: the length is set, but the countdown is not started
+    /// - isActive: the countdown has started but not yet ended
+    /// - isOver: the countdown has completed
+    function getCountdownStatus() public view returns (CountdownStatus status) {
+        if (Countdown.getLength() == 0)
+            return CountdownStatus.isNull;
+        if (getDeadlineStatus() == DeadlineStatus.isNull)
+            return CountdownStatus.isSet;
+        if (getDeadlineStatus() != DeadlineStatus.isOver)
+            return CountdownStatus.isActive;
+        else
+            return CountdownStatus.isOver;
     }
 
-    // timeRemaining will default to 0 if _setDeadline is not called
-    // if the now exceeds deadline, just return 0 as the timeRemaining
+    function isNull() public view returns (bool validity) {
+        return getCountdownStatus() == CountdownStatus.isNull;
+    }
+
+    function isSet() public view returns (bool validity) {
+        return getCountdownStatus() == CountdownStatus.isSet;
+    }
+
+    function isActive() public view returns (bool validity) {
+        return getCountdownStatus() == CountdownStatus.isActive;
+    }
+
+    function isOver() public view returns (bool validity) {
+        return getCountdownStatus() == CountdownStatus.isOver;
+    }
+
+    // helper to retain abi
     function timeRemaining() public view returns (uint256 time) {
-        if (now >= Deadline.getDeadline()) {
-            time = 0;
-        } else {
-            time = Deadline.getDeadline().sub(now);
-        }
+        return Deadline.getTimeRemaining();
     }
 
 }
