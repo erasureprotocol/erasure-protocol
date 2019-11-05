@@ -186,7 +186,7 @@ describe("Staking", function () {
           amountStaked,
           0
         ),
-        "no stake to take"
+        "no stake to remove"
       );
     });
 
@@ -216,7 +216,7 @@ describe("Staking", function () {
           amountStaked,
           amountToTake
         ),
-        "cannot take more than currentStake"
+        "cannot remove more than currentStake"
       );
     });
 
@@ -252,18 +252,27 @@ describe("Staking", function () {
       const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
         txn
       );
-      const expectedEvent = "StakeTaken";
-
-      const stakeTakenEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
+      const StakeTakenEventLogs = utils.parseLogs(
+        receipt,
+        contracts.TestStaking,
+        "StakeTaken"
       );
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.recipient, recipient);
+      assert.equal(StakeTakenEvent.amount.toNumber(), amountTaken);
 
-      assert.isDefined(stakeTakenEvent);
-      assert.equal(stakeTakenEvent.args.staker, staker);
-      assert.equal(stakeTakenEvent.args.recipient, recipient);
-      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountTaken);
-      assert.equal(stakeTakenEvent.args.newStake.toNumber(), amountTaken);
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        contracts.TestStaking,
+        "StakeRemoved"
+      );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toNumber(), amountTaken);
+      assert.equal(StakeRemovedEvent.newStake.toNumber(), amountTaken);
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountTaken).toString(10);
@@ -318,18 +327,27 @@ describe("Staking", function () {
       const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
         txn
       );
-      const expectedEvent = "StakeTaken";
-
-      const stakeTakenEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
+      const StakeTakenEventLogs = utils.parseLogs(
+        receipt,
+        contracts.TestStaking,
+        "StakeTaken"
       );
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.recipient, recipient);
+      assert.equal(StakeTakenEvent.amount.toNumber(), amountStaked);
 
-      assert.isDefined(stakeTakenEvent);
-      assert.equal(stakeTakenEvent.args.staker, staker);
-      assert.equal(stakeTakenEvent.args.recipient, recipient);
-      assert.equal(stakeTakenEvent.args.amount.toNumber(), amountStaked);
-      assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        contracts.TestStaking,
+        "StakeRemoved"
+      );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toNumber(), amountStaked);
+      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake();
@@ -400,7 +418,7 @@ describe("Staking", function () {
 
       await assert.revertWith(
         contracts.TestStaking.instance.burnStake(staker, amountStaked, 0),
-        "no stake to burn"
+        "no stake to remove"
       );
     });
 
@@ -429,7 +447,7 @@ describe("Staking", function () {
           amountStaked,
           amountToBurn
         ),
-        "cannot burn more than currentStake"
+        "cannot remove more than currentStake"
       );
     });
 
@@ -462,17 +480,26 @@ describe("Staking", function () {
       const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
         txn
       );
-      const expectedEvent = "StakeBurned";
-
-      const stakeBurnedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
+      const StakeTakenEventLogs = utils.parseLogs(
+        receipt,
+        this.TestStaking,
+        "StakeBurned"
       );
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.amount.toNumber(), amountBurn);
 
-      assert.isDefined(stakeBurnedEvent);
-      assert.equal(stakeBurnedEvent.args.staker, staker);
-      assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountBurn);
-      assert.equal(stakeBurnedEvent.args.newStake.toNumber(), amountBurn);
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        this.TestStaking,
+        "StakeRemoved"
+      );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toNumber(), amountBurn);
+      assert.equal(StakeRemovedEvent.newStake.toNumber(), amountBurn);
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await this.MockNMR.balanceOf(
@@ -514,17 +541,26 @@ describe("Staking", function () {
       const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
         txn
       );
-      const expectedEvent = "StakeBurned";
-
-      const stakeBurnedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
+      const StakeTakenEventLogs = utils.parseLogs(
+        receipt,
+        this.TestStaking,
+        "StakeBurned"
       );
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.amount.toNumber(), amountToAdd);
 
-      assert.isDefined(stakeBurnedEvent);
-      assert.equal(stakeBurnedEvent.args.staker, staker);
-      assert.equal(stakeBurnedEvent.args.amount.toNumber(), amountToAdd);
-      assert.equal(stakeBurnedEvent.args.newStake.toNumber(), 0);
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        this.TestStaking,
+        "StakeRemoved"
+      );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toNumber(), amountToAdd);
+      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake();

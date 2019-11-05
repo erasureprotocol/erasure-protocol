@@ -7,7 +7,7 @@ const CountdownGriefingFactoryArtifact = require("../../build/CountdownGriefing_
 const AgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
 const MockNMRArtifact = require("../../build/MockNMR.json");
 
-describe("CountdownGriefing", function() {
+describe("CountdownGriefing", function () {
   // wallets and addresses
   const [
     operatorWallet,
@@ -658,18 +658,28 @@ describe("CountdownGriefing", function() {
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn
       );
-      const eventLogs = utils.parseLogs(
+      const StakeTakenEventLogs = utils.parseLogs(
         receipt,
         this.TestCountdownGriefing,
         "StakeTaken"
       );
-      assert.equal(eventLogs.length, 1);
-      const [event] = eventLogs;
-      assert.equal(event.staker, staker);
-      assert.equal(event.recipient, staker); // staker's stake is released to staker address
-      assert.equal(event.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.recipient, staker); // staker's stake is released to staker address
+      assert.equal(StakeTakenEvent.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
+
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        this.TestCountdownGriefing,
+        "StakeRemoved"
+      );
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
       assert.equal(
-        event.newStake.toString(),
+        StakeRemovedEvent.newStake.toString(),
         currentStake.sub(releaseAmount).toString()
       );
     };
@@ -804,22 +814,27 @@ describe("CountdownGriefing", function() {
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn
       );
-      const expectedEvent = "StakeTaken";
-
-      const stakeTakenEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
+      const StakeTakenEventLogs = utils.parseLogs(
+        receipt,
+        this.TestCountdownGriefing,
+        "StakeTaken"
       );
+      assert.equal(StakeTakenEventLogs.length, 1);
+      const [StakeTakenEvent] = StakeTakenEventLogs;
+      assert.equal(StakeTakenEvent.staker, staker);
+      assert.equal(StakeTakenEvent.recipient, staker);
+      assert.equal(StakeTakenEvent.amount.toString(), stakerStake.toString());
 
-      assert.isDefined(stakeTakenEvent);
-      assert.equal(stakeTakenEvent.args.staker, staker);
-      assert.equal(stakeTakenEvent.args.recipient, staker);
-
-      assert.equal(
-        stakeTakenEvent.args.amount.toString(),
-        stakerStake.toString()
+      const StakeRemovedEventLogs = utils.parseLogs(
+        receipt,
+        this.TestCountdownGriefing,
+        "StakeRemoved"
       );
-      assert.equal(stakeTakenEvent.args.newStake.toNumber(), 0);
+      assert.equal(StakeRemovedEventLogs.length, 1);
+      const [StakeRemovedEvent] = StakeRemovedEventLogs;
+      assert.equal(StakeRemovedEvent.staker, staker);
+      assert.equal(StakeRemovedEvent.amount.toString(), stakerStake.toString());
+      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
     });
   });
 

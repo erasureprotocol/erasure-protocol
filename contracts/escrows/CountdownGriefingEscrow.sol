@@ -25,7 +25,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator;
         uint256 paymentAmount;
         uint256 stakeAmount;
-        uint256 countdownLength;
         EscrowStatus status;
         bytes agreementParams;
     }
@@ -173,37 +172,43 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // create the agreement
 
-        // get the agreement factory address
-        address escrowFactory = Template.getFactory();
-        address escrowRegistry = iFactory(escrowFactory).getInstanceRegistry();
-        address agreementFactory = abi.decode(iRegistry(escrowRegistry).getFactoryData(escrowFactory), (address));
-        // decode agreement initialization parameters
-        (
-            uint256 ratio,
-            uint8 ratioType,
-            uint256 countdownLength
-        ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256));
-        // encode initialization function
-        bytes memory initCalldata = abi.encodeWithSignature(
-            'initialize',
-            address(this),
-            _data.seller,
-            _data.buyer,
-            ratio,
-            ratioType,
-            countdownLength,
-            bytes("0x")
-        );
-        // deploy and initialize agreement contract
-        address agreement = iFactory(agreementFactory).create(initCalldata);
+        address agreement;
+        {
+            // get the agreement factory address
+            address escrowFactory = Template.getFactory();
+            address escrowRegistry = iFactory(escrowFactory).getInstanceRegistry();
+            address agreementFactory = abi.decode(iRegistry(escrowRegistry).getFactoryData(escrowFactory), (address));
+            // decode agreement initialization parameters
+            (
+                uint256 ratio,
+                uint8 ratioType,
+                uint256 countdownLength
+            ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256));
+            // encode initialization function
+            bytes memory initCalldata = abi.encodeWithSignature(
+                'initialize',
+                address(this),
+                _data.seller,
+                _data.buyer,
+                ratio,
+                ratioType,
+                countdownLength,
+                bytes("0x")
+            );
+            // deploy and initialize agreement contract
+            agreement = iFactory(agreementFactory).create(initCalldata);
+        }
 
         // transfer stake and payment to the agreement
 
-        if (_data.paymentAmount != uint256(0))
-            Staking._removeFullStake(_data.buyer);
-        if (_data.stakeAmount != uint256(0))
-            Staking._removeFullStake(_data.seller);
-        uint256 totalStake = _data.paymentAmount.add(_data.stakeAmount);
+        uint256 totalStake;
+        {
+            if (_data.paymentAmount != uint256(0))
+                Staking._removeFullStake(_data.buyer);
+            if (_data.stakeAmount != uint256(0))
+                Staking._removeFullStake(_data.seller);
+            totalStake = _data.paymentAmount.add(_data.stakeAmount);
+        }
 
         CountdownGriefing(agreement).increaseStake(0, totalStake);
 
