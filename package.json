@@ -11,7 +11,7 @@
     "test": "bash run-ganache-tests.sh",
     "test_etherlime": "yarn etherlime test --solcVersion=0.5.11 --timeout=10000",
     "coverage": "yarn etherlime coverage --solcVersion=0.5.11",
-    "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false",
+    "deploy": "yarn etherlime deploy ./deployment/deploy_v120.js --compile=false",
     "deploy_ganache": "bash run-ganache-deploy.sh"
   },
   "dependencies": {
