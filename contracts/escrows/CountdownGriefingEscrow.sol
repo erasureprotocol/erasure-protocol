@@ -13,7 +13,7 @@ import "../modules/Template.sol";
 
 /// @title CountdownGriefingEscrow
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
-/// @dev Security contract: security@numer.ai
+/// @dev Security contact: security@numer.ai
 contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
