@@ -6,13 +6,19 @@ const multihash = require('multihashes');
 const Hash = require('ipfs-only-hash')
 
 const MAX_UINT32 = Math.pow(2, 32) - 1
+const MAX_UINT8 = Math.pow(2, 8) - 1
 const FERNET_SECRET_LENGTH = 32
 const NONCE_LENGTH = 24
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
-const randomNumber = () => getRandomValues(new Uint32Array(1))[0] / MAX_UINT32
+const randomNumber = () => {
+  if (typeof window === 'undefined') {
+    return getRandomValues(new Uint8Array(1))[0] / MAX_UINT8
+  }
+  return getRandomValues(new Uint32Array(1))[0] / MAX_UINT32
+}
 
 const randomString = () => {
   let result = '';
@@ -38,7 +44,15 @@ const ErasureHelper = {
   },
   crypto: {
     symmetric: {
-      generateKey: () => btoa(randomString()),
+      generateKey: () => {
+        let key = Buffer.from(randomString()).toString('base64')
+        let secret = fernet.decode64toHex(key)
+        while (secret.length !== fernet.hexBits(256)) {
+          key = Buffer.from(randomString()).toString('base64')
+          secret = fernet.decode64toHex(key)
+        }
+        return key
+      },
       encryptMessage: (secretKey, msg) => {
         const secret = new fernet.Secret(secretKey)
         const token = new fernet.Token({secret, ttl: 0})
@@ -75,4 +89,4 @@ const ErasureHelper = {
   }
 }
 
-export default ErasureHelper
+module.exports = ErasureHelper
