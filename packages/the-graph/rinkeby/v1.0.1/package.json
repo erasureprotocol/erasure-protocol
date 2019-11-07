@@ -1,0 +1,13 @@
+{
+  "name": "erasure",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.15.0",
+    "@graphprotocol/graph-ts": "0.15.0"
+  }
+}

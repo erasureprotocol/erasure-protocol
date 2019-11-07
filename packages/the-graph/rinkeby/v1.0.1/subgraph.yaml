@@ -1,0 +1,180 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: FeedFactory
+    network: rinkeby
+    source:
+      address: "0xDF7bEcEE9C726bb729b8cE47d9CF345c147c035B"
+      abi: FeedFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - ExplicitInitDataFeedFactory
+        - InstanceCreatedFeedFactory
+        - Feed
+      abis:
+        - name: FeedFactory
+          file: ./abis/FeedFactory.json
+      eventHandlers:
+        - event: ExplicitInitData(address,address,bytes)
+          handler: handleExplicitInitDataFeedFactory
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedFeedFactory
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: PostFactory
+    network: rinkeby
+    source:
+      address: "0x375E1f89A995ef4D7A85fE88e3Fa447384E76561"
+      abi: PostFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - ExplicitInitDataPostFactory
+        - InstanceCreatedPostFactory
+        - Post
+      abis:
+        - name: PostFactory
+          file: ./abis/PostFactory.json
+      eventHandlers:
+        - event: ExplicitInitData(address,bytes,bytes,bytes)
+          handler: handleExplicitInitDataPostFactory
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedPostFactory
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: OneWayGriefingFactory
+    network: rinkeby
+    source:
+      address: "0x5Ceef2D4dA69dCd077CBf9d1428ad394fd713f04"
+      abi: OneWayGriefingFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - ExplicitInitDataOneWayGriefingFactory
+        - InstanceCreatedOneWayGriefingFactory
+        - OneWayGriefingAgreement
+      abis:
+        - name: OneWayGriefingFactory
+          file: ./abis/OneWayGriefingFactory.json
+      eventHandlers:
+        - event: ExplicitInitData(indexed address,indexed address,indexed address,uint256,uint8,uint256,bytes)
+          handler: handleExplicitInitDataOneWayGriefingFactory
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedOneWayGriefingFactory
+      file: ./src/mapping.ts
+templates:
+  - name: Feed
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: Feed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - PostCreatedFeed
+        - VariableMetadataSetFeed
+        - StaticMetadataSetFeed
+        - OperatorUpdatedFeed
+      file: ./src/mapping.ts
+      abis:
+        - name: Feed
+          file: ./abis/Feed.json
+      eventHandlers:
+        - event: PostCreated(address,address,bytes)
+          handler: handlePostCreatedFeed
+        - event: VariableMetadataSet(bytes)
+          handler: handleVariableMetadataSetFeed
+        - event: StaticMetadataSet(bytes)
+          handler: handleStaticMetadataSetFeed
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedFeed
+  - name: Post
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: Post
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - PostCreatedPost
+        - VariableMetadataSetPost
+        - StaticMetadataSetPost
+        - OperatorUpdatedPost
+        - ProofHashSetPost
+      file: ./src/mapping.ts
+      abis:
+        - name: Post
+          file: ./abis/Post.json
+      eventHandlers:
+        - event: Created(address,bytes,bytes,bytes)
+          handler: handlePostCreatedPost
+        - event: VariableMetadataSet(bytes)
+          handler: handleVariableMetadataSetPost
+        - event: StaticMetadataSet(bytes)
+          handler: handleStaticMetadataSetPost
+        - event: ProofHashSet(address,bytes)
+          handler: handleProofHashSetPost
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedPost
+  - name: OneWayGriefing
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: OneWayGriefing
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - VariableMetadataSetOneWayGriefing
+        - StaticMetadataSetOneWayGriefing
+        - OperatorUpdatedOneWayGriefing
+        - RatioSetOneWayGriefing
+        - GriefedOneWayGriefing
+        - TokenSetOneWayGriefing
+        - StakeAddedOneWayGriefing
+        - StakeTakenOneWayGriefing
+        - StakeBurnedOneWayGriefing
+        - LengthSetOneWayGriefing
+        - DeadlineSetOneWayGriefing
+      file: ./src/mapping.ts
+      abis:
+        - name: OneWayGriefing
+          file: ./abis/OneWayGriefing.json
+      eventHandlers:
+        - event: VariableMetadataSet(bytes)
+          handler: handleVariableMetadataSetOneWayGriefing
+        - event: StaticMetadataSet(bytes)
+          handler: handleStaticMetadataSetOneWayGriefing
+        - event: RatioSet(address,uint256,uint8)
+          handler: handleRatioSetOneWayGriefing
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedOneWayGriefing
+        - event: Griefed(address,address,uint256,uint256,bytes)
+          handler: handleGriefedOneWayGriefing
+        - event: TokenSet(address)
+          handler: handleTokenSetOneWayGriefing
+        - event: StakeAdded(address,address,uint256,uint256)
+          handler: handleStakeAddedOneWayGriefing
+        - event: StakeTaken(address,address,uint256,uint256)
+          handler: handleStakeTakenOneWayGriefing
+        - event: StakeBurned(address,uint256,uint256)
+          handler: handleStakeBurnedOneWayGriefing
+        - event: LengthSet(uint256)
+          handler: handleLengthSetOneWayGriefing
+        - event: DeadlineSet(uint256)
+          handler: handleDeadlineSetOneWayGriefing
+        

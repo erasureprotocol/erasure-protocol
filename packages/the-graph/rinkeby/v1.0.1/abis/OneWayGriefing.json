@@ -1,0 +1,719 @@
+[
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getCreator",
+    "outputs": [
+      {
+        "name": "creator",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getToken",
+    "outputs": [
+      {
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "isActiveOperator",
+    "outputs": [
+      {
+        "name": "ok",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "ratio",
+        "type": "uint256"
+      },
+      {
+        "name": "punishment",
+        "type": "uint256"
+      },
+      {
+        "name": "ratioType",
+        "type": "uint8"
+      }
+    ],
+    "name": "getCost",
+    "outputs": [
+      {
+        "name": "cost",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "ratio",
+        "type": "uint256"
+      },
+      {
+        "name": "cost",
+        "type": "uint256"
+      },
+      {
+        "name": "ratioType",
+        "type": "uint8"
+      }
+    ],
+    "name": "getPunishment",
+    "outputs": [
+      {
+        "name": "punishment",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getDeadline",
+    "outputs": [
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "isOperator",
+    "outputs": [
+      {
+        "name": "ok",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "staker",
+        "type": "address"
+      }
+    ],
+    "name": "getRatio",
+    "outputs": [
+      {
+        "name": "ratio",
+        "type": "uint256"
+      },
+      {
+        "name": "ratioType",
+        "type": "uint8"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isAfterDeadline",
+    "outputs": [
+      {
+        "name": "status",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getMetadata",
+    "outputs": [
+      {
+        "name": "staticMetadata",
+        "type": "bytes"
+      },
+      {
+        "name": "variableMetadata",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "staker",
+        "type": "address"
+      }
+    ],
+    "name": "getStake",
+    "outputs": [
+      {
+        "name": "stake",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "hasActiveOperator",
+    "outputs": [
+      {
+        "name": "ok",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOver",
+    "outputs": [
+      {
+        "name": "status",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getLength",
+    "outputs": [
+      {
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "timeRemaining",
+    "outputs": [
+      {
+        "name": "time",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getOperator",
+    "outputs": [
+      {
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "isCreator",
+    "outputs": [
+      {
+        "name": "ok",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "status",
+        "type": "bool"
+      }
+    ],
+    "name": "OperatorUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "staticMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "StaticMetadataSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "variableMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "VariableMetadataSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "ratio",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "ratioType",
+        "type": "uint8"
+      }
+    ],
+    "name": "RatioSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "punisher",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "punishment",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "cost",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "message",
+        "type": "bytes"
+      }
+    ],
+    "name": "Griefed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "TokenSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "funder",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "newStake",
+        "type": "uint256"
+      }
+    ],
+    "name": "StakeAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "newStake",
+        "type": "uint256"
+      }
+    ],
+    "name": "StakeTaken",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "newStake",
+        "type": "uint256"
+      }
+    ],
+    "name": "StakeBurned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "LengthSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "DeadlineSet",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "name": "staker",
+        "type": "address"
+      },
+      {
+        "name": "counterparty",
+        "type": "address"
+      },
+      {
+        "name": "ratio",
+        "type": "uint256"
+      },
+      {
+        "name": "ratioType",
+        "type": "uint8"
+      },
+      {
+        "name": "countdownLength",
+        "type": "uint256"
+      },
+      {
+        "name": "staticMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "variableMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "setVariableMetadata",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "currentStake",
+        "type": "uint256"
+      },
+      {
+        "name": "amountToAdd",
+        "type": "uint256"
+      }
+    ],
+    "name": "increaseStake",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "currentStake",
+        "type": "uint256"
+      },
+      {
+        "name": "amountToAdd",
+        "type": "uint256"
+      }
+    ],
+    "name": "reward",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "name": "punishment",
+        "type": "uint256"
+      },
+      {
+        "name": "message",
+        "type": "bytes"
+      }
+    ],
+    "name": "punish",
+    "outputs": [
+      {
+        "name": "cost",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "startCountdown",
+    "outputs": [
+      {
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "retrieveStake",
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address"
+      }
+    ],
+    "name": "transferOperator",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOperator",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "isStaker",
+    "outputs": [
+      {
+        "name": "validity",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "isCounterparty",
+    "outputs": [
+      {
+        "name": "validity",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
