@@ -1,6 +1,6 @@
 # Erasure Crypto + IPFS Helpers
 
-This package contains the crypto system used on erasurequant.com plus some IPFS helper functions.
+This package contains the crypto system used on [erasurequant.com](https://erasurequant.com) plus some IPFS helper functions.
 
 For asymmetric crypto we use the [TweetNaCL.js](https://github.com/dchest/tweetnacl-js) library.
 
