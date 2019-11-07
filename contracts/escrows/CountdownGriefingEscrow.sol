@@ -23,15 +23,22 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address buyer;
         address seller;
         address operator;
-        uint256 paymentAmount;
-        uint256 stakeAmount;
+        uint128 paymentAmount;
+        uint128 stakeAmount;
         EscrowStatus status;
-        bytes agreementParams;
+        AgreementParams agreementParams;
+    }
+
+    struct AgreementParams {
+        uint120 ratio;
+        uint8 ratioType;
+        uint128 countdownLength;
     }
 
     event Initialized(
         address buyer,
         address seller,
+        address operator,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 countdownLength,
@@ -53,7 +60,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator,
         uint256 paymentAmount,
         uint256 stakeAmount,
-        uint256 countdownLength,
+        uint256 escrowCountdown,
         bytes memory metadata,
         bytes memory agreementParams
     ) public initializeTemplate() {
@@ -71,23 +78,32 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // set amounts if defined
         if (paymentAmount != uint256(0))
-            _data.paymentAmount = paymentAmount;
+            require(paymentAmount <= uint256(uint128(paymentAmount)), "paymentAmount is too large");
+            _data.paymentAmount = uint128(paymentAmount);
         if (stakeAmount != uint256(0))
-            _data.stakeAmount = stakeAmount;
+            require(stakeAmount == uint256(uint128(stakeAmount)), "stakeAmount is too large");
+            _data.stakeAmount = uint128(stakeAmount);
 
         // set countdown length
-        Countdown._setLength(countdownLength);
+        Countdown._setLength(escrowCountdown);
 
         // set metadata
         if (metadata.length != 0)
             EventMetadata._setMetadata(metadata);
 
         // set agreementParams
-        if (agreementParams.length != 0)
-            _data.agreementParams = agreementParams;
+        if (agreementParams.length != 0) {
+            (
+                uint120 ratio,
+                uint8 ratioType,
+                uint128 agreementCountdown
+            ) = abi.decode(agreementParams, (uint120, uint8, uint128));
+
+            _data.agreementParams = AgreementParams(ratio, ratioType, agreementCountdown);
+        }
 
         // emit event
-        emit Initialized(buyer, seller, paymentAmount, stakeAmount, countdownLength, metadata, agreementParams);
+        emit Initialized(buyer, seller, operator, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
     }
 
     /// @notice Emit metadata event
@@ -117,8 +133,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
 
         // Add the stake amount
-        if (_data.stakeAmount != uint256(0))
-            Staking._addStake(_data.seller, msg.sender, uint256(0), _data.stakeAmount);
+        if (uint256(_data.stakeAmount) != uint256(0))
+            Staking._addStake(_data.seller, msg.sender, uint256(0), uint256(_data.stakeAmount));
 
         // If payment is deposited, finalize the escrow
         if (isPaymentDeposited())
@@ -126,7 +142,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             finalize();
 
         // emit event
-        emit StakeDeposited(_data.seller, _data.stakeAmount);
+        emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
     }
 
     /// @notice Deposit Payment
@@ -145,8 +161,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
 
         // Add the payment as a stake
-        if (_data.paymentAmount != uint256(0))
-            Staking._addStake(_data.buyer, msg.sender, uint256(0), _data.paymentAmount);
+        if (uint256(_data.paymentAmount) != uint256(0))
+            Staking._addStake(_data.buyer, msg.sender, uint256(0), uint256(_data.paymentAmount));
 
         // If stake is deposited, start countdown for seller to finalize
         if (isStakeDeposited())
@@ -154,7 +170,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             Countdown._start();
 
         // emit event
-        emit PaymentDeposited(_data.buyer, _data.paymentAmount);
+        emit PaymentDeposited(_data.buyer, uint256(_data.paymentAmount));
     }
 
     /// @notice Finalize escrow and execute completion script
@@ -175,26 +191,23 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address agreement;
         {
             // get the agreement factory address
+
             address escrowFactory = Template.getFactory();
             address escrowRegistry = iFactory(escrowFactory).getInstanceRegistry();
             address agreementFactory = abi.decode(iRegistry(escrowRegistry).getFactoryData(escrowFactory), (address));
-            // decode agreement initialization parameters
-            (
-                uint256 ratio,
-                uint8 ratioType,
-                uint256 countdownLength
-            ) = abi.decode(_data.agreementParams, (uint256, uint8, uint256));
+
             // encode initialization function
             bytes memory initCalldata = abi.encodeWithSignature(
                 'initialize',
                 address(this),
                 _data.seller,
                 _data.buyer,
-                ratio,
-                ratioType,
-                countdownLength,
+                uint256(_data.agreementParams.ratio),
+                _data.agreementParams.ratioType,
+                uint256(_data.agreementParams.countdownLength),
                 bytes("0x")
             );
+
             // deploy and initialize agreement contract
             agreement = iFactory(agreementFactory).create(initCalldata);
         }
@@ -203,11 +216,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         uint256 totalStake;
         {
-            if (_data.paymentAmount != uint256(0))
+            if (uint256(_data.paymentAmount) != uint256(0))
                 Staking._removeFullStake(_data.buyer);
-            if (_data.stakeAmount != uint256(0))
+            if (uint256(_data.stakeAmount) != uint256(0))
                 Staking._removeFullStake(_data.seller);
-            totalStake = _data.paymentAmount.add(_data.stakeAmount);
+            totalStake = uint256(_data.paymentAmount).add(uint256(_data.stakeAmount));
         }
 
         CountdownGriefing(agreement).increaseStake(0, totalStake);
@@ -253,11 +266,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isDeposited() || Countdown.isOver(), "only after deposit and countdown");
 
         // return stake to seller
-        if (_data.stakeAmount != uint256(0))
+        if (uint256(_data.stakeAmount) != uint256(0))
             Staking._takeFullStake(_data.seller, _data.seller);
 
         // return payment to buyer
-        if (_data.paymentAmount != uint256(0))
+        if (uint256(_data.paymentAmount) != uint256(0))
             Staking._takeFullStake(_data.buyer, _data.buyer);
 
         // update status
@@ -269,24 +282,50 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     /// View functions
 
-    /// @notice Return true iff caller is seller
-    function isSeller(address caller) public view returns (bool validity) {
-        return caller == _data.seller;
+    function getBuyer() public view returns (address buyer) {
+        return _data.buyer;
     }
 
     /// @notice Return true iff caller is buyer
     function isBuyer(address caller) public view returns (bool validity) {
-        return caller == _data.buyer;
+        return caller == getBuyer();
+    }
+
+    function getSeller() public view returns (address seller) {
+        return _data.seller;
+    }
+
+    /// @notice Return true iff caller is seller
+    function isSeller(address caller) public view returns (bool validity) {
+        return caller == getSeller();
     }
 
     /// @notice Return true iff depositStake() has been called successfully
     function isStakeDeposited() public view returns (bool validity) {
-        return Staking.getStake(_data.seller) == _data.stakeAmount;
+        return Staking.getStake(_data.seller) == uint256(_data.stakeAmount);
     }
 
     /// @notice Return true iff depositPayment() has been called successfully
     function isPaymentDeposited() public view returns (bool validity) {
-        return Staking.getStake(_data.buyer) == _data.paymentAmount;
+        return Staking.getStake(_data.buyer) == uint256(_data.paymentAmount);
+    }
+
+    function getData() public view returns (
+        uint128 paymentAmount,
+        uint128 stakeAmount,
+        EscrowStatus status,
+        uint120 ratio,
+        uint8 ratioType,
+        uint128 countdownLength
+    ) {
+        return (
+            _data.paymentAmount,
+            _data.stakeAmount,
+            _data.status,
+            _data.agreementParams.ratio,
+            _data.agreementParams.ratioType,
+            _data.agreementParams.countdownLength
+        );
     }
 
     enum EscrowStatus { isOpen, isDeposited, isFinalized, isCancelled }
