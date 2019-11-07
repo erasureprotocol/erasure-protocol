@@ -1,4 +1,5 @@
 const assert = require('assert')
+const isBase64 = require('is-base64');
 const ErasureHelper = require('../index')
 
 describe('ipfs', () => {
@@ -26,6 +27,7 @@ describe('crypto', () => {
       it('should return a base64 string of length 44', () => {
         const key = ErasureHelper.crypto.symmetric.generateKey()
         assert.equal(key.length, 44)
+        assert(isBase64(key))
       })
     })
     describe('encryptMessage and decryptMessage', () => {
