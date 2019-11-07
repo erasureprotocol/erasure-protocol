@@ -67,11 +67,11 @@ const ErasureHelper = {
     asymmetric: {
       generateKeyPair: (sig, salt) => tweetnacl.box.keyPair.fromSecretKey(pbkdf2.pbkdf2Sync(sig, salt, 1000, 32)),
       generateNonce: () => tweetnacl.randomBytes(NONCE_LENGTH),
-      encryptMessage: (msg, nonce, publicKey, secretKey) => { // publicKey of receiver, secretKey of sender
+      encryptMessage: (msg, nonce, publicKey, secretKey) => {
         const encodedMessage = encoder.encode(msg)
         return tweetnacl.box(encodedMessage, nonce, publicKey, secretKey)
       },
-      decryptMessage: (box, nonce, publicKey, secretKey) => { // publicKey of sender and secretKey of receiver, or vice versa (both work)
+      decryptMessage: (box, nonce, publicKey, secretKey) => {
         const encodedMessage = tweetnacl.box.open(box, nonce, publicKey, secretKey)
         return decoder.decode(encodedMessage)
       },
