@@ -15,7 +15,7 @@
     "crypto",
     "ipfs"
   ],
-  "author": "James Geary",
+  "author": "James Geary <james@numer.ai>",
   "license": "MIT",
   "dependencies": {
     "fernet": "^0.3.1",
