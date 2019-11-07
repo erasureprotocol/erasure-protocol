@@ -1,0 +1,32 @@
+{
+  "name": "@erasure/crypto-ipfs",
+  "version": "1.0.0",
+  "description": "asymmetric and symmetric crypto for use with erasure, ipfs and private backend. warning: unaudited.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erasureprotocol/erasure-protocol/tree/master/packages/crypto-ipfs"
+  },
+  "keywords": [
+    "erasure",
+    "crypto",
+    "ipfs"
+  ],
+  "author": "James Geary",
+  "license": "MIT",
+  "dependencies": {
+    "fernet": "^0.3.1",
+    "get-random-values": "^1.2.0",
+    "ipfs-only-hash": "^1.0.2",
+    "multihashes": "^0.4.15",
+    "pbkdf2": "^3.0.17",
+    "tweetnacl": "^1.0.1"
+  },
+  "devDependencies": {
+    "is-base64": "^1.0.0",
+    "mocha": "^6.2.2"
+  }
+}
