@@ -46,9 +46,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         bytes agreementParams
     );
     event DataSubmitted(bytes data);
-    event StakeDeposited(address seller, uint256 stake);
-    event PaymentDeposited(address buyer, uint256 payment);
-    event Finalized();
+    event StakeDeposited(address seller, uint256 amount);
+    event PaymentDeposited(address buyer, uint256 amount);
+    event Finalized(address agreement);
     event Cancelled();
 
     /// @notice Constructor
@@ -136,13 +136,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         if (uint256(_data.stakeAmount) != uint256(0))
             Staking._addStake(_data.seller, msg.sender, uint256(0), uint256(_data.stakeAmount));
 
+        // emit event
+        emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
+
         // If payment is deposited, finalize the escrow
         if (isPaymentDeposited())
             _data.status = EscrowStatus.isDeposited;
             finalize();
-
-        // emit event
-        emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
     }
 
     /// @notice Deposit Payment
@@ -198,14 +198,14 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
             // encode initialization function
             bytes memory initCalldata = abi.encodeWithSignature(
-                'initialize',
+                'initialize(address,address,address,uint256,uint8,uint256,bytes)',
                 address(this),
                 _data.seller,
                 _data.buyer,
                 uint256(_data.agreementParams.ratio),
                 _data.agreementParams.ratioType,
                 uint256(_data.agreementParams.countdownLength),
-                bytes("0x")
+                bytes("")
             );
 
             // deploy and initialize agreement contract
@@ -223,6 +223,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             totalStake = uint256(_data.paymentAmount).add(uint256(_data.stakeAmount));
         }
 
+        require(IERC20(BurnNMR.getToken()).approve(agreement, totalStake), "token approval failed");
         CountdownGriefing(agreement).increaseStake(0, totalStake);
 
         // start agreement countdown
@@ -236,8 +237,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // update status
         _data.status = EscrowStatus.isFinalized;
 
+        // delete storage
+        delete _data.paymentAmount;
+        delete _data.stakeAmount;
+        delete _data.agreementParams;
+
         // emit event
-        emit Finalized();
+        emit Finalized(agreement);
     }
 
     /// @notice Submit data to the buyer
@@ -247,7 +253,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // restrict access control
         require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
         // restrict state machine
-        require(isDeposited(), "only after deposit");
+        require(isFinalized(), "only after finalized");
 
         // emit event
         emit DataSubmitted(data);
@@ -261,20 +267,25 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: before depositStake() OR before depositPayment() OR after Countdown.isOver()
     function cancel() public {
         // restrict access control
-        require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
+        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
         // restrict state machine
         require(!isDeposited() || Countdown.isOver(), "only after deposit and countdown");
 
         // return stake to seller
-        if (uint256(_data.stakeAmount) != uint256(0))
+        if (Staking.getStake(_data.seller) != 0)
             Staking._takeFullStake(_data.seller, _data.seller);
 
         // return payment to buyer
-        if (uint256(_data.paymentAmount) != uint256(0))
+        if (Staking.getStake(_data.buyer) != 0)
             Staking._takeFullStake(_data.buyer, _data.buyer);
 
         // update status
         _data.status = EscrowStatus.isCancelled;
+
+        // delete storage
+        delete _data.paymentAmount;
+        delete _data.stakeAmount;
+        delete _data.agreementParams;
 
         // emit event
         emit Cancelled();
