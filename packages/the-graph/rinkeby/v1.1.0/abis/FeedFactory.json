@@ -1,0 +1,208 @@
+[
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceType",
+    "outputs": [
+      { "internalType": "bytes4", "name": "instanceType", "type": "bytes4" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getTemplate",
+    "outputs": [
+      { "internalType": "address", "name": "template", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInitSelector",
+    "outputs": [
+      { "internalType": "bytes4", "name": "initSelector", "type": "bytes4" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes", "name": "callData", "type": "bytes" },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" }
+    ],
+    "name": "createSalty",
+    "outputs": [
+      { "internalType": "address", "name": "instance", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "address", "name": "instance", "type": "address" }
+    ],
+    "name": "getInstanceCreator",
+    "outputs": [
+      { "internalType": "address", "name": "creator", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "bytes", "name": "callData", "type": "bytes" }
+    ],
+    "name": "getNextInstance",
+    "outputs": [
+      { "internalType": "address", "name": "target", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceRegistry",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "instanceRegistry",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceCount",
+    "outputs": [
+      { "internalType": "uint256", "name": "count", "type": "uint256" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "startIndex", "type": "uint256" },
+      { "internalType": "uint256", "name": "endIndex", "type": "uint256" }
+    ],
+    "name": "getPaginatedInstances",
+    "outputs": [
+      { "internalType": "address[]", "name": "instances", "type": "address[]" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "bytes", "name": "callData", "type": "bytes" }
+    ],
+    "name": "create",
+    "outputs": [
+      { "internalType": "address", "name": "instance", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstances",
+    "outputs": [
+      { "internalType": "address[]", "name": "instances", "type": "address[]" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "getInstance",
+    "outputs": [
+      { "internalType": "address", "name": "instance", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "internalType": "bytes", "name": "callData", "type": "bytes" },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" }
+    ],
+    "name": "getSaltyInstance",
+    "outputs": [
+      { "internalType": "address", "name": "target", "type": "address" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "instanceRegistry",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "templateContract",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "instance",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "callData",
+        "type": "bytes"
+      }
+    ],
+    "name": "InstanceCreated",
+    "type": "event"
+  }
+]

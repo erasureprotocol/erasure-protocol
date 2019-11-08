@@ -1,0 +1,222 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: FeedFactory
+    network: rinkeby
+    source:
+      address: "0xa3140871346f4efF924dc874EC6AfD4573232F03"
+      abi: FeedFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InstanceCreatedFeedFactory
+      abis:
+        - name: FeedFactory
+          file: ./abis/FeedFactory.json
+      eventHandlers:
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedFeedFactory
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: PostFactory
+    network: rinkeby
+    source:
+      address: "0xbd1E2C679ED25485e27e5AD8eD3a2776769d22aF"
+      abi: PostFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InstanceCreatedPostFactory
+      abis:
+        - name: PostFactory
+          file: ./abis/PostFactory.json
+      eventHandlers:
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedPostFactory
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: CountdownGriefingFactory
+    network: rinkeby
+    source:
+      address: "0xc5B883Db107Cc9927F9c6E18bc603A5d9FcE7074"
+      abi: CountdownGriefingFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InstanceCreatedCountdownGriefingFactory
+      abis:
+        - name: CountdownGriefingFactory
+          file: ./abis/CountdownGriefingFactory.json
+      eventHandlers:
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedCountdownGriefingFactory
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: SimpleGriefingFactory
+    network: rinkeby
+    source:
+      address: "0x5B0d1Db5f266E97f739685b788C5F1DE3E325b25"
+      abi: SimpleGriefingFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InstanceCreatedSimpleGriefingFactory
+      abis:
+        - name: SimpleGriefingFactory
+          file: ./abis/SimpleGriefingFactory.json
+      eventHandlers:
+        - event: InstanceCreated(indexed address,indexed address,bytes)
+          handler: handleInstanceCreatedSimpleGriefingFactory
+      file: ./src/mapping.ts
+templates:
+  - name: Feed
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: Feed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InitializedFeed
+        - HashSubmittedFeed
+        - HashFormatSetFeed
+        - OperatorUpdatedFeed
+        - MetadataSetFeed
+      file: ./src/mapping.ts
+      abis:
+        - name: Feed
+          file: ./abis/Feed.json
+      eventHandlers:
+        - event: Initialized(address,bytes,bytes)
+          handler: handleInitializedFeed
+        - event: HashSubmitted(bytes32)
+          handler: handleHashSubmittedFeed
+        - event: HashFormatSet(uint8,uint8)
+          handler: handleHashFormatSetFeed
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedFeed
+        - event: MetadataSet(bytes)
+          handler: handleMetadataSetFeed
+  - name: Post
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: Post
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InitializedPost
+        - ProofHashSetPost
+        - OperatorUpdatedPost
+        - MetadataSetPost
+      file: ./src/mapping.ts
+      abis:
+        - name: Post
+          file: ./abis/Post.json
+      eventHandlers:
+        - event: Initialized(address,bytes,bytes)
+          handler: handleInitializedPost
+        - event: ProofHashSet(address,bytes)
+          handler: handleProofHashSetPost
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedPost
+        - event: MetadataSet(bytes)
+          handler: handleMetadataSetPost
+  - name: CountdownGriefing
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: CountdownGriefing
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InitializedCountdownGriefing
+        - RatioSetCountdownGriefing
+        - GriefedCountdownGriefing
+        - LengthSetCountdownGriefing
+        - OperatorUpdatedCountdownGriefing
+        - MetadataSetCountdownGriefing
+        - StakeAddedCountdownGriefing
+        - StakeTakenCountdownGriefing
+        - StakeBurnedCountdownGriefing
+        - DeadlineSetCountdownGriefing
+      file: ./src/mapping.ts
+      abis:
+        - name: CountdownGriefing
+          file: ./abis/CountdownGriefing.json
+      eventHandlers:
+        - event: Initialized(address,address,address,uint256,uint8,uint256,bytes)
+          handler: handleInitializedCountdownGriefing
+        - event: RatioSet(address,uint256,uint8)
+          handler: handleRatioSetCountdownGriefing
+        - event: Griefed(address,address,uint256,uint256,bytes)
+          handler: handleGriefedCountdownGriefing
+        - event: LengthSet(uint256)
+          handler: handleLengthSetCountdownGriefing
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedCountdownGriefing
+        - event: MetadataSet(bytes)
+          handler: handleMetadataSetCountdownGriefing
+        - event: StakeAdded(address,address,uint256,uint256)
+          handler: handleStakeAddedCountdownGriefing
+        - event: StakeTaken(address,address,uint256,uint256)
+          handler: handleStakeTakenCountdownGriefing
+        - event: StakeBurned(address,uint256,uint256)
+          handler: handleStakeBurnedCountdownGriefing
+        - event: DeadlineSet(uint256)
+          handler: handleDeadlineSetCountdownGriefing
+  - name: SimpleGriefing
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: SimpleGriefing
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - InitializedSimpleGriefing
+        - RatioSetSimpleGriefing
+        - GriefedSimpleGriefing
+        - OperatorUpdatedSimpleGriefing
+        - MetadataSetSimpleGriefing
+        - StakeAddedSimpleGriefing
+        - StakeTakenSimpleGriefing
+        - StakeBurnedSimpleGriefing
+      file: ./src/mapping.ts
+      abis:
+        - name: SimpleGriefing
+          file: ./abis/SimpleGriefing.json
+      eventHandlers:
+        - event: Initialized(address,address,address,uint256,uint8,bytes)
+          handler: handleInitializedSimpleGriefing
+        - event: RatioSet(address,uint256,uint8)
+          handler: handleRatioSetSimpleGriefing
+        - event: Griefed(address,address,uint256,uint256,bytes)
+          handler: handleGriefedSimpleGriefing
+        - event: OperatorUpdated(address,bool)
+          handler: handleOperatorUpdatedSimpleGriefing
+        - event: MetadataSet(bytes)
+          handler: handleMetadataSetSimpleGriefing
+        - event: StakeAdded(address,address,uint256,uint256)
+          handler: handleStakeAddedSimpleGriefing
+        - event: StakeTaken(address,address,uint256,uint256)
+          handler: handleStakeTakenSimpleGriefing
+        - event: StakeBurned(address,uint256,uint256)
+          handler: handleStakeBurnedSimpleGriefing
