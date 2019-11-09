@@ -135,7 +135,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             _data.seller = msg.sender;
         }
         // restrict state machine
-        require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
+        require(isOpen() || onlyPaymentDeposited(), "can only deposit stake once");
 
         // Add the stake amount
         if (uint256(_data.stakeAmount) != uint256(0)) {
@@ -146,9 +146,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
 
         // If payment is deposited, finalize the escrow
-        if (isPaymentDeposited()) {
+        if (onlyPaymentDeposited()) {
             _data.status = EscrowStatus.isDeposited;
             finalize();
+        } else {
+            _data.status = EscrowStatus.onlyStakeDeposited;
         }
 
     }
@@ -166,21 +168,24 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             _data.buyer = msg.sender;
         }
         // restrict state machine
-        require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
+        require(isOpen() || onlyStakeDeposited(), "can only deposit payment once");
 
         // Add the payment as a stake
         if (uint256(_data.paymentAmount) != uint256(0)) {
             Staking._addStake(_data.buyer, msg.sender, uint256(0), uint256(_data.paymentAmount));
         }
 
-        // If stake is deposited, start countdown for seller to finalize
-        if (isStakeDeposited()) {
-            _data.status = EscrowStatus.isDeposited;
-            Countdown._start();
-        }
-
         // emit event
         emit PaymentDeposited(_data.buyer, uint256(_data.paymentAmount));
+
+        // If stake is deposited, start countdown for seller to finalize
+        if (onlyStakeDeposited()) {
+            _data.status = EscrowStatus.isDeposited;
+            Countdown._start();
+        } else {
+            _data.status = EscrowStatus.onlyPaymentDeposited;
+        }
+        
     }
 
     /// @notice Finalize escrow and execute completion script
@@ -269,18 +274,38 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit DataSubmitted(data);
     }
 
-    /// @notice Finalize escrow and execute completion script
+    /// @notice Cancel escrow because no interested counterparty
+    ///          - return deposit to caller
+    ///          - close escrow
+    /// @dev Access Control: seller OR buyer OR operator
+    ///      State Machine: before depositStake() OR before depositPayment()
+    function cancel() public {
+        // restrict access control
+        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or buyer or active operator");
+        // restrict state machine
+        require(isOpen() || onlyStakeDeposited() || onlyPaymentDeposited(), "only before deposits are completed");
+
+        // cancel escrow and return deposits
+        _cancel();
+    }
+
+    /// @notice Cancel escrow if seller does not finalize
     ///          - return stake to seller
     ///          - return payment to buyer
     ///          - close escrow
-    /// @dev Access Control: seller OR buyer OR operator
-    ///      State Machine: before depositStake() OR before depositPayment() OR after Countdown.isOver()
-    function cancel() public {
+    /// @dev Access Control: buyer OR operator
+    ///      State Machine: after Countdown.isOver()
+    function timeout() public {
         // restrict access control
-        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
+        require(isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
         // restrict state machine
-        require(!isDeposited() || Countdown.isOver(), "only after deposit and countdown");
+        require(Countdown.isOver(), "only after countdown ended");
 
+        // cancel escrow and return deposits
+        _cancel();
+    }
+
+    function _cancel() private {
         // return stake to seller
         if (Staking.getStake(_data.seller) != 0) {
             Staking._takeFullStake(_data.seller, _data.seller);
@@ -323,16 +348,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return caller == getSeller();
     }
 
-    /// @notice Return true iff depositStake() has been called successfully
-    function isStakeDeposited() public view returns (bool validity) {
-        return Staking.getStake(_data.seller) == uint256(_data.stakeAmount);
-    }
-
-    /// @notice Return true iff depositPayment() has been called successfully
-    function isPaymentDeposited() public view returns (bool validity) {
-        return Staking.getStake(_data.buyer) == uint256(_data.paymentAmount);
-    }
-
     function getData() public view returns (
         uint128 paymentAmount,
         uint128 stakeAmount,
@@ -351,9 +366,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         );
     }
 
-    enum EscrowStatus { isOpen, isDeposited, isFinalized, isCancelled }
+    enum EscrowStatus { isOpen, onlyStakeDeposited, onlyPaymentDeposited, isDeposited, isFinalized, isCancelled }
     /// @notice Return the status of the state machine
-    ///          - isOpen: deposits are not completed
+    ///          - isOpen: initialized but no deposits made
+    ///          - onlyStakeDeposited: only stake deposit completed
+    ///          - onlyPaymentDeposited: only payment deposit completed
     ///          - isDeposited: both payment and stake deposit is completed
     ///          - isFinalized: the escrow completed successfully
     ///          - isCancelled: the escrow was cancelled
@@ -363,6 +380,14 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     function isOpen() public view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isOpen;
+    }
+
+    function onlyStakeDeposited() public view returns (bool validity) {
+        return getEscrowStatus() == EscrowStatus.onlyStakeDeposited;
+    }
+
+    function onlyPaymentDeposited() public view returns (bool validity) {
+        return getEscrowStatus() == EscrowStatus.onlyPaymentDeposited;
     }
 
     function isDeposited() public view returns (bool validity) {

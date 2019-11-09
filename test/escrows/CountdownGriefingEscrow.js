@@ -185,10 +185,8 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal((await g.Instance.getBuyer()), _buyer);
         assert.equal((await g.Instance.isBuyer(_buyer)), true);
         assert.equal((await g.Instance.getStake(_buyer)).toString(), paymentAmount.toString());
-        assert.equal((await g.Instance.isStakeDeposited()), false);
-        assert.equal((await g.Instance.isPaymentDeposited()), true);
-        assert.equal((await g.Instance.isDeposited()), false);
-        assert.equal((await g.Instance.getEscrowStatus()), 0);
+        assert.equal((await g.Instance.onlyPaymentDeposited()), true);
+        assert.equal((await g.Instance.getEscrowStatus()), 2);
 
     };
 
@@ -227,10 +225,8 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal((await g.Instance.getSeller()), _seller);
         assert.equal((await g.Instance.isSeller(_seller)), true);
         assert.equal((await g.Instance.getStake(_seller)).toString(), stakeAmount.toString());
-        assert.equal((await g.Instance.isStakeDeposited()), true);
-        assert.equal((await g.Instance.isPaymentDeposited()), false);
-        assert.equal((await g.Instance.isDeposited()), false);
-        assert.equal((await g.Instance.getEscrowStatus()), 0);
+        assert.equal((await g.Instance.onlyStakeDeposited()), true);
+        assert.equal((await g.Instance.getEscrowStatus()), 1);
 
     };
 
@@ -340,9 +336,7 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal((await g.Instance.getBuyer()), requester);
                 assert.equal((await g.Instance.isBuyer(requester)), true);
                 assert.equal((await g.Instance.getStake(requester)).toNumber(), 0);
-                assert.equal((await g.Instance.isStakeDeposited()), true);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
-                assert.equal((await g.Instance.getEscrowStatus()), 2);
+                assert.equal((await g.Instance.getEscrowStatus()), 4);
 
             });
 
@@ -404,8 +398,7 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getStake(requester)).toNumber(), 0);
-                assert.equal((await g.Instance.getEscrowStatus()), 3);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
+                assert.equal((await g.Instance.getEscrowStatus()), 5);
 
             });
         });
@@ -469,10 +462,7 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal((await g.Instance.getBuyer()), buyer);
                 assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toString(), paymentAmount.toString());
-                assert.equal((await g.Instance.isStakeDeposited()), true);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
-                assert.equal((await g.Instance.isDeposited()), true);
-                assert.equal((await g.Instance.getEscrowStatus()), 1);
+                assert.equal((await g.Instance.getEscrowStatus()), 3);
                 assert.equal((await g.Instance.getCountdownStatus()), 2);
 
             });
@@ -529,9 +519,7 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal((await g.Instance.getBuyer()), buyer);
                 assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toNumber(), 0);
-                assert.equal((await g.Instance.isStakeDeposited()), true);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
-                assert.equal((await g.Instance.getEscrowStatus()), 2);
+                assert.equal((await g.Instance.getEscrowStatus()), 4);
 
             });
 
@@ -591,8 +579,7 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getStake(seller)).toNumber(), 0);
-                assert.equal((await g.Instance.getEscrowStatus()), 3);
-                assert.equal((await g.Instance.isStakeDeposited()), true);
+                assert.equal((await g.Instance.getEscrowStatus()), 5);
 
             });
         });
@@ -654,15 +641,12 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal((await g.Instance.getBuyer()), buyer);
                 assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toString(), paymentAmount.toString());
-                assert.equal((await g.Instance.isStakeDeposited()), true);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
-                assert.equal((await g.Instance.isDeposited()), true);
-                assert.equal((await g.Instance.getEscrowStatus()), 1);
+                assert.equal((await g.Instance.getEscrowStatus()), 3);
                 assert.equal((await g.Instance.getCountdownStatus()), 2);
 
             });
 
-            it("buyer should successfully cancel", async function () {
+            it("buyer should successfully timeout", async function () {
 
                 // time travel
 
@@ -671,7 +655,7 @@ describe("CountdownGriefingEscrow", function () {
                 // cancel escrow
 
                 let events = {};
-                const tx = await g.Instance.from(buyer).cancel();
+                const tx = await g.Instance.from(buyer).timeout();
                 const receipt = await g.Instance.verboseWaitForTransaction(tx);
 
                 // validate events
@@ -704,9 +688,7 @@ describe("CountdownGriefingEscrow", function () {
 
                 assert.equal((await g.Instance.getStake(seller)).toNumber(), 0);
                 assert.equal((await g.Instance.getStake(buyer)).toNumber(), 0);
-                assert.equal((await g.Instance.getEscrowStatus()), 3);
-                assert.equal((await g.Instance.isStakeDeposited()), true);
-                assert.equal((await g.Instance.isPaymentDeposited()), true);
+                assert.equal((await g.Instance.getEscrowStatus()), 5);
 
             });
         });
