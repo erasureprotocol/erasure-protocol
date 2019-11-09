@@ -17,7 +17,9 @@ const AgreementTemplate_Artifact = require("../../build/CountdownGriefing.json")
 const AgreementFactory_Artifact = require("../../build/CountdownGriefing_Factory.json");
 const AgreementRegistry_Artifact = require("../../build/Erasure_Agreements.json");
 
-// artifacts
+// global
+
+var g = {};
 
 describe("CountdownGriefingEscrow", function () {
 
@@ -39,50 +41,47 @@ describe("CountdownGriefingEscrow", function () {
     // ABICoder
     const AbiCoder = new ethers.utils.AbiCoder();
 
-    before(async () => {
+    before(async function () {
 
-        // setup deployment describe
-        [this.deployer, this.MockNMR] = await setupDeployment();
-        [this.deployer, this.MockNMR] = await initDeployment();
+        // setup deployment
+        [g.deployer, g.MockNMR] = await setupDeployment();
+        [g.deployer, g.MockNMR] = await initDeployment();
 
         // deploy registry contracts
-        this.Registry = await this.deployer.deploy(Registry_Artifact);
-        this.AgreementRegistry = await this.deployer.deploy(AgreementRegistry_Artifact);
+        g.Registry = await g.deployer.deploy(Registry_Artifact);
+        g.AgreementRegistry = await g.deployer.deploy(AgreementRegistry_Artifact);
 
         // deploy template contracts
-        this.Template = await this.deployer.deploy(Template_Artifact);
-        this.AgreementTemplate = await this.deployer.deploy(AgreementTemplate_Artifact);
+        g.Template = await g.deployer.deploy(Template_Artifact);
+        g.AgreementTemplate = await g.deployer.deploy(AgreementTemplate_Artifact);
 
         // deploy factory contracts
-        console.log('binding factory pre');
-
-        this.Factory = await this.deployer.deploy(
+        g.Factory = await g.deployer.deploy(
             Factory_Artifact,
             false,
-            this.Registry.contractAddress,
-            this.Template.contractAddress
+            g.Registry.contractAddress,
+            g.Template.contractAddress
         );
-        console.log('binding factory post');
-        this.AgreementFactory = await this.deployer.deploy(
+        g.AgreementFactory = await g.deployer.deploy(
             AgreementFactory_Artifact,
             false,
-            this.AgreementRegistry.contractAddress,
-            this.AgreementTemplate.contractAddress
+            g.AgreementRegistry.contractAddress,
+            g.AgreementTemplate.contractAddress
         );
 
         // register factories in registries
-        const abiCodedAddress = AbiCoder.encode(['address'], [this.AgreementFactory.contractAddress]);
-        await this.Registry.from(this.deployer.signer).addFactory(
-            this.Factory.contractAddress,
+        const abiCodedAddress = AbiCoder.encode(['address'], [g.AgreementFactory.contractAddress]);
+        await g.Registry.from(g.deployer.signer).addFactory(
+            g.Factory.contractAddress,
             abiCodedAddress
         );
-        await this.AgreementRegistry.from(this.deployer.signer).addFactory(
-            this.AgreementFactory.contractAddress,
+        await g.AgreementRegistry.from(g.deployer.signer).addFactory(
+            g.AgreementFactory.contractAddress,
             "0x"
         );
 
         // snapshot state
-        this.initSnapshot = await utils.snapshot(this.deployer.provider);
+        g.initSnapshot = await utils.snapshot(g.deployer.provider);
 
     });
 
@@ -101,26 +100,23 @@ describe("CountdownGriefingEscrow", function () {
         // deploy escrow contract
 
         let events = {};
-        // console.log(this);
 
-        console.log('user factory pre');
-        const tx = await this.Factory.from(_creator).create(calldata);
-        console.log('user factory post');
-        const receipt = await this.Factory.verboseWaitForTransaction(tx);
+        const tx = await g.Factory.from(_creator).create(calldata);
+        const receipt = await g.Factory.verboseWaitForTransaction(tx);
 
         // get escrow contract
 
-        [events.InstanceCreated] = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
+        [events.InstanceCreated] = utils.parseLogs(receipt, g.Factory, "InstanceCreated");
         const instanceAddress = events.InstanceCreated.instance;
 
-        this.Instance = this.deployer.wrapDeployedContract(
+        g.Instance = g.deployer.wrapDeployedContract(
             Template_Artifact,
             instanceAddress
         );
 
         // validate events
 
-        [events.Initialized] = utils.parseLogs(receipt, this.Instance, "Initialized");
+        [events.Initialized] = utils.parseLogs(receipt, g.Instance, "Initialized");
 
         assert.equal(events.Initialized.buyer, _buyer);
         assert.equal(events.Initialized.seller, _seller);
@@ -133,18 +129,18 @@ describe("CountdownGriefingEscrow", function () {
 
         // validate state change
 
-        assert.equal((await this.Instance.getBuyer()), _buyer);
-        assert.equal((await this.Instance.isBuyer(_buyer)), true);
-        assert.equal((await this.Instance.getSeller()), _seller);
-        assert.equal((await this.Instance.isSeller(_seller)), true);
-        assert.equal((await this.Instance.getOperator()), _operator);
-        assert.equal((await this.Instance.isOperator(_operator)), true);
-        assert.equal((await this.Instance.hasActiveOperator()), false);
-        assert.equal((await this.Instance.isActiveOperator(_operator)), false);
-        assert.equal((await this.Instance.getLength()), escrowCountdown);
-        assert.equal((await this.Instance.getEscrowStatus()), 0);
+        assert.equal((await g.Instance.getBuyer()), _buyer);
+        assert.equal((await g.Instance.isBuyer(_buyer)), true);
+        assert.equal((await g.Instance.getSeller()), _seller);
+        assert.equal((await g.Instance.isSeller(_seller)), true);
+        assert.equal((await g.Instance.getOperator()), _operator);
+        assert.equal((await g.Instance.isOperator(_operator)), true);
+        assert.equal((await g.Instance.hasActiveOperator()), false);
+        assert.equal((await g.Instance.isActiveOperator(_operator)), false);
+        assert.equal((await g.Instance.getLength()), escrowCountdown);
+        assert.equal((await g.Instance.getEscrowStatus()), 0);
 
-        const data = await this.Instance.getData();
+        const data = await g.Instance.getData();
         assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
         assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
         assert.equal(data.status, 0);
@@ -152,30 +148,27 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal(data.ratioType, 2);
         assert.equal(data.countdownLength, agreementCountdown);
 
-        return this.Instance;
-
     };
 
     async function depositPayment(_buyer) {
 
         // mint tokens 
 
-        await this.MockNMR.mintMockTokens(requester, paymentAmount);
+        await g.MockNMR.mintMockTokens(_buyer, paymentAmount);
+        await g.MockNMR.from(_buyer).approve(g.Instance.contractAddress, paymentAmount);
 
         // deposit NMR in the escrow
 
-        const approveTx = await this.MockNMR.from(_buyer).approve(this.Instance.contractAddress, paymentAmount);
-        const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-        const depositTx = await this.Instance.from(_buyer).depositPayment();
-        const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
+        const depositTx = await g.Instance.from(_buyer).depositPayment();
+        const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
         let events = {};
 
         // validate events
 
-        [events.PaymentDeposited] = utils.parseLogs(depositReceipt, this.Instance, "PaymentDeposited");
-        [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-        [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
+        [events.PaymentDeposited] = utils.parseLogs(receipt, g.Instance, "PaymentDeposited");
+        [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+        [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
         assert.equal(events.PaymentDeposited.buyer, _buyer);
         assert.equal(events.PaymentDeposited.amount.toString(), paymentAmount.toString());
@@ -184,18 +177,18 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString());
         assert.equal(events.StakeAdded.newStake.toString(), paymentAmount.toString());
         assert.equal(events.Transfer.from, _buyer);
-        assert.equal(events.Transfer.to, this.Instance.contractAddress);
+        assert.equal(events.Transfer.to, g.Instance.contractAddress);
         assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
 
         // validate state change
 
-        assert.equal((await this.Instance.getBuyer()), _buyer);
-        assert.equal((await this.Instance.isBuyer(_buyer)), true);
-        assert.equal((await this.Instance.getStake(_buyer)).toString(), paymentAmount.toString());
-        assert.equal((await this.Instance.isStakeDeposited()), false);
-        assert.equal((await this.Instance.isPaymentDeposited()), true);
-        assert.equal((await this.Instance.isDeposited()), false);
-        assert.equal((await this.Instance.getEscrowStatus()), 0);
+        assert.equal((await g.Instance.getBuyer()), _buyer);
+        assert.equal((await g.Instance.isBuyer(_buyer)), true);
+        assert.equal((await g.Instance.getStake(_buyer)).toString(), paymentAmount.toString());
+        assert.equal((await g.Instance.isStakeDeposited()), false);
+        assert.equal((await g.Instance.isPaymentDeposited()), true);
+        assert.equal((await g.Instance.isDeposited()), false);
+        assert.equal((await g.Instance.getEscrowStatus()), 0);
 
     };
 
@@ -203,22 +196,21 @@ describe("CountdownGriefingEscrow", function () {
 
         // mint tokens 
 
-        await this.MockNMR.mintMockTokens(_seller, stakeAmount);
+        await g.MockNMR.mintMockTokens(_seller, stakeAmount);
+        await g.MockNMR.from(_seller).approve(g.Instance.contractAddress, stakeAmount);
 
         // deposit NMR in the escrow
 
-        const approveTx = await this.MockNMR.from(_seller).approve(this.Instance.contractAddress, stakeAmount);
-        const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-        const depositTx = await this.Instance.from(_seller).depositPayment();
-        const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
+        const depositTx = await g.Instance.from(_seller).depositStake();
+        const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
         let events = {};
 
         // validate events
 
-        [events.StakeDeposited] = utils.parseLogs(depositReceipt, this.Instance, "StakeDeposited");
-        [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-        [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
+        [events.StakeDeposited] = utils.parseLogs(receipt, g.Instance, "StakeDeposited");
+        [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+        [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
         assert.equal(events.StakeDeposited.seller, _seller);
         assert.equal(events.StakeDeposited.amount.toString(), stakeAmount.toString());
@@ -227,36 +219,52 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
         assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
         assert.equal(events.Transfer.from, _seller);
-        assert.equal(events.Transfer.to, this.Instance.contractAddress);
+        assert.equal(events.Transfer.to, g.Instance.contractAddress);
         assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
 
         // validate state change
 
-        assert.equal((await this.Instance.getSeller()), _seller);
-        assert.equal((await this.Instance.isSeller(_seller)), true);
-        assert.equal((await this.Instance.getStake(_seller)).toString(), stakeAmount.toString());
-        assert.equal((await this.Instance.isStakeDeposited()), true);
-        assert.equal((await this.Instance.isPaymentDeposited()), false);
-        assert.equal((await this.Instance.isDeposited()), false);
-        assert.equal((await this.Instance.getEscrowStatus()), 0);
+        assert.equal((await g.Instance.getSeller()), _seller);
+        assert.equal((await g.Instance.isSeller(_seller)), true);
+        assert.equal((await g.Instance.getStake(_seller)).toString(), stakeAmount.toString());
+        assert.equal((await g.Instance.isStakeDeposited()), true);
+        assert.equal((await g.Instance.isPaymentDeposited()), false);
+        assert.equal((await g.Instance.isDeposited()), false);
+        assert.equal((await g.Instance.getEscrowStatus()), 0);
 
     };
 
-    describe("Requester", async () => {
-        describe("Requester Happy Path", async () => {
-            it("requester should successfully create escrow", async () => {
+    async function submitData(_seller) {
+
+        // send data into escrow 
+
+        let events = {};
+        const tx = await g.Instance.from(_seller).submitData(encryptedData);
+        const receipt = await g.Instance.verboseWaitForTransaction(tx);
+
+        // validate events
+
+        [events.DataSubmitted] = utils.parseLogs(receipt, g.Instance, "DataSubmitted");
+
+        assert.equal(events.DataSubmitted.data, encryptedData);
+
+    };
+
+    describe("Requester", async function () {
+        describe("Requester Happy Path", async function () {
+            it("requester should successfully create escrow", async function () {
 
                 // revert contract state
 
-                await utils.revertState(this.deployer.provider, this.initSnapshot);
+                await utils.revertState(g.deployer.provider, g.initSnapshot);
 
                 // create escrow
 
-                this.Instance = await createEscrow(requester, requester, ethers.constants.AddressZero, ethers.constants.AddressZero);
+                await createEscrow(requester, requester, ethers.constants.AddressZero, ethers.constants.AddressZero);
 
             });
 
-            it("requester should successfully deposit payment", async () => {
+            it("requester should successfully deposit payment", async function () {
 
                 // deposit payment
 
@@ -264,39 +272,38 @@ describe("CountdownGriefingEscrow", function () {
 
             });
 
-            it("fulfiller should successfully deposit stake and finalize", async () => {
+            it("fulfiller should successfully deposit stake and finalize", async function () {
 
                 // mint tokens 
 
-                await this.MockNMR.mintMockTokens(fulfiller, stakeAmount);
+                await g.MockNMR.mintMockTokens(fulfiller, stakeAmount);
+                await g.MockNMR.from(fulfiller).approve(g.Instance.contractAddress, stakeAmount);
 
                 // deposit NMR in the escrow
 
-                const approveTx = await this.MockNMR.from(fulfiller).approve(this.Instance.contractAddress, stakeAmount);
-                const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-                const depositTx = await this.Instance.from(fulfiller).depositStake();
-                const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
+                const depositTx = await g.Instance.from(fulfiller).depositStake();
+                const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
                 let events = {};
 
                 // get agreement contract
 
-                [events.InstanceCreated] = utils.parseLogs(depositReceipt, this.AgreementFactory, "InstanceCreated");
+                [events.InstanceCreated] = utils.parseLogs(receipt, g.AgreementFactory, "InstanceCreated");
                 const instanceAddress = events.InstanceCreated.instance;
 
-                this.AgreementInstance = this.deployer.wrapDeployedContract(
+                g.AgreementInstance = g.deployer.wrapDeployedContract(
                     AgreementTemplate_Artifact,
                     instanceAddress
                 );
 
                 // validate events
 
-                [events.StakeDeposited] = utils.parseLogs(depositReceipt, this.Instance, "StakeDeposited");
-                [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-                events.Transfer = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-                events.StakeRemoved = utils.parseLogs(depositReceipt, this.Instance, "StakeRemoved");
-                [events.Finalized] = utils.parseLogs(depositReceipt, this.Instance, "Finalized");
-                [events.Initialized] = utils.parseLogs(depositReceipt, this.AgreementInstance, "Initialized");
+                [events.StakeDeposited] = utils.parseLogs(receipt, g.Instance, "StakeDeposited");
+                [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+                events.Transfer = utils.parseLogs(receipt, g.MockNMR, "Transfer");
+                events.StakeRemoved = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                [events.Finalized] = utils.parseLogs(receipt, g.Instance, "Finalized");
+                [events.Initialized] = utils.parseLogs(receipt, g.AgreementInstance, "Initialized");
 
                 assert.equal(events.StakeDeposited.seller, fulfiller);
                 assert.equal(events.StakeDeposited.amount.toString(), stakeAmount.toString());
@@ -305,7 +312,7 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
                 assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
                 assert.equal(events.Transfer[0].from, fulfiller);
-                assert.equal(events.Transfer[0].to, this.Instance.contractAddress);
+                assert.equal(events.Transfer[0].to, g.Instance.contractAddress);
                 assert.equal(events.Transfer[0].value.toString(), stakeAmount.toString());
                 assert.equal(events.StakeRemoved[0].staker, requester);
                 assert.equal(events.StakeRemoved[0].amount.toString(), paymentAmount.toString());
@@ -313,11 +320,11 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal(events.StakeRemoved[1].staker, fulfiller);
                 assert.equal(events.StakeRemoved[1].amount.toString(), stakeAmount.toString());
                 assert.equal(events.StakeRemoved[1].newStake.toNumber(), 0);
-                assert.equal(events.Transfer[1].from, this.Instance.contractAddress);
-                assert.equal(events.Transfer[1].to, this.AgreementInstance.contractAddress);
+                assert.equal(events.Transfer[1].from, g.Instance.contractAddress);
+                assert.equal(events.Transfer[1].to, g.AgreementInstance.contractAddress);
                 assert.equal(events.Transfer[1].value.toString(), stakeAmount.add(paymentAmount).toString());
-                assert.equal(events.Finalized.agreement, this.AgreementInstance.contractAddress);
-                assert.equal(events.Initialized.operator, this.Instance.contractAddress);
+                assert.equal(events.Finalized.agreement, g.AgreementInstance.contractAddress);
+                assert.equal(events.Initialized.operator, g.Instance.contractAddress);
                 assert.equal(events.Initialized.staker, fulfiller);
                 assert.equal(events.Initialized.counterparty, requester);
                 assert.equal(events.Initialized.ratio.toString(), griefRatio.toString());
@@ -327,542 +334,169 @@ describe("CountdownGriefingEscrow", function () {
 
                 // validate state change
 
-                assert.equal((await this.Instance.getSeller()), fulfiller);
-                assert.equal((await this.Instance.isSeller(fulfiller)), true);
-                assert.equal((await this.Instance.getStake(fulfiller)).toNumber(), 0);
-                assert.equal((await this.Instance.getBuyer()), requester);
-                assert.equal((await this.Instance.isBuyer(requester)), true);
-                assert.equal((await this.Instance.getStake(requester)).toNumber(), 0);
-                assert.equal((await this.Instance.isStakeDeposited()), true);
-                assert.equal((await this.Instance.isPaymentDeposited()), true);
-                assert.equal((await this.Instance.getEscrowStatus()), 2);
+                assert.equal((await g.Instance.getSeller()), fulfiller);
+                assert.equal((await g.Instance.isSeller(fulfiller)), true);
+                assert.equal((await g.Instance.getStake(fulfiller)).toNumber(), 0);
+                assert.equal((await g.Instance.getBuyer()), requester);
+                assert.equal((await g.Instance.isBuyer(requester)), true);
+                assert.equal((await g.Instance.getStake(requester)).toNumber(), 0);
+                assert.equal((await g.Instance.isStakeDeposited()), true);
+                assert.equal((await g.Instance.isPaymentDeposited()), true);
+                assert.equal((await g.Instance.getEscrowStatus()), 2);
 
             });
 
-            it("fulfiller should successfully submit data", async () => {
+            it("fulfiller should successfully submit data", async function () {
 
-                // send data into escrow 
-
-                let events = {};
-                const tx = await this.Instance.from(fulfiller).submitData(encryptedData);
-                const receipt = await this.Instance.verboseWaitForTransaction(tx);
-
-                // validate events
-
-                [events.DataSubmitted] = utils.parseLogs(receipt, this.Instance, "DataSubmitted");
-
-                assert.equal(events.DataSubmitted.data, encryptedData);
+                // submit data
+                await submitData(fulfiller);
 
             });
         });
 
-        describe("Requester finds no Fulfiller", () => {
+        describe("Requester finds no Fulfiller", function () {
 
-            it("requester should successfully create escrow", async () => {
+            it("requester should successfully create escrow", async function () {
 
                 // revert contract state
 
-                await utils.revertState(this.deployer.provider, this.initSnapshot);
+                await utils.revertState(g.deployer.provider, g.initSnapshot);
 
-                // encode initialization variables into calldata
+                // create escrow
 
-                const agreementTypes = ["uint120", "uint8", "uint128"];
-                const agreementParams = [griefRatio, ratioType, agreementCountdown];
-                const encodedParams = AbiCoder.encode(agreementTypes, agreementParams);
-
-                let initTypes = ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes', 'bytes'];
-                let initParams = [requester, ethers.constants.AddressZero, ethers.constants.AddressZero, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
-                const calldata = abiEncodeWithSelector('initialize', initTypes, initParams);
-
-                // deploy escrow contract
-
-                let events = {};
-                const tx = await this.Factory.from(requester).create(calldata);
-                const receipt = await this.Factory.verboseWaitForTransaction(tx);
-
-                // get escrow contract
-
-                [events.InstanceCreated] = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
-                const instanceAddress = events.InstanceCreated.instance;
-
-                this.Instance = this.deployer.wrapDeployedContract(
-                    Template_Artifact,
-                    instanceAddress
-                );
-
-                // validate events
-
-                [events.Initialized] = utils.parseLogs(receipt, this.Instance, "Initialized");
-
-                assert.equal(events.Initialized.buyer, requester);
-                assert.equal(events.Initialized.seller, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.operator, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(events.Initialized.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(events.Initialized.countdownLength, escrowCountdown);
-                assert.equal(events.Initialized.metadata, "0x");
-                assert.equal(events.Initialized.agreementParams, encodedParams);
-
-                // validate state change
-
-                assert.equal((await this.Instance.getBuyer()), requester);
-                assert.equal((await this.Instance.isBuyer(requester)), true);
-                assert.equal((await this.Instance.getSeller()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isSeller(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.getOperator()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isOperator(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.hasActiveOperator()), false);
-                assert.equal((await this.Instance.isActiveOperator(ethers.constants.AddressZero)), false);
-                assert.equal((await this.Instance.getLength()), escrowCountdown);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
-
-                const data = await this.Instance.getData();
-                assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(data.status, 0);
-                assert.equal(data.ratio.toString(), griefRatio.toString());
-                assert.equal(data.ratioType, 2);
-                assert.equal(data.countdownLength, agreementCountdown);
+                await createEscrow(requester, requester, ethers.constants.AddressZero, ethers.constants.AddressZero);
 
             });
 
-            it("requester should successfully deposit payment", async () => {
+            it("requester should successfully deposit payment", async function () {
 
-                // mint tokens 
+                // deposit payment
 
-                await this.MockNMR.mintMockTokens(requester, paymentAmount);
-
-                // deposit NMR in the escrow
-
-                const approveTx = await this.MockNMR.from(requester).approve(this.Instance.contractAddress, paymentAmount);
-                const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-                const depositTx = await this.Instance.from(requester).depositPayment();
-                const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
-
-                let events = {};
-
-                // validate events
-
-                [events.PaymentDeposited] = utils.parseLogs(depositReceipt, this.Instance, "PaymentDeposited");
-                [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-                [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-
-                assert.equal(events.PaymentDeposited.buyer, requester);
-                assert.equal(events.PaymentDeposited.amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeAdded.staker, requester);
-                assert.equal(events.StakeAdded.funder, requester);
-                assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), paymentAmount.toString());
-                assert.equal(events.Transfer.from, requester);
-                assert.equal(events.Transfer.to, this.Instance.contractAddress);
-                assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
-
-                // validate state change
-
-                assert.equal((await this.Instance.getBuyer()), requester);
-                assert.equal((await this.Instance.isBuyer(requester)), true);
-                assert.equal((await this.Instance.getStake(requester)).toString(), paymentAmount.toString());
-                assert.equal((await this.Instance.isStakeDeposited()), false);
-                assert.equal((await this.Instance.isPaymentDeposited()), true);
-                assert.equal((await this.Instance.isDeposited()), false);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
+                await depositPayment(requester);
 
             });
 
-            it("requester should successfully cancel escrow", async () => {
+            it("requester should successfully cancel escrow", async function () {
 
                 // cancel escrow
 
                 let events = {};
-                const tx = await this.Instance.from(requester).cancel();
-                const receipt = await this.Instance.verboseWaitForTransaction(tx);
+                const tx = await g.Instance.from(requester).cancel();
+                const receipt = await g.Instance.verboseWaitForTransaction(tx);
 
                 // validate events
 
-                assert.equal(utils.hasEvent(receipt, this.Instance, "Cancelled"), true);
-                [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-                [events.StakeRemoved] = utils.parseLogs(depositReceipt, this.Instance, "StakeRemoved");
-                [events.StakeTaken] = utils.parseLogs(depositReceipt, this.Instance, "StakeTaken");
+                assert.equal(utils.hasEvent(receipt, g.Instance, "Cancelled"), true);
+                [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
+                [events.StakeRemoved] = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                [events.StakeTaken] = utils.parseLogs(receipt, g.Instance, "StakeTaken");
 
-                assert.equal(events.Transfer.from, this.Instance.contractAddress);
+                assert.equal(events.Transfer.from, g.Instance.contractAddress);
                 assert.equal(events.Transfer.to, requester);
-                assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
+                assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
                 assert.equal(events.StakeRemoved.staker, requester);
-                assert.equal(events.StakeRemoved.amount.toString(), stakeAmount.toString());
+                assert.equal(events.StakeRemoved.amount.toString(), paymentAmount.toString());
                 assert.equal(events.StakeRemoved.newStake.toNumber(), 0);
                 assert.equal(events.StakeTaken.staker, requester);
                 assert.equal(events.StakeTaken.recipient, requester);
-                assert.equal(events.StakeTaken.amount.toString(), stakeAmount.toString());
+                assert.equal(events.StakeTaken.amount.toString(), paymentAmount.toString());
 
                 // validate state change
 
-                assert.equal((await this.Instance.getStake(requester)).toNumber(), 0);
-                assert.equal((await this.Instance.getEscrowStatus()), 3);
-                assert.equal((await this.Instance.isStakeDeposited()), true);
+                assert.equal((await g.Instance.getStake(requester)).toNumber(), 0);
+                assert.equal((await g.Instance.getEscrowStatus()), 3);
+                assert.equal((await g.Instance.isStakeDeposited()), true);
 
             });
         });
     });
 
-    describe("Seller", () => {
-        describe("Seller Happy Path", () => {
-            it("seller should successfully create escrow", async () => {
+    describe("Seller", function () {
+        describe("Seller Happy Path", function () {
+            it("seller should successfully create escrow", async function () {
 
                 // revert contract state
 
-                await utils.revertState(this.deployer.provider, this.initSnapshot);
+                await utils.revertState(g.deployer.provider, g.initSnapshot);
 
-                // encode initialization variables into calldata
+                // create escrow
 
-                const agreementTypes = ["uint120", "uint8", "uint128"];
-                const agreementParams = [griefRatio, ratioType, agreementCountdown];
-                const encodedParams = AbiCoder.encode(agreementTypes, agreementParams);
-
-                let initTypes = ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes', 'bytes'];
-                let initParams = [ethers.constants.AddressZero, seller, ethers.constants.AddressZero, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
-                const calldata = abiEncodeWithSelector('initialize', initTypes, initParams);
-
-                // deploy escrow contract
-
-                let events = {};
-                const tx = await this.Factory.from(seller).create(calldata);
-                const receipt = await this.Factory.verboseWaitForTransaction(tx);
-
-                // get escrow contract
-
-                [events.InstanceCreated] = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
-                const instanceAddress = events.InstanceCreated.instance;
-
-                this.Instance = this.deployer.wrapDeployedContract(
-                    Template_Artifact,
-                    instanceAddress
-                );
-
-                // validate events
-
-                [events.Initialized] = utils.parseLogs(receipt, this.Instance, "Initialized");
-
-                assert.equal(events.Initialized.buyer, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.seller, seller);
-                assert.equal(events.Initialized.operator, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(events.Initialized.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(events.Initialized.countdownLength, escrowCountdown);
-                assert.equal(events.Initialized.metadata, "0x");
-                assert.equal(events.Initialized.agreementParams, encodedParams);
-
-                // validate state change
-
-                assert.equal((await this.Instance.getBuyer()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isBuyer(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getOperator()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isOperator(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.hasActiveOperator()), false);
-                assert.equal((await this.Instance.isActiveOperator(ethers.constants.AddressZero)), false);
-                assert.equal((await this.Instance.getLength()), escrowCountdown);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
-
-                const data = await this.Instance.getData();
-                assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(data.status, 0);
-                assert.equal(data.ratio.toString(), griefRatio.toString());
-                assert.equal(data.ratioType, 2);
-                assert.equal(data.countdownLength, agreementCountdown);
+                await createEscrow(seller, ethers.constants.AddressZero, seller, ethers.constants.AddressZero);
 
             });
 
-            it("seller should successfully deposit stake", async () => {
+            it("seller should successfully deposit stake", async function () {
 
-                // mint tokens 
+                // deposit stake
 
-                await this.MockNMR.mintMockTokens(seller, stakeAmount);
-
-                // deposit NMR in the escrow
-
-                const approveTx = await this.MockNMR.from(seller).approve(this.Instance.contractAddress, stakeAmount);
-                const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-                const depositTx = await this.Instance.from(seller).depositPayment();
-                const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
-
-                let events = {};
-
-                // validate events
-
-                [events.StakeDeposited] = utils.parseLogs(depositReceipt, this.Instance, "StakeDeposited");
-                [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-                [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-
-                assert.equal(events.StakeDeposited.seller, seller);
-                assert.equal(events.StakeDeposited.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.staker, seller);
-                assert.equal(events.StakeAdded.funder, seller);
-                assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
-                assert.equal(events.Transfer.from, seller);
-                assert.equal(events.Transfer.to, this.Instance.contractAddress);
-                assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
-
-                // validate state change
-
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getStake(seller)).toString(), stakeAmount.toString());
-                assert.equal((await this.Instance.isStakeDeposited()), true);
-                assert.equal((await this.Instance.isPaymentDeposited()), false);
-                assert.equal((await this.Instance.isDeposited()), false);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
+                await depositStake(seller);
 
             });
 
-            it("buyer should successfully fulfill request and trigger countdown", async () => {
+            it("buyer should successfully fulfill request and trigger countdown", async function () {
 
             });
 
-            it("seller should successfully finalize", async () => {
+            it("seller should successfully finalize", async function () {
 
             });
 
-            it("seller should successfully submit the data", async () => {
+            it("seller should successfully submit the data", async function () {
 
             });
         });
-        describe("Seller finds no Buyer", () => {
-            it("seller should successfully create escrow", async () => {
+        describe("Seller finds no Buyer", function () {
+            it("seller should successfully create escrow", async function () {
 
                 // revert contract state
 
-                await utils.revertState(this.deployer.provider, this.initSnapshot);
+                await utils.revertState(g.deployer.provider, g.initSnapshot);
 
-                // encode initialization variables into calldata
+                // create escrow
 
-                const agreementTypes = ["uint120", "uint8", "uint128"];
-                const agreementParams = [griefRatio, ratioType, agreementCountdown];
-                const encodedParams = AbiCoder.encode(agreementTypes, agreementParams);
-
-                let initTypes = ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes', 'bytes'];
-                let initParams = [ethers.constants.AddressZero, seller, ethers.constants.AddressZero, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
-                const calldata = abiEncodeWithSelector('initialize', initTypes, initParams);
-
-                // deploy escrow contract
-
-                let events = {};
-                const tx = await this.Factory.from(seller).create(calldata);
-                const receipt = await this.Factory.verboseWaitForTransaction(tx);
-
-                // get escrow contract
-
-                [events.InstanceCreated] = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
-                const instanceAddress = events.InstanceCreated.instance;
-
-                this.Instance = this.deployer.wrapDeployedContract(
-                    Template_Artifact,
-                    instanceAddress
-                );
-
-                // validate events
-
-                [events.Initialized] = utils.parseLogs(receipt, this.Instance, "Initialized");
-
-                assert.equal(events.Initialized.buyer, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.seller, seller);
-                assert.equal(events.Initialized.operator, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(events.Initialized.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(events.Initialized.countdownLength, escrowCountdown);
-                assert.equal(events.Initialized.metadata, "0x");
-                assert.equal(events.Initialized.agreementParams, encodedParams);
-
-                // validate state change
-
-                assert.equal((await this.Instance.getBuyer()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isBuyer(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getOperator()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isOperator(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.hasActiveOperator()), false);
-                assert.equal((await this.Instance.isActiveOperator(ethers.constants.AddressZero)), false);
-                assert.equal((await this.Instance.getLength()), escrowCountdown);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
-
-                const data = await this.Instance.getData();
-                assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(data.status, 0);
-                assert.equal(data.ratio.toString(), griefRatio.toString());
-                assert.equal(data.ratioType, 2);
-                assert.equal(data.countdownLength, agreementCountdown);
+                await createEscrow(seller, ethers.constants.AddressZero, seller, ethers.constants.AddressZero);
 
             });
 
-            it("seller should successfully deposit stake", async () => {
+            it("seller should successfully deposit payment", async function () {
 
-                // mint tokens 
+                // deposit payment
 
-                await this.MockNMR.mintMockTokens(seller, stakeAmount);
-
-                // deposit NMR in the escrow
-
-                const approveTx = await this.MockNMR.from(seller).approve(this.Instance.contractAddress, stakeAmount);
-                const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-                const depositTx = await this.Instance.from(seller).depositPayment();
-                const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
-
-                let events = {};
-
-                // validate events
-
-                [events.StakeDeposited] = utils.parseLogs(depositReceipt, this.Instance, "StakeDeposited");
-                [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-                [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-
-                assert.equal(events.StakeDeposited.seller, seller);
-                assert.equal(events.StakeDeposited.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.staker, seller);
-                assert.equal(events.StakeAdded.funder, seller);
-                assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
-                assert.equal(events.Transfer.from, seller);
-                assert.equal(events.Transfer.to, this.Instance.contractAddress);
-                assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
-
-                // validate state change
-
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getStake(seller)).toString(), stakeAmount.toString());
-                assert.equal((await this.Instance.isStakeDeposited()), true);
-                assert.equal((await this.Instance.isPaymentDeposited()), false);
-                assert.equal((await this.Instance.isDeposited()), false);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
+                await depositStake(seller);
 
             });
 
-            it("seller should successfully cancel", async () => {
+            it("seller should successfully cancel", async function () {
 
             });
         });
 
-        describe("Seller does not finalize sale", () => {
-            it("seller should successfully create escrow", async () => {
+        describe("Seller does not finalize sale", function () {
+            it("seller should successfully create escrow", async function () {
 
                 // revert contract state
 
-                await utils.revertState(this.deployer.provider, this.initSnapshot);
+                await utils.revertState(g.deployer.provider, g.initSnapshot);
 
-                // encode initialization variables into calldata
+                // create escrow
 
-                const agreementTypes = ["uint120", "uint8", "uint128"];
-                const agreementParams = [griefRatio, ratioType, agreementCountdown];
-                const encodedParams = AbiCoder.encode(agreementTypes, agreementParams);
-
-                let initTypes = ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes', 'bytes'];
-                let initParams = [ethers.constants.AddressZero, seller, ethers.constants.AddressZero, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
-                const calldata = abiEncodeWithSelector('initialize', initTypes, initParams);
-
-                // deploy escrow contract
-
-                let events = {};
-                const tx = await this.Factory.from(seller).create(calldata);
-                const receipt = await this.Factory.verboseWaitForTransaction(tx);
-
-                // get escrow contract
-
-                [events.InstanceCreated] = utils.parseLogs(receipt, this.Factory, "InstanceCreated");
-                const instanceAddress = events.InstanceCreated.instance;
-
-                this.Instance = this.deployer.wrapDeployedContract(
-                    Template_Artifact,
-                    instanceAddress
-                );
-
-                // validate events
-
-                [events.Initialized] = utils.parseLogs(receipt, this.Instance, "Initialized");
-
-                assert.equal(events.Initialized.buyer, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.seller, seller);
-                assert.equal(events.Initialized.operator, ethers.constants.AddressZero);
-                assert.equal(events.Initialized.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(events.Initialized.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(events.Initialized.countdownLength, escrowCountdown);
-                assert.equal(events.Initialized.metadata, "0x");
-                assert.equal(events.Initialized.agreementParams, encodedParams);
-
-                // validate state change
-
-                assert.equal((await this.Instance.getBuyer()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isBuyer(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getOperator()), ethers.constants.AddressZero);
-                assert.equal((await this.Instance.isOperator(ethers.constants.AddressZero)), true);
-                assert.equal((await this.Instance.hasActiveOperator()), false);
-                assert.equal((await this.Instance.isActiveOperator(ethers.constants.AddressZero)), false);
-                assert.equal((await this.Instance.getLength()), escrowCountdown);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
-
-                const data = await this.Instance.getData();
-                assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
-                assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
-                assert.equal(data.status, 0);
-                assert.equal(data.ratio.toString(), griefRatio.toString());
-                assert.equal(data.ratioType, 2);
-                assert.equal(data.countdownLength, agreementCountdown);
+                await createEscrow(seller, ethers.constants.AddressZero, seller, ethers.constants.AddressZero);
 
             });
 
-            it("seller should successfully deposit stake", async () => {
+            it("seller should successfully deposit payment", async function () {
 
-                // mint tokens 
+                // deposit payment
 
-                await this.MockNMR.mintMockTokens(seller, stakeAmount);
-
-                // deposit NMR in the escrow
-
-                const approveTx = await this.MockNMR.from(seller).approve(this.Instance.contractAddress, stakeAmount);
-                const approveReceipt = await this.MockNMR.verboseWaitForTransaction(approveTx);
-                const depositTx = await this.Instance.from(seller).depositPayment();
-                const depositReceipt = await this.Instance.verboseWaitForTransaction(depositTx);
-
-                let events = {};
-
-                // validate events
-
-                [events.StakeDeposited] = utils.parseLogs(depositReceipt, this.Instance, "StakeDeposited");
-                [events.StakeAdded] = utils.parseLogs(depositReceipt, this.Instance, "StakeAdded");
-                [events.Transfer] = utils.parseLogs(depositReceipt, this.MockNMR, "Transfer");
-
-                assert.equal(events.StakeDeposited.seller, seller);
-                assert.equal(events.StakeDeposited.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.staker, seller);
-                assert.equal(events.StakeAdded.funder, seller);
-                assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
-                assert.equal(events.Transfer.from, seller);
-                assert.equal(events.Transfer.to, this.Instance.contractAddress);
-                assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
-
-                // validate state change
-
-                assert.equal((await this.Instance.getSeller()), seller);
-                assert.equal((await this.Instance.isSeller(seller)), true);
-                assert.equal((await this.Instance.getStake(seller)).toString(), stakeAmount.toString());
-                assert.equal((await this.Instance.isStakeDeposited()), true);
-                assert.equal((await this.Instance.isPaymentDeposited()), false);
-                assert.equal((await this.Instance.isDeposited()), false);
-                assert.equal((await this.Instance.getEscrowStatus()), 0);
+                await depositStake(seller);
 
             });
 
-            it("buyer should successfully fulfill request and trigger countdown", async () => {
+            it("buyer should successfully fulfill request and trigger countdown", async function () {
 
             });
 
-            it("buyer should successfully cancel", async () => {
+            it("buyer should successfully cancel", async function () {
 
             });
         });

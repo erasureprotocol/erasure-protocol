@@ -65,10 +65,12 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         bytes memory agreementParams
     ) public initializeTemplate() {
         // set participants if defined
-        if (buyer != address(0))
+        if (buyer != address(0)) {
             _data.buyer = buyer;
-        if (seller != address(0))
+        }
+        if (seller != address(0)) {
             _data.seller = seller;
+        }
 
         // set operator
         if (operator != address(0)) {
@@ -77,19 +79,22 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
 
         // set amounts if defined
-        if (paymentAmount != uint256(0))
+        if (paymentAmount != uint256(0)) {
             require(paymentAmount <= uint256(uint128(paymentAmount)), "paymentAmount is too large");
             _data.paymentAmount = uint128(paymentAmount);
-        if (stakeAmount != uint256(0))
+        }
+        if (stakeAmount != uint256(0)) {
             require(stakeAmount == uint256(uint128(stakeAmount)), "stakeAmount is too large");
             _data.stakeAmount = uint128(stakeAmount);
+        }
 
         // set countdown length
         Countdown._setLength(escrowCountdown);
 
         // set metadata
-        if (metadata.length != 0)
+        if (metadata.length != 0) {
             EventMetadata._setMetadata(metadata);
+        }
 
         // set agreementParams
         if (agreementParams.length != 0) {
@@ -133,16 +138,19 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
 
         // Add the stake amount
-        if (uint256(_data.stakeAmount) != uint256(0))
+        if (uint256(_data.stakeAmount) != uint256(0)) {
             Staking._addStake(_data.seller, msg.sender, uint256(0), uint256(_data.stakeAmount));
+        }
 
         // emit event
         emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
 
         // If payment is deposited, finalize the escrow
-        if (isPaymentDeposited())
+        if (isPaymentDeposited()) {
             _data.status = EscrowStatus.isDeposited;
             finalize();
+        }
+
     }
 
     /// @notice Deposit Payment
@@ -161,13 +169,15 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isFinalized() && !isCancelled(), "only before finalize or cancel");
 
         // Add the payment as a stake
-        if (uint256(_data.paymentAmount) != uint256(0))
+        if (uint256(_data.paymentAmount) != uint256(0)) {
             Staking._addStake(_data.buyer, msg.sender, uint256(0), uint256(_data.paymentAmount));
+        }
 
         // If stake is deposited, start countdown for seller to finalize
-        if (isStakeDeposited())
+        if (isStakeDeposited()) {
             _data.status = EscrowStatus.isDeposited;
             Countdown._start();
+        }
 
         // emit event
         emit PaymentDeposited(_data.buyer, uint256(_data.paymentAmount));
@@ -272,12 +282,14 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         require(!isDeposited() || Countdown.isOver(), "only after deposit and countdown");
 
         // return stake to seller
-        if (Staking.getStake(_data.seller) != 0)
+        if (Staking.getStake(_data.seller) != 0) {
             Staking._takeFullStake(_data.seller, _data.seller);
+        }
 
         // return payment to buyer
-        if (Staking.getStake(_data.buyer) != 0)
+        if (Staking.getStake(_data.buyer) != 0) {
             Staking._takeFullStake(_data.buyer, _data.buyer);
+        }
 
         // update status
         _data.status = EscrowStatus.isCancelled;
