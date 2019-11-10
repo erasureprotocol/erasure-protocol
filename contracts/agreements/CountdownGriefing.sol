@@ -8,15 +8,10 @@ import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
-/* Immediately engage with specific buyer
- * - Stake can be increased at any time.
- * - Request to end agreement and recover stake requires cooldown period to complete.
- * - Counterparty can greif the staker at predefined ratio.
- *
- * NOTE:
- * - This top level contract should only perform access control and state transitions
- *
- */
+/// @title CountdownGriefing
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
@@ -73,7 +68,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         EventMetadata._setMetadata(metadata);
     }
 
-    function increaseStake(uint256 currentStake, uint256 amountToAdd) public {
+    function increaseStake(uint256 amountToAdd) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
@@ -81,10 +76,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(!Countdown.isOver(), "agreement ended");
 
         // add stake
-        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
+        Staking._addStake(_data.staker, msg.sender, amountToAdd);
     }
 
-    function reward(uint256 currentStake, uint256 amountToAdd) public {
+    function reward(uint256 amountToAdd) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
@@ -92,10 +87,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(!Countdown.isOver(), "agreement ended");
 
         // add stake
-        Staking._addStake(_data.staker, msg.sender, currentStake, amountToAdd);
+        Staking._addStake(_data.staker, msg.sender, amountToAdd);
     }
 
-    function punish(uint256 currentStake, uint256 punishment, bytes memory message) public returns (uint256 cost) {
+    function punish(uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
@@ -103,15 +98,15 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(!Countdown.isOver(), "agreement ended");
 
         // execute griefing
-        cost = Griefing._grief(msg.sender, _data.staker, currentStake, punishment, message);
+        cost = Griefing._grief(msg.sender, _data.staker, punishment, message);
     }
 
-    function releaseStake(uint256 currentStake, uint256 amountToRelease) public {
+    function releaseStake(uint256 amountToRelease) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // release stake back to the staker
-        Staking._takeStake(_data.staker, _data.staker, currentStake, amountToRelease);
+        Staking._takeStake(_data.staker, _data.staker, amountToRelease);
     }
 
     function startCountdown() public returns (uint256 deadline) {
@@ -148,17 +143,25 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
 
-        // transfer operator
+        // renounce operator
         Operated._renounceOperator();
     }
 
     // view functions
 
     function isStaker(address caller) public view returns (bool validity) {
-        validity = (caller == _data.staker);
+        return caller == getStaker();
+    }
+
+    function getStaker() public view returns (address staker) {
+        return _data.staker;
     }
 
     function isCounterparty(address caller) public view returns (bool validity) {
-        validity = (caller == _data.counterparty);
+        return caller == getCounterparty();
+    }
+
+    function getCounterparty() public view returns (address counterparty) {
+        return _data.counterparty;
     }
 }

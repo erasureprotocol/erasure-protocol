@@ -14,6 +14,7 @@ import "../modules/Template.sol";
 /// @title CountdownGriefingEscrow
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 /// @dev State Machine: https://www.lucidchart.com/publicSegments/view/839ccf53-cdc9-4528-8d5e-8ce53df6f647/image.png
 contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
@@ -46,10 +47,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         bytes metadata,
         bytes agreementParams
     );
-    event DataSubmitted(bytes data);
     event StakeDeposited(address seller, uint256 amount);
     event PaymentDeposited(address buyer, uint256 amount);
     event Finalized(address agreement);
+    event DataSubmitted(bytes data);
     event Cancelled();
 
     /// @notice Constructor
@@ -73,7 +74,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
             _data.seller = seller;
         }
 
-        // set operator
+        // set operator if defined
         if (operator != address(0)) {
             Operated._setOperator(operator);
             Operated._activateOperator();
@@ -92,19 +93,18 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // set countdown length
         Countdown._setLength(escrowCountdown);
 
-        // set metadata
+        // set metadata if defined
         if (metadata.length != 0) {
             EventMetadata._setMetadata(metadata);
         }
 
-        // set agreementParams
+        // set agreementParams if defined
         if (agreementParams.length != 0) {
             (
                 uint120 ratio,
                 uint8 ratioType,
                 uint128 agreementCountdown
             ) = abi.decode(agreementParams, (uint120, uint8, uint128));
-
             _data.agreementParams = AgreementParams(ratio, ratioType, agreementCountdown);
         }
 
@@ -138,13 +138,17 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // restrict state machine
         require(isOpen() || onlyPaymentDeposited(), "can only deposit stake once");
 
+        // declare storage variables in memory
+        address seller = _data.seller;
+        uint256 stakeAmount = uint256(_data.stakeAmount);
+
         // Add the stake amount
-        if (uint256(_data.stakeAmount) != uint256(0)) {
-            Staking._addStake(_data.seller, msg.sender, uint256(0), uint256(_data.stakeAmount));
+        if (stakeAmount != uint256(0)) {
+            Staking._addStake(seller, msg.sender, stakeAmount);
         }
 
         // emit event
-        emit StakeDeposited(_data.seller, uint256(_data.stakeAmount));
+        emit StakeDeposited(seller, stakeAmount);
 
         // If payment is deposited, finalize the escrow
         if (onlyPaymentDeposited()) {
@@ -171,13 +175,17 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // restrict state machine
         require(isOpen() || onlyStakeDeposited(), "can only deposit payment once");
 
+        // declare storage variables in memory
+        address buyer = _data.buyer;
+        uint256 paymentAmount = uint256(_data.paymentAmount);
+
         // Add the payment as a stake
-        if (uint256(_data.paymentAmount) != uint256(0)) {
-            Staking._addStake(_data.buyer, msg.sender, uint256(0), uint256(_data.paymentAmount));
+        if (paymentAmount != uint256(0)) {
+            Staking._addStake(buyer, msg.sender, paymentAmount);
         }
 
         // emit event
-        emit PaymentDeposited(_data.buyer, uint256(_data.paymentAmount));
+        emit PaymentDeposited(buyer, paymentAmount);
 
         // If stake is deposited, start countdown for seller to finalize
         if (onlyStakeDeposited()) {
@@ -232,23 +240,28 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         uint256 totalStake;
         {
-            if (uint256(_data.paymentAmount) != uint256(0))
-                Staking._removeFullStake(_data.buyer);
-            if (uint256(_data.stakeAmount) != uint256(0))
-                Staking._removeFullStake(_data.seller);
-            totalStake = uint256(_data.paymentAmount).add(uint256(_data.stakeAmount));
+            
+            uint256 paymentAmount = Deposit._clearDeposit(_data.buyer);
+            uint256 stakeAmount = Deposit._clearDeposit(_data.seller);
+            totalStake = paymentAmount.add(stakeAmount);
         }
 
-        require(IERC20(BurnNMR.getToken()).approve(agreement, totalStake), "token approval failed");
-        CountdownGriefing(agreement).increaseStake(0, totalStake);
+        if (totalStake > 0) {
+            require(IERC20(BurnNMR.getToken()).approve(agreement, totalStake), "token approval failed");
+            CountdownGriefing(agreement).increaseStake(totalStake);
+        }
 
         // start agreement countdown
 
         CountdownGriefing(agreement).startCountdown();
 
-        // disable operator
-
-        CountdownGriefing(agreement).renounceOperator();
+        // transfer operator
+        address operator = Operated.getOperator();
+        if (operator != address(0)) {
+            CountdownGriefing(agreement).transferOperator(operator);
+        } else {
+            CountdownGriefing(agreement).renounceOperator();
+        }
 
         // update status
         _data.status = EscrowStatus.isFinalized;
@@ -307,6 +320,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     }
 
     function _cancel() private {
+        // declare storage variables in memory
+        address seller = _data.seller;
+        address buyer = _data.buyer;
+
         // return stake to seller
         if (Staking.getStake(_data.seller) != 0) {
             Staking._takeFullStake(_data.seller, _data.seller);

@@ -228,27 +228,11 @@ describe("Griefing", function () {
     const message = "I don't like you";
     let currentStake = ethers.utils.bigNumberify("0");
 
-    it("should revert when wrong currentStake", async () => {
-      const currentStake = ethers.utils.parseEther("100");
-
-      await assert.revertWith(
-        contracts.TestGriefing.instance.grief(
-          buyer,
-          seller,
-          currentStake,
-          punishment,
-          Buffer.from(message)
-        ),
-        "current stake incorrect"
-      );
-    });
-
     it("should revert when grief ratio not set", async () => {
       await assert.revertWith(
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
-          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -267,7 +251,6 @@ describe("Griefing", function () {
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
-          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -281,7 +264,7 @@ describe("Griefing", function () {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
+          .grief(buyer, seller, punishment, Buffer.from(message)),
         "nmr burnFrom failed"
       );
     });
@@ -301,7 +284,7 @@ describe("Griefing", function () {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
+          .grief(buyer, seller, punishment, Buffer.from(message)),
         "nmr burnFrom failed"
       );
     });
@@ -319,7 +302,7 @@ describe("Griefing", function () {
       await assert.revert(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, currentStake, punishment, Buffer.from(message))
+          .grief(buyer, seller, punishment, Buffer.from(message))
       );
     });
 
@@ -338,7 +321,7 @@ describe("Griefing", function () {
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .addStake(seller, seller, 0, wrongStakeAmount);
+        .addStake(seller, seller, wrongStakeAmount);
 
       currentStake = wrongStakeAmount;
 
@@ -350,8 +333,8 @@ describe("Griefing", function () {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, currentStake, punishment, Buffer.from(message)),
-        "cannot remove more than currentStake"
+          .grief(buyer, seller, punishment, Buffer.from(message)),
+        "insufficient deposit to remove"
       );
     });
 
@@ -371,7 +354,7 @@ describe("Griefing", function () {
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .addStake(seller, seller, 0, stakeAmount);
+        .addStake(seller, seller, stakeAmount);
 
       currentStake = stakeAmount;
 
@@ -384,7 +367,7 @@ describe("Griefing", function () {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, currentStake, punishment, Buffer.from(message));
+        .grief(buyer, seller, punishment, Buffer.from(message));
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );
@@ -425,7 +408,7 @@ describe("Griefing", function () {
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .addStake(seller, seller, 0, stakeAmount);
+        .addStake(seller, seller, stakeAmount);
 
       currentStake = stakeAmount;
 
@@ -438,7 +421,7 @@ describe("Griefing", function () {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, currentStake, punishment, Buffer.from(message));
+        .grief(buyer, seller, punishment, Buffer.from(message));
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn
       );

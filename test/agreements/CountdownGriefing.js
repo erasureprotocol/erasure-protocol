@@ -155,13 +155,17 @@ describe("CountdownGriefing", function () {
 
       // _data.staker
       const isStaker = await this.TestCountdownGriefing.isStaker(staker);
+      const getStaker = await this.TestCountdownGriefing.getStaker();
       assert.equal(isStaker, true);
+      assert.equal(getStaker, staker);
 
       // _data.counterparty
       const isCounterparty = await this.TestCountdownGriefing.isCounterparty(
         counterparty
       );
+      const getCounterparty = await this.TestCountdownGriefing.getCounterparty();
       assert.equal(isCounterparty, true);
+      assert.equal(getCounterparty, counterparty);
 
       // Operator._setOperator
       const operator = await this.TestCountdownGriefing.getOperator();
@@ -303,7 +307,6 @@ describe("CountdownGriefing", function () {
       );
 
       const txn = await this.TestCountdownGriefing.from(sender).increaseStake(
-        currentStake,
         amountToAdd
       );
 
@@ -323,7 +326,6 @@ describe("CountdownGriefing", function () {
       assert.equal(stakeAddedEvent.args.staker, staker);
       assert.equal(stakeAddedEvent.args.funder, sender);
       assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), currentStake);
     };
 
     it("should revert when msg.sender is counterparty", async () => {
@@ -335,7 +337,6 @@ describe("CountdownGriefing", function () {
       // use the counterparty to be the msg.sender
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).increaseStake(
-          currentStake,
           amountToAdd
         ),
         "only staker or active operator"
@@ -345,7 +346,6 @@ describe("CountdownGriefing", function () {
     it("should revert when msg.sender is deactivated operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).increaseStake(
-          currentStake,
           amountToAdd
         ),
         "only staker or active operator"
@@ -377,7 +377,6 @@ describe("CountdownGriefing", function () {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).increaseStake(
-          currentStake,
           amountToAdd
         ),
         "agreement ended"
@@ -408,7 +407,6 @@ describe("CountdownGriefing", function () {
       );
 
       const txn = await this.TestCountdownGriefing.from(sender).reward(
-        currentStake,
         amountToAdd
       );
 
@@ -433,7 +431,6 @@ describe("CountdownGriefing", function () {
       assert.equal(stakeAddedEvent.args.staker, staker);
       assert.equal(stakeAddedEvent.args.funder, sender);
       assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), currentStake);
     };
 
     it("should revert when msg.sender is staker", async () => {
@@ -445,7 +442,6 @@ describe("CountdownGriefing", function () {
       // use the staker to be the msg.sender
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).reward(
-          currentStake,
           amountToAdd
         ),
         "only counterparty or active operator"
@@ -455,7 +451,6 @@ describe("CountdownGriefing", function () {
     it("should revert when msg.sender is deactivated operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).reward(
-          currentStake,
           amountToAdd
         ),
         "only counterparty or active operator"
@@ -487,7 +482,6 @@ describe("CountdownGriefing", function () {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).reward(
-          currentStake,
           amountToAdd
         ),
         "agreement ended"
@@ -515,7 +509,6 @@ describe("CountdownGriefing", function () {
       );
 
       await this.TestCountdownGriefing.from(staker).increaseStake(
-        currentStake,
         stakerStake
       );
       currentStake = currentStake.add(stakerStake);
@@ -532,7 +525,6 @@ describe("CountdownGriefing", function () {
       );
 
       const txn = await this.TestCountdownGriefing.from(counterparty).punish(
-        currentStake,
         punishment,
         Buffer.from(message)
       );
@@ -571,7 +563,6 @@ describe("CountdownGriefing", function () {
       // staker is not counterparty or operator
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).punish(
-          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -600,7 +591,6 @@ describe("CountdownGriefing", function () {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
-          currentStake,
           punishment,
           Buffer.from(message)
         ),
@@ -616,22 +606,10 @@ describe("CountdownGriefing", function () {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
-          currentStake,
           punishment,
           Buffer.from(message)
         ),
         "nmr burnFrom failed"
-      );
-    });
-
-    it("should revert when currentStake is incorrect", async () => {
-      await assert.revertWith(
-        this.TestCountdownGriefing.from(counterparty).punish(
-          currentStake.add(1),
-          punishment,
-          Buffer.from(message)
-        ),
-        "current stake incorrect"
       );
     });
 
@@ -652,7 +630,6 @@ describe("CountdownGriefing", function () {
       const currentStake = await this.TestCountdownGriefing.getStake(staker);
 
       const txn = await this.TestCountdownGriefing.from(sender).releaseStake(
-        currentStake,
         releaseAmount
       );
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
@@ -668,20 +645,6 @@ describe("CountdownGriefing", function () {
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.recipient, staker); // staker's stake is released to staker address
       assert.equal(StakeTakenEvent.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        this.TestCountdownGriefing,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toString(), releaseAmount.toString()); // amount released is the full stake amount
-      assert.equal(
-        StakeRemovedEvent.newStake.toString(),
-        currentStake.sub(releaseAmount).toString()
-      );
     };
 
     it("should revert when msg.sender is not counterparty or active operator", async () => {
@@ -689,7 +652,6 @@ describe("CountdownGriefing", function () {
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).releaseStake(
-          currentStake,
           releaseAmount
         ),
         "only counterparty or active operator"
@@ -699,7 +661,6 @@ describe("CountdownGriefing", function () {
     it("should revert when msg.sender is operator but not active", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).releaseStake(
-          currentStake,
           releaseAmount
         ),
         "only counterparty or active operator"
@@ -724,7 +685,6 @@ describe("CountdownGriefing", function () {
       const currentStake = await this.TestCountdownGriefing.getStake(staker);
 
       await this.TestCountdownGriefing.from(staker).increaseStake(
-        currentStake,
         stakerStake
       );
 
@@ -785,7 +745,6 @@ describe("CountdownGriefing", function () {
       );
 
       await this.TestCountdownGriefing.from(staker).increaseStake(
-        0,
         stakerStake
       );
 
@@ -824,17 +783,6 @@ describe("CountdownGriefing", function () {
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.recipient, staker);
       assert.equal(StakeTakenEvent.amount.toString(), stakerStake.toString());
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        this.TestCountdownGriefing,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toString(), stakerStake.toString());
-      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
     });
   });
 

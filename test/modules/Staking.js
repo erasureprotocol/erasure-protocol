@@ -36,43 +36,43 @@ describe("Staking", function () {
 
     it("should fail when no allowance", async () => {
       await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
+        contracts.TestStaking.instance.addStake(staker, funder, 10),
         "insufficient allowance"
       );
     });
 
-    it("should fail when currentStake is wrong", async () => {
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when currentStake is wrong", async () => {
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // currentStake should begin from 0
-      await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 10, 10),
-        "current stake incorrect"
-      );
+    //   // currentStake should begin from 0
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.addStake(staker, funder, 10),
+    //     "current stake incorrect"
+    //   );
 
-      // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, 10);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR.from(funder).approve(stakingAddress, 10);
 
-      await contracts.TestStaking.instance.addStake(staker, funder, 0, 10);
+    //   await contracts.TestStaking.instance.addStake(staker, funder, 10);
 
-      // // new currentStake should be 10 instead
-      await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 10),
-        "current stake incorrect"
-      );
-    });
+    //   // // new currentStake should be 10 instead
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.addStake(staker, funder, 10),
+    //     "current stake incorrect"
+    //   );
+    // });
 
-    it("should fail when amountToAdd is 0", async () => {
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when amountToAdd is 0", async () => {
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, 10);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR.from(funder).approve(stakingAddress, 10);
 
-      await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 0, 0),
-        "no stake to add"
-      );
-    });
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.addStake(staker, funder, 0),
+    //     "no stake to add"
+    //   );
+    // });
 
     it("should addStake successfully", async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress;
@@ -90,7 +90,6 @@ describe("Staking", function () {
       const txn = await contracts.TestStaking.instance.addStake(
         staker,
         funder,
-        0,
         amountToAdd
       );
 
@@ -109,7 +108,6 @@ describe("Staking", function () {
       assert.equal(stakeAddedEvent.args.staker, staker);
       assert.equal(stakeAddedEvent.args.funder, funder);
       assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd);
-      assert.equal(stakeAddedEvent.args.newStake.toNumber(), amountToAdd);
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountToAdd).toString(10);
@@ -132,63 +130,59 @@ describe("Staking", function () {
     const staker = wallets.seller.signer.signingKey.address;
     const recipient = wallets.numerai.signer.signingKey.address;
 
-    it("should fail when currentStake is wrong", async () => {
-      const amountStaked = 10;
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when currentStake is wrong", async () => {
+    //   const amountStaked = 10;
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // approve staking contract to transferFrom
-      await this.MockNMR
-        .from(recipient)
-        .approve(stakingAddress, amountStaked);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR
+    //     .from(recipient)
+    //     .approve(stakingAddress, amountStaked);
 
-      // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(
-        staker,
-        recipient,
-        0,
-        amountStaked
-      );
+    //   // add stake of 10 tokens
+    //   await contracts.TestStaking.instance.addStake(
+    //     staker,
+    //     recipient,
+    //     amountStaked
+    //   );
 
-      // should be 10
-      await assert.revertWith(
-        contracts.TestStaking.instance.takeStake(
-          staker,
-          recipient,
-          0,
-          amountStaked
-        ),
-        "current stake incorrect"
-      );
-    });
+    //   // should be 10
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.takeStake(
+    //       staker,
+    //       recipient,
+    //       amountStaked
+    //     ),
+    //     "current stake incorrect"
+    //   );
+    // });
 
-    it("should fail when amountToTake is 0", async () => {
-      const amountStaked = 10;
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when amountToTake is 0", async () => {
+    //   const amountStaked = 10;
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // approve staking contract to transferFrom
-      await this.MockNMR
-        .from(recipient)
-        .approve(stakingAddress, amountStaked);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR
+    //     .from(recipient)
+    //     .approve(stakingAddress, amountStaked);
 
-      // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(
-        staker,
-        recipient,
-        0,
-        amountStaked
-      );
+    //   // add stake of 10 tokens
+    //   await contracts.TestStaking.instance.addStake(
+    //     staker,
+    //     recipient,
+    //     amountStaked
+    //   );
 
-      // should be 10
-      await assert.revertWith(
-        contracts.TestStaking.instance.takeStake(
-          staker,
-          recipient,
-          amountStaked,
-          0
-        ),
-        "no stake to remove"
-      );
-    });
+    //   // should be 10
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.takeStake(
+    //       staker,
+    //       recipient,
+    //       0
+    //     ),
+    //     "no stake to remove"
+    //   );
+    // });
 
     it("should fail when amountToTake > currentStake", async () => {
       const amountStaked = 10;
@@ -204,7 +198,6 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         recipient,
-        0,
         amountStaked
       );
 
@@ -213,10 +206,9 @@ describe("Staking", function () {
         contracts.TestStaking.instance.takeStake(
           staker,
           recipient,
-          amountStaked,
           amountToTake
         ),
-        "cannot remove more than currentStake"
+        "insufficient deposit to remove"
       );
     });
 
@@ -237,14 +229,12 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         recipient,
-        0,
         amountToAdd
       );
 
       const txn = await contracts.TestStaking.instance.takeStake(
         staker,
         recipient,
-        amountToAdd,
         amountTaken
       );
 
@@ -262,17 +252,6 @@ describe("Staking", function () {
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.recipient, recipient);
       assert.equal(StakeTakenEvent.amount.toNumber(), amountTaken);
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toNumber(), amountTaken);
-      assert.equal(StakeRemovedEvent.newStake.toNumber(), amountTaken);
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountTaken).toString(10);
@@ -314,7 +293,6 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         recipient,
-        0,
         amountStaked
       );
 
@@ -337,17 +315,6 @@ describe("Staking", function () {
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.recipient, recipient);
       assert.equal(StakeTakenEvent.amount.toNumber(), amountStaked);
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toNumber(), amountStaked);
-      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake();
@@ -375,52 +342,50 @@ describe("Staking", function () {
     const staker = wallets.seller.signer.signingKey.address;
     const funder = wallets.numerai.signer.signingKey.address;
 
-    it("should fail when currentStake is wrong", async () => {
-      const amountBurnt = 10;
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when currentStake is wrong", async () => {
+    //   const amountBurnt = 10;
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // approve staking contract to transferFrom
-      await this.MockNMR
-        .from(funder)
-        .approve(stakingAddress, amountBurnt);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR
+    //     .from(funder)
+    //     .approve(stakingAddress, amountBurnt);
 
-      // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(
-        staker,
-        funder,
-        0,
-        amountBurnt
-      );
+    //   // add stake of 10 tokens
+    //   await contracts.TestStaking.instance.addStake(
+    //     staker,
+    //     funder,
+    //     amountBurnt
+    //   );
 
-      // should be 10
-      await assert.revertWith(
-        contracts.TestStaking.instance.burnStake(staker, 0, amountBurnt),
-        "current stake incorrect"
-      );
-    });
+    //   // should be 10
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.burnStake(staker, 0, amountBurnt),
+    //     "current stake incorrect"
+    //   );
+    // });
 
-    it("should fail when amountToBurn is 0", async () => {
-      const amountStaked = 10;
-      const stakingAddress = contracts.TestStaking.instance.contractAddress;
+    // it("should fail when amountToBurn is 0", async () => {
+    //   const amountStaked = 10;
+    //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
-      // approve staking contract to transferFrom
-      await this.MockNMR
-        .from(funder)
-        .approve(stakingAddress, amountStaked);
+    //   // approve staking contract to transferFrom
+    //   await this.MockNMR
+    //     .from(funder)
+    //     .approve(stakingAddress, amountStaked);
 
-      // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(
-        staker,
-        funder,
-        0,
-        amountStaked
-      );
+    //   // add stake of 10 tokens
+    //   await contracts.TestStaking.instance.addStake(
+    //     staker,
+    //     funder,
+    //     amountStaked
+    //   );
 
-      await assert.revertWith(
-        contracts.TestStaking.instance.burnStake(staker, amountStaked, 0),
-        "no stake to remove"
-      );
-    });
+    //   await assert.revertWith(
+    //     contracts.TestStaking.instance.burnStake(staker, 0),
+    //     "no stake to remove"
+    //   );
+    // });
 
     it("should fail when amountToBurn > currentStake", async () => {
       const amountStaked = 10;
@@ -436,7 +401,6 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         funder,
-        0,
         amountStaked
       );
 
@@ -444,10 +408,9 @@ describe("Staking", function () {
       await assert.revertWith(
         contracts.TestStaking.instance.burnStake(
           staker,
-          amountStaked,
           amountToBurn
         ),
-        "cannot remove more than currentStake"
+        "insufficient deposit to remove"
       );
     });
 
@@ -466,13 +429,11 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         funder,
-        0,
         amountToAdd
       );
 
       const txn = await contracts.TestStaking.instance.burnStake(
         staker,
-        amountToAdd,
         amountBurn
       );
 
@@ -482,24 +443,13 @@ describe("Staking", function () {
       );
       const StakeTakenEventLogs = utils.parseLogs(
         receipt,
-        this.TestStaking,
+        contracts.TestStaking.instance,
         "StakeBurned"
       );
       assert.equal(StakeTakenEventLogs.length, 1);
       const [StakeTakenEvent] = StakeTakenEventLogs;
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.amount.toNumber(), amountBurn);
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        this.TestStaking,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toNumber(), amountBurn);
-      assert.equal(StakeRemovedEvent.newStake.toNumber(), amountBurn);
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await this.MockNMR.balanceOf(
@@ -531,7 +481,6 @@ describe("Staking", function () {
       await contracts.TestStaking.instance.addStake(
         staker,
         funder,
-        0,
         amountToAdd
       );
 
@@ -543,24 +492,13 @@ describe("Staking", function () {
       );
       const StakeTakenEventLogs = utils.parseLogs(
         receipt,
-        this.TestStaking,
+        contracts.TestStaking.instance,
         "StakeBurned"
       );
       assert.equal(StakeTakenEventLogs.length, 1);
       const [StakeTakenEvent] = StakeTakenEventLogs;
       assert.equal(StakeTakenEvent.staker, staker);
       assert.equal(StakeTakenEvent.amount.toNumber(), amountToAdd);
-
-      const StakeRemovedEventLogs = utils.parseLogs(
-        receipt,
-        this.TestStaking,
-        "StakeRemoved"
-      );
-      assert.equal(StakeRemovedEventLogs.length, 1);
-      const [StakeRemovedEvent] = StakeRemovedEventLogs;
-      assert.equal(StakeRemovedEvent.staker, staker);
-      assert.equal(StakeRemovedEvent.amount.toNumber(), amountToAdd);
-      assert.equal(StakeRemovedEvent.newStake.toNumber(), 0);
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake();

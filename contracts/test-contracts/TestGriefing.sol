@@ -12,8 +12,8 @@ contract TestGriefing is Griefing {
         griefCost = _griefCost;
     }
 
-    function addStake(address staker, address funder, uint256 currentStake, uint256 amountToAdd) public {
-        Staking._addStake(staker, funder, currentStake, amountToAdd);
+    function addStake(address staker, address funder, uint256 amountToAdd) public {
+        Staking._addStake(staker, funder, amountToAdd);
     }
 
     function setRatio(address staker, uint256 ratio, RatioType ratioType) public {
@@ -23,10 +23,9 @@ contract TestGriefing is Griefing {
     function grief(
         address punisher,
         address staker,
-        uint256 currentStake,
         uint256 punishment,
         bytes memory message
     ) public {
-        _griefCost = Griefing._grief(punisher, staker, currentStake, punishment, message);
+        _griefCost = Griefing._grief(punisher, staker, punishment, message);
     }
 }

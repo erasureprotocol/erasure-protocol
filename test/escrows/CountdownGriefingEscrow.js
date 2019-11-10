@@ -44,7 +44,7 @@ describe("CountdownGriefingEscrow", function () {
     before(async function () {
 
         // setup deployment
-        [g.deployer, g.MockNMR] = await setupDeployment();
+        // [g.deployer, g.MockNMR] = await setupDeployment();
         [g.deployer, g.MockNMR] = await initDeployment();
 
         // deploy registry contracts
@@ -168,6 +168,7 @@ describe("CountdownGriefingEscrow", function () {
 
         [events.PaymentDeposited] = utils.parseLogs(receipt, g.Instance, "PaymentDeposited");
         [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+        [events.DepositIncreased] = utils.parseLogs(receipt, g.Instance, "DepositIncreased");
         [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
         assert.equal(events.PaymentDeposited.buyer, _buyer);
@@ -175,7 +176,9 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal(events.StakeAdded.staker, _buyer);
         assert.equal(events.StakeAdded.funder, _buyer);
         assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString());
-        assert.equal(events.StakeAdded.newStake.toString(), paymentAmount.toString());
+        assert.equal(events.DepositIncreased.user, _buyer);
+        assert.equal(events.DepositIncreased.amount.toString(), paymentAmount.toString());
+        assert.equal(events.DepositIncreased.newDeposit.toString(), paymentAmount.toString());
         assert.equal(events.Transfer.from, _buyer);
         assert.equal(events.Transfer.to, g.Instance.contractAddress);
         assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
@@ -208,6 +211,7 @@ describe("CountdownGriefingEscrow", function () {
 
         [events.StakeDeposited] = utils.parseLogs(receipt, g.Instance, "StakeDeposited");
         [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+        [events.DepositIncreased] = utils.parseLogs(receipt, g.Instance, "DepositIncreased");
         [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
         assert.equal(events.StakeDeposited.seller, _seller);
@@ -215,7 +219,9 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal(events.StakeAdded.staker, _seller);
         assert.equal(events.StakeAdded.funder, _seller);
         assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
-        assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
+        assert.equal(events.DepositIncreased.user, _seller);
+        assert.equal(events.DepositIncreased.amount.toString(), stakeAmount.toString());
+        assert.equal(events.DepositIncreased.newDeposit.toString(), stakeAmount.toString());
         assert.equal(events.Transfer.from, _seller);
         assert.equal(events.Transfer.to, g.Instance.contractAddress);
         assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
@@ -297,7 +303,7 @@ describe("CountdownGriefingEscrow", function () {
                 [events.StakeDeposited] = utils.parseLogs(receipt, g.Instance, "StakeDeposited");
                 [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
                 events.Transfer = utils.parseLogs(receipt, g.MockNMR, "Transfer");
-                events.StakeRemoved = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                events.DepositDecreased = utils.parseLogs(receipt, g.Instance, "DepositDecreased");
                 [events.Finalized] = utils.parseLogs(receipt, g.Instance, "Finalized");
                 [events.Initialized] = utils.parseLogs(receipt, g.AgreementInstance, "Initialized");
 
@@ -306,16 +312,15 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal(events.StakeAdded.staker, fulfiller);
                 assert.equal(events.StakeAdded.funder, fulfiller);
                 assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), stakeAmount.toString());
                 assert.equal(events.Transfer[0].from, fulfiller);
                 assert.equal(events.Transfer[0].to, g.Instance.contractAddress);
                 assert.equal(events.Transfer[0].value.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved[0].staker, requester);
-                assert.equal(events.StakeRemoved[0].amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved[0].newStake.toNumber(), 0);
-                assert.equal(events.StakeRemoved[1].staker, fulfiller);
-                assert.equal(events.StakeRemoved[1].amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved[1].newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased[0].user, requester);
+                assert.equal(events.DepositDecreased[0].amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositDecreased[0].newDeposit.toNumber(), 0);
+                assert.equal(events.DepositDecreased[1].user, fulfiller);
+                assert.equal(events.DepositDecreased[1].amount.toString(), stakeAmount.toString());
+                assert.equal(events.DepositDecreased[1].newDeposit.toNumber(), 0);
                 assert.equal(events.Transfer[1].from, g.Instance.contractAddress);
                 assert.equal(events.Transfer[1].to, g.AgreementInstance.contractAddress);
                 assert.equal(events.Transfer[1].value.toString(), stakeAmount.add(paymentAmount).toString());
@@ -382,15 +387,15 @@ describe("CountdownGriefingEscrow", function () {
 
                 assert.equal(utils.hasEvent(receipt, g.Instance, "Cancelled"), true);
                 [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
-                [events.StakeRemoved] = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                [events.DepositDecreased] = utils.parseLogs(receipt, g.Instance, "DepositDecreased");
                 [events.StakeTaken] = utils.parseLogs(receipt, g.Instance, "StakeTaken");
 
                 assert.equal(events.Transfer.from, g.Instance.contractAddress);
                 assert.equal(events.Transfer.to, requester);
                 assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved.staker, requester);
-                assert.equal(events.StakeRemoved.amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved.newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased.user, requester);
+                assert.equal(events.DepositDecreased.amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositDecreased.newDeposit.toNumber(), 0);
                 assert.equal(events.StakeTaken.staker, requester);
                 assert.equal(events.StakeTaken.recipient, requester);
                 assert.equal(events.StakeTaken.amount.toString(), paymentAmount.toString());
@@ -444,6 +449,7 @@ describe("CountdownGriefingEscrow", function () {
 
                 [events.PaymentDeposited] = utils.parseLogs(receipt, g.Instance, "PaymentDeposited");
                 [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+                [events.DepositIncreased] = utils.parseLogs(receipt, g.Instance, "DepositIncreased");
                 [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
                 assert.equal(events.PaymentDeposited.buyer, buyer);
@@ -451,7 +457,9 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal(events.StakeAdded.staker, buyer);
                 assert.equal(events.StakeAdded.funder, buyer);
                 assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), paymentAmount.toString());
+                assert.equal(events.DepositIncreased.user, buyer);
+                assert.equal(events.DepositIncreased.amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositIncreased.newDeposit.toString(), paymentAmount.toString());
                 assert.equal(events.Transfer.from, buyer);
                 assert.equal(events.Transfer.to, g.Instance.contractAddress);
                 assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
@@ -489,19 +497,19 @@ describe("CountdownGriefingEscrow", function () {
                 // validate events
 
                 [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
-                events.StakeRemoved = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                events.DepositDecreased = utils.parseLogs(receipt, g.Instance, "DepositDecreased");
                 [events.Finalized] = utils.parseLogs(receipt, g.Instance, "Finalized");
                 [events.Initialized] = utils.parseLogs(receipt, g.AgreementInstance, "Initialized");
 
                 assert.equal(events.Transfer.from, g.Instance.contractAddress);
                 assert.equal(events.Transfer.to, g.AgreementInstance.contractAddress);
                 assert.equal(events.Transfer.value.toString(), stakeAmount.add(paymentAmount).toString());
-                assert.equal(events.StakeRemoved[0].staker, buyer);
-                assert.equal(events.StakeRemoved[0].amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved[0].newStake.toNumber(), 0);
-                assert.equal(events.StakeRemoved[1].staker, seller);
-                assert.equal(events.StakeRemoved[1].amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved[1].newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased[0].user, buyer);
+                assert.equal(events.DepositDecreased[0].amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositDecreased[0].newDeposit.toNumber(), 0);
+                assert.equal(events.DepositDecreased[1].user, seller);
+                assert.equal(events.DepositDecreased[1].amount.toString(), stakeAmount.toString());
+                assert.equal(events.DepositDecreased[1].newDeposit.toNumber(), 0);
                 assert.equal(events.Finalized.agreement, g.AgreementInstance.contractAddress);
                 assert.equal(events.Initialized.operator, g.Instance.contractAddress);
                 assert.equal(events.Initialized.staker, seller);
@@ -563,15 +571,15 @@ describe("CountdownGriefingEscrow", function () {
 
                 assert.equal(utils.hasEvent(receipt, g.Instance, "Cancelled"), true);
                 [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
-                [events.StakeRemoved] = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                [events.DepositDecreased] = utils.parseLogs(receipt, g.Instance, "DepositDecreased");
                 [events.StakeTaken] = utils.parseLogs(receipt, g.Instance, "StakeTaken");
 
                 assert.equal(events.Transfer.from, g.Instance.contractAddress);
                 assert.equal(events.Transfer.to, seller);
                 assert.equal(events.Transfer.value.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved.staker, seller);
-                assert.equal(events.StakeRemoved.amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved.newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased.user, seller);
+                assert.equal(events.DepositDecreased.amount.toString(), stakeAmount.toString());
+                assert.equal(events.DepositDecreased.newDeposit.toNumber(), 0);
                 assert.equal(events.StakeTaken.staker, seller);
                 assert.equal(events.StakeTaken.recipient, seller);
                 assert.equal(events.StakeTaken.amount.toString(), stakeAmount.toString());
@@ -623,6 +631,7 @@ describe("CountdownGriefingEscrow", function () {
 
                 [events.PaymentDeposited] = utils.parseLogs(receipt, g.Instance, "PaymentDeposited");
                 [events.StakeAdded] = utils.parseLogs(receipt, g.Instance, "StakeAdded");
+                [events.DepositIncreased] = utils.parseLogs(receipt, g.Instance, "DepositIncreased");
                 [events.Transfer] = utils.parseLogs(receipt, g.MockNMR, "Transfer");
 
                 assert.equal(events.PaymentDeposited.buyer, buyer);
@@ -630,7 +639,9 @@ describe("CountdownGriefingEscrow", function () {
                 assert.equal(events.StakeAdded.staker, buyer);
                 assert.equal(events.StakeAdded.funder, buyer);
                 assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeAdded.newStake.toString(), paymentAmount.toString());
+                assert.equal(events.DepositIncreased.user, buyer);
+                assert.equal(events.DepositIncreased.amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositIncreased.newDeposit.toString(), paymentAmount.toString());
                 assert.equal(events.Transfer.from, buyer);
                 assert.equal(events.Transfer.to, g.Instance.contractAddress);
                 assert.equal(events.Transfer.value.toString(), paymentAmount.toString());
@@ -662,24 +673,24 @@ describe("CountdownGriefingEscrow", function () {
 
                 assert.equal(utils.hasEvent(receipt, g.Instance, "Cancelled"), true);
                 events.Transfer = utils.parseLogs(receipt, g.MockNMR, "Transfer");
-                events.StakeRemoved = utils.parseLogs(receipt, g.Instance, "StakeRemoved");
+                events.DepositDecreased = utils.parseLogs(receipt, g.Instance, "DepositDecreased");
                 events.StakeTaken = utils.parseLogs(receipt, g.Instance, "StakeTaken");
 
                 assert.equal(events.Transfer[0].from, g.Instance.contractAddress);
                 assert.equal(events.Transfer[0].to, seller);
                 assert.equal(events.Transfer[0].value.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved[0].staker, seller);
-                assert.equal(events.StakeRemoved[0].amount.toString(), stakeAmount.toString());
-                assert.equal(events.StakeRemoved[0].newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased[0].user, seller);
+                assert.equal(events.DepositDecreased[0].amount.toString(), stakeAmount.toString());
+                assert.equal(events.DepositDecreased[0].newDeposit.toNumber(), 0);
                 assert.equal(events.StakeTaken[0].staker, seller);
                 assert.equal(events.StakeTaken[0].recipient, seller);
                 assert.equal(events.StakeTaken[0].amount.toString(), stakeAmount.toString());
                 assert.equal(events.Transfer[1].from, g.Instance.contractAddress);
                 assert.equal(events.Transfer[1].to, buyer);
                 assert.equal(events.Transfer[1].value.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved[1].staker, buyer);
-                assert.equal(events.StakeRemoved[1].amount.toString(), paymentAmount.toString());
-                assert.equal(events.StakeRemoved[1].newStake.toNumber(), 0);
+                assert.equal(events.DepositDecreased[1].user, buyer);
+                assert.equal(events.DepositDecreased[1].amount.toString(), paymentAmount.toString());
+                assert.equal(events.DepositDecreased[1].newDeposit.toNumber(), 0);
                 assert.equal(events.StakeTaken[1].staker, buyer);
                 assert.equal(events.StakeTaken[1].recipient, buyer);
                 assert.equal(events.StakeTaken[1].amount.toString(), paymentAmount.toString());
