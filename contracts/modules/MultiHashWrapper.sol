@@ -1,11 +1,12 @@
 pragma solidity ^0.5.0;
 
 
-/**
- * @title MultiHashWrapper
- * @dev Contract that handles multi hash data structures and encoding/decoding
- *   Learn more here: https://github.com/multiformats/multihash
- */
+/// @title MultiHashWrapper
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
+/// @notice Contract that handles multi hash data structures and encoding/decoding
+/// Learn more here: https://github.com/multiformats/multihash
 contract MultiHashWrapper {
 
     // bytes32 hash first to fill the first storage slot

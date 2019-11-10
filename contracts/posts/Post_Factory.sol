@@ -4,6 +4,10 @@ import "../modules/Factory.sol";
 import "./Post.sol";
 
 
+/// @title Post_Factory
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Post_Factory is Factory {
 
     constructor(address instanceRegistry, address templateContract) public {

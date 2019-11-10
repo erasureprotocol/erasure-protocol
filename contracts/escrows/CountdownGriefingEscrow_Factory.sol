@@ -7,6 +7,7 @@ import "./CountdownGriefingEscrow.sol";
 /// @title CountdownGriefingEscrow_Factory
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract CountdownGriefingEscrow_Factory is Factory {
 
     constructor(address instanceRegistry, address templateContract) public {

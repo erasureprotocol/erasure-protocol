@@ -4,6 +4,10 @@ import "../modules/Factory.sol";
 import "./Feed.sol";
 
 
+/// @title Feed_Factory
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Feed_Factory is Factory {
 
     constructor(address instanceRegistry, address templateContract) public {

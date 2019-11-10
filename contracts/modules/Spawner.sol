@@ -1,12 +1,12 @@
 pragma solidity ^0.5.0;
 
 
-/**
- * @title Spawn
- * @author 0age
- * @notice This contract provides creation code that is used by Spawner in order
- * to initialize and deploy eip-1167 minimal proxies for a given logic contract.
- */
+/// @title Spawn
+/// @author 0age (@0age) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
+/// @notice This contract provides creation code that is used by Spawner in order
+/// to initialize and deploy eip-1167 minimal proxies for a given logic contract.
 contract Spawn {
   constructor(
     address logicContract,
@@ -36,14 +36,14 @@ contract Spawn {
   }
 }
 
-/**
- * @title Spawner
- * @author 0age
- * @notice This contract spawns and initializes eip-1167 minimal proxies that
- * point to existing logic contracts. The logic contracts need to have an
- * intitializer function that should only callable when no contract exists at
- * their current address (i.e. it is being `DELEGATECALL`ed from a constructor).
- */
+/// @title Spawner
+/// @author 0age (@0age) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
+/// @notice This contract spawns and initializes eip-1167 minimal proxies that
+/// point to existing logic contracts. The logic contracts need to have an
+/// intitializer function that should only callable when no contract exists at
+/// their current address (i.e. it is being `DELEGATECALL`ed from a constructor).
 contract Spawner {
   /**
    * @notice Internal function for spawning an eip-1167 minimal proxy using

@@ -3,6 +3,10 @@ pragma solidity ^0.5.0;
 import "./iFactory.sol";
 
 
+/// @title Template
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Template {
 
     address private _factory;

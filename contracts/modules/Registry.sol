@@ -3,6 +3,10 @@ pragma solidity ^0.5.0;
 import "../helpers/openzeppelin-solidity/ownership/Ownable.sol";
 
 
+/// @title Registry
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Registry is Ownable {
 
     enum FactoryStatus { Unregistered, Registered, Retired }
