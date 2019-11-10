@@ -2,9 +2,10 @@ pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 
-/* Deadline
- *
- */
+/// @title Deadline
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Deadline {
 
     using SafeMath for uint256;
@@ -49,21 +50,16 @@ contract Deadline {
             return DeadlineStatus.isOver;
     }
 
-    function isNull() public view returns (bool status) {
+    function isNull() internal view returns (bool status) {
         return getDeadlineStatus() == DeadlineStatus.isNull;
     }
 
-    function isSet() public view returns (bool status) {
+    function isSet() internal view returns (bool status) {
         return getDeadlineStatus() == DeadlineStatus.isSet;
     }
 
-    function isOver() public view returns (bool status) {
+    function isOver() internal view returns (bool status) {
         return getDeadlineStatus() == DeadlineStatus.isOver;
-    }
-
-    // helper to retain abi
-    function isAfterDeadline() public view returns (bool status) {
-        return Deadline.isOver();
     }
 
 }

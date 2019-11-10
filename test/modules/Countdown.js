@@ -1,6 +1,6 @@
 const { createDeployer } = require("../helpers/setup");
 
-describe("Countdown", function() {
+describe("Countdown", function () {
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
@@ -45,27 +45,41 @@ describe("Countdown", function() {
     });
   });
 
-  describe("Deadline._isAfterDeadline", () => {
-    it("should be false if deadline not set", async () => {
-      const isAfterDeadline = await contracts.TestCountdown.instance.isAfterDeadline();
-      assert.equal(isAfterDeadline, false);
+  describe("Deadline.getDeadlineStatus", () => {
+    it("should be 0 when deadline not set", async () => {
+      const getDeadlineStatus = await contracts.TestCountdown.instance.getDeadlineStatus();
+      assert.equal(getDeadlineStatus, 0);
+      const getTimeRemaining = await contracts.TestCountdown.instance.getTimeRemaining();
+      assert.equal(getTimeRemaining, 0);
     });
 
-    it("checks is after deadline", async () => {
+    it("should be 1 when deadline set", async () => {
       const block = await deployer.provider.getBlock("latest");
       const blockTimestamp = block.timestamp;
 
-      // test exceed deadline, 2000 (current time) > 1000 (deadline)
+      // set deadline
       await contracts.TestCountdown.instance.setDeadline(blockTimestamp + 1000);
-      await utils.setTimeTo(deployer.provider, blockTimestamp + 2000);
-      let isAfterDeadline = await contracts.TestCountdown.instance.isAfterDeadline();
-      assert.equal(isAfterDeadline, true);
 
-      // test before deadline, 3000 (current time) < 4000 (deadline)
-      await contracts.TestCountdown.instance.setDeadline(blockTimestamp + 4000);
-      await utils.setTimeTo(deployer.provider, blockTimestamp + 3000);
-      isAfterDeadline = await contracts.TestCountdown.instance.isAfterDeadline();
-      assert.equal(isAfterDeadline, false);
+      const getDeadlineStatus = await contracts.TestCountdown.instance.getDeadlineStatus();
+      assert.equal(getDeadlineStatus, 1);
+      const getTimeRemaining = await contracts.TestCountdown.instance.getTimeRemaining();
+      assert.equal((getTimeRemaining > 0), true);
+    });
+
+    it("should be 2 when deadline past", async () => {
+      const block = await deployer.provider.getBlock("latest");
+      const blockTimestamp = block.timestamp;
+
+      // set deadline
+      await contracts.TestCountdown.instance.setDeadline(blockTimestamp + 1000);
+
+      // time travel
+      await utils.timeTravel(deployer.provider, 2000);
+
+      const getDeadlineStatus = await contracts.TestCountdown.instance.getDeadlineStatus();
+      assert.equal(getDeadlineStatus, 2);
+      const getTimeRemaining = await contracts.TestCountdown.instance.getTimeRemaining();
+      assert.equal(getTimeRemaining, 0);
     });
   });
 
@@ -104,64 +118,72 @@ describe("Countdown", function() {
     });
   });
 
-  describe("Countdown.isOver", () => {
-    it("should get isOver as false when length not set", async () => {
-      let isOver = await contracts.TestCountdown.instance.isOver();
-      assert.equal(isOver, false);
+  describe("Countdown.getCountdownStatus", () => {
+    it("should be 0 when length not set", async () => {
+      // getCountdownStatus
+      const getCountdownStatus = await contracts.TestCountdown.instance.getCountdownStatus();
+      assert.equal(getCountdownStatus, 0);
+
+      // getLength
+      const getLength = await contracts.TestCountdown.instance.getLength();
+      assert.equal(getLength, 0);
     });
 
-    it("gets isOver status correctly", async () => {
+    it("should be 1 when length set", async () => {
+
       const length = 2000;
+
+      // set length
       await contracts.TestCountdown.instance.setLength(length);
+
+      // getCountdownStatus
+      const getCountdownStatus = await contracts.TestCountdown.instance.getCountdownStatus();
+      assert.equal(getCountdownStatus, 1);
+
+      // getLength
+      const getLength = await contracts.TestCountdown.instance.getLength();
+      assert.equal(getLength, 2000);
+    });
+
+    it("should be 2 when countdown started", async () => {
+
+      const length = 2000;
+
+      // set length
+      await contracts.TestCountdown.instance.setLength(length);
+
+      // start countdown
       await contracts.TestCountdown.instance.start();
 
-      const block = await deployer.provider.getBlock("latest");
-      const blockTimestamp = block.timestamp;
+      // getCountdownStatus
+      const getCountdownStatus = await contracts.TestCountdown.instance.getCountdownStatus();
+      assert.equal(getCountdownStatus, 2);
 
-      // check that it's not over
-      await utils.setTimeTo(deployer.provider, blockTimestamp + 1000);
-      let isOver = await contracts.TestCountdown.instance.isOver();
-      assert.equal(isOver, false);
-
-      // check that it's over
-      await utils.setTimeTo(deployer.provider, blockTimestamp + 3000);
-      isOver = await contracts.TestCountdown.instance.isOver();
-      assert.equal(isOver, true);
-    });
-  });
-
-  describe("Countdown.timeRemaining", () => {
-    it("should get timeRemaining as 0 when deadline not set", async () => {
-      const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
-      assert.equal(timeRemaining, 0);
+      // getLength
+      const getLength = await contracts.TestCountdown.instance.getLength();
+      assert.equal(getLength, 2000);
     });
 
-    it("gets timeRemaining correctly before deadline", async () => {
+    it("should be 3 when countdown over", async () => {
+
       const length = 2000;
-      const increment = 1000;
+
+      // set length
       await contracts.TestCountdown.instance.setLength(length);
+
+      // start countdown
       await contracts.TestCountdown.instance.start();
 
-      const block = await deployer.provider.getBlock("latest");
-      const blockTimestamp = block.timestamp;
+      // time travel
+      await utils.timeTravel(deployer.provider, length);
 
-      await utils.setTimeTo(deployer.provider, blockTimestamp + increment);
-      const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
-      assert.isAtMost(timeRemaining.toNumber(), length - increment);
-    });
+      // getCountdownStatus
+      const getCountdownStatus = await contracts.TestCountdown.instance.getCountdownStatus();
+      assert.equal(getCountdownStatus, 3);
 
-    it("gets timeRemaining as 0 correctly after deadline", async () => {
-      const length = 2000;
-      const increment = 3000;
-      await contracts.TestCountdown.instance.setLength(length);
-      await contracts.TestCountdown.instance.start();
-
-      const block = await deployer.provider.getBlock("latest");
-      const blockTimestamp = block.timestamp;
-
-      await utils.setTimeTo(deployer.provider, blockTimestamp + increment);
-      const timeRemaining = await contracts.TestCountdown.instance.timeRemaining();
-      assert.equal(timeRemaining.toNumber(), 0);
+      // getLength
+      const getLength = await contracts.TestCountdown.instance.getLength();
+      assert.equal(getLength, 2000);
     });
   });
 });
