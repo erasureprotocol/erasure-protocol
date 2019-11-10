@@ -4,6 +4,10 @@ import "../helpers/DecimalMath.sol";
 import "./Staking.sol";
 
 
+/// @title Griefing
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Griefing is Staking {
 
     enum RatioType { NaN, Inf, Dec }
@@ -37,15 +41,9 @@ contract Griefing is Staking {
     function _grief(
         address punisher,
         address staker,
-        uint256 currentStake,
         uint256 punishment,
         bytes memory message
     ) internal returns (uint256 cost) {
-
-        // prevent accidental double punish
-        // cannot be strict equality to prevent frontrunning
-        require(currentStake <= Staking.getStake(staker), "current stake incorrect");
-
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
         RatioType ratioType = _griefRatio[staker].ratioType;
@@ -60,7 +58,7 @@ contract Griefing is Staking {
         BurnNMR._burnFrom(punisher, cost);
 
         // burn the punishment from the target's stake
-        Staking._burnStake(staker, currentStake, punishment);
+        Staking._burnStake(staker, punishment);
 
         // emit event
         emit Griefed(punisher, staker, punishment, cost, message);
