@@ -194,7 +194,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         } else {
             _data.status = EscrowStatus.onlyPaymentDeposited;
         }
-        
     }
 
     /// @notice Finalize escrow and execute completion script
@@ -240,7 +239,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         uint256 totalStake;
         {
-            
             uint256 paymentAmount = Deposit._clearDeposit(_data.buyer);
             uint256 stakeAmount = Deposit._clearDeposit(_data.seller);
             totalStake = paymentAmount.add(stakeAmount);
@@ -325,13 +323,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address buyer = _data.buyer;
 
         // return stake to seller
-        if (Staking.getStake(_data.seller) != 0) {
-            Staking._takeFullStake(_data.seller, _data.seller);
+        if (Staking.getStake(seller) != 0) {
+            Staking._takeFullStake(seller, seller);
         }
 
         // return payment to buyer
-        if (Staking.getStake(_data.buyer) != 0) {
-            Staking._takeFullStake(_data.buyer, _data.buyer);
+        if (Staking.getStake(buyer) != 0) {
+            Staking._takeFullStake(buyer, buyer);
         }
 
         // update status
