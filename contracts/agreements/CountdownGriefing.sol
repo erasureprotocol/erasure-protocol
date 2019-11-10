@@ -125,7 +125,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require deadline is passed
-        require(Deadline.isAfterDeadline(),"deadline not passed");
+        require(Deadline.isOver(),"deadline not passed");
 
         // retrieve stake
         amount = Staking._takeFullStake(_data.staker, recipient);

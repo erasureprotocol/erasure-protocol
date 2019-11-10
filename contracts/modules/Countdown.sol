@@ -4,8 +4,10 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 import "./Deadline.sol";
 
 
-/* Countdown timer
- */
+/// @title Countdown
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Countdown is Deadline {
 
     using SafeMath for uint256;
@@ -49,25 +51,20 @@ contract Countdown is Deadline {
             return CountdownStatus.isOver;
     }
 
-    function isNull() public view returns (bool validity) {
+    function isNull() internal view returns (bool validity) {
         return getCountdownStatus() == CountdownStatus.isNull;
     }
 
-    function isSet() public view returns (bool validity) {
+    function isSet() internal view returns (bool validity) {
         return getCountdownStatus() == CountdownStatus.isSet;
     }
 
-    function isActive() public view returns (bool validity) {
+    function isActive() internal view returns (bool validity) {
         return getCountdownStatus() == CountdownStatus.isActive;
     }
 
-    function isOver() public view returns (bool validity) {
+    function isOver() internal view returns (bool validity) {
         return getCountdownStatus() == CountdownStatus.isOver;
-    }
-
-    // helper to retain abi
-    function timeRemaining() public view returns (uint256 time) {
-        return Deadline.getTimeRemaining();
     }
 
 }
