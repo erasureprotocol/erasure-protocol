@@ -7,6 +7,10 @@ import "../modules/ProofHashes.sol";
 import "../modules/MultiHashWrapper.sol";
 
 
+/// @title Feed
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Template {
 
     event Initialized(address operator, bytes multihash, bytes metadata);

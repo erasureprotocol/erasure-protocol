@@ -2,10 +2,11 @@ pragma solidity ^0.5.0;
 
 import "./iNMR.sol";
 
-/**
- * @title NMR token burning helper
- * @dev Allows for calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.
- */
+/// @title BurnNMR
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
+/// @notice Allows for calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.
 contract BurnNMR {
 
     // address of the token

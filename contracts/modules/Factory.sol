@@ -4,6 +4,10 @@ import "./Spawner.sol";
 import "./iRegistry.sol";
 
 
+/// @title Factory
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Factory is Spawner {
 
     address[] private _instances;

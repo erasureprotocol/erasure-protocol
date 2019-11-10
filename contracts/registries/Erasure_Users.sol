@@ -3,6 +3,10 @@ pragma solidity ^0.5.0;
 import "../helpers/HitchensUnorderedAddressSetLib.sol";
 
 
+/// @title Erasure_Users
+/// @author Stephane Gosselin (@thegostep) for Numerai Inc
+/// @dev Security contact: security@numer.ai
+/// @dev Version: 1.2.0
 contract Erasure_Users {
 
     using HitchensUnorderedAddressSetLib for HitchensUnorderedAddressSetLib.Set;
