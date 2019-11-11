@@ -306,12 +306,12 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///          - return payment to buyer
     ///          - close escrow
     /// @dev Access Control: buyer OR operator
-    ///      State Machine: after Countdown.isOver()
+    ///      State Machine: after depositStake() AND after depositPayment() AND after Countdown.isOver()
     function timeout() public {
         // restrict access control
-        require(isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
+        require(isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only buyer or active operator");
         // restrict state machine
-        require(Countdown.isOver(), "only after countdown ended");
+        require(isDeposited() && Countdown.isOver(), "only after countdown ended");
 
         // cancel escrow and return deposits
         _cancel();
