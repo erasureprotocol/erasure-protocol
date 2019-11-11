@@ -1,8 +1,6 @@
 pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
-import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
-import "../modules/Countdown.sol";
 import "../modules/Griefing.sol";
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
