@@ -200,13 +200,13 @@ describe("CountdownGriefing", function () {
     const stakerMetadata = "STAKER";
     const operatorMetadata = "OPERATOR";
 
-    it("should revert when msg.sender is not staker or active operator", async () => {
+    it("should revert when msg.sender is not active operator", async () => {
       // use the counterparty to be the msg.sender
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only staker or active operator"
+        "only active operator"
       );
     });
 
@@ -215,18 +215,7 @@ describe("CountdownGriefing", function () {
         this.DeactivatedGriefing.from(operator).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only staker or active operator"
-      );
-    });
-
-    it("should set metadata when msg.sender is staker", async () => {
-      const txn = await this.TestCountdownGriefing.from(staker).setMetadata(
-        Buffer.from(stakerMetadata)
-      );
-      await assert.emit(txn, "MetadataSet");
-      await assert.emitWithArgs(
-        txn,
-        ethers.utils.hexlify(ethers.utils.toUtf8Bytes(stakerMetadata))
+        "only active operator"
       );
     });
 

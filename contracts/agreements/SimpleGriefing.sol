@@ -58,7 +58,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     function setMetadata(bytes memory metadata) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         // update metadata
         EventMetadata._setMetadata(metadata);
