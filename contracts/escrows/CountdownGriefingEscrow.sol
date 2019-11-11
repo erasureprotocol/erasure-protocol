@@ -113,11 +113,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     }
 
     /// @notice Emit metadata event
-    /// @dev Access Control: seller OR buyer OR operator
+    /// @dev Access Control: operator
     ///      State Machine: always
     function setMetadata(bytes memory metadata) public {
         // restrict access
-        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or buyer or active operator");
+        require(Operated.isActiveOperator(msg.sender), "only  active operator");
 
         // update metadata
         EventMetadata._setMetadata(metadata);
