@@ -154,7 +154,7 @@ const c = {
                 address: ""
             },
             rinkeby: {
-                address: "0x3A7BD58D3f88130de6625878e9d25D5606359F04"
+                address: "0x41754906482F65d984f9f0e2ef06D24f5dD7eee8"
             }
         },
         template: {
@@ -163,7 +163,7 @@ const c = {
                 address: ""
             },
             rinkeby: {
-                address: "0xCeE65b74f91996824Bb02721Bcf0281652031632"
+                address: "0x80460AAE614477553b660c608877f5c6D7a06Df9"
             }
         },
         instance: {
