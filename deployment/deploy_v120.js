@@ -35,12 +35,12 @@ const deploy = async (network, secret) => {
     console.log(`Deployment Wallet: ${deployer.signer.address}`);
 
     // deploy escrow registry
-    await deployer.deployAndVerify(c.Erasure_Escrows.artifact).then(wrap => {
-      c.Erasure_Escrows[network] = {
-        wrap: wrap,
-        address: wrap.contractAddress
-      };
-    });
+    // await deployer.deployAndVerify(c.Erasure_Escrows.artifact).then(wrap => {
+    //   c.Erasure_Escrows[network] = {
+    //     wrap: wrap,
+    //     address: wrap.contractAddress
+    //   };
+    // });
   } else if (network == "mainnet") {
     // set owner address
     multisig = "0x0000000000377d181a0ebd08590c6b399b272000";
@@ -68,10 +68,10 @@ const deploy = async (network, secret) => {
 Get Deployed Registries
       `);
 
-  c.Erasure_Posts[network].wrap = deployer.wrapDeployedContract(
-    c.Erasure_Posts.artifact,
-    c.Erasure_Posts[network].address
-  );
+  // c.Erasure_Posts[network].wrap = deployer.wrapDeployedContract(
+  //   c.Erasure_Posts.artifact,
+  //   c.Erasure_Posts[network].address
+  // );
   c.Erasure_Agreements[network].wrap = deployer.wrapDeployedContract(
     c.Erasure_Agreements.artifact,
     c.Erasure_Agreements[network].address
@@ -85,11 +85,11 @@ Get Deployed Registries
 Validate Ownership
       `);
 
-  assert.equal(
-    await c.Erasure_Posts[network].wrap.owner(),
-    deployer.signer.address
-  );
-  console.log(`Erasure_Posts has valid owner: ${deployer.signer.address}`);
+  // assert.equal(
+  //   await c.Erasure_Posts[network].wrap.owner(),
+  //   deployer.signer.address
+  // );
+  // console.log(`Erasure_Posts has valid owner: ${deployer.signer.address}`);
 
   assert.equal(
     await c.Erasure_Agreements[network].wrap.owner(),
@@ -116,6 +116,24 @@ Deploy Templates
     c.CountdownGriefingEscrow.template[network].address
   );
 
+  await deployer.deployAndVerify(c.CountdownGriefing.template.artifact).then(wrap => {
+    c.CountdownGriefing.template[network].address = wrap.contractAddress;
+  });
+
+  c.CountdownGriefing.template[network].wrap = deployer.wrapDeployedContract(
+    c.CountdownGriefing.template.artifact,
+    c.CountdownGriefing.template[network].address
+  );
+
+  await deployer.deployAndVerify(c.SimpleGriefing.template.artifact).then(wrap => {
+    c.SimpleGriefing.template[network].address = wrap.contractAddress;
+  });
+
+  c.SimpleGriefing.template[network].wrap = deployer.wrapDeployedContract(
+    c.SimpleGriefing.template.artifact,
+    c.SimpleGriefing.template[network].address
+  );
+
   console.log(`
 Deploy Factories
             `);
@@ -134,6 +152,38 @@ Deploy Factories
   c.CountdownGriefingEscrow.factory[network].wrap = deployer.wrapDeployedContract(
     c.CountdownGriefingEscrow.factory.artifact,
     c.CountdownGriefingEscrow.factory[network].address
+  );
+
+  await deployer
+    .deployAndVerify(
+      c.CountdownGriefing.factory.artifact,
+      false,
+      c.Erasure_Agreements[network].address,
+      c.CountdownGriefing.template[network].address
+    )
+    .then(wrap => {
+      c.CountdownGriefing.factory[network].address = wrap.contractAddress;
+    });
+
+  c.CountdownGriefing.factory[network].wrap = deployer.wrapDeployedContract(
+    c.CountdownGriefing.factory.artifact,
+    c.CountdownGriefing.factory[network].address
+  );
+
+  await deployer
+    .deployAndVerify(
+      c.SimpleGriefing.factory.artifact,
+      false,
+      c.Erasure_Agreements[network].address,
+      c.SimpleGriefing.template[network].address
+    )
+    .then(wrap => {
+      c.SimpleGriefing.factory[network].address = wrap.contractAddress;
+    });
+
+  c.SimpleGriefing.factory[network].wrap = deployer.wrapDeployedContract(
+    c.SimpleGriefing.factory.artifact,
+    c.SimpleGriefing.factory[network].address
   );
 
   console.log(`
@@ -161,21 +211,57 @@ Register Factories
       gasUsed = gasUsed.add(receipt.gasUsed);
     });
 
-  console.log(`
-Transfer Registry Ownership
-      `);
-
-  await c.Erasure_Posts[network].wrap
-    .transferOwnership(multisig, { gasPrice: defaultGas })
+  await c.Erasure_Agreements[network].wrap
+    .addFactory(
+      c.CountdownGriefing.factory[network].address,
+      ethers.utils.hexlify(0x0),
+      { gasPrice: defaultGas }
+    )
     .then(async txn => {
-      console.log(`transferOwnership() | Erasure_Posts => ${multisig}`);
-      const receipt = await c.Erasure_Posts[
+      console.log(
+        `addFactory() | CountdownGriefing_Factory => Erasure_Agreements`
+      );
+      const receipt = await c.Erasure_Agreements[
         network
       ].wrap.verboseWaitForTransaction(txn);
       console.log(`gasUsed: ${receipt.gasUsed}`);
       console.log(``);
       gasUsed = gasUsed.add(receipt.gasUsed);
     });
+
+  await c.Erasure_Agreements[network].wrap
+    .addFactory(
+      c.SimpleGriefing.factory[network].address,
+      ethers.utils.hexlify(0x0),
+      { gasPrice: defaultGas }
+    )
+    .then(async txn => {
+      console.log(
+        `addFactory() | SimpleGriefing_Factory => Erasure_Agreements`
+      );
+      const receipt = await c.Erasure_Agreements[
+        network
+      ].wrap.verboseWaitForTransaction(txn);
+      console.log(`gasUsed: ${receipt.gasUsed}`);
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+    });
+
+  console.log(`
+Transfer Registry Ownership
+      `);
+
+  // await c.Erasure_Posts[network].wrap
+  //   .transferOwnership(multisig, { gasPrice: defaultGas })
+  //   .then(async txn => {
+  //     console.log(`transferOwnership() | Erasure_Posts => ${multisig}`);
+  //     const receipt = await c.Erasure_Posts[
+  //       network
+  //     ].wrap.verboseWaitForTransaction(txn);
+  //     console.log(`gasUsed: ${receipt.gasUsed}`);
+  //     console.log(``);
+  //     gasUsed = gasUsed.add(receipt.gasUsed);
+  //   });
 
   await c.Erasure_Agreements[network].wrap
     .transferOwnership(multisig, { gasPrice: defaultGas })
@@ -211,6 +297,89 @@ Create test instance from factories
   console.log(`multihash: ${multihash}`);
   console.log(`hash: ${hash}`);
   console.log(``);
+
+  await c.SimpleGriefing.factory[network].wrap
+    .create(
+      abiEncodeWithSelector(
+        "initialize",
+        ["address", "address", "address", "uint256", "uint8", "bytes"],
+        [
+          userAddress,
+          userAddress,
+          userAddress,
+          ethers.utils.parseEther("1"),
+          2,
+          "0x0"
+        ]
+      ),
+      { gasPrice: defaultGas }
+    )
+    .then(async txn => {
+      const receipt = await c.SimpleGriefing.factory[
+        network
+      ].wrap.verboseWaitForTransaction(txn);
+      const eventFound = receipt.events.find(
+        emittedEvent => emittedEvent.event === "InstanceCreated",
+        "There is no such event"
+      );
+
+      c.SimpleGriefing.instance[network].wrap = deployer.wrapDeployedContract(
+        c.SimpleGriefing.template.artifact,
+        eventFound.args.instance
+      );
+      console.log(
+        `create() | ${receipt.gasUsed} gas | SimpleGriefing_Factory => ${eventFound.args.instance}`
+      );
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+    });
+
+  await c.CountdownGriefing.factory[network].wrap
+    .create(
+      abiEncodeWithSelector(
+        "initialize",
+        [
+          "address",
+          "address",
+          "address",
+          "uint256",
+          "uint8",
+          "uint256",
+          "bytes"
+        ],
+        [
+          userAddress,
+          userAddress,
+          userAddress,
+          ethers.utils.parseEther("1"),
+          2,
+          100000000,
+          "0x0"
+        ]
+      ),
+      { gasPrice: defaultGas }
+    )
+    .then(async txn => {
+      const receipt = await c.CountdownGriefing.factory[
+        network
+      ].wrap.verboseWaitForTransaction(txn);
+      const eventFound = receipt.events.find(
+        emittedEvent => emittedEvent.event === "InstanceCreated",
+        "There is no such event"
+      );
+
+      c.CountdownGriefing.instance[
+        network
+      ].wrap = deployer.wrapDeployedContract(
+        c.CountdownGriefing.template.artifact,
+        eventFound.args.instance
+      );
+      console.log(
+        `create() | ${receipt.gasUsed} gas | CountdownGriefing_Factory => ${eventFound.args.instance}`
+      );
+      console.log(``);
+      gasUsed = gasUsed.add(receipt.gasUsed);
+    });
 
   await c.CountdownGriefingEscrow.factory[network].wrap
     .create(

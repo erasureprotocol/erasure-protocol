@@ -42,7 +42,7 @@ const c = {
                 address: "0x67ef9503cf0350dB52130Ef2Ad053E868Bc90FC7"
             },
             rinkeby: {
-                address: "0xe2940cfF284eaEB54caad6A0d7946657283375a1"
+                address: "0x86afD598Ab5CcBDe770dCb57373E3f4c8E23df95"
             }
         },
         template: {
@@ -51,7 +51,7 @@ const c = {
                 address: "0xC04Bd2f0d484b7e0156b21c98B2923Ca8b9ce149"
             },
             rinkeby: {
-                address: "0x5B0d1Db5f266E97f739685b788C5F1DE3E325b25"
+                address: "0xda6D8eCd5a56d3ae1741BebbA3Fb382B073DAaFf"
             }
         },
         instance: {
@@ -70,7 +70,7 @@ const c = {
                 address: "0xd330e5e9670738D36E31dcb1fde0c08B1895a0b1"
             },
             rinkeby: {
-                address: "0x5B2fcD6264fCFF7803a99e262900214667B6C77C"
+                address: "0xffc062e58CB967d2ca33F9d714257f9f003A3b6d"
             }
         },
         template: {
@@ -79,7 +79,7 @@ const c = {
                 address: "0x89a2958544f86Cc57828dbBf31E2C786f20Fe0a0"
             },
             rinkeby: {
-                address: "	0xc5B883Db107Cc9927F9c6E18bc603A5d9FcE7074"
+                address: "0x93F75120365129Da3A9E3e23e3AbB857F1ADf5B6"
             }
         },
         instance: {
@@ -154,7 +154,7 @@ const c = {
                 address: ""
             },
             rinkeby: {
-                address: "0x41754906482F65d984f9f0e2ef06D24f5dD7eee8"
+                address: "0x51FA999b00aCA5005AE4599b71ef05e32E9A2D00"
             }
         },
         template: {
@@ -163,7 +163,7 @@ const c = {
                 address: ""
             },
             rinkeby: {
-                address: "0x80460AAE614477553b660c608877f5c6D7a06Df9"
+                address: "0x714089F6F615AeFd042982c91b9E89C24878c5E4"
             }
         },
         instance: {
