@@ -8,6 +8,7 @@ import "./Deadline.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
+/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/b70058b3-d1e7-4c23-addd-3771bc7ecc78/image.png
 contract Countdown is Deadline {
 
     using SafeMath for uint256;

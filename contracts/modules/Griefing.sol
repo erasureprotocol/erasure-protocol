@@ -8,6 +8,7 @@ import "./Staking.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
+/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/a5a68c17-6f2c-49e1-9ea1-b30c77d9eeac/image.png
 contract Griefing is Staking {
 
     enum RatioType { NaN, Inf, Dec }
