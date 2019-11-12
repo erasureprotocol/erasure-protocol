@@ -10,6 +10,7 @@ import "../modules/Template.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
+/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/cfc3418d-2079-4e61-8c9f-8950e47d4621/image.png
 contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
@@ -126,5 +127,29 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     function getCounterparty() public view returns (address counterparty) {
         return _data.counterparty;
+    }
+
+    function getStake() public view returns (uint256 stake) {
+        return Staking.getStake(_data.staker);
+    }
+
+    enum AgreementStatus { isInitialized, isStaked }
+    /// @notice Return the status of the state machine
+    ///          - isInitialized: initialized but no deposits made
+    ///          - isStaked: stake is deposited
+    function getAgreementStatus() public view returns (AgreementStatus status) {
+        if (getStake() > 0) {
+            return AgreementStatus.isStaked;
+        } else {
+            return AgreementStatus.isInitialized;
+        }
+    }
+
+    function isInitialized() public view returns (bool validity) {
+        return getAgreementStatus() == AgreementStatus.isInitialized;
+    }
+
+    function isStaked() public view returns (bool validity) {
+        return getAgreementStatus() == AgreementStatus.isStaked;
     }
 }

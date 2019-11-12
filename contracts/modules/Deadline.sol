@@ -2,10 +2,12 @@ pragma solidity ^0.5.0;
 
 import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 
+
 /// @title Deadline
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
+/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/59851750-cc50-4424-bfd1-32166f5a28c8/image.png
 contract Deadline {
 
     using SafeMath for uint256;

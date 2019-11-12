@@ -176,8 +176,8 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     enum AgreementStatus { isInitialized, isInCountdown, isTerminated }
     /// @notice Return the status of the state machine
     ///          - isInitialized: initialized but no deposits made
-    ///          - isInCountdown: only payment deposit completed
-    ///          - isTerminated: both payment and stake deposit is completed
+    ///          - isInCountdown: staker has triggered countdown to termination
+    ///          - isTerminated: griefing agreement is over, staker can retrieve stake
     function getAgreementStatus() public view returns (AgreementStatus status) {
         if (Countdown.isOver()) {
             return AgreementStatus.isTerminated;
