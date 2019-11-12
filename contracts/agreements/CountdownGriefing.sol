@@ -166,10 +166,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     }
 
     function isStaked() public view returns (bool validity) {
-        return getStake() > 0;
+        return getCurrentStake() > 0;
     }
 
-    function getStake() public view returns (uint256 stake) {
+    function getCurrentStake() public view returns (uint256 stake) {
         return Staking.getStake(_data.staker);
     }
 
