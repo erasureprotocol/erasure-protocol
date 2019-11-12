@@ -56,6 +56,14 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Constructor
     /// @dev Access Control: only factory
     ///      State Machine: before all
+    /// @param buyer Address of the user that will deposit payment
+    /// @param seller Address of the user that will deposit stake and submit data
+    /// @param operator Address of the user that overrides access control
+    /// @param paymentAmount Amount of NMR (18 decimals) to be deposited by buyer as payment
+    /// @param stakeAmount Amount of NMR (18 deciamals) to be deposited by seller as stake
+    /// @param escrowCountdown Amount of time (in seconds) the seller has to finalize the escrow after the payment is deposited
+    /// @param metadata Data (any format) to emit as event on initialization
+    /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters (abi.encode(ratio, ratioType, agreementCountdown)) to create on escrow completion. See CountdownGriefing contract for details
     function initialize(
         address buyer,
         address seller,
@@ -101,11 +109,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // set agreementParams if defined
         if (agreementParams.length != 0) {
             (
-                uint120 ratio,
+                uint256 ratio,
                 uint8 ratioType,
-                uint128 agreementCountdown
-            ) = abi.decode(agreementParams, (uint120, uint8, uint128));
-            _data.agreementParams = AgreementParams(ratio, ratioType, agreementCountdown);
+                uint256 agreementCountdown
+            ) = abi.decode(agreementParams, (uint256, uint8, uint256));
+            require(ratio == uint256(uint120(ratio)), "ratio out of bounds");
+            require(agreementCountdown == uint256(uint128(agreementCountdown)), "agreementCountdown out of bounds");
+            _data.agreementParams = AgreementParams(uint120(ratio), uint8(ratioType), uint128(agreementCountdown));
         }
 
         // emit event
@@ -115,6 +125,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Emit metadata event
     /// @dev Access Control: operator
     ///      State Machine: always
+    /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only  active operator");
@@ -123,7 +134,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         EventMetadata._setMetadata(metadata);
     }
 
-    /// @notice Deposit Stake
+    /// @notice Deposit Stake in NMR
+    ///          - requires the seller to have previously approved the escrow to transfer the amount of tokens
     ///          - if seller not already set, make msg.sender the seller
     ///          - if buyer already deposited the payment, finalize the escrow
     /// @dev Access Control: buyer OR operator
@@ -160,7 +172,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     }
 
-    /// @notice Deposit Payment
+    /// @notice Deposit Payment in NMR
+    ///          - requires the buyer to have previously approved the escrow to transfer the amount of tokens
     ///          - if buyer not already set, make msg.sender the buyer
     ///          - if seller already deposited the stake, start the finalization countdown
     /// @dev Access Control: buyer OR operator
@@ -198,7 +211,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     /// @notice Finalize escrow and execute completion script
     ///          - create the agreement
-    ///          - transfer stake and payment to agreement
+    ///          - transfer deposited stake and payment to agreement
     ///          - start agreement countdown
     ///          - disable agreement operator
     /// @dev Access Control: seller OR operator
@@ -276,6 +289,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Submit data to the buyer
     /// @dev Access Control: seller OR operator
     ///      State Machine: after finalize()
+    /// @param data Data (any format) to submit to the buyer
     function submitData(bytes memory data) public {
         // restrict access control
         require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
@@ -350,7 +364,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return _data.buyer;
     }
 
-    /// @notice Return true iff caller is buyer
     function isBuyer(address caller) public view returns (bool validity) {
         return caller == getBuyer();
     }
@@ -359,7 +372,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return _data.seller;
     }
 
-    /// @notice Return true iff caller is seller
     function isSeller(address caller) public view returns (bool validity) {
         return caller == getSeller();
     }
