@@ -129,7 +129,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         return _data.counterparty;
     }
 
-    function getStake() public view returns (uint256 stake) {
+    function getCurrentStake() public view returns (uint256 stake) {
         return Staking.getStake(_data.staker);
     }
 
@@ -138,7 +138,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     ///          - isInitialized: initialized but no deposits made
     ///          - isStaked: stake is deposited
     function getAgreementStatus() public view returns (AgreementStatus status) {
-        if (getStake() > 0) {
+        if (getCurrentStake() > 0) {
             return AgreementStatus.isStaked;
         } else {
             return AgreementStatus.isInitialized;
