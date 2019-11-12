@@ -11,6 +11,7 @@ import "../modules/Template.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
+/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/8d81a581-e850-4e59-b102-d214c4ef724a/image.png
 contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
@@ -72,7 +73,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement ended");
+        require(!isTerminated(), "agreement ended");
 
         // add stake
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
@@ -83,7 +84,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement ended");
+        require(!isTerminated(), "agreement ended");
 
         // add stake
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
@@ -94,7 +95,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
 
         // require agreement is not ended
-        require(!Countdown.isOver(), "agreement ended");
+        require(!isTerminated(), "agreement ended");
 
         // execute griefing
         cost = Griefing._grief(msg.sender, _data.staker, punishment, message);
@@ -113,7 +114,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require countdown is not started
-        require(Deadline.getDeadline() == 0, "deadline already set");
+        require(isInitialized(), "deadline already set");
 
         // start countdown
         deadline = Countdown._start();
@@ -124,7 +125,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
 
         // require deadline is passed
-        require(Deadline.isOver(),"deadline not passed");
+        require(isTerminated(), "deadline not passed");
 
         // retrieve stake
         amount = Staking._takeFullStake(_data.staker, recipient);
@@ -162,5 +163,40 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
 
     function getCounterparty() public view returns (address counterparty) {
         return _data.counterparty;
+    }
+
+    function isStaked() public view returns (bool validity) {
+        return getStake() > 0;
+    }
+
+    function getStake() public view returns (uint256 stake) {
+        return Staking.getStake(_data.staker);
+    }
+
+    enum AgreementStatus { isInitialized, isInCountdown, isTerminated }
+    /// @notice Return the status of the state machine
+    ///          - isInitialized: initialized but no deposits made
+    ///          - isInCountdown: only payment deposit completed
+    ///          - isTerminated: both payment and stake deposit is completed
+    function getAgreementStatus() public view returns (AgreementStatus status) {
+        if (Countdown.isOver()) {
+            return AgreementStatus.isTerminated;
+        } else if (Countdown.isActive()) {
+            return AgreementStatus.isInCountdown;
+        } else {
+            return AgreementStatus.isInitialized;
+        }
+    }
+
+    function isInitialized() public view returns (bool validity) {
+        return getAgreementStatus() == AgreementStatus.isInitialized;
+    }
+
+    function isInCountdown() public view returns (bool validity) {
+        return getAgreementStatus() == AgreementStatus.isInCountdown;
+    }
+
+    function isTerminated() public view returns (bool validity) {
+        return getAgreementStatus() == AgreementStatus.isTerminated;
     }
 }
