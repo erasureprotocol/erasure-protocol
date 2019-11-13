@@ -24,7 +24,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     struct Data {
         address buyer;
         address seller;
-        address operator;
         uint128 paymentAmount;
         uint128 stakeAmount;
         EscrowStatus status;
