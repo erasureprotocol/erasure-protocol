@@ -24,6 +24,16 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
 
     event Initialized(address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, uint256 countdownLength, bytes metadata);
 
+    /// @notice Constructor
+    /// @dev Access Control: only factory
+    ///      State Machine: before all
+    /// @param operator Address of the operator that overrides access control
+    /// @param staker Address of the staker who owns the stake
+    /// @param counterparty Address of the counterparty who has the right to punish and reward
+    /// @param ratio Uint256 number (18 decimals) passed to Griefing module
+    /// @param ratioType Uint8 number passed to Staking module
+    /// @param countdownLength Amount of time (in seconds) the counterparty has to punish or reward before the agreement ends
+    /// @param metadata Data (any format) to emit as event on initialization
     function initialize(
         address operator,
         address staker,
@@ -60,6 +70,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
 
     // state functions
 
+    /// @notice Emit metadata event
+    /// @dev Access Control: operator
+    ///      State Machine: always
+    /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
@@ -68,6 +82,11 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         EventMetadata._setMetadata(metadata);
     }
 
+    /// @notice Called by the staker to increase the stake
+    ///          - requires the staker to have previously approved the agreement for the amount of tokens
+    /// @dev Access Control: staker OR operator
+    ///      State Machine: before isTerminated()
+    /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
     function increaseStake(uint256 amountToAdd) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
@@ -79,6 +98,11 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
     }
 
+    /// @notice Called by the counterparty to increase the stake
+    ///          - requires the counterparty to have previously approved the agreement for the amount of tokens
+    /// @dev Access Control: counterparty OR operator
+    ///      State Machine: before isTerminated()
+    /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
     function reward(uint256 amountToAdd) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
@@ -90,6 +114,14 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
     }
 
+    /// @notice Called by the counterparty to punish the stake
+    ///          - burns the amount of tokens set as punishment from the stake and a proportional amount from the counterparty balance based on the griefRatio
+    ///          - requires the counterparty to have previously approved the agreement for the amount of tokens
+    /// @dev Access Control: counterparty OR operator
+    ///      State Machine: before isTerminated()
+    /// @param punishment Amount of NMR (18 decimals) to be burned from the stake
+    /// @param message Data (any format) to emit as event giving reason for the punishment
+    /// @return cost Amount of NMR (18 decimals) it costs to perform punishment
     function punish(uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
@@ -101,6 +133,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         cost = Griefing._grief(msg.sender, _data.staker, punishment, message);
     }
 
+    /// @notice Called by the counterparty to release the stake to the staker
+    /// @dev Access Control: counterparty OR operator
+    ///      State Machine: anytime
+    /// @param amountToRelease Amount of NMR (18 decimals) to be released from the stake
     function releaseStake(uint256 amountToRelease) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
@@ -109,6 +145,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         Staking._takeStake(_data.staker, _data.staker, amountToRelease);
     }
 
+    /// @notice Called by the staker to begin countdown to finalize the agreement
+    /// @dev Access Control: staker OR operator
+    ///      State Machine: before Countdown.isActive()
+    /// @return deadline Timestamp (Unix seconds) at which the agreement will be finalized
     function startCountdown() public returns (uint256 deadline) {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
@@ -120,6 +160,11 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         deadline = Countdown._start();
     }
 
+    /// @notice Called by the staker to retrieve the remaining stake once the agreement has ended
+    /// @dev Access Control: staker OR operator
+    ///      State Machine: after Countdown.isOver()
+    /// @param recipient Address of the acount where to send the stake
+    /// @return amount Amount of NMR (18 decimals) retrieved
     function retrieveStake(address recipient) public returns (uint256 amount) {
         // restrict access
         require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
@@ -131,6 +176,10 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         amount = Staking._takeFullStake(_data.staker, recipient);
     }
 
+    /// @notice Called by the operator to transfer control to new operator
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
+    /// @param operator Address of the new operator
     function transferOperator(address operator) public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
@@ -139,6 +188,9 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         Operated._transferOperator(operator);
     }
 
+    /// @notice Called by the operator to renounce control
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
     function renounceOperator() public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
@@ -149,32 +201,47 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
 
     // view functions
 
-    function isStaker(address caller) public view returns (bool validity) {
-        return caller == getStaker();
-    }
-
+    /// @notice Get the address of the staker (if set)
+    /// @return staker Staker account address
     function getStaker() public view returns (address staker) {
         return _data.staker;
     }
 
-    function isCounterparty(address caller) public view returns (bool validity) {
-        return caller == getCounterparty();
+    /// @notice Validate if the address matches the stored staker address
+    /// @param caller Address to validate
+    /// @return validity True if matching address
+    function isStaker(address caller) public view returns (bool validity) {
+        return caller == getStaker();
     }
 
+    /// @notice Get the address of the counterparty (if set)
+    /// @return counterparty Counterparty account address
     function getCounterparty() public view returns (address counterparty) {
         return _data.counterparty;
     }
 
-    function isStaked() public view returns (bool validity) {
-        return getCurrentStake() > 0;
+    /// @notice Validate if the address matches the stored counterparty address
+    /// @param caller Address to validate
+    /// @return validity True if matching address
+    function isCounterparty(address caller) public view returns (bool validity) {
+        return caller == getCounterparty();
     }
 
+    /// @notice Get the current stake of the agreement
+    /// @return stake Amount of NMR (18 decimals) staked
     function getCurrentStake() public view returns (uint256 stake) {
         return Staking.getStake(_data.staker);
     }
 
+    /// @notice Validate if the current stake is greater than 0
+    /// @return validity True if non-zero stake
+    function isStaked() public view returns (bool validity) {
+        return getCurrentStake() > 0;
+    }
+
     enum AgreementStatus { isInitialized, isInCountdown, isTerminated }
     /// @notice Return the status of the state machine
+    /// @return uint8 status from of the following states:
     ///          - isInitialized: initialized but no deposits made
     ///          - isInCountdown: staker has triggered countdown to termination
     ///          - isTerminated: griefing agreement is over, staker can retrieve stake

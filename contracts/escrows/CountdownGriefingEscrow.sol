@@ -358,28 +358,66 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         emit Cancelled();
     }
 
+    /// @notice Called by the operator to transfer control to new operator
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
+    /// @param operator Address of the new operator
+    function transferOperator(address operator) public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // transfer operator
+        Operated._transferOperator(operator);
+    }
+
+    /// @notice Called by the operator to renounce control
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
+    function renounceOperator() public {
+        // restrict access
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
+
+        // renounce operator
+        Operated._renounceOperator();
+    }
+
     /// View functions
 
+    /// @notice Get the address of the buyer (if set)
+    /// @return buyer Buyer account address
     function getBuyer() public view returns (address buyer) {
         return _data.buyer;
     }
 
+    /// @notice Validate if the address matches the stored buyer address
+    /// @param caller Address to validate
+    /// @return validity True if matching address
     function isBuyer(address caller) public view returns (bool validity) {
         return caller == getBuyer();
     }
 
+    /// @notice Get the address of the seller (if set)
+    /// @return seller Seller account address
     function getSeller() public view returns (address seller) {
         return _data.seller;
     }
 
+    /// @notice Validate if the address matches the stored seller address
+    /// @param caller Address to validate
+    /// @return validity True if matching address
     function isSeller(address caller) public view returns (bool validity) {
         return caller == getSeller();
     }
 
+    /// @notice Get the data in storage
+    /// @return uint128 paymentAmount set in initialization
+    /// @return uint128 stakeAmount set in initialization
+    /// @return uint120 ratio used for initialization of agreement on completion
+    /// @return uint8 ratioType used for initialization of agreement on completion
+    /// @return uint128 countdownLength used for initialization of agreement on completion
     function getData() public view returns (
         uint128 paymentAmount,
         uint128 stakeAmount,
-        EscrowStatus status,
         uint120 ratio,
         uint8 ratioType,
         uint128 countdownLength
@@ -387,7 +425,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return (
             _data.paymentAmount,
             _data.stakeAmount,
-            _data.status,
             _data.agreementParams.ratio,
             _data.agreementParams.ratioType,
             _data.agreementParams.countdownLength
@@ -396,6 +433,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     enum EscrowStatus { isOpen, onlyStakeDeposited, onlyPaymentDeposited, isDeposited, isFinalized, isCancelled }
     /// @notice Return the status of the state machine
+    /// @return uint8 status from of the following states:
     ///          - isOpen: initialized but no deposits made
     ///          - onlyStakeDeposited: only stake deposit completed
     ///          - onlyPaymentDeposited: only payment deposit completed

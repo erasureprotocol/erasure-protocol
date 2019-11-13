@@ -14,6 +14,12 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
 
     event Initialized(address operator, bytes multihash, bytes metadata);
 
+    /// @notice Constructor
+    /// @dev Access Control: only factory
+    ///      State Machine: before all
+    /// @param operator Address of the operator that overrides access control
+    /// @param multihash Proofhash (34 bytes) of the timestamped data as a base58-encoded multihash
+    /// @param metadata Data (any format) to emit as event on initialization
     function initialize(
         address operator,
         bytes memory multihash,
@@ -42,6 +48,10 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
 
     // state functions
 
+    /// @notice Emit metadata event
+    /// @dev Access Control: creator OR operator
+    ///      State Machine: always
+    /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
@@ -50,6 +60,10 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
         EventMetadata._setMetadata(metadata);
     }
 
+    /// @notice Called by the operator to transfer control to new operator
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
+    /// @param operator Address of the new operator
     function transferOperator(address operator) public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
@@ -58,11 +72,14 @@ contract Post is ProofHash, Operated, EventMetadata, Template {
         Operated._transferOperator(operator);
     }
 
+    /// @notice Called by the operator to renounce control
+    /// @dev Access Control: operator
+    ///      State Machine: anytime
     function renounceOperator() public {
         // restrict access
         require(Operated.isActiveOperator(msg.sender), "only active operator");
 
-        // transfer operator
+        // renounce operator
         Operated._renounceOperator();
     }
 
