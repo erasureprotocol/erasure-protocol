@@ -12,7 +12,8 @@
     "test_etherlime": "yarn etherlime test --solcVersion=0.5.11 --timeout=10000",
     "coverage": "yarn etherlime coverage --solcVersion=0.5.11",
     "deploy": "yarn etherlime deploy ./deployment/deploy.js --compile=false",
-    "deploy_ganache": "bash run-ganache-deploy.sh"
+    "deploy_ganache": "bash run-ganache-deploy.sh",
+    "lint": "solhint contracts/**/*.sol"
   },
   "dependencies": {
     "@0x/sol-compiler": "^3.1.15",
@@ -22,5 +23,8 @@
     "etherlime-lib": "^1.1.3",
     "ethers": "^4.0.32",
     "ganache-cli": "6.5.1"
+  },
+  "devDependencies": {
+    "solhint": "^2.3.0"
   }
 }
