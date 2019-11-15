@@ -11,3 +11,5 @@ class TestContractHelpers(unittest.TestCase):
         web3 = Web3(WebsocketProvider(endpoint_uri="localhost:8545"))
         contract = _make_contract(
             web3, "0xA411eB36538a2Ae060A766221E43A94205460369", "Feed")
+
+        assert contract is not None
