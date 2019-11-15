@@ -54,3 +54,29 @@ jobs:
       - name: Run Tests
         working-directory: ./packages/crypto-ipfs/
         run: yarn run test
+
+  pyerasureclient:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.6.x', '3.7.x', '3.8.x']
+    name: Python Erasure Client v${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+      - name: Install
+        working-directory: ./python-packages/erasure-client
+        run: make install-dev
+      - name: Style
+        working-directory: ./python-packages/erasure-client
+        run: make style
+      - name: Lint
+        working-directory: ./python-packages/erasure-client
+        run: make lint
+      - name: Test
+        working-directory: ./python-packages/erasure-client
+        run: make test
