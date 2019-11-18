@@ -1,7 +1,7 @@
 const {
   createInstanceAddress,
   createEip1167RuntimeCode,
-  getLatestContractAdressFrom,
+  getLatestContractAddressFrom,
   abiEncodeWithSelector,
   createSelector
 } = require("../helpers/utils");
@@ -52,7 +52,7 @@ function testFactory(
     });
 
     const createLocalInstance = salt => {
-      // this should accomodate tests where createargs is different from initABI
+      // this should accommodate tests where createargs is different from initABI
       const { instanceAddress, callData } = createInstanceAddress(
         this.Factory.contractAddress,
         logicContractAddress,
@@ -229,7 +229,7 @@ function testFactory(
 
     describe("Factory.getInstance", () => {
       it("should get instance correctly", async () => {
-        // iterate thru all the instance index and check against the instances array
+        // iterate through all the instance index and check against the instances array
         // ensure that the order is preserved
         for (let i = 0; i < totalInstanceCount; i++) {
           const actualInstanceAddress = await this.Factory.getInstance(i);

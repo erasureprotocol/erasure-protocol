@@ -17,7 +17,7 @@ contract Template {
         // set factory
         _factory = msg.sender;
 
-        // only allow function to be delegatecalled from within a constructor.
+        // only allow function to be `DELEGATECALL`ed from within a constructor.
         uint32 codeSize;
         assembly { codeSize := extcodesize(address) }
         require(codeSize == 0, "must be called within contract constructor");

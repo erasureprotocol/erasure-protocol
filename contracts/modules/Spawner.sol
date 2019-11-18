@@ -42,7 +42,7 @@ contract Spawn {
 /// @dev Version: 1.2.0
 /// @notice This contract spawns and initializes eip-1167 minimal proxies that
 /// point to existing logic contracts. The logic contracts need to have an
-/// intitializer function that should only callable when no contract exists at
+/// initializer function that should only callable when no contract exists at
 /// their current address (i.e. it is being `DELEGATECALL`ed from a constructor).
 contract Spawner {
   /**
