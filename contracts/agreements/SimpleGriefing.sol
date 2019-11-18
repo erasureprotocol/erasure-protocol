@@ -77,7 +77,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     }
 
     /// @notice Called by the staker to increase the stake
-    ///          - requires the staker to have previously approved the agreement for the amount of tokens
+    ///          - requires the staker to have previously approved (ERC-20) the agreement for the amount of tokens
     /// @dev Access Control: staker OR operator
     ///      State Machine: anytime
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
@@ -90,7 +90,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     }
 
     /// @notice Called by the counterparty to increase the stake
-    ///          - requires the counterparty to have previously approved the agreement for the amount of tokens
+    ///          - requires the counterparty to have previously approved (ERC-20) the agreement for the amount of tokens
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: anytime
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
@@ -104,7 +104,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     /// @notice Called by the counterparty to punish the stake
     ///          - burns the amount of tokens set as punishment from the stake and a proportional amount from the counterparty balance based on the griefRatio
-    ///          - requires the counterparty to have previously approved the agreement for the amount of tokens
+    ///          - requires the counterparty to have previously approved (ERC-20) the agreement for the amount of tokens
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: anytime
     /// @param punishment Amount of NMR (18 decimals) to be burned from the stake
