@@ -163,7 +163,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @notice Called by the staker to retrieve the remaining stake once the agreement has ended
     /// @dev Access Control: staker OR operator
     ///      State Machine: after Countdown.isOver()
-    /// @param recipient Address of the acount where to send the stake
+    /// @param recipient Address of the account where to send the stake
     /// @return amount Amount of NMR (18 decimals) retrieved
     function retrieveStake(address recipient) public returns (uint256 amount) {
         // restrict access

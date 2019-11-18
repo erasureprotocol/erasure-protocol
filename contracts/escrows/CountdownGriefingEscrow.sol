@@ -59,7 +59,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param seller Address of the user that will deposit stake and submit data
     /// @param operator Address of the user that overrides access control
     /// @param paymentAmount Amount of NMR (18 decimals) to be deposited by buyer as payment
-    /// @param stakeAmount Amount of NMR (18 deciamals) to be deposited by seller as stake
+    /// @param stakeAmount Amount of NMR (18 decimals) to be deposited by seller as stake
     /// @param escrowCountdown Amount of time (in seconds) the seller has to finalize the escrow after the payment is deposited
     /// @param metadata Data (any format) to emit as event on initialization
     /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters (abi.encode(ratio, ratioType, agreementCountdown)) to create on escrow completion. See CountdownGriefing contract for details
