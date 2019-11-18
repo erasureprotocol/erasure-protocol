@@ -36,8 +36,8 @@ contract MultiHashWrapper {
     }
 
     /**
-    * @dev Given a base58-encoded  hash, divides into its individual parts and returns a struct
-    * @param source base58-encoded  hash
+    * @dev Given a base58-encoded hash, divides into its individual parts and returns a struct
+    * @param source base58-encoded hash
     * @return MultiHash that has the hashFunction, digestSize and the hash
     */
     function _splitMultiHash(bytes memory source) internal pure returns (MultiHash memory) {

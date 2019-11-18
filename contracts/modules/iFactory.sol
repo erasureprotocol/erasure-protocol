@@ -1,12 +1,12 @@
 pragma solidity ^0.5.0;
 
 /* TODO: Update eip165 interface
- *  bytes4(keccak256('create(bytes)')) == 0xcf5ba53f
- *  bytes4(keccak256('getInstanceType()')) == 0x18c2f4cf
- *  bytes4(keccak256('getInstanceRegistry()')) == 0xa5e13904
- *  bytes4(keccak256('getImplementation()')) == 0xaaf10f42
+ * bytes4(keccak256('create(bytes)')) == 0xcf5ba53f
+ * bytes4(keccak256('getInstanceType()')) == 0x18c2f4cf
+ * bytes4(keccak256('getInstanceRegistry()')) == 0xa5e13904
+ * bytes4(keccak256('getImplementation()')) == 0xaaf10f42
  *
- *  => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6
+ * => 0xcf5ba53f ^ 0x18c2f4cf ^ 0xa5e13904 ^ 0xaaf10f42 == 0xd88967b6
  */
  interface iFactory {
 
