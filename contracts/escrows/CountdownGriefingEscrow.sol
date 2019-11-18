@@ -127,7 +127,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only  active operator");
+        require(Operated.isActiveOperator(msg.sender), "only active operator");
 
         // update metadata
         EventMetadata._setMetadata(metadata);

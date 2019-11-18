@@ -76,9 +76,9 @@ contract Griefing is Staking {
     // pure functions
 
     function getCost(uint256 ratio, uint256 punishment, RatioType ratioType) public pure returns(uint256 cost) {
-        /*  Dec:  Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18
-         *  Inf:  Punishment at no cost
-         *  NaN:  No Punishment */
+        /* Dec: Cost multiplied by ratio interpreted as a decimal number with 18 decimals, e.g. 1 -> 1e18
+         * Inf: Punishment at no cost
+         * NaN: No Punishment */
         if (ratioType == RatioType.Dec) {
             return DecimalMath.mul(SafeMath.mul(punishment, e18), ratio) / e18;
         }
@@ -89,9 +89,9 @@ contract Griefing is Staking {
     }
 
     function getPunishment(uint256 ratio, uint256 cost, RatioType ratioType) public pure returns(uint256 punishment) {
-        /*  Dec: Ratio is a decimal number with 18 decimals
-         *  Inf:  Punishment at no cost
-         *  NaN:  No Punishment */
+        /* Dec: Ratio is a decimal number with 18 decimals
+         * Inf: Punishment at no cost
+         * NaN: No Punishment */
         if (ratioType == RatioType.Dec) {
             return DecimalMath.div(SafeMath.mul(cost, e18), ratio) / e18;
         }
