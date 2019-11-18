@@ -143,7 +143,6 @@ describe("CountdownGriefingEscrow", function () {
         const data = await g.Instance.getData();
         assert.equal(data.paymentAmount.toString(), paymentAmount.toString());
         assert.equal(data.stakeAmount.toString(), stakeAmount.toString());
-        assert.equal(data.status, 0);
         assert.equal(data.ratio.toString(), griefRatio.toString());
         assert.equal(data.ratioType, 2);
         assert.equal(data.countdownLength, agreementCountdown);
