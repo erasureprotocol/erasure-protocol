@@ -76,7 +76,7 @@ library ERC165Checker {
      * Interface identification is specified in ERC-165.
      */
     function _supportsERC165Interface(address account, bytes4 interfaceId) private view returns (bool) {
-        // success determines whether the staticcall succeeded and result determines
+        // success determines whether the static call succeeded and result determines
         // whether the contract at account indicates support of _interfaceId
         (bool success, bool result) = _callERC165SupportsInterface(account, interfaceId);
 
@@ -108,7 +108,7 @@ library ERC165Checker {
 
             success := staticcall(
                 30000,                   // 30k gas
-                account,                 // To addr
+                account,                 // To address
                 encodedParams_data,
                 encodedParams_size,
                 output,
