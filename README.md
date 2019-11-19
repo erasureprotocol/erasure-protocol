@@ -34,18 +34,18 @@ Recourse is achieved when a party is punished for wrongdoing. In the world of Er
 
 The first type of agreement used on Erasure is called `Griefing`. Griefing allows a party to come to a resolution without a third party arbitrator through punishing their counterparty at a cost. This follows research in neuroeconomics which observes that cooperation evolves in populations where altruistic punishment such as griefing is possible.
 
-Creating a Griefing agreement is as simple as having both parties agree on their respective ratio and amount at stake. The ratio represents the cost in NMR to burn 1 NMR of the counterparty. When griefing occurs, both the cost and punishment are burned from the NMR supply forever.
+Creating a Griefing agreement is as simple as having two parties agree on their respective “ratio” and amount to stake. Your ratio represents some amount of NMR that your counterparty can spend (“cost”) to burn 1 NMR of yours (“punishment”). When griefing occurs, both the cost and the punishment are burned from the NMR supply forever.
 
-Take for example an agreement between Alice and Bob. Alice is anonymous and has not built a track record. She stakes 500 NMR and selects a ratio of 0.5. Bob, however, has revealed his real-world identity and has an excellent track record. As such, he stakes 100 NMR and selects a ratio of 1.
+Take for example an agreement between Alice and Bob. Alice is anonymous and has not built a track record. She stakes 500 NMR and selects a ratio of 0.5. Bob, however, has revealed his real-world identity and has an excellent track record. As such, he stakes 100 NMR and selects a ratio of 1.0.
 
-```
-Alice = { stake = 500, ratio = 0.5}
-Bob = { stake = 100, ratio = 1}
-Bob punishes Alice for 10 NMR => Cost is 5 NMR (10 * 0.5)
-Alice punishes Bob for 10 NMR => Cost is 10 NMR (10 * 1)
-new_Alice = { stake = 490, ratio = 0.5}
-new_Bob = { stake = 90, ratio = 1}
-```
+*Please note: punishments are paid from pre-committed NMR stake but costs are paid from liquid NMR tokens.*
+
+| Action                                     | Resulting Alice stake | Resulting Bob stake |
+| ------------------------------------------ | --------------------- | ------------------- |
+| Alice stakes 500 NMR with ratio 0.5        | 500                   | 0                   |
+| Bob stakes 100 NMR with ratio 1.0          | 500                   | 100                 |
+| Bob pays 5 NMR to punish Alice for 10 NMR  | 490                   | 100                 |
+| Alice pays 10 NMR to punish Bob for 10 NMR | 490                   | 85                  |
 
 Griefing avoids relying on a centralized oracle or a trusted third party to perform arbitration over the terms of the agreement and instead allows the parties to come to a resolution on their own. As new techniques for resolution like decentralized oracles are built on Ethereum, it will be possible to add them to the set of `Erasure_Agreements`.
 
