@@ -26,7 +26,7 @@ proofHash = multihash(userAddress + salt + data)
 
 ## Payments through any cryptocurrency
 
-Erasure is able to use any Ethereum-native cryptocurrencies such as ETH, WBTC and NMR within its programmable escrow smart contracts. These escrows are registered in the `Erasure_Escrows` registry which contributes to the single source of truth.
+The Erasure Protocol is designed to support any Ethereum-native cryptocurrencies such as ETH, WBTC and NMR within its programmable escrow smart contracts. The first escrow template called `CountdownGriefingEscrow` supports payments in NMR. All Erasure escrows are registered in the `Erasure_Escrows` registry which contributes to the single source of truth.
 
 ## Recourse through Griefing
 
