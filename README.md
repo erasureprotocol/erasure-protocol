@@ -53,7 +53,7 @@ Griefing avoids relying on a centralized oracle or a trusted third party to perf
 
 ## The Architecture
 
-Every agreement, user, entry, whatever may have its own account, and those accounts (or the factories that deploy them) can report back to simple, shared registries that establish a single source of truth for a given protocol. This grants individual agents in the system the authority to opt-in to new changes, gives rise to a diversity of options for how to interact with the system, and makes the system more decentralized.
+Every agreement, user, entry, whatever may have its own account, and those accounts (or the factories that deploy them) can report back to simple, shared registries that establish a single source of truth for the Erasure Protocol. This grants individual agents in the system the authority to opt-in to new changes, gives rise to a diversity of options for how to interact with the system, and makes the system more decentralized.
 
 So far, the registries developed are:
 
