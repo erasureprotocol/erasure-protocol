@@ -83,7 +83,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     }
 
     /// @notice Called by the staker to increase the stake
-    ///          - requires the staker to have previously approved (ERC-20) the agreement for the amount of tokens
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: staker OR operator
     ///      State Machine: before isTerminated()
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
@@ -99,7 +99,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     }
 
     /// @notice Called by the counterparty to increase the stake
-    ///          - requires the counterparty to have previously approved (ERC-20) the agreement for the amount of tokens
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: before isTerminated()
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
@@ -116,7 +116,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
 
     /// @notice Called by the counterparty to punish the stake
     ///          - burns the amount of tokens set as punishment from the stake and a proportional amount from the counterparty balance based on the griefRatio
-    ///          - requires the counterparty to have previously approved (ERC-20) the agreement for the amount of tokens
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: before isTerminated()
     /// @param punishment Amount of NMR (18 decimals) to be burned from the stake
