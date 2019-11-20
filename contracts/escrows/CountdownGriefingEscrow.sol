@@ -134,7 +134,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     }
 
     /// @notice Deposit Stake in NMR
-    ///          - requires the seller to have previously approved the escrow to transfer the amount of tokens
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     ///          - if seller not already set, make msg.sender the seller
     ///          - if buyer already deposited the payment, finalize the escrow
     /// @dev Access Control: buyer OR operator
@@ -172,7 +172,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     }
 
     /// @notice Deposit Payment in NMR
-    ///          - requires the buyer to have previously approved the escrow to transfer the amount of tokens
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     ///          - if buyer not already set, make msg.sender the buyer
     ///          - if seller already deposited the stake, start the finalization countdown
     /// @dev Access Control: buyer OR operator
