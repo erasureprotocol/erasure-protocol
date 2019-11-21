@@ -3,7 +3,7 @@ const assert = require("assert");
 const ganache = require("ganache-cli");
 const {
   hexlify,
-  createMultihashSha256,
+  createIPFShash,
   abiEncodeWithSelector
 } = require("./utils");
 
@@ -16,6 +16,9 @@ let c = {
   },
   Erasure_Posts: {
     artifact: require("./artifacts/Erasure_Posts.json")
+  },
+  Erasure_Escrows: {
+    artifact: require("./artifacts/Erasure_Escrows.json")
   },
   SimpleGriefing: {
     factory: {
@@ -33,20 +36,20 @@ let c = {
       artifact: require("./artifacts/CountdownGriefing.json")
     }
   },
+  CountdownGriefingEscrow: {
+    factory: {
+      artifact: require("./artifacts/CountdownGriefingEscrow_Factory.json")
+    },
+    template: {
+      artifact: require("./artifacts/CountdownGriefingEscrow.json")
+    }
+  },
   Feed: {
     factory: {
       artifact: require("./artifacts/Feed_Factory.json")
     },
     template: {
       artifact: require("./artifacts/Feed.json")
-    }
-  },
-  Post: {
-    factory: {
-      artifact: require("./artifacts/Post_Factory.json")
-    },
-    template: {
-      artifact: require("./artifacts/Post.json")
     }
   }
 };
@@ -106,20 +109,20 @@ async function deployContract(contractName, params, signer) {
   );
   console.log(
     `Deploy | ${
-      contract.address
+    contract.address
     } | ${contractName} | ${receipt.gasUsed.toString()} gas`
   );
   return [contract, receipt];
 }
 
-async function deployFactory(contractName, registry, signer) {
+async function deployFactory(contractName, registry, signer, factoryData = "0x0") {
   let templateContract;
   await deployer(c[contractName].template.artifact, [], signer).then(
     ([contract, receipt]) => {
       templateContract = contract;
       console.log(
         `Deploy | ${
-          contract.address
+        contract.address
         } | ${contractName} | Template | ${receipt.gasUsed.toString()} gas`
       );
     }
@@ -134,13 +137,13 @@ async function deployFactory(contractName, registry, signer) {
     factoryContract = contract;
     console.log(
       `Deploy | ${
-        contract.address
+      contract.address
       } | ${contractName} | Factory | ${receipt.gasUsed.toString()} gas`
     );
   });
 
   let tx = await registry
-    .addFactory(factoryContract.address, "0x")
+    .addFactory(factoryContract.address, factoryData)
     .then(async tx => {
       const receipt = await provider.getTransactionReceipt(tx.hash);
       console.log(
@@ -167,7 +170,7 @@ async function deployNMR(signer) {
 }
 
 const main = async () => {
-  process.on("unhandledRejection", function(error) {
+  process.on("unhandledRejection", function (error) {
     console.error(error);
     process.exit(1);
   });
@@ -197,6 +200,11 @@ Deploy Registries
     [],
     deploySigner
   );
+  [c.Erasure_Escrows.wrap, _] = await deployContract(
+    "Erasure_Escrows",
+    [],
+    deploySigner
+  );
 
   console.log(`
 Deploy Factories
@@ -220,174 +228,21 @@ Deploy Factories
     deploySigner
   );
 
-  [c.Post.template.wrap, c.Post.factory.wrap] = await deployFactory(
-    "Post",
-    c.Erasure_Posts.wrap,
-    deploySigner
-  );
-
   [c.Feed.template.wrap, c.Feed.factory.wrap] = await deployFactory(
     "Feed",
     c.Erasure_Posts.wrap,
     deploySigner
   );
 
-  console.log(`
-Create Test Instances
-      `);
+  const abiEncoder = new ethers.utils.AbiCoder();
+  const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory[network].address]);
 
-  const userAddress = deploySigner._address;
-  const multihash = createMultihashSha256("multihash");
-  const hash = ethers.utils.keccak256(hexlify("multihash"));
-  console.log(`userAddress: ${userAddress}`);
-  console.log(`multihash: ${multihash}`);
-  console.log(`hash: ${hash}`);
-  console.log(``);
-
-  await c.Post.factory.wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        ["address", "bytes", "bytes"],
-        [userAddress, multihash, multihash]
-      )
-    )
-    .then(async tx => {
-      const receipt = await provider.getTransactionReceipt(tx.hash);
-      const interface = new ethers.utils.Interface(
-        c.Post.factory.artifact.compilerOutput.abi
-      );
-
-      for (log of receipt.logs) {
-        const event = interface.parseLog(log);
-        if (event !== null && event.name === "InstanceCreated") {
-          instanceAddress = event.values.instance;
-        }
-      }
-      console.log(
-        `create() | ${receipt.gasUsed.toString()} gas | Post_Factory => ${instanceAddress}`
-      );
-    });
-
-  await c.Feed.factory.wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        ["address", "bytes", "bytes"],
-        [userAddress, multihash, multihash]
-      )
-    )
-    .then(async tx => {
-      const receipt = await provider.getTransactionReceipt(tx.hash);
-      const interface = new ethers.utils.Interface(
-        c.Feed.factory.artifact.compilerOutput.abi
-      );
-
-      for (log of receipt.logs) {
-        const event = interface.parseLog(log);
-        if (event !== null && event.name === "InstanceCreated") {
-          c.Feed.wrap = new ethers.Contract(
-            event.values.instance,
-            c.Feed.template.artifact.compilerOutput.abi,
-            deploySigner
-          );
-        }
-      }
-      console.log(
-        `create() | ${receipt.gasUsed.toString()} gas | Feed_Factory => ${
-          c.Feed.wrap.address
-        }`
-      );
-    });
-
-  await c.Feed.wrap.submitHash(hash).then(async tx => {
-    const receipt = await provider.getTransactionReceipt(tx.hash);
-    const interface = new ethers.utils.Interface(
-      c.Feed.template.artifact.compilerOutput.abi
-    );
-
-    for (log of receipt.logs) {
-      const event = interface.parseLog(log);
-      if (event !== null && event.name === "HashSubmitted") {
-        assert.equal(event.values.hash, hash);
-      }
-    }
-
-    console.log(`submitHash() | ${receipt.gasUsed} gas | Feed`);
-  });
-
-  await c.SimpleGriefing.factory.wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        ["address", "address", "address", "uint256", "uint8", "bytes"],
-        [
-          userAddress,
-          userAddress,
-          userAddress,
-          ethers.utils.parseEther("1"),
-          2,
-          "0x0"
-        ]
-      )
-    )
-    .then(async tx => {
-      const receipt = await provider.getTransactionReceipt(tx.hash);
-      const interface = new ethers.utils.Interface(
-        c.SimpleGriefing.factory.artifact.compilerOutput.abi
-      );
-
-      for (log of receipt.logs) {
-        const event = interface.parseLog(log);
-        if (event !== null && event.name === "InstanceCreated") {
-          instanceAddress = event.values.instance;
-        }
-      }
-      console.log(
-        `create() | ${receipt.gasUsed.toString()} gas | SimpleGriefing_Factory => ${instanceAddress}`
-      );
-    });
-
-  await c.CountdownGriefing.factory.wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        [
-          "address",
-          "address",
-          "address",
-          "uint256",
-          "uint8",
-          "uint256",
-          "bytes"
-        ],
-        [
-          userAddress,
-          userAddress,
-          userAddress,
-          ethers.utils.parseEther("1"),
-          2,
-          100000000,
-          "0x0"
-        ]
-      )
-    )
-    .then(async tx => {
-      const receipt = await provider.getTransactionReceipt(tx.hash);
-      const interface = new ethers.utils.Interface(
-        c.CountdownGriefing.factory.artifact.compilerOutput.abi
-      );
-
-      for (log of receipt.logs) {
-        const event = interface.parseLog(log);
-        if (event !== null && event.name === "InstanceCreated") {
-          instanceAddress = event.values.instance;
-        }
-      }
-      console.log(
-        `create() | ${receipt.gasUsed.toString()} gas | CountdownGriefing_Factory => ${instanceAddress}`
-      );
-    });
+  [c.CountdownGriefingEscrow.template.wrap, c.CountdownGriefingEscrow.factory.wrap] = await deployFactory(
+    "CountdownGriefingEscrow",
+    c.Erasure_Escrows.wrap,
+    deploySigner,
+    agreementFactory
+  );
 
   if (args.exit_on_success) process.exit(0);
 };

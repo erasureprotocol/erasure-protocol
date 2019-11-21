@@ -2,7 +2,7 @@ const etherlime = require("etherlime-lib");
 const ethers = require("ethers");
 const {
   hexlify,
-  createMultihashSha256,
+  createIPFShash,
   abiEncodeWithSelector
 } = require("../test/helpers/utils");
 const assert = require("assert");
@@ -13,431 +13,304 @@ require("dotenv").config();
 
 const deploy = async (network, secret) => {
 
-
   let deployer;
   let multisig;
 
   let defaultGas = ethers.utils.parseUnits("15", "gwei");
   let gasUsed = ethers.constants.Zero;
 
+  console.log(``);
+  console.log(`Initialize Deployer`);
+  console.log(``);
+
+  // set owner address
+
   if (network == "rinkeby") {
-    // set owner address
     multisig = "0x6087555A70E2F96B7838806e7743041E035a37e5";
-
-    // initialize deployer
-    deployer = await new etherlime.InfuraPrivateKeyDeployer(
-      process.env.DEPLOYMENT_PRIV_KEY,
-      "rinkeby",
-      process.env.INFURA_API_KEY,
-      { gasPrice: defaultGas, etherscanApiKey: process.env.ETHERSCAN_API_KEY }
-    );
-
-    console.log(`Deployment Wallet: ${deployer.signer.address}`);
-
-    // deploy escrow registry
-    // await deployer.deployAndVerify(c.Erasure_Escrows.artifact).then(wrap => {
-    //   c.Erasure_Escrows[network] = {
-    //     wrap: wrap,
-    //     address: wrap.contractAddress
-    //   };
-    // });
   } else if (network == "mainnet") {
-    // set owner address
     multisig = "0x0000000000377d181a0ebd08590c6b399b272000";
+  }
 
-    // initialize deployer
-    deployer = await new etherlime.InfuraPrivateKeyDeployer(
-      process.env.DEPLOYMENT_PRIV_KEY,
-      "mainnet",
-      process.env.INFURA_API_KEY,
-      { gasPrice: defaultGas, etherscanApiKey: process.env.ETHERSCAN_API_KEY }
-    );
+  // initialize deployer
 
-    console.log(`Deployment Wallet: ${deployer.signer.address}`);
+  deployer = await new etherlime.InfuraPrivateKeyDeployer(
+    process.env.DEPLOYMENT_PRIV_KEY,
+    network,
+    process.env.INFURA_API_KEY,
+    { gasPrice: defaultGas, etherscanApiKey: process.env.ETHERSCAN_API_KEY }
+  );
 
-    // deploy escrow registry
-    await deployer.deployAndVerify(c.Erasure_Escrows.artifact).then(wrap => {
-      c.Erasure_Escrows[network] = {
+  console.log(`Deployment Wallet: ${deployer.signer.address}`);
+
+  console.log(``);
+  console.log(`Deploy Registries`);
+  console.log(``);
+
+  async function deployRegistry(registry) {
+    await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
+      c[registry][network] = {
         wrap: wrap,
         address: wrap.contractAddress
       };
     });
   }
 
-  console.log(`
-Get Deployed Registries
-      `);
+  // Erasure_Escrows
 
-  // c.Erasure_Posts[network].wrap = deployer.wrapDeployedContract(
-  //   c.Erasure_Posts.artifact,
-  //   c.Erasure_Posts[network].address
-  // );
-  c.Erasure_Agreements[network].wrap = deployer.wrapDeployedContract(
-    c.Erasure_Agreements.artifact,
-    c.Erasure_Agreements[network].address
-  );
-  c.Erasure_Escrows[network].wrap = deployer.wrapDeployedContract(
-    c.Erasure_Escrows.artifact,
-    c.Erasure_Escrows[network].address
-  );
+  await deployRegistry("Erasure_Escrows");
 
-  console.log(`
-Validate Ownership
-      `);
+  console.log(``);
+  console.log(`Get Deployed Registries`);
+  console.log(``);
 
-  // assert.equal(
-  //   await c.Erasure_Posts[network].wrap.owner(),
-  //   deployer.signer.address
-  // );
-  // console.log(`Erasure_Posts has valid owner: ${deployer.signer.address}`);
+  async function getRegistry(registry) {
 
-  assert.equal(
-    await c.Erasure_Agreements[network].wrap.owner(),
-    deployer.signer.address
-  );
-  console.log(`Erasure_Agreements has valid owner: ${deployer.signer.address}`);
+    // get registry at cached address
+    c[registry][network].wrap = deployer.wrapDeployedContract(
+      c[registry].artifact,
+      c[registry][network].address
+    );
 
-  assert.equal(
-    await c.Erasure_Escrows[network].wrap.owner(),
-    deployer.signer.address
-  );
-  console.log(`Erasure_Escrows has valid owner: ${deployer.signer.address}`);
+    // validate ownership
+    assert.equal(
+      await c[registry][network].wrap.owner(),
+      deployer.signer.address
+    );
 
-  console.log(`
-Deploy Templates
-          `);
+    console.log(`${registry} has valid owner: ${deployer.signer.address}`);
+  }
 
-  await deployer.deployAndVerify(c.CountdownGriefingEscrow.template.artifact).then(wrap => {
-    c.CountdownGriefingEscrow.template[network].address = wrap.contractAddress;
-  });
+  // Erasure_Posts
 
-  c.CountdownGriefingEscrow.template[network].wrap = deployer.wrapDeployedContract(
-    c.CountdownGriefingEscrow.template.artifact,
-    c.CountdownGriefingEscrow.template[network].address
-  );
+  await getRegistry("Erasure_Posts");
 
-  await deployer.deployAndVerify(c.CountdownGriefing.template.artifact).then(wrap => {
-    c.CountdownGriefing.template[network].address = wrap.contractAddress;
-  });
+  // Erasure_Agreements
 
-  c.CountdownGriefing.template[network].wrap = deployer.wrapDeployedContract(
-    c.CountdownGriefing.template.artifact,
-    c.CountdownGriefing.template[network].address
-  );
+  await getRegistry("Erasure_Posts");
 
-  await deployer.deployAndVerify(c.SimpleGriefing.template.artifact).then(wrap => {
-    c.SimpleGriefing.template[network].address = wrap.contractAddress;
-  });
+  // Erasure_Escrows
 
-  c.SimpleGriefing.template[network].wrap = deployer.wrapDeployedContract(
-    c.SimpleGriefing.template.artifact,
-    c.SimpleGriefing.template[network].address
-  );
+  await getRegistry("Erasure_Posts");
 
-  console.log(`
-Deploy Factories
-            `);
+  console.log(``);
+  console.log(`Deploy Templates`);
+  console.log(``);
 
-  await deployer
-    .deployAndVerify(
-      c.CountdownGriefingEscrow.factory.artifact,
-      false,
-      c.Erasure_Escrows[network].address,
-      c.CountdownGriefingEscrow.template[network].address
-    )
-    .then(wrap => {
-      c.CountdownGriefingEscrow.factory[network].address = wrap.contractAddress;
+  async function deployTemplate(name) {
+    await deployer.deployAndVerify(c[name].template.artifact).then(wrap => {
+      c[name].template[network].address = wrap.contractAddress;
     });
 
-  c.CountdownGriefingEscrow.factory[network].wrap = deployer.wrapDeployedContract(
-    c.CountdownGriefingEscrow.factory.artifact,
-    c.CountdownGriefingEscrow.factory[network].address
-  );
+    c[name].template[network].wrap = deployer.wrapDeployedContract(
+      c[name].template.artifact,
+      c[name].template[network].address
+    );
 
-  await deployer
-    .deployAndVerify(
-      c.CountdownGriefing.factory.artifact,
-      false,
-      c.Erasure_Agreements[network].address,
-      c.CountdownGriefing.template[network].address
-    )
-    .then(wrap => {
-      c.CountdownGriefing.factory[network].address = wrap.contractAddress;
-    });
+    return c[name].template[network].wrap
+  }
 
-  c.CountdownGriefing.factory[network].wrap = deployer.wrapDeployedContract(
-    c.CountdownGriefing.factory.artifact,
-    c.CountdownGriefing.factory[network].address
-  );
+  // Feed
 
-  await deployer
-    .deployAndVerify(
-      c.SimpleGriefing.factory.artifact,
-      false,
-      c.Erasure_Agreements[network].address,
-      c.SimpleGriefing.template[network].address
-    )
-    .then(wrap => {
-      c.SimpleGriefing.factory[network].address = wrap.contractAddress;
-    });
+  await deployTemplate("Feed");
 
-  c.SimpleGriefing.factory[network].wrap = deployer.wrapDeployedContract(
-    c.SimpleGriefing.factory.artifact,
-    c.SimpleGriefing.factory[network].address
-  );
+  // SimpleGriefing
 
-  console.log(`
-Register Factories
-      `);
+  await deployTemplate("SimpleGriefing");
+
+  // CountdownGriefing
+
+  await deployTemplate("CountdownGriefing");
+
+  // CountdownGriefingEscrow
+
+  await deployTemplate("CountdownGriefingEscrow");
+
+  console.log(``);
+  console.log(`Deploy and Register Factories`);
+  console.log(``);
+
+  async function deployFactory(name, registry, factoryData = ethers.utils.hexlify(0x0)) {
+    await deployer
+      .deployAndVerify(
+        c[name].factory.artifact,
+        false,
+        c[registry][network].address,
+        c[name].template[network].address
+      )
+      .then(wrap => {
+        c[name].factory[network].address = wrap.contractAddress;
+      });
+
+    c[name].factory[network].wrap = deployer.wrapDeployedContract(
+      c[name].factory.artifact,
+      c[name].factory[network].address
+    );
+
+    await c[registry][network].wrap
+      .addFactory(
+        c[name].factory[network].address,
+        factoryData,
+        { gasPrice: defaultGas }
+      )
+      .then(async txn => {
+        console.log(
+          `addFactory() | ${name}_Factory => ${registry}`
+        );
+        const receipt = await c[registry][network].wrap.verboseWaitForTransaction(txn);
+        console.log(`gasUsed: ${receipt.gasUsed}`);
+        console.log(``);
+        gasUsed = gasUsed.add(receipt.gasUsed);
+      });
+
+    return c[name].factory[network].wrap
+  }
+
+  // Feed
+
+  await deployFactory("Feed", "Erasure_Posts");
+
+  // SimpleGriefing
+
+  await deployFactory("SimpleGriefing", "Erasure_Agreements");
+
+  // CountdownGriefing
+
+  await deployFactory("CountdownGriefing", "Erasure_Agreements");
+
+  // CountdownGriefingEscrow
 
   const abiEncoder = new ethers.utils.AbiCoder();
   const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory[network].address]);
+  await deployFactory("CountdownGriefingEscrow", "Erasure_Escrows", agreementFactory);
 
-  await c.Erasure_Escrows[network].wrap
-    .addFactory(
-      c.CountdownGriefingEscrow.factory[network].address,
-      agreementFactory,
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      console.log(
-        `addFactory() | CountdownGriefingEscrow_Factory => Erasure_Escrows`
-      );
-      const receipt = await c.Erasure_Escrows[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      console.log(`gasUsed: ${receipt.gasUsed}`);
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
-
-  await c.Erasure_Agreements[network].wrap
-    .addFactory(
-      c.CountdownGriefing.factory[network].address,
-      ethers.utils.hexlify(0x0),
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      console.log(
-        `addFactory() | CountdownGriefing_Factory => Erasure_Agreements`
-      );
-      const receipt = await c.Erasure_Agreements[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      console.log(`gasUsed: ${receipt.gasUsed}`);
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
-
-  await c.Erasure_Agreements[network].wrap
-    .addFactory(
-      c.SimpleGriefing.factory[network].address,
-      ethers.utils.hexlify(0x0),
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      console.log(
-        `addFactory() | SimpleGriefing_Factory => Erasure_Agreements`
-      );
-      const receipt = await c.Erasure_Agreements[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      console.log(`gasUsed: ${receipt.gasUsed}`);
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
-
-  console.log(`
-Transfer Registry Ownership
-      `);
-
-  // await c.Erasure_Posts[network].wrap
-  //   .transferOwnership(multisig, { gasPrice: defaultGas })
-  //   .then(async txn => {
-  //     console.log(`transferOwnership() | Erasure_Posts => ${multisig}`);
-  //     const receipt = await c.Erasure_Posts[
-  //       network
-  //     ].wrap.verboseWaitForTransaction(txn);
-  //     console.log(`gasUsed: ${receipt.gasUsed}`);
-  //     console.log(``);
-  //     gasUsed = gasUsed.add(receipt.gasUsed);
-  //   });
-
-  await c.Erasure_Agreements[network].wrap
-    .transferOwnership(multisig, { gasPrice: defaultGas })
-    .then(async txn => {
-      console.log(`transferOwnership() | Erasure_Agreements => ${multisig}`);
-      const receipt = await c.Erasure_Agreements[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      console.log(`gasUsed: ${receipt.gasUsed}`);
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
-
-  await c.Erasure_Escrows[network].wrap
-    .transferOwnership(multisig, { gasPrice: defaultGas })
-    .then(async txn => {
-      console.log(`transferOwnership() | Erasure_Escrows => ${multisig}`);
-      const receipt = await c.Erasure_Escrows[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      console.log(`gasUsed: ${receipt.gasUsed}`);
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
-
-  console.log(`
-Create test instance from factories
-      `);
-
-  const userAddress = "0x6087555A70E2F96B7838806e7743041E035a37e5";
-  const multihash = createMultihashSha256("multihash");
-  const hash = ethers.utils.keccak256(hexlify("multihash"));
-  console.log(`multihash: ${multihash}`);
-  console.log(`hash: ${hash}`);
+  console.log(``);
+  console.log(`Transfer Registry Ownership`);
   console.log(``);
 
-  await c.SimpleGriefing.factory[network].wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        ["address", "address", "address", "uint256", "uint8", "bytes"],
-        [
-          userAddress,
-          userAddress,
-          userAddress,
-          ethers.utils.parseEther("1"),
-          2,
-          "0x0"
-        ]
-      ),
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      const receipt = await c.SimpleGriefing.factory[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === "InstanceCreated",
-        "There is no such event"
-      );
+  async function transferRegistry(registry) {
+    await c[registry][network].wrap
+      .transferOwnership(multisig, { gasPrice: defaultGas })
+      .then(async txn => {
+        console.log(`transferOwnership() | ${registry} => ${multisig}`);
+        const receipt = await c[registry][network].wrap.verboseWaitForTransaction(txn);
+        console.log(`gasUsed: ${receipt.gasUsed}`);
+        console.log(``);
+        gasUsed = gasUsed.add(receipt.gasUsed);
+      });
+  }
 
-      c.SimpleGriefing.instance[network].wrap = deployer.wrapDeployedContract(
-        c.SimpleGriefing.template.artifact,
-        eventFound.args.instance
-      );
-      console.log(
-        `create() | ${receipt.gasUsed} gas | SimpleGriefing_Factory => ${eventFound.args.instance}`
-      );
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
+  // Erasure_Posts
 
-  await c.CountdownGriefing.factory[network].wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        [
-          "address",
-          "address",
-          "address",
-          "uint256",
-          "uint8",
-          "uint256",
-          "bytes"
-        ],
-        [
-          userAddress,
-          userAddress,
-          userAddress,
-          ethers.utils.parseEther("1"),
-          2,
-          100000000,
-          "0x0"
-        ]
-      ),
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      const receipt = await c.CountdownGriefing.factory[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === "InstanceCreated",
-        "There is no such event"
-      );
+  await transferRegistry("Erasure_Posts");
 
-      c.CountdownGriefing.instance[
-        network
-      ].wrap = deployer.wrapDeployedContract(
-        c.CountdownGriefing.template.artifact,
-        eventFound.args.instance
-      );
-      console.log(
-        `create() | ${receipt.gasUsed} gas | CountdownGriefing_Factory => ${eventFound.args.instance}`
-      );
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
+  // Erasure_Agreements
 
-  await c.CountdownGriefingEscrow.factory[network].wrap
-    .create(
-      abiEncodeWithSelector(
-        "initialize",
-        ["address", "address", "address", "uint256", "uint256", "uint256", "bytes", "bytes"],
-        [
-          userAddress,
-          userAddress,
-          userAddress,
-          ethers.utils.parseEther("1"),
-          ethers.utils.parseEther("1"),
-          100000000,
-          "0x0",
-          abiEncodeWithSelector(
-            "initialize",
-            [
-              "address",
-              "address",
-              "address",
-              "uint256",
-              "uint8",
-              "uint256",
-              "bytes"
-            ],
-            [
-              userAddress,
-              userAddress,
-              userAddress,
-              ethers.utils.parseEther("1"),
-              2,
-              100000000,
-              "0x0"
-            ]
-          )
-        ]
-      ),
-      { gasPrice: defaultGas }
-    )
-    .then(async txn => {
-      const receipt = await c.CountdownGriefingEscrow.factory[
-        network
-      ].wrap.verboseWaitForTransaction(txn);
-      const eventFound = receipt.events.find(
-        emittedEvent => emittedEvent.event === "InstanceCreated",
-        "There is no such event"
-      );
+  await transferRegistry("Erasure_Posts");
 
-      c.CountdownGriefingEscrow.instance[network].wrap = deployer.wrapDeployedContract(
-        c.CountdownGriefingEscrow.template.artifact,
-        eventFound.args.instance
-      );
-      console.log(
-        `create() | ${receipt.gasUsed} gas | CountdownGriefingEscrow_Factory => ${eventFound.args.instance}`
-      );
-      console.log(``);
-      gasUsed = gasUsed.add(receipt.gasUsed);
-    });
+  // Erasure_Escrows
+
+  await transferRegistry("Erasure_Posts");
+
+  console.log(``);
+  console.log(`Create test instance from factories`);
+  console.log(``);
+
+  const userAddress = "0x6087555A70E2F96B7838806e7743041E035a37e5";
+  const proofhash = ethers.utils.sha256(ethers.utils.toUtf8Bytes("proofhash"));
+  const IPFShash = createIPFShash("multihash"));
+  console.log(`userAddress: ${userAddress}`);
+  console.log(`proofhash: ${proofhash}`);
+  console.log(`IPFShash: ${IPFShash}`);
+  console.log(``);
+
+  async function createInstance(name, calldata) {
+    await c[name].factory[network].wrap
+      .create(calldata, { gasPrice: defaultGas })
+      .then(async txn => {
+        const receipt = await c[name].factory[
+          network
+        ].wrap.verboseWaitForTransaction(txn);
+        const eventFound = receipt.events.find(
+          emittedEvent => emittedEvent.event === "InstanceCreated",
+          "There is no such event"
+        );
+
+        c[name].instance[network].wrap = deployer.wrapDeployedContract(
+          c[name].template.artifact,
+          eventFound.args.instance
+        );
+
+        console.log(
+          `create() | ${receipt.gasUsed} gas | ${name}_Factory => ${eventFound.args.instance}`
+        );
+        console.log(``);
+        gasUsed = gasUsed.add(receipt.gasUsed);
+      });
+  }
+
+  // Feed
+
+  await createInstance("Feed", abiEncodeWithSelector(
+    "initialize",
+    ["address", "bytes32", "bytes"],
+    [userAddress, proofhash, IPFShash]
+  ));
+
+  // SimpleGriefing
+
+  await createInstance("SimpleGriefing", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint8", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefing
+
+  await createInstance("CountdownGriefing", abiEncodeWithSelector(
+    "initialize",
+    [
+      "address",
+      "address",
+      "address",
+      "uint256",
+      "uint8",
+      "uint256",
+      "bytes"
+    ],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      100000000,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefingEscrow
+
+  await createInstance("CountdownGriefingEscrow", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint256", "uint256", "bytes", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("1"),
+      100000000,
+      IPFShash,
+      abiEncoder.encode(["uint256", "uint8", "uint256"], [ethers.utils.parseEther("1"), 2, 100000000])
+    ]
+  ));
 
   console.log(``);
   console.log(`total gas used: ${gasUsed.toString()}`);

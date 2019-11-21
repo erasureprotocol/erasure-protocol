@@ -35,6 +35,34 @@ const c = {
             address: "0xA9FfF710c8687fF1a5bD8031225907917f03319A"
         }
     },
+    Feed: {
+        factory: {
+            artifact: require("../build/Feed_Factory.json"),
+            mainnet: {
+                address: "0x206780873974878722Ed156544589701832eE920"
+            },
+            rinkeby: {
+                address: "0xa3140871346f4efF924dc874EC6AfD4573232F03"
+            }
+        },
+        template: {
+            artifact: require("../build/Feed.json"),
+            mainnet: {
+                address: "0xA411eB36538a2Ae060A766221E43A94205460369"
+            },
+            rinkeby: {
+                address: "0x7aA06aa3b6D5476c0CE720231E2Add74164f78CD"
+            }
+        },
+        instance: {
+            mainnet: {
+                address: ""
+            },
+            rinkeby: {
+                address: ""
+            }
+        }
+    },
     SimpleGriefing: {
         factory: {
             artifact: require("../build/SimpleGriefing_Factory.json"),
@@ -80,62 +108,6 @@ const c = {
             },
             rinkeby: {
                 address: "0x93F75120365129Da3A9E3e23e3AbB857F1ADf5B6"
-            }
-        },
-        instance: {
-            mainnet: {
-                address: ""
-            },
-            rinkeby: {
-                address: ""
-            }
-        }
-    },
-    Feed: {
-        factory: {
-            artifact: require("../build/Feed_Factory.json"),
-            mainnet: {
-                address: "0x206780873974878722Ed156544589701832eE920"
-            },
-            rinkeby: {
-                address: "0xa3140871346f4efF924dc874EC6AfD4573232F03"
-            }
-        },
-        template: {
-            artifact: require("../build/Feed.json"),
-            mainnet: {
-                address: "0xA411eB36538a2Ae060A766221E43A94205460369"
-            },
-            rinkeby: {
-                address: "0x7aA06aa3b6D5476c0CE720231E2Add74164f78CD"
-            }
-        },
-        instance: {
-            mainnet: {
-                address: ""
-            },
-            rinkeby: {
-                address: ""
-            }
-        }
-    },
-    Post: {
-        factory: {
-            artifact: require("../build/Post_Factory.json"),
-            mainnet: {
-                address: "0x41b65f0153410E42ec26eaBa71F9f8f133282B54"
-            },
-            rinkeby: {
-                address: "0xbd1E2C679ED25485e27e5AD8eD3a2776769d22aF"
-            }
-        },
-        template: {
-            artifact: require("../build/Post.json"),
-            mainnet: {
-                address: "0x7f858F0726af676e00cB76459D984463ee1307c2"
-            },
-            rinkeby: {
-                address: "0x223EbC4e00eD605cC580E6B547aDbf7300B4BF4D"
             }
         },
         instance: {
