@@ -1,7 +1,7 @@
 pragma solidity ^0.5.0;
 
-import "../openzeppelin-solidity/token/ERC20/IERC20.sol";
-import "../openzeppelin-solidity/math/SafeMath.sol";
+import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
+import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 
 
 contract MockNMR is IERC20 {
