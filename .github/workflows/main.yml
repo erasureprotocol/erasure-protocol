@@ -16,10 +16,8 @@ jobs:
         run: yarn install
       - name: Test Compilation
         run: yarn run compile
-      - name: Test Deployment
-        run: yarn run deploy_ganache
       - name: Test Contracts
-        run: yarn run test
+        run: bash run-ganache-tests.sh
 
   testenv:
     name: Testenv Deployment
