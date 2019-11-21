@@ -115,7 +115,7 @@ describe("Feed", function () {
       assert.equal(actualOperator, operator);
 
       //  Operator._activateOperator()
-      const operatorIsActive = await this.TestFeed.hasActiveOperator();
+      const operatorIsActive = await this.TestFeed.getOperatorStatus();
       assert.equal(operatorIsActive, true);
     });
   });

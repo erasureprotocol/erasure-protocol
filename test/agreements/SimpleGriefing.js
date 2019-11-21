@@ -118,7 +118,7 @@ describe("SimpleGriefing", function () {
 
       // check that it's the TestSimpleGriefing state that is changed
       // not the SimpleGriefing logic contract's state
-      const logicContractIsActive = await this.SimpleGriefing.hasActiveOperator();
+      const logicContractIsActive = await this.SimpleGriefing.getOperatorStatus();
       assert.equal(logicContractIsActive, false);
 
       // check all the state changes
@@ -128,21 +128,19 @@ describe("SimpleGriefing", function () {
       assert.equal(token, this.MockNMR.contractAddress);
 
       // _data.staker
-      const isStaker = await this.TestSimpleGriefing.isStaker(staker);
-      assert.equal(isStaker, true);
+      const getStaker = await this.TestSimpleGriefing.getStaker();
+      assert.equal(getStaker, staker);
 
       // _data.counterparty
-      const isCounterparty = await this.TestSimpleGriefing.isCounterparty(
-        counterparty
-      );
-      assert.equal(isCounterparty, true);
+      const getCounterparty = await this.TestSimpleGriefing.getCounterparty();
+      assert.equal(getCounterparty, counterparty);
 
       // Operator._setOperator
       const operator = await this.TestSimpleGriefing.getOperator();
       assert.equal(operator, operator);
 
       //  Operator._activate()
-      const callingContractIsActive = await this.TestSimpleGriefing.hasActiveOperator();
+      const callingContractIsActive = await this.TestSimpleGriefing.getOperatorStatus();
       assert.equal(callingContractIsActive, true);
 
       // Griefing._setRatio
@@ -517,7 +515,7 @@ describe("SimpleGriefing", function () {
       const actualOperator = await this.TestSimpleGriefing.getOperator();
       assert.equal(actualOperator, newOperator);
 
-      const isActive = await this.TestSimpleGriefing.hasActiveOperator();
+      const isActive = await this.TestSimpleGriefing.getOperatorStatus();
       assert.equal(isActive, true);
     });
   });
@@ -547,7 +545,7 @@ describe("SimpleGriefing", function () {
       const actualOperator = await this.TestSimpleGriefing.getOperator();
       assert.equal(actualOperator, ethers.constants.AddressZero);
 
-      const isActive = await this.TestSimpleGriefing.hasActiveOperator();
+      const isActive = await this.TestSimpleGriefing.getOperatorStatus();
       assert.equal(isActive, false);
     });
   });

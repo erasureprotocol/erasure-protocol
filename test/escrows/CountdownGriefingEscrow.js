@@ -129,13 +129,9 @@ describe("CountdownGriefingEscrow", function () {
         // validate state change
 
         assert.equal((await g.Instance.getBuyer()), _buyer);
-        assert.equal((await g.Instance.isBuyer(_buyer)), true);
         assert.equal((await g.Instance.getSeller()), _seller);
-        assert.equal((await g.Instance.isSeller(_seller)), true);
         assert.equal((await g.Instance.getOperator()), _operator);
-        assert.equal((await g.Instance.isOperator(_operator)), true);
-        assert.equal((await g.Instance.hasActiveOperator()), false);
-        assert.equal((await g.Instance.isActiveOperator(_operator)), false);
+        assert.equal((await g.Instance.getOperatorStatus()), false);
         assert.equal((await g.Instance.getLength()), escrowCountdown);
         assert.equal((await g.Instance.getEscrowStatus()), 0);
 
@@ -184,9 +180,7 @@ describe("CountdownGriefingEscrow", function () {
         // validate state change
 
         assert.equal((await g.Instance.getBuyer()), _buyer);
-        assert.equal((await g.Instance.isBuyer(_buyer)), true);
         assert.equal((await g.Instance.getStake(_buyer)).toString(), paymentAmount.toString());
-        assert.equal((await g.Instance.onlyPaymentDeposited()), true);
         assert.equal((await g.Instance.getEscrowStatus()), 2);
 
     };
@@ -227,9 +221,7 @@ describe("CountdownGriefingEscrow", function () {
         // validate state change
 
         assert.equal((await g.Instance.getSeller()), _seller);
-        assert.equal((await g.Instance.isSeller(_seller)), true);
         assert.equal((await g.Instance.getStake(_seller)).toString(), stakeAmount.toString());
-        assert.equal((await g.Instance.onlyStakeDeposited()), true);
         assert.equal((await g.Instance.getEscrowStatus()), 1);
 
     };
@@ -334,10 +326,8 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getSeller()), fulfiller);
-                assert.equal((await g.Instance.isSeller(fulfiller)), true);
                 assert.equal((await g.Instance.getStake(fulfiller)).toNumber(), 0);
                 assert.equal((await g.Instance.getBuyer()), requester);
-                assert.equal((await g.Instance.isBuyer(requester)), true);
                 assert.equal((await g.Instance.getStake(requester)).toNumber(), 0);
                 assert.equal((await g.Instance.getEscrowStatus()), 4);
 
@@ -466,7 +456,6 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getBuyer()), buyer);
-                assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toString(), paymentAmount.toString());
                 assert.equal((await g.Instance.getEscrowStatus()), 3);
                 assert.equal((await g.Instance.getCountdownStatus()), 2);
@@ -520,10 +509,8 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getSeller()), seller);
-                assert.equal((await g.Instance.isSeller(seller)), true);
                 assert.equal((await g.Instance.getStake(seller)).toNumber(), 0);
                 assert.equal((await g.Instance.getBuyer()), buyer);
-                assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toNumber(), 0);
                 assert.equal((await g.Instance.getEscrowStatus()), 4);
 
@@ -648,7 +635,6 @@ describe("CountdownGriefingEscrow", function () {
                 // validate state change
 
                 assert.equal((await g.Instance.getBuyer()), buyer);
-                assert.equal((await g.Instance.isBuyer(buyer)), true);
                 assert.equal((await g.Instance.getStake(buyer)).toString(), paymentAmount.toString());
                 assert.equal((await g.Instance.getEscrowStatus()), 3);
                 assert.equal((await g.Instance.getCountdownStatus()), 2);

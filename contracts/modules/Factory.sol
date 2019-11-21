@@ -41,6 +41,8 @@ contract Factory is Spawner {
         instance = Spawner._spawn(getTemplate(), callData);
 
         _createHelper(instance, callData);
+
+        return instance;
     }
 
     function createSalty(bytes memory callData, bytes32 salt) public returns (address instance) {
@@ -48,6 +50,8 @@ contract Factory is Spawner {
         instance = Spawner._spawnSalty(getTemplate(), callData, salt);
 
         _createHelper(instance, callData);
+
+        return instance;
     }
 
     function _createHelper(address instance, bytes memory callData) private {
@@ -75,36 +79,36 @@ contract Factory is Spawner {
     }
 
     function getInstanceCreator(address instance) public view returns (address creator) {
-        creator = _instanceCreator[instance];
+        return _instanceCreator[instance];
     }
 
     function getInstanceType() public view returns (bytes4 instanceType) {
-        instanceType = _instanceType;
+        return _instanceType;
     }
 
     function getInitSelector() public view returns (bytes4 initSelector) {
-        initSelector = _initSelector;
+        return _initSelector;
     }
 
     function getInstanceRegistry() public view returns (address instanceRegistry) {
-        instanceRegistry = _instanceRegistry;
+        return _instanceRegistry;
     }
 
     function getTemplate() public view returns (address template) {
-        template = _templateContract;
+        return _templateContract;
     }
 
     function getInstanceCount() public view returns (uint256 count) {
-        count = _instances.length;
+        return _instances.length;
     }
 
     function getInstance(uint256 index) public view returns (address instance) {
         require(index < _instances.length, "index out of range");
-        instance = _instances[index];
+        return _instances[index];
     }
 
     function getInstances() public view returns (address[] memory instances) {
-        instances = _instances;
+        return _instances;
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
@@ -121,7 +125,7 @@ contract Factory is Spawner {
         }
 
         // return array of addresses
-        instances = range;
+        return range;
     }
 
 }

@@ -164,7 +164,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @notice Validate if the address matches the stored staker address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isStaker(address caller) public view returns (bool validity) {
+    function isStaker(address caller) internal view returns (bool validity) {
         return caller == getStaker();
     }
 
@@ -177,7 +177,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @notice Validate if the address matches the stored counterparty address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isCounterparty(address caller) public view returns (bool validity) {
+    function isCounterparty(address caller) internal view returns (bool validity) {
         return caller == getCounterparty();
     }
 
@@ -200,11 +200,11 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         }
     }
 
-    function isInitialized() public view returns (bool validity) {
+    function isInitialized() internal view returns (bool validity) {
         return getAgreementStatus() == AgreementStatus.isInitialized;
     }
 
-    function isStaked() public view returns (bool validity) {
+    function isStaked() internal view returns (bool validity) {
         return getAgreementStatus() == AgreementStatus.isStaked;
     }
 }
