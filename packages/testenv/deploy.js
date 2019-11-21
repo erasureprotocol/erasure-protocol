@@ -9,47 +9,47 @@ const {
 
 let c = {
   NMR: {
-    artifact: require("./artifacts/MockNMR.json")
+    artifact: require("./build/MockNMR.json")
   },
   Erasure_Agreements: {
-    artifact: require("./artifacts/Erasure_Agreements.json")
+    artifact: require("./build/Erasure_Agreements.json")
   },
   Erasure_Posts: {
-    artifact: require("./artifacts/Erasure_Posts.json")
+    artifact: require("./build/Erasure_Posts.json")
   },
   Erasure_Escrows: {
-    artifact: require("./artifacts/Erasure_Escrows.json")
+    artifact: require("./build/Erasure_Escrows.json")
   },
   SimpleGriefing: {
     factory: {
-      artifact: require("./artifacts/SimpleGriefing_Factory.json")
+      artifact: require("./build/SimpleGriefing_Factory.json")
     },
     template: {
-      artifact: require("./artifacts/SimpleGriefing.json")
+      artifact: require("./build/SimpleGriefing.json")
     }
   },
   CountdownGriefing: {
     factory: {
-      artifact: require("./artifacts/CountdownGriefing_Factory.json")
+      artifact: require("./build/CountdownGriefing_Factory.json")
     },
     template: {
-      artifact: require("./artifacts/CountdownGriefing.json")
+      artifact: require("./build/CountdownGriefing.json")
     }
   },
   CountdownGriefingEscrow: {
     factory: {
-      artifact: require("./artifacts/CountdownGriefingEscrow_Factory.json")
+      artifact: require("./build/CountdownGriefingEscrow_Factory.json")
     },
     template: {
-      artifact: require("./artifacts/CountdownGriefingEscrow.json")
+      artifact: require("./build/CountdownGriefingEscrow.json")
     }
   },
   Feed: {
     factory: {
-      artifact: require("./artifacts/Feed_Factory.json")
+      artifact: require("./build/Feed_Factory.json")
     },
     template: {
-      artifact: require("./artifacts/Feed.json")
+      artifact: require("./build/Feed.json")
     }
   }
 };
@@ -235,7 +235,7 @@ Deploy Factories
   );
 
   const abiEncoder = new ethers.utils.AbiCoder();
-  const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory[network].address]);
+  const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory.wrap.address]);
 
   [c.CountdownGriefingEscrow.template.wrap, c.CountdownGriefingEscrow.factory.wrap] = await deployFactory(
     "CountdownGriefingEscrow",

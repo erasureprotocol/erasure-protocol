@@ -1,14 +1,20 @@
 {
   "contractsDir": "../../contracts",
-  "artifactsDir": "artifacts",
+  "artifactsDir": "build",
   "solcVersion": "0.5.11",
   "contracts": "*",
   "compilerSettings": {
     "evmVersion": "constantinople",
-    "optimizer": { "enabled": false, "runs": 200 },
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
     "outputSelection": {
       "*": {
-        "*": ["abi", "evm.bytecode.object"]
+        "*": [
+          "abi",
+          "evm.bytecode.object"
+        ]
       }
     }
   }
