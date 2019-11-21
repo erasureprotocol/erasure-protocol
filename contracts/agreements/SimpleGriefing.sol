@@ -47,7 +47,6 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);
-            Operated._activateOperator();
         }
 
         // set griefing ratio
@@ -70,7 +69,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // update metadata
         EventMetadata._setMetadata(metadata);
@@ -83,7 +82,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
     function increaseStake(uint256 amountToAdd) public {
         // restrict access
-        require(isStaker(msg.sender) || Operated.isActiveOperator(msg.sender), "only staker or active operator");
+        require(isStaker(msg.sender) || Operated.isOperator(msg.sender), "only staker or operator");
 
         // add stake
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
@@ -96,7 +95,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param amountToAdd Amount of NMR (18 decimals) to be added to the stake
     function reward(uint256 amountToAdd) public {
         // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+        require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
 
         // add stake
         Staking._addStake(_data.staker, msg.sender, amountToAdd);
@@ -112,7 +111,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @return cost Amount of NMR (18 decimals) it costs to perform punishment
     function punish(uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+        require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
 
         // execute griefing
         cost = Griefing._grief(msg.sender, _data.staker, punishment, message);
@@ -124,7 +123,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param amountToRelease Amount of NMR (18 decimals) to be released from the stake
     function releaseStake(uint256 amountToRelease) public {
         // restrict access
-        require(isCounterparty(msg.sender) || Operated.isActiveOperator(msg.sender), "only counterparty or active operator");
+        require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
 
         // release stake back to the staker
         Staking._takeStake(_data.staker, _data.staker, amountToRelease);
@@ -136,7 +135,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param operator Address of the new operator
     function transferOperator(address operator) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // transfer operator
         Operated._transferOperator(operator);
@@ -147,7 +146,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     ///      State Machine: anytime
     function renounceOperator() public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // renounce operator
         Operated._renounceOperator();

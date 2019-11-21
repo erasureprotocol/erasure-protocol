@@ -131,7 +131,6 @@ describe("CountdownGriefingEscrow", function () {
         assert.equal((await g.Instance.getBuyer()), _buyer);
         assert.equal((await g.Instance.getSeller()), _seller);
         assert.equal((await g.Instance.getOperator()), _operator);
-        assert.equal((await g.Instance.getOperatorStatus()), false);
         assert.equal((await g.Instance.getLength()), escrowCountdown);
         assert.equal((await g.Instance.getEscrowStatus()), 0);
 

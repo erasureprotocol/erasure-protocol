@@ -8,41 +8,51 @@ pragma solidity ^0.5.0;
 contract Operated {
 
     address private _operator;
-    bool private _status;
 
-    event OperatorUpdated(address operator, bool status);
+    event OperatorUpdated(address operator);
 
     // state functions
 
     function _setOperator(address operator) internal {
-        require(_operator != operator, "cannot set same operator");
+
+        // can only be called when operator is null
+        require(_operator == address(0), "operator already set");
+
+        // cannot set to address 0
+        require(operator != address(0), "cannot set operator to address 0");
+
+        // set operator in storage
         _operator = operator;
-        emit OperatorUpdated(operator, _status);
+
+        // emit event
+        emit OperatorUpdated(operator);
     }
 
     function _transferOperator(address operator) internal {
-        // transferring operator-ship implies there was an operator set before this
-        require(_operator != address(0), "operator not set");
-        _setOperator(operator);
+
+        // requires existing operator
+        require(_operator != address(0), "only when operator set");
+
+        // cannot set to address 0
+        require(operator != address(0), "cannot set operator to address 0");
+
+        // set operator in storage
+        _operator = operator;
+
+        // emit event
+        emit OperatorUpdated(operator);
     }
 
     function _renounceOperator() internal {
-        require(_status, "only when operator active");
+
+        // requires existing operator
+        require(_operator != address(0), "only when operator set");
+
+        // set operator in storage
         _operator = address(0);
-        _status = false;
-        emit OperatorUpdated(address(0), false);
-    }
 
-    function _activateOperator() internal {
-        require(!_status, "only when operator not active");
-        _status = true;
-        emit OperatorUpdated(_operator, true);
-    }
-
-    function _deactivateOperator() internal {
-        require(_status, "only when operator active");
-        _status = false;
-        emit OperatorUpdated(_operator, false);
+        // emit event
+        emit OperatorUpdated(address(0));
     }
 
     // view functions
@@ -53,14 +63,6 @@ contract Operated {
 
     function isOperator(address caller) internal view returns (bool ok) {
         return caller == _operator;
-    }
-
-    function getOperatorStatus() public view returns (bool ok) {
-        return _status;
-    }
-
-    function isActiveOperator(address caller) internal view returns (bool ok) {
-        return isOperator(caller) && getOperatorStatus();
     }
 
 }

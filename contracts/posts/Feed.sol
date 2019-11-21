@@ -28,7 +28,6 @@ contract Feed is ProofHashes, Operated, EventMetadata, Template {
         // set operator
         if (operator != address(0)) {
             Operated._setOperator(operator);
-            Operated._activateOperator();
         }
 
         // submit proofHash
@@ -49,11 +48,11 @@ contract Feed is ProofHashes, Operated, EventMetadata, Template {
 
     /// @notice Submit proofhash to add to feed
     /// @dev Access Control: creator OR operator
-    ///      State Machine: always
+    ///      State Machine: anytime
     /// @param proofHash Proofhash (bytes32) sha256 hash of timestampled data
     function submitHash(bytes32 proofHash) public {
-        // only active operator or creator
-        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
+        // only operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isOperator(msg.sender), "only operator or creator");
 
         // submit proofHash
         ProofHashes._submitHash(proofHash);
@@ -61,11 +60,11 @@ contract Feed is ProofHashes, Operated, EventMetadata, Template {
 
     /// @notice Emit metadata event
     /// @dev Access Control: creator OR operator
-    ///      State Machine: always
+    ///      State Machine: anytime
     /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
-        // only active operator or creator
-        require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
+        // only operator or creator
+        require(Template.isCreator(msg.sender) || Operated.isOperator(msg.sender), "only operator or creator");
 
         // set metadata
         EventMetadata._setMetadata(metadata);
@@ -77,7 +76,7 @@ contract Feed is ProofHashes, Operated, EventMetadata, Template {
     /// @param operator Address of the new operator
     function transferOperator(address operator) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // transfer operator
         Operated._transferOperator(operator);
@@ -88,7 +87,7 @@ contract Feed is ProofHashes, Operated, EventMetadata, Template {
     ///      State Machine: anytime
     function renounceOperator() public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // renounce operator
         Operated._renounceOperator();
