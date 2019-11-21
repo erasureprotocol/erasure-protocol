@@ -31,7 +31,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @param staker Address of the staker who owns the stake
     /// @param counterparty Address of the counterparty who has the right to punish and reward
     /// @param ratio Uint256 number (18 decimals) passed to Griefing module
-    /// @param ratioType Uint8 number passed to Staking module
+    /// @param ratioType Griefing.RatioType number passed to Griefing module
     /// @param countdownLength Amount of time (in seconds) the counterparty has to punish or reward before the agreement ends
     /// @param metadata Data (any format) to emit as event on initialization
     function initialize(

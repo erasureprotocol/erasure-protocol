@@ -32,7 +32,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     struct AgreementParams {
         uint120 ratio;
-        uint8 ratioType;
+        Griefing.RatioType ratioType;
         uint128 countdownLength;
     }
 
@@ -62,7 +62,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param stakeAmount Amount of NMR (18 decimals) to be deposited by seller as stake
     /// @param escrowCountdown Amount of time (in seconds) the seller has to finalize the escrow after the payment is deposited
     /// @param metadata Data (any format) to emit as event on initialization
-    /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters (abi.encode(ratio, ratioType, agreementCountdown)) to create on escrow completion. See CountdownGriefing contract for details
+    /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters `abi.encode(ratio, ratioType, agreementCountdown)`.
+    ///                        The agreement is created on escrow completion. `ratio` is limited to uint120 and `agreementCountdown` is limited to uint128.
+    ///                        See CountdownGriefing contract for additional details.
     function initialize(
         address operator,
         address buyer,
@@ -108,12 +110,12 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         if (agreementParams.length != 0) {
             (
                 uint256 ratio,
-                uint8 ratioType,
+                Griefing.RatioType ratioType,
                 uint256 agreementCountdown
-            ) = abi.decode(agreementParams, (uint256, uint8, uint256));
+            ) = abi.decode(agreementParams, (uint256, Griefing.RatioType, uint256));
             require(ratio == uint256(uint120(ratio)), "ratio out of bounds");
             require(agreementCountdown == uint256(uint128(agreementCountdown)), "agreementCountdown out of bounds");
-            _data.agreementParams = AgreementParams(uint120(ratio), uint8(ratioType), uint128(agreementCountdown));
+            _data.agreementParams = AgreementParams(uint120(ratio), ratioType, uint128(agreementCountdown));
         }
 
         // emit event
@@ -411,13 +413,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @return uint128 paymentAmount set in initialization
     /// @return uint128 stakeAmount set in initialization
     /// @return uint120 ratio used for initialization of agreement on completion
-    /// @return uint8 ratioType used for initialization of agreement on completion
+    /// @return Griefing.RatioType ratioType used for initialization of agreement on completion
     /// @return uint128 countdownLength used for initialization of agreement on completion
     function getData() public view returns (
         uint128 paymentAmount,
         uint128 stakeAmount,
         uint120 ratio,
-        uint8 ratioType,
+        Griefing.RatioType ratioType,
         uint128 countdownLength
     ) {
         return (
@@ -431,7 +433,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
     enum EscrowStatus { isOpen, onlyStakeDeposited, onlyPaymentDeposited, isDeposited, isFinalized, isCancelled }
     /// @notice Return the status of the state machine
-    /// @return uint8 status from of the following states:
+    /// @return EscrowStatus status from of the following states:
     ///          - isOpen: initialized but no deposits made
     ///          - onlyStakeDeposited: only stake deposit completed
     ///          - onlyPaymentDeposited: only payment deposit completed
