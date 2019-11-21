@@ -1,7 +1,7 @@
 {
   "contractsDir": "../../contracts",
   "artifactsDir": "build",
-  "solcVersion": "0.5.11",
+  "solcVersion": "0.5.13",
   "contracts": "*",
   "compilerSettings": {
     "evmVersion": "constantinople",
