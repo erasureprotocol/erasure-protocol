@@ -4,7 +4,6 @@ const ethers = require("ethers");
 const { setupDeployment, initDeployment } = require("../helpers/setup");
 const {
     hexlify,
-    createMultihashSha256,
     abiEncodeWithSelector,
     assertEvent
 } = require("../helpers/utils");

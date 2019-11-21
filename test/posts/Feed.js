@@ -3,7 +3,6 @@ const etherlime = require("etherlime-lib");
 const { createDeployer } = require("../helpers/setup");
 const {
   hexlify,
-  createMultihashSha256,
   abiEncodeWithSelector,
   assertEvent
 } = require("../helpers/utils");
@@ -13,7 +12,7 @@ const TestFeedArtifact = require("../../build/Feed.json");
 const FeedFactoryArtifact = require("../../build/Feed_Factory.json");
 const ErasurePostsArtifact = require("../../build/Erasure_Posts.json");
 
-describe("Feed", function() {
+describe("Feed", function () {
   let deployer;
 
   // wallets and addresses
@@ -36,12 +35,7 @@ describe("Feed", function() {
   const newFeedMetadata = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes("newFeedMetadata")
   );
-  const proofHash = createMultihashSha256("proofHash");
-  const hash = ethers.utils.keccak256(hexlify("proofHash"));
-  const invalidProofHash = ethers.utils.keccak256(hexlify("invalidProofHash"));
-  const postMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes("postMetadata")
-  );
+  const proofHash = ethers.utils.sha256(hexlify("proofHash"));
 
   const deployTestFeed = async (
     validInit = true,
@@ -52,7 +46,7 @@ describe("Feed", function() {
     if (validInit) {
       callData = abiEncodeWithSelector(
         "initialize",
-        ["address", "bytes", "bytes"],
+        ["address", "bytes32", "bytes"],
         args
       );
       const postID = addPost(proofHash);
@@ -131,7 +125,7 @@ describe("Feed", function() {
     it("should revert when msg.sender is not operator or creator", async () => {
       // Factory has to be the sender here
       await assert.revertWith(
-        this.TestFeed.from(other).submitHash(hash),
+        this.TestFeed.from(other).submitHash(proofHash),
         "only active operator or creator"
       );
     });
@@ -139,7 +133,7 @@ describe("Feed", function() {
     // check deactivated operator
     it("should revert when msg.sender is operator but not active", async () => {
       await assert.revertWith(
-        this.DeactivatedFeed.from(operator).submitHash(hash),
+        this.DeactivatedFeed.from(operator).submitHash(proofHash),
         "only active operator or creator"
       );
     });

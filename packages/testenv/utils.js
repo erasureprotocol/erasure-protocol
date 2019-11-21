@@ -1,22 +1,23 @@
 const ethers = require("ethers");
+const SpawnArtifact = require("../../build/Spawn.json");
 
 const hexlify = utf8str =>
   ethers.utils.hexlify(ethers.utils.toUtf8Bytes(utf8str));
 
-const createPaddedMultihashSha256 = string => {
-  const hash = ethers.utils.sha256(ethers.utils.toUtf8Bytes(string));
-  const sha2_256 = ethers.utils.hexZeroPad("0x12", 8); // uint8
-  const bits256 = ethers.utils.hexZeroPad(ethers.utils.hexlify(64), 8);
+// const createPaddedMultihashSha256 = string => {
+//   const hash = ethers.utils.sha256(ethers.utils.toUtf8Bytes(string));
+//   const sha2_256 = ethers.utils.hexZeroPad("0x12", 8); // uint8
+//   const bits256 = ethers.utils.hexZeroPad(ethers.utils.hexlify(64), 8);
 
-  const abiEncoder = new ethers.utils.AbiCoder();
-  const multihash = abiEncoder.encode(
-    ["uint8", "uint8", "bytes32"],
-    [sha2_256, bits256, hash]
-  );
-  return multihash;
-};
+//   const abiEncoder = new ethers.utils.AbiCoder();
+//   const multihash = abiEncoder.encode(
+//     ["uint8", "uint8", "bytes32"],
+//     [sha2_256, bits256, hash]
+//   );
+//   return multihash;
+// };
 
-const createMultihashSha256 = string => {
+const createIPFShash = string => {
   const hash = ethers.utils.sha256(ethers.utils.toUtf8Bytes(string));
   const sha2_256 = "0x12"; // uint8
   const bits256 = ethers.utils.hexlify(32);
@@ -52,12 +53,9 @@ function createInstanceAddressWithCallData(
     [logicContractAddress, callData]
   );
 
-  let spawnBytecode =
-    "0x60806040526040516102953803806102958339818101604052604081101561002657600080fd5b81019080805190602001909291908051604051939291908464010000000082111561005057600080fd5b8382019150602082018581111561006657600080fd5b825186600182028301116401000000008211171561008357600080fd5b8083526020830192505050908051906020019080838360005b838110156100b757808201518184015260208101905061009c565b50505050905090810190601f1680156100e45780820380516001836020036101000a031916815260200191505b5060405250505060008273ffffffffffffffffffffffffffffffffffffffff16826040518082805190602001908083835b602083106101385780518252602082019150602081019050602083039250610115565b6001836020036101000a038019825116818451168082178552505050505050905001915050600060405180830381855af49150503d8060008114610198576040519150601f19603f3d011682016040523d82523d6000602084013e61019d565b606091505b50509050806101b0573d6000803e3d6000fd5b606069363d3d373d3d3d363d7360b01b846e5af43d82803e903d91602b57fd5bf360881b604051602001808475ffffffffffffffffffffffffffffffffffffffffffff191675ffffffffffffffffffffffffffffffffffffffffffff19168152600a018373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1660601b81526014018270ffffffffffffffffffffffffffffffffff191670ffffffffffffffffffffffffffffffffff19168152600f0193505050506040516020818303038152906040529050602d81602001f3fe";
-
   const initCodeHash = ethers.utils.solidityKeccak256(
     ["bytes", "bytes"],
-    [spawnBytecode, initCallData]
+    [SpawnArtifact.bytecode, initCallData]
   );
 
   if (!salt) {
@@ -169,7 +167,7 @@ module.exports = {
   createInstanceAddressWithCallData,
   createEip1167RuntimeCode,
   createSelector,
-  createMultihashSha256,
+  createIPFShash,
   getLatestContractAddressFrom,
   abiEncodeWithSelector,
   assertEvent

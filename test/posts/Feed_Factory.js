@@ -17,7 +17,7 @@ const staticMetadata = ethers.utils.keccak256(
   ethers.utils.toUtf8Bytes("staticMetadata")
 );
 
-const createTypes = ["address", "bytes", "bytes"];
+const createTypes = ["address", "bytes32", "bytes"];
 
 let FeedTemplate;
 let deployer;
@@ -31,7 +31,7 @@ function runFactoryTest() {
 
   describe(factoryName, () => {
     it("setups test", () => {
-      const createArgs = [creator, '0x', staticMetadata];
+      const createArgs = [creator, ethers.constants.HashZero, staticMetadata];
 
       testFactory(
         deployer,

@@ -4,26 +4,25 @@ import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 import "../modules/ProofHashes.sol";
-import "../modules/MultiHashWrapper.sol";
 
 
 /// @title Feed
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Template {
+contract Feed is ProofHashes, Operated, EventMetadata, Template {
 
-    event Initialized(address operator, bytes multihash, bytes metadata);
+    event Initialized(address operator, bytes32 proofHash, bytes metadata);
 
     /// @notice Constructor
     /// @dev Access Control: only factory
     ///      State Machine: before all
     /// @param operator Address of the operator that overrides access control
-    /// @param multihash Proofhash (34 bytes) of the timestamped data as a base58-encoded multihash
+    /// @param proofHash Proofhash (bytes32) sha256 hash of timestampled data
     /// @param metadata Data (any format) to emit as event on initialization
     function initialize(
         address operator,
-        bytes memory multihash,
+        bytes32 proofHash,
         bytes memory metadata
     ) public initializeTemplate() {
         // set operator
@@ -32,16 +31,9 @@ contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Templat
             Operated._activateOperator();
         }
 
-        // add multihash to storage
-        if (multihash.length != 0) {
-            // unpack multihash
-            MultiHashWrapper.MultiHash memory multihashObj = MultiHashWrapper._splitMultiHash(multihash);
-
-            // set multihash format
-            ProofHashes._setMultiHashFormat(multihashObj.hashFunction, multihashObj.digestSize);
-
-            // submit hash
-            ProofHashes._submitHash(multihashObj.hash);
+        // submit proofHash
+        if (proofHash != bytes32(0)) {
+            ProofHashes._submitHash(proofHash);
         }
 
         // set metadata
@@ -50,7 +42,7 @@ contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Templat
         }
 
         // log initialization params
-        emit Initialized(operator, multihash, metadata);
+        emit Initialized(operator, proofHash, metadata);
     }
 
     // state functions
@@ -58,13 +50,13 @@ contract Feed is ProofHashes, MultiHashWrapper, Operated, EventMetadata, Templat
     /// @notice Submit proofhash to add to feed
     /// @dev Access Control: creator OR operator
     ///      State Machine: always
-    /// @param multihash Proofhash (34 bytes) of the timestamped data as a base58-encoded multihash
-    function submitHash(bytes32 multihash) public {
+    /// @param proofHash Proofhash (bytes32) sha256 hash of timestampled data
+    function submitHash(bytes32 proofHash) public {
         // only active operator or creator
         require(Template.isCreator(msg.sender) || Operated.isActiveOperator(msg.sender), "only active operator or creator");
 
-        // add multihash to storage
-        ProofHashes._submitHash(multihash);
+        // submit proofHash
+        ProofHashes._submitHash(proofHash);
     }
 
     /// @notice Emit metadata event
