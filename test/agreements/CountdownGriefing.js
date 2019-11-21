@@ -144,8 +144,6 @@ describe("CountdownGriefing", function () {
 
       // check that it's the TestCountdownGriefing state that is changed
       // not the CountdownGriefing logic contract's state
-      const logicContractIsActive = await this.CountdownGriefing.getOperatorStatus();
-      assert.equal(logicContractIsActive, false);
 
       // check all the state changes
 
@@ -164,10 +162,6 @@ describe("CountdownGriefing", function () {
       // Operator._setOperator
       const operator = await this.TestCountdownGriefing.getOperator();
       assert.equal(operator, operator);
-
-      //  Operator._activate()
-      const callingContractIsActive = await this.TestCountdownGriefing.getOperatorStatus();
-      assert.equal(callingContractIsActive, true);
 
       // Griefing._setRatio
       const [
@@ -200,7 +194,7 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(counterparty).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -209,7 +203,7 @@ describe("CountdownGriefing", function () {
         this.DeactivatedGriefing.from(operator).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -243,14 +237,14 @@ describe("CountdownGriefing", function () {
       // use the staker as the msg.sender
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).startCountdown(),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).startCountdown(),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -322,7 +316,7 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(counterparty).increaseStake(
           amountToAdd
         ),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -331,7 +325,7 @@ describe("CountdownGriefing", function () {
         this.DeactivatedGriefing.from(operator).increaseStake(
           amountToAdd
         ),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -427,7 +421,7 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(staker).reward(
           amountToAdd
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -436,7 +430,7 @@ describe("CountdownGriefing", function () {
         this.DeactivatedGriefing.from(operator).reward(
           amountToAdd
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -549,7 +543,7 @@ describe("CountdownGriefing", function () {
           punishment,
           Buffer.from(message)
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -637,7 +631,7 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(staker).releaseStake(
           releaseAmount
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -646,7 +640,7 @@ describe("CountdownGriefing", function () {
         this.DeactivatedGriefing.from(operator).releaseStake(
           releaseAmount
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -685,14 +679,14 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(counterparty).retrieveStake(
           counterparty
         ),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
     it("should revert when msg.sender is deactivated operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).retrieveStake(counterparty),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -775,14 +769,14 @@ describe("CountdownGriefing", function () {
         this.TestCountdownGriefing.from(counterparty).transferOperator(
           newOperator
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
     it("should revert when msg.sender is not active operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).transferOperator(newOperator),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -791,13 +785,10 @@ describe("CountdownGriefing", function () {
         operator
       ).transferOperator(newOperator);
       await assert.emit(txn, "OperatorUpdated");
-      await assert.emitWithArgs(txn, [newOperator, true]);
+      await assert.emitWithArgs(txn, [newOperator]);
 
       const actualOperator = await this.TestCountdownGriefing.getOperator();
       assert.equal(actualOperator, newOperator);
-
-      const isActive = await this.TestCountdownGriefing.getOperatorStatus();
-      assert.equal(isActive, true);
     });
   });
 
@@ -805,14 +796,14 @@ describe("CountdownGriefing", function () {
     it("should revert when msg.sender is not operator", async () => {
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).renounceOperator(),
-        "only active operator"
+        "only operator"
       );
     });
 
     it("should revert when msg.sender is not active operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).renounceOperator(),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -823,13 +814,10 @@ describe("CountdownGriefing", function () {
         operator
       ).renounceOperator();
       await assert.emit(txn, "OperatorUpdated");
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero]);
 
       const actualOperator = await this.TestCountdownGriefing.getOperator();
       assert.equal(actualOperator, ethers.constants.AddressZero);
-
-      const isActive = await this.TestCountdownGriefing.getOperatorStatus();
-      assert.equal(isActive, false);
     });
   });
 });

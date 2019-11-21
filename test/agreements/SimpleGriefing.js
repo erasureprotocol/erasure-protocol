@@ -118,8 +118,6 @@ describe("SimpleGriefing", function () {
 
       // check that it's the TestSimpleGriefing state that is changed
       // not the SimpleGriefing logic contract's state
-      const logicContractIsActive = await this.SimpleGriefing.getOperatorStatus();
-      assert.equal(logicContractIsActive, false);
 
       // check all the state changes
 
@@ -138,10 +136,6 @@ describe("SimpleGriefing", function () {
       // Operator._setOperator
       const operator = await this.TestSimpleGriefing.getOperator();
       assert.equal(operator, operator);
-
-      //  Operator._activate()
-      const callingContractIsActive = await this.TestSimpleGriefing.getOperatorStatus();
-      assert.equal(callingContractIsActive, true);
 
       // Griefing._setRatio
       const [
@@ -170,7 +164,7 @@ describe("SimpleGriefing", function () {
         this.TestSimpleGriefing.from(counterparty).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -179,7 +173,7 @@ describe("SimpleGriefing", function () {
         this.DeactivatedGriefing.from(operator).setMetadata(
           Buffer.from(stakerMetadata)
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -237,7 +231,7 @@ describe("SimpleGriefing", function () {
         this.TestSimpleGriefing.from(counterparty).increaseStake(
           amountToAdd
         ),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -247,7 +241,7 @@ describe("SimpleGriefing", function () {
           amountToAdd,
           { gasLimit: 30000 }
         ),
-        "only staker or active operator"
+        "only staker or operator"
       );
     });
 
@@ -311,7 +305,7 @@ describe("SimpleGriefing", function () {
       // use the staker to be the msg.sender
       await assert.revertWith(
         this.TestSimpleGriefing.from(staker).reward(amountToAdd),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -320,7 +314,7 @@ describe("SimpleGriefing", function () {
         this.DeactivatedGriefing.from(operator).reward(
           amountToAdd
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -399,7 +393,7 @@ describe("SimpleGriefing", function () {
           punishment,
           Buffer.from(message)
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -448,7 +442,7 @@ describe("SimpleGriefing", function () {
         this.TestSimpleGriefing.from(staker).releaseStake(
           releaseAmount
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -457,7 +451,7 @@ describe("SimpleGriefing", function () {
         this.DeactivatedGriefing.from(operator).releaseStake(
           releaseAmount
         ),
-        "only counterparty or active operator"
+        "only counterparty or operator"
       );
     });
 
@@ -492,7 +486,7 @@ describe("SimpleGriefing", function () {
         this.TestSimpleGriefing.from(counterparty).transferOperator(
           newOperator
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -501,7 +495,7 @@ describe("SimpleGriefing", function () {
         this.DeactivatedGriefing.from(counterparty).transferOperator(
           newOperator
         ),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -510,13 +504,10 @@ describe("SimpleGriefing", function () {
         newOperator
       );
       await assert.emit(txn, "OperatorUpdated");
-      await assert.emitWithArgs(txn, [newOperator, true]);
+      await assert.emitWithArgs(txn, [newOperator]);
 
       const actualOperator = await this.TestSimpleGriefing.getOperator();
       assert.equal(actualOperator, newOperator);
-
-      const isActive = await this.TestSimpleGriefing.getOperatorStatus();
-      assert.equal(isActive, true);
     });
   });
 
@@ -524,14 +515,14 @@ describe("SimpleGriefing", function () {
     it("should revert when msg.sender is not operator", async () => {
       await assert.revertWith(
         this.TestSimpleGriefing.from(counterparty).renounceOperator(),
-        "only active operator"
+        "only operator"
       );
     });
 
     it("should revert when msg.sender is not active operator", async () => {
       await assert.revertWith(
         this.DeactivatedGriefing.from(operator).renounceOperator(),
-        "only active operator"
+        "only operator"
       );
     });
 
@@ -540,13 +531,10 @@ describe("SimpleGriefing", function () {
         newOperator
       ).renounceOperator();
       await assert.emit(txn, "OperatorUpdated");
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
+      await assert.emitWithArgs(txn, [ethers.constants.AddressZero]);
 
       const actualOperator = await this.TestSimpleGriefing.getOperator();
       assert.equal(actualOperator, ethers.constants.AddressZero);
-
-      const isActive = await this.TestSimpleGriefing.getOperatorStatus();
-      assert.equal(isActive, false);
     });
   });
 });

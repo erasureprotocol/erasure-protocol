@@ -84,7 +84,6 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // set operator if defined
         if (operator != address(0)) {
             Operated._setOperator(operator);
-            Operated._activateOperator();
         }
 
         // set amounts if defined
@@ -127,7 +126,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param metadata Data (any format) to emit as event
     function setMetadata(bytes memory metadata) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // update metadata
         EventMetadata._setMetadata(metadata);
@@ -142,8 +141,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     function depositStake() public {
         // restrict access control
         // set msg.sender as seller if not already set
-        if (!isSeller(msg.sender) && !Operated.isActiveOperator(msg.sender)) {
-            require(_data.seller == address(0), "only seller or active operator");
+        if (!isSeller(msg.sender) && !Operated.isOperator(msg.sender)) {
+            require(_data.seller == address(0), "only seller or operator");
             _data.seller = msg.sender;
         }
         // restrict state machine
@@ -180,8 +179,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     function depositPayment() public {
         // restrict access control
         // set msg.sender as buyer if not already set
-        if (!isBuyer(msg.sender) && !Operated.isActiveOperator(msg.sender)) {
-            require(_data.buyer == address(0), "only buyer or active operator");
+        if (!isBuyer(msg.sender) && !Operated.isOperator(msg.sender)) {
+            require(_data.buyer == address(0), "only buyer or operator");
             _data.buyer = msg.sender;
         }
         // restrict state machine
@@ -217,7 +216,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: after depositStake() AND after depositPayment()
     function finalize() public {
         // restrict access control
-        require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
+        require(isSeller(msg.sender) || Operated.isOperator(msg.sender), "only seller or operator");
         // restrict state machine
         require(isDeposited(), "only after deposit");
 
@@ -291,7 +290,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param data Data (any format) to submit to the buyer
     function submitData(bytes memory data) public {
         // restrict access control
-        require(isSeller(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or active operator");
+        require(isSeller(msg.sender) || Operated.isOperator(msg.sender), "only seller or operator");
         // restrict state machine
         require(isFinalized(), "only after finalized");
 
@@ -306,7 +305,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: before depositStake() OR before depositPayment()
     function cancel() public {
         // restrict access control
-        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only seller or buyer or active operator");
+        require(isSeller(msg.sender) || isBuyer(msg.sender) || Operated.isOperator(msg.sender), "only seller or buyer or operator");
         // restrict state machine
         require(isOpen() || onlyStakeDeposited() || onlyPaymentDeposited(), "only before deposits are completed");
 
@@ -322,7 +321,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: after depositStake() AND after depositPayment() AND after Countdown.isOver()
     function timeout() public {
         // restrict access control
-        require(isBuyer(msg.sender) || Operated.isActiveOperator(msg.sender), "only buyer or active operator");
+        require(isBuyer(msg.sender) || Operated.isOperator(msg.sender), "only buyer or operator");
         // restrict state machine
         require(isDeposited() && Countdown.isOver(), "only after countdown ended");
 
@@ -363,7 +362,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param operator Address of the new operator
     function transferOperator(address operator) public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // transfer operator
         Operated._transferOperator(operator);
@@ -374,7 +373,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: anytime
     function renounceOperator() public {
         // restrict access
-        require(Operated.isActiveOperator(msg.sender), "only active operator");
+        require(Operated.isOperator(msg.sender), "only operator");
 
         // renounce operator
         Operated._renounceOperator();

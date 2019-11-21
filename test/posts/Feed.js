@@ -111,12 +111,8 @@ describe("Feed", function () {
       this.TestFeed = await deployTestFeed(true);
 
       // Operator._setOperator
-      const actualOperator = await this.TestFeed.getOperator();
-      assert.equal(actualOperator, operator);
-
-      //  Operator._activateOperator()
-      const operatorIsActive = await this.TestFeed.getOperatorStatus();
-      assert.equal(operatorIsActive, true);
+      const getOperator = await this.TestFeed.getOperator();
+      assert.equal(getOperator, operator);
     });
   });
 
@@ -126,7 +122,7 @@ describe("Feed", function () {
       // Factory has to be the sender here
       await assert.revertWith(
         this.TestFeed.from(other).submitHash(proofHash),
-        "only active operator or creator"
+        "only operator or creator"
       );
     });
 
@@ -134,7 +130,7 @@ describe("Feed", function () {
     it("should revert when msg.sender is operator but not active", async () => {
       await assert.revertWith(
         this.DeactivatedFeed.from(operator).submitHash(proofHash),
-        "only active operator or creator"
+        "only operator or creator"
       );
     });
 
@@ -160,14 +156,14 @@ describe("Feed", function () {
     it("should revert when msg.sender not operator or creator", async () => {
       await assert.revertWith(
         this.TestFeed.from(other).setMetadata(newFeedMetadata),
-        "only active operator or creator"
+        "only operator or creator"
       );
     });
 
     it("should revert when msg.sender is operator but not active", async () => {
       await assert.revertWith(
         this.DeactivatedFeed.from(operator).setMetadata(newFeedMetadata),
-        "only active operator or creator"
+        "only operator or creator"
       );
     });
 
