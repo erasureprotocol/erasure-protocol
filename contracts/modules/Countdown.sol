@@ -27,12 +27,13 @@ contract Countdown is Deadline {
     function _start() internal returns (uint256 deadline) {
         deadline = _length.add(now);
         Deadline._setDeadline(deadline);
+        return deadline;
     }
 
     // view functions
 
     function getLength() public view returns (uint256 length) {
-        length = _length;
+        return _length;
     }
 
     enum CountdownStatus { isNull, isSet, isActive, isOver }
@@ -42,11 +43,11 @@ contract Countdown is Deadline {
     /// - isActive: the countdown has started but not yet ended
     /// - isOver: the countdown has completed
     function getCountdownStatus() public view returns (CountdownStatus status) {
-        if (Countdown.getLength() == 0)
+        if (_length == 0)
             return CountdownStatus.isNull;
-        if (getDeadlineStatus() == DeadlineStatus.isNull)
+        if (Deadline.getDeadlineStatus() == DeadlineStatus.isNull)
             return CountdownStatus.isSet;
-        if (getDeadlineStatus() != DeadlineStatus.isOver)
+        if (Deadline.getDeadlineStatus() != DeadlineStatus.isOver)
             return CountdownStatus.isActive;
         else
             return CountdownStatus.isOver;

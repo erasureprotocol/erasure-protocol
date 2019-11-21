@@ -66,9 +66,7 @@ contract Registry is Ownable {
         emit FactoryAdded(msg.sender, factory, factoryID, extraData);
     }
 
-    function retireFactory(
-        address factory
-    ) external onlyOwner() {
+    function retireFactory(address factory) external onlyOwner() {
         // get the factory object from storage.
         Factory storage factoryData = _factoryData[factory];
 
@@ -87,23 +85,23 @@ contract Registry is Ownable {
     // factory view functions
 
     function getFactoryCount() external view returns (uint256 count) {
-        count = _factoryList.length;
+        return _factoryList.length;
     }
 
     function getFactoryStatus(address factory) external view returns (FactoryStatus status) {
-        status = _factoryData[factory].status;
+        return _factoryData[factory].status;
     }
 
     function getFactoryID(address factory) external view returns (uint16 factoryID) {
-        factoryID = _factoryData[factory].factoryID;
+        return _factoryData[factory].factoryID;
     }
 
     function getFactoryData(address factory) external view returns (bytes memory extraData) {
-        extraData = _factoryData[factory].extraData;
+        return _factoryData[factory].extraData;
     }
 
     function getFactoryAddress(uint16 factoryID) external view returns (address factory) {
-        factory = _factoryList[factoryID];
+        return _factoryList[factoryID];
     }
 
     function getFactory(address factory) public view returns (
@@ -112,13 +110,11 @@ contract Registry is Ownable {
         bytes memory extraData
     ) {
         Factory memory factoryData = _factoryData[factory];
-        status = factoryData.status;
-        factoryID = factoryData.factoryID;
-        extraData = factoryData.extraData;
+        return (factoryData.status, factoryData.factoryID, factoryData.extraData);
     }
 
     function getFactories() external view returns (address[] memory factories) {
-        factories = _factoryList;
+        return _factoryList;
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
@@ -135,7 +131,7 @@ contract Registry is Ownable {
         }
 
         // return array of addresses
-        factories = range;
+        return range;
     }
 
     // instance state functions
@@ -168,27 +164,28 @@ contract Registry is Ownable {
     // instance view functions
 
     function getInstanceType() external view returns (bytes4 instanceType) {
-        instanceType = _instanceType;
+        return _instanceType;
     }
 
     function getInstanceCount() external view returns (uint256 count) {
-        count = _instances.length;
+        return _instances.length;
     }
 
     function getInstance(uint256 index) external view returns (address instance) {
         require(index < _instances.length, "index out of range");
-        instance = _instances[index].instance;
+        return _instances[index].instance;
     }
 
-    function getInstanceData(uint256 index) external view
-        returns (address instanceAddress, uint16 factoryID, uint80 extraData) {
+    function getInstanceData(uint256 index) external view returns (
+        address instanceAddress,
+        uint16 factoryID,
+        uint80 extraData
+    ) {
 
         require(index < _instances.length, "index out of range");
 
         Instance memory instance = _instances[index];
-        instanceAddress = instance.instance;
-        factoryID = instance.factoryID;
-        extraData = instance.extraData;
+        return (instance.instance, instance.factoryID, instance.extraData);
     }
 
     function getInstances() external view returns (address[] memory instances) {
@@ -199,7 +196,7 @@ contract Registry is Ownable {
         for (uint256 i = 0; i < length; i++) {
             addresses[i] = _instances[i].instance;
         }
-        instances = addresses;
+        return addresses;
     }
 
     // Note: startIndex is inclusive, endIndex exclusive
@@ -216,6 +213,6 @@ contract Registry is Ownable {
         }
 
         // return array of addresses
-        instances = range;
+        return range;
     }
 }

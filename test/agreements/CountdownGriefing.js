@@ -144,7 +144,7 @@ describe("CountdownGriefing", function () {
 
       // check that it's the TestCountdownGriefing state that is changed
       // not the CountdownGriefing logic contract's state
-      const logicContractIsActive = await this.CountdownGriefing.hasActiveOperator();
+      const logicContractIsActive = await this.CountdownGriefing.getOperatorStatus();
       assert.equal(logicContractIsActive, false);
 
       // check all the state changes
@@ -154,17 +154,11 @@ describe("CountdownGriefing", function () {
       assert.equal(token, this.MockNMR.contractAddress);
 
       // _data.staker
-      const isStaker = await this.TestCountdownGriefing.isStaker(staker);
       const getStaker = await this.TestCountdownGriefing.getStaker();
-      assert.equal(isStaker, true);
       assert.equal(getStaker, staker);
 
       // _data.counterparty
-      const isCounterparty = await this.TestCountdownGriefing.isCounterparty(
-        counterparty
-      );
       const getCounterparty = await this.TestCountdownGriefing.getCounterparty();
-      assert.equal(isCounterparty, true);
       assert.equal(getCounterparty, counterparty);
 
       // Operator._setOperator
@@ -172,7 +166,7 @@ describe("CountdownGriefing", function () {
       assert.equal(operator, operator);
 
       //  Operator._activate()
-      const callingContractIsActive = await this.TestCountdownGriefing.hasActiveOperator();
+      const callingContractIsActive = await this.TestCountdownGriefing.getOperatorStatus();
       assert.equal(callingContractIsActive, true);
 
       // Griefing._setRatio
@@ -802,7 +796,7 @@ describe("CountdownGriefing", function () {
       const actualOperator = await this.TestCountdownGriefing.getOperator();
       assert.equal(actualOperator, newOperator);
 
-      const isActive = await this.TestCountdownGriefing.hasActiveOperator();
+      const isActive = await this.TestCountdownGriefing.getOperatorStatus();
       assert.equal(isActive, true);
     });
   });
@@ -834,7 +828,7 @@ describe("CountdownGriefing", function () {
       const actualOperator = await this.TestCountdownGriefing.getOperator();
       assert.equal(actualOperator, ethers.constants.AddressZero);
 
-      const isActive = await this.TestCountdownGriefing.hasActiveOperator();
+      const isActive = await this.TestCountdownGriefing.getOperatorStatus();
       assert.equal(isActive, false);
     });
   });

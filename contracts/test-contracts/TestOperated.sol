@@ -25,4 +25,12 @@ contract TestOperated is Operated {
     function transferOperator(address newOperator) public {
         Operated._transferOperator(newOperator);
     }
+
+    function testIsOperator(address caller) public view returns (bool validity) {
+        return Operated.isOperator(caller);
+    }
+
+    function testIsActiveOperator(address caller) public view returns (bool validity) {
+        return Operated.isActiveOperator(caller);
+    }
 }

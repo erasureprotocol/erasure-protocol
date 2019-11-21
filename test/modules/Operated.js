@@ -1,6 +1,6 @@
 const { createDeployer } = require("../helpers/setup");
 
-describe("Operated", function() {
+describe("Operated", function () {
   const [operatorWallet, newOperatorWallet] = accounts;
   const operator = operatorWallet.signer.signingKey.address;
   const newOperator = newOperatorWallet.signer.signingKey.address;
@@ -33,7 +33,7 @@ describe("Operated", function() {
       const actualOperator = await contracts.TestOperated.instance.getOperator();
       assert.equal(actualOperator, operator);
 
-      const isOperator = await contracts.TestOperated.instance.isOperator(
+      const isOperator = await contracts.TestOperated.instance.testIsOperator(
         operator
       );
       assert.equal(isOperator, true);
@@ -54,7 +54,7 @@ describe("Operated", function() {
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, true]);
 
-      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
+      const actualIsActive = await contracts.TestOperated.instance.getOperatorStatus();
       assert.equal(actualIsActive, true);
     });
 
@@ -75,7 +75,7 @@ describe("Operated", function() {
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [ethers.constants.AddressZero, false]);
 
-      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
+      const actualIsActive = await contracts.TestOperated.instance.getOperatorStatus();
       assert.equal(actualIsActive, false);
     });
 
@@ -87,7 +87,7 @@ describe("Operated", function() {
       await assert.emit(txn, "OperatorUpdated");
       await assert.emitWithArgs(txn, [operator, false]);
 
-      const actualIsActive = await contracts.TestOperated.instance.hasActiveOperator();
+      const actualIsActive = await contracts.TestOperated.instance.getOperatorStatus();
       assert.equal(actualIsActive, false);
     });
 
@@ -112,7 +112,7 @@ describe("Operated", function() {
       const actualOperator = await contracts.TestOperated.instance.getOperator();
       assert.equal(actualOperator, newOperator);
 
-      const isOperator = await contracts.TestOperated.instance.isOperator(
+      const isOperator = await contracts.TestOperated.instance.testIsOperator(
         newOperator
       );
       assert.equal(isOperator, true);
@@ -139,7 +139,7 @@ describe("Operated", function() {
       const actualOperator = await contracts.TestOperated.instance.getOperator();
       assert.equal(actualOperator, ethers.constants.AddressZero);
 
-      const status = await contracts.TestOperated.instance.hasActiveOperator();
+      const status = await contracts.TestOperated.instance.getOperatorStatus();
       assert.equal(status, false);
     });
 
@@ -169,7 +169,7 @@ describe("Operated", function() {
       await contracts.TestOperated.instance.activateOperator();
       await contracts.TestOperated.instance.setOperator(operator);
 
-      const isActiveOperator = await contracts.TestOperated.instance.isActiveOperator(
+      const isActiveOperator = await contracts.TestOperated.instance.testIsActiveOperator(
         operator
       );
       assert.equal(isActiveOperator, true);
@@ -178,7 +178,7 @@ describe("Operated", function() {
     it("should get isActiveOperator=false correctly", async () => {
       await contracts.TestOperated.instance.activateOperator();
 
-      const isActiveOperator = await contracts.TestOperated.instance.isActiveOperator(
+      const isActiveOperator = await contracts.TestOperated.instance.testIsActiveOperator(
         operator
       );
       assert.equal(isActiveOperator, false);

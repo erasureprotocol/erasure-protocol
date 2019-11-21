@@ -63,14 +63,16 @@ contract Griefing is Staking {
 
         // emit event
         emit Griefed(punisher, staker, punishment, cost, message);
+
+        // return
+        return cost;
     }
 
     // view functions
 
     function getRatio(address staker) public view returns (uint256 ratio, RatioType ratioType) {
         // get stake data from storage
-        ratio = _griefRatio[staker].ratio;
-        ratioType = _griefRatio[staker].ratioType;
+        return (_griefRatio[staker].ratio, _griefRatio[staker].ratioType);
     }
 
     // pure functions

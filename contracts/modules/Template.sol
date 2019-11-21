@@ -28,15 +28,15 @@ contract Template {
 
     function getCreator() public view returns (address creator) {
         // iFactory(...) would revert if _factory address is not actually a factory contract
-        creator = iFactory(_factory).getInstanceCreator(address(this));
+        return iFactory(_factory).getInstanceCreator(address(this));
     }
 
-    function isCreator(address caller) public view returns (bool ok) {
-        ok = (caller == getCreator());
+    function isCreator(address caller) internal view returns (bool ok) {
+        return (caller == getCreator());
     }
 
     function getFactory() public view returns (address factory) {
-        factory = _factory;
+        return _factory;
     }
 
 }

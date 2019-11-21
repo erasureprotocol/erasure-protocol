@@ -17,7 +17,7 @@ contract Operated {
     function _setOperator(address operator) internal {
         require(_operator != operator, "cannot set same operator");
         _operator = operator;
-        emit OperatorUpdated(operator, hasActiveOperator());
+        emit OperatorUpdated(operator, _status);
     }
 
     function _transferOperator(address operator) internal {
@@ -27,20 +27,20 @@ contract Operated {
     }
 
     function _renounceOperator() internal {
-        require(hasActiveOperator(), "only when operator active");
+        require(_status, "only when operator active");
         _operator = address(0);
         _status = false;
         emit OperatorUpdated(address(0), false);
     }
 
     function _activateOperator() internal {
-        require(!hasActiveOperator(), "only when operator not active");
+        require(!_status, "only when operator not active");
         _status = true;
         emit OperatorUpdated(_operator, true);
     }
 
     function _deactivateOperator() internal {
-        require(hasActiveOperator(), "only when operator active");
+        require(_status, "only when operator active");
         _status = false;
         emit OperatorUpdated(_operator, false);
     }
@@ -48,19 +48,19 @@ contract Operated {
     // view functions
 
     function getOperator() public view returns (address operator) {
-        operator = _operator;
+        return _operator;
     }
 
-    function isOperator(address caller) public view returns (bool ok) {
-        return (caller == getOperator());
+    function isOperator(address caller) internal view returns (bool ok) {
+        return caller == _operator;
     }
 
-    function hasActiveOperator() public view returns (bool ok) {
+    function getOperatorStatus() public view returns (bool ok) {
         return _status;
     }
 
-    function isActiveOperator(address caller) public view returns (bool ok) {
-        return (isOperator(caller) && hasActiveOperator());
+    function isActiveOperator(address caller) internal view returns (bool ok) {
+        return isOperator(caller) && getOperatorStatus();
     }
 
 }

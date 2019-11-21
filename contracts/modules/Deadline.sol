@@ -32,8 +32,8 @@ contract Deadline {
     // timeRemaining will default to 0 if _setDeadline is not called
     // if the now exceeds deadline, just return 0 as the timeRemaining
     function getTimeRemaining() public view returns (uint256 time) {
-        if (Deadline.getDeadline() > now)
-            return Deadline.getDeadline().sub(now);
+        if (_deadline > now)
+            return _deadline.sub(now);
         else
             return 0;
     }
@@ -44,9 +44,9 @@ contract Deadline {
     /// - isSet: the deadline is set, but has not passed
     /// - isOver: the deadline has passed
     function getDeadlineStatus() public view returns (DeadlineStatus status) {
-        if (Deadline.getDeadline() == 0)
+        if (_deadline == 0)
             return DeadlineStatus.isNull;
-        if (Deadline.getDeadline() > now)
+        if (_deadline > now)
             return DeadlineStatus.isSet;
         else
             return DeadlineStatus.isOver;

@@ -130,7 +130,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(!isTerminated(), "agreement ended");
 
         // execute griefing
-        cost = Griefing._grief(msg.sender, _data.staker, punishment, message);
+        return Griefing._grief(msg.sender, _data.staker, punishment, message);
     }
 
     /// @notice Called by the counterparty to release the stake to the staker
@@ -157,7 +157,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isInitialized(), "deadline already set");
 
         // start countdown
-        deadline = Countdown._start();
+        return Countdown._start();
     }
 
     /// @notice Called by the staker to retrieve the remaining stake once the agreement has ended
@@ -173,7 +173,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(isTerminated(), "deadline not passed");
 
         // retrieve stake
-        amount = Staking._takeFullStake(_data.staker, recipient);
+        return Staking._takeFullStake(_data.staker, recipient);
     }
 
     /// @notice Called by the operator to transfer control to new operator
@@ -210,7 +210,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @notice Validate if the address matches the stored staker address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isStaker(address caller) public view returns (bool validity) {
+    function isStaker(address caller) internal view returns (bool validity) {
         return caller == getStaker();
     }
 
@@ -223,7 +223,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @notice Validate if the address matches the stored counterparty address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isCounterparty(address caller) public view returns (bool validity) {
+    function isCounterparty(address caller) internal view returns (bool validity) {
         return caller == getCounterparty();
     }
 
@@ -255,15 +255,15 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         }
     }
 
-    function isInitialized() public view returns (bool validity) {
+    function isInitialized() internal view returns (bool validity) {
         return getAgreementStatus() == AgreementStatus.isInitialized;
     }
 
-    function isInCountdown() public view returns (bool validity) {
+    function isInCountdown() internal view returns (bool validity) {
         return getAgreementStatus() == AgreementStatus.isInCountdown;
     }
 
-    function isTerminated() public view returns (bool validity) {
+    function isTerminated() internal view returns (bool validity) {
         return getAgreementStatus() == AgreementStatus.isTerminated;
     }
 }

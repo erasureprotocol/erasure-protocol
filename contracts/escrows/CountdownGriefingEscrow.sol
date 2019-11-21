@@ -391,7 +391,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Validate if the address matches the stored buyer address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isBuyer(address caller) public view returns (bool validity) {
+    function isBuyer(address caller) internal view returns (bool validity) {
         return caller == getBuyer();
     }
 
@@ -404,7 +404,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Validate if the address matches the stored seller address
     /// @param caller Address to validate
     /// @return validity True if matching address
-    function isSeller(address caller) public view returns (bool validity) {
+    function isSeller(address caller) internal view returns (bool validity) {
         return caller == getSeller();
     }
 
@@ -443,28 +443,27 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return _data.status;
     }
 
-    function isOpen() public view returns (bool validity) {
+    function isOpen() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isOpen;
     }
 
-    function onlyStakeDeposited() public view returns (bool validity) {
+    function onlyStakeDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.onlyStakeDeposited;
     }
 
-    function onlyPaymentDeposited() public view returns (bool validity) {
+    function onlyPaymentDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.onlyPaymentDeposited;
     }
 
-    function isDeposited() public view returns (bool validity) {
+    function isDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isDeposited;
     }
 
-    function isFinalized() public view returns (bool validity) {
+    function isFinalized() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isFinalized;
     }
 
-    function isCancelled() public view returns (bool validity) {
+    function isCancelled() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isCancelled;
     }
-
 }
