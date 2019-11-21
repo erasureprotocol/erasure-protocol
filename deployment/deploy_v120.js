@@ -26,6 +26,9 @@ const deploy = async (network, secret) => {
   // set owner address
 
   if (network == "rinkeby") {
+    ///////////////////////////////////////////////
+    /* NOTE: Must update hardcoded token address */
+    ///////////////////////////////////////////////
     multisig = "0x6087555A70E2F96B7838806e7743041E035a37e5";
   } else if (network == "mainnet") {
     multisig = "0x0000000000377d181a0ebd08590c6b399b272000";
