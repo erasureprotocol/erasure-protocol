@@ -93,7 +93,7 @@ describe("CountdownGriefingEscrow", function () {
         const encodedParams = AbiCoder.encode(agreementTypes, agreementParams);
 
         let initTypes = ['address', 'address', 'address', 'uint256', 'uint256', 'uint256', 'bytes', 'bytes'];
-        let initParams = [_buyer, _seller, _operator, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
+        let initParams = [_operator, _buyer, _seller, paymentAmount, stakeAmount, escrowCountdown, "0x", encodedParams];
         const calldata = abiEncodeWithSelector('initialize', initTypes, initParams);
 
         // deploy escrow contract

@@ -37,9 +37,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     }
 
     event Initialized(
+        address operator,
         address buyer,
         address seller,
-        address operator,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 countdownLength,
@@ -64,9 +64,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param metadata Data (any format) to emit as event on initialization
     /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters (abi.encode(ratio, ratioType, agreementCountdown)) to create on escrow completion. See CountdownGriefing contract for details
     function initialize(
+        address operator,
         address buyer,
         address seller,
-        address operator,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 escrowCountdown,
@@ -118,7 +118,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
 
         // emit event
-        emit Initialized(buyer, seller, operator, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
+        emit Initialized(operator, buyer, seller, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
     }
 
     /// @notice Emit metadata event
