@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT="$(yarn etherlime compile --solcVersion=0.5.11 --runs=200 --deleteCompiledFiles=true)"
+OUTPUT="$(yarn etherlime compile --exportAbi=true --deleteCompiledFiles=true)"
 
 echo -e "$OUTPUT"
 
