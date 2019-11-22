@@ -7,7 +7,7 @@ import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/59851750-cc50-4424-bfd1-32166f5a28c8/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Deadline.png
 contract Deadline {
 
     using SafeMath for uint256;

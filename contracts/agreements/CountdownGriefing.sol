@@ -11,7 +11,7 @@ import "../modules/Template.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/8d81a581-e850-4e59-b102-d214c4ef724a/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/agreements/CountdownGriefing.png
 contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;

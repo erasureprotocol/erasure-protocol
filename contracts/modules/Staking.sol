@@ -10,7 +10,7 @@ import "./Deposit.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/9b490fcd-3f2e-439d-a578-48bd0b452456/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Staking.png
 contract Staking is Deposit, BurnNMR {
 
     using SafeMath for uint256;
