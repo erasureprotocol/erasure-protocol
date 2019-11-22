@@ -15,7 +15,7 @@ import "../modules/Template.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/839ccf53-cdc9-4528-8d5e-8ce53df6f647/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/escrows/CountdownGriefingEscrow.png
 contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;

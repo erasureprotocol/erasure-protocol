@@ -8,7 +8,7 @@ import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/fb0a8b6f-22d9-46fa-ae89-4d7b8b4ebd6f/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Deposit.png
 contract Deposit {
 
     using SafeMath for uint256;

@@ -10,7 +10,7 @@ import "../modules/Template.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @dev State Machine: https://www.lucidchart.com/publicSegments/view/cfc3418d-2079-4e61-8c9f-8950e47d4621/image.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/agreements/SimpleGriefing.png
 contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
