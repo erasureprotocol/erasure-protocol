@@ -49,6 +49,146 @@ const deploy = async (network, secret) => {
   console.log(`Deploy Registries`);
   console.log(``);
 
+  // Erasure_Escrows
+  await deployRegistry("Erasure_Escrows");
+
+  console.log(``);
+  console.log(`Get Deployed Registries`);
+  console.log(``);
+
+  // Erasure_Posts
+  await getRegistry("Erasure_Posts");
+
+  // Erasure_Agreements
+  await getRegistry("Erasure_Agreements");
+
+  // Erasure_Escrows
+  await getRegistry("Erasure_Escrows");
+
+  console.log(``);
+  console.log(`Deploy Factories`);
+  console.log(``);
+
+  // Feed
+  await deployFactory("Feed", "Erasure_Posts");
+
+  // SimpleGriefing
+  await deployFactory("SimpleGriefing", "Erasure_Agreements");
+
+  // CountdownGriefing
+  await deployFactory("CountdownGriefing", "Erasure_Agreements");
+
+  // CountdownGriefingEscrow
+  const abiEncoder = new ethers.utils.AbiCoder();
+  const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory[network].address]);
+  await deployFactory("CountdownGriefingEscrow", "Erasure_Escrows", agreementFactory);
+
+  console.log(``);
+  console.log(`Transfer Registry Ownership`);
+  console.log(``);
+
+  // Erasure_Posts
+  await transferRegistry("Erasure_Posts");
+
+  // Erasure_Agreements
+  await transferRegistry("Erasure_Agreements");
+
+  // Erasure_Escrows
+  await transferRegistry("Erasure_Escrows");
+
+  console.log(``);
+  console.log(`Create test instance from factories`);
+  console.log(``);
+
+  const userAddress = "0x6087555A70E2F96B7838806e7743041E035a37e5";
+  const proofhash = ethers.utils.sha256(ethers.utils.toUtf8Bytes("proofhash"));
+  const IPFShash = createIPFShash("multihash");
+  console.log(`userAddress: ${userAddress}`);
+  console.log(`proofhash: ${proofhash}`);
+  console.log(`IPFShash: ${IPFShash}`);
+  console.log(``);
+
+  // Feed
+  await createInstance("Feed", abiEncodeWithSelector(
+    "initialize",
+    ["address", "bytes32", "bytes"],
+    [userAddress, proofhash, IPFShash]
+  ));
+
+  // SimpleGriefing
+  await createInstance("SimpleGriefing", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint8", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefing
+  await createInstance("CountdownGriefing", abiEncodeWithSelector(
+    "initialize",
+    [
+      "address",
+      "address",
+      "address",
+      "uint256",
+      "uint8",
+      "uint256",
+      "bytes"
+    ],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      100000000,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefingEscrow
+  await createInstance("CountdownGriefingEscrow", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint256", "uint256", "bytes", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("1"),
+      100000000,
+      IPFShash,
+      abiEncoder.encode(["uint256", "uint8", "uint256"], [ethers.utils.parseEther("1"), 2, 100000000])
+    ]
+  ));
+
+  console.log(`
+total gas used: ${gasUsed.toString()}
+
+Registries:
+  Erasure_Posts           ${c.Erasure_Posts[network].address}
+  Erasure_Agreements      ${c.Erasure_Agreements[network].address}
+  Erasure_Escrows         ${c.Erasure_Escrows[network].address}
+
+Templates:
+  Feed                    ${c.Feed.template[network].address}     
+  SimpleGriefing          ${c.SimpleGriefing.template[network].address}
+  CountdownGriefing       ${c.CountdownGriefing.template[network].address}
+  CountdownGriefingEscrow ${c.CountdownGriefingEscrow.template[network].address}
+
+Factories:
+  Feed                    ${c.Feed.factory[network].address}
+  SimpleGriefing          ${c.SimpleGriefing.factory[network].address}
+  CountdownGriefing       ${c.CountdownGriefing.factory[network].address}
+  CountdownGriefingEscrow ${c.CountdownGriefingEscrow.factory[network].address}
+`);
+
   async function deployRegistry(registry) {
     await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
       c[registry][network] = {
@@ -57,14 +197,6 @@ const deploy = async (network, secret) => {
       };
     });
   }
-
-  // Erasure_Escrows
-
-  await deployRegistry("Erasure_Escrows");
-
-  console.log(``);
-  console.log(`Get Deployed Registries`);
-  console.log(``);
 
   async function getRegistry(registry) {
 
@@ -83,56 +215,16 @@ const deploy = async (network, secret) => {
     console.log(`${registry} has valid owner: ${deployer.signer.address}`);
   }
 
-  // Erasure_Posts
-
-  await getRegistry("Erasure_Posts");
-
-  // Erasure_Agreements
-
-  await getRegistry("Erasure_Posts");
-
-  // Erasure_Escrows
-
-  await getRegistry("Erasure_Posts");
-
-  console.log(``);
-  console.log(`Deploy Templates`);
-  console.log(``);
-
-  async function deployTemplate(name) {
+  async function deployFactory(name, registry, factoryData = ethers.utils.hexlify(0x0)) {
     await deployer.deployAndVerify(c[name].template.artifact).then(wrap => {
       c[name].template[network].address = wrap.contractAddress;
     });
 
-    c[name].template[network].wrap = deployer.wrapDeployedContract(
+    c[name].template[network].wrap = await deployer.wrapDeployedContract(
       c[name].template.artifact,
       c[name].template[network].address
     );
 
-    return c[name].template[network].wrap
-  }
-
-  // Feed
-
-  await deployTemplate("Feed");
-
-  // SimpleGriefing
-
-  await deployTemplate("SimpleGriefing");
-
-  // CountdownGriefing
-
-  await deployTemplate("CountdownGriefing");
-
-  // CountdownGriefingEscrow
-
-  await deployTemplate("CountdownGriefingEscrow");
-
-  console.log(``);
-  console.log(`Deploy and Register Factories`);
-  console.log(``);
-
-  async function deployFactory(name, registry, factoryData = ethers.utils.hexlify(0x0)) {
     await deployer
       .deployAndVerify(
         c[name].factory.artifact,
@@ -144,7 +236,7 @@ const deploy = async (network, secret) => {
         c[name].factory[network].address = wrap.contractAddress;
       });
 
-    c[name].factory[network].wrap = deployer.wrapDeployedContract(
+    c[name].factory[network].wrap = await deployer.wrapDeployedContract(
       c[name].factory.artifact,
       c[name].factory[network].address
     );
@@ -164,31 +256,7 @@ const deploy = async (network, secret) => {
         console.log(``);
         gasUsed = gasUsed.add(receipt.gasUsed);
       });
-
-    return c[name].factory[network].wrap
   }
-
-  // Feed
-
-  await deployFactory("Feed", "Erasure_Posts");
-
-  // SimpleGriefing
-
-  await deployFactory("SimpleGriefing", "Erasure_Agreements");
-
-  // CountdownGriefing
-
-  await deployFactory("CountdownGriefing", "Erasure_Agreements");
-
-  // CountdownGriefingEscrow
-
-  const abiEncoder = new ethers.utils.AbiCoder();
-  const agreementFactory = abiEncoder.encode(['address'], [c.CountdownGriefing.factory[network].address]);
-  await deployFactory("CountdownGriefingEscrow", "Erasure_Escrows", agreementFactory);
-
-  console.log(``);
-  console.log(`Transfer Registry Ownership`);
-  console.log(``);
 
   async function transferRegistry(registry) {
     await c[registry][network].wrap
@@ -201,30 +269,6 @@ const deploy = async (network, secret) => {
         gasUsed = gasUsed.add(receipt.gasUsed);
       });
   }
-
-  // Erasure_Posts
-
-  await transferRegistry("Erasure_Posts");
-
-  // Erasure_Agreements
-
-  await transferRegistry("Erasure_Posts");
-
-  // Erasure_Escrows
-
-  await transferRegistry("Erasure_Posts");
-
-  console.log(``);
-  console.log(`Create test instance from factories`);
-  console.log(``);
-
-  const userAddress = "0x6087555A70E2F96B7838806e7743041E035a37e5";
-  const proofhash = ethers.utils.sha256(ethers.utils.toUtf8Bytes("proofhash"));
-  const IPFShash = createIPFShash("multihash"));
-  console.log(`userAddress: ${userAddress}`);
-  console.log(`proofhash: ${proofhash}`);
-  console.log(`IPFShash: ${IPFShash}`);
-  console.log(``);
 
   async function createInstance(name, calldata) {
     await c[name].factory[network].wrap
@@ -250,73 +294,6 @@ const deploy = async (network, secret) => {
         gasUsed = gasUsed.add(receipt.gasUsed);
       });
   }
-
-  // Feed
-
-  await createInstance("Feed", abiEncodeWithSelector(
-    "initialize",
-    ["address", "bytes32", "bytes"],
-    [userAddress, proofhash, IPFShash]
-  ));
-
-  // SimpleGriefing
-
-  await createInstance("SimpleGriefing", abiEncodeWithSelector(
-    "initialize",
-    ["address", "address", "address", "uint256", "uint8", "bytes"],
-    [
-      userAddress,
-      userAddress,
-      userAddress,
-      ethers.utils.parseEther("1"),
-      2,
-      IPFShash
-    ]
-  ));
-
-  // CountdownGriefing
-
-  await createInstance("CountdownGriefing", abiEncodeWithSelector(
-    "initialize",
-    [
-      "address",
-      "address",
-      "address",
-      "uint256",
-      "uint8",
-      "uint256",
-      "bytes"
-    ],
-    [
-      userAddress,
-      userAddress,
-      userAddress,
-      ethers.utils.parseEther("1"),
-      2,
-      100000000,
-      IPFShash
-    ]
-  ));
-
-  // CountdownGriefingEscrow
-
-  await createInstance("CountdownGriefingEscrow", abiEncodeWithSelector(
-    "initialize",
-    ["address", "address", "address", "uint256", "uint256", "uint256", "bytes", "bytes"],
-    [
-      userAddress,
-      userAddress,
-      userAddress,
-      ethers.utils.parseEther("1"),
-      ethers.utils.parseEther("1"),
-      100000000,
-      IPFShash,
-      abiEncoder.encode(["uint256", "uint8", "uint256"], [ethers.utils.parseEther("1"), 2, 100000000])
-    ]
-  ));
-
-  console.log(``);
-  console.log(`total gas used: ${gasUsed.toString()}`);
 };
 
 module.exports = { deploy };
