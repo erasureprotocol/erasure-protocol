@@ -148,19 +148,37 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         EventMetadata._setMetadata(metadata);
     }
 
+    /// @notice Deposit Stake in NMR and set seller address
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
+    ///          - if buyer already deposited the payment, finalize the escrow
+    /// @dev Access Control: anyone
+    ///      State Machine: before finalize() OR before cancel()
+    function depositAndSetSeller(address seller) public {
+        // restrict access control
+        require(_data.seller == address(0), "seller already set");
+
+        // set seller
+        _data.seller = seller;
+
+        // deposit stake
+        _depositStake();
+    }
+
     /// @notice Deposit Stake in NMR
     ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if seller not already set, make msg.sender the seller
     ///          - if buyer already deposited the payment, finalize the escrow
     /// @dev Access Control: buyer OR operator
     ///      State Machine: before finalize() OR before cancel()
     function depositStake() public {
         // restrict access control
-        // set msg.sender as seller if not already set
-        if (!isSeller(msg.sender) && !Operated.isOperator(msg.sender)) {
-            require(_data.seller == address(0), "only seller or operator");
-            _data.seller = msg.sender;
-        }
+        require(_data.seller != address(0), "seller not yet set");
+        require(isSeller(msg.sender) || Operated.isOperator(msg.sender), "only seller or operator");
+
+        // deposit stake
+        _depositStake();
+    }
+
+    function _depositStake() private {
         // restrict state machine
         require(isOpen() || onlyPaymentDeposited(), "can only deposit stake once");
 
@@ -183,22 +201,39 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         } else {
             _data.status = EscrowStatus.onlyStakeDeposited;
         }
+    }
 
+    /// @notice Deposit Payment in NMR and set buyer address
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
+    ///          - if seller already deposited the stake, start the finalization countdown
+    /// @dev Access Control: buyer OR operator
+    ///      State Machine: before finalize() OR before cancel()
+    function depositAndSetBuyer(address buyer) public {
+        // restrict access control
+        require(_data.buyer == address(0), "buyer already set");
+
+        // set buyer
+        _data.buyer = buyer;
+
+        // deposit payment
+        _depositPayment();
     }
 
     /// @notice Deposit Payment in NMR
     ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if buyer not already set, make msg.sender the buyer
     ///          - if seller already deposited the stake, start the finalization countdown
     /// @dev Access Control: buyer OR operator
     ///      State Machine: before finalize() OR before cancel()
     function depositPayment() public {
         // restrict access control
-        // set msg.sender as buyer if not already set
-        if (!isBuyer(msg.sender) && !Operated.isOperator(msg.sender)) {
-            require(_data.buyer == address(0), "only buyer or operator");
-            _data.buyer = msg.sender;
-        }
+        require(_data.buyer != address(0), "buyer not yet set");
+        require(isBuyer(msg.sender) || Operated.isOperator(msg.sender), "only buyer or operator");
+
+        // deposit payment
+        _depositPayment();
+    }
+
+    function _depositPayment() private {
         // restrict state machine
         require(isOpen() || onlyStakeDeposited(), "can only deposit payment once");
 

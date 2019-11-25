@@ -152,7 +152,14 @@ describe("CountdownGriefingEscrow", function () {
 
         // deposit NMR in the escrow
 
-        const depositTx = await g.Instance.from(_buyer).depositPayment();
+        let depositTx;
+        const currentBuyer = await g.Instance.getBuyer();
+        if (currentBuyer === ethers.constants.AddressZero) {
+            depositTx = await g.Instance.from(_buyer).depositAndSetBuyer(_buyer);
+        } else {
+            depositTx = await g.Instance.from(_buyer).depositPayment();
+        }
+
         const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
         let events = {};
@@ -193,7 +200,14 @@ describe("CountdownGriefingEscrow", function () {
 
         // deposit NMR in the escrow
 
-        const depositTx = await g.Instance.from(_seller).depositStake();
+        let depositTx;
+        const currentSeller = await g.Instance.getSeller();
+        if (currentSeller === ethers.constants.AddressZero) {
+            depositTx = await g.Instance.from(_seller).depositAndSetSeller(_seller);
+        } else {
+            depositTx = await g.Instance.from(_seller).depositStake();
+        }
+
         const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
         let events = {};
@@ -272,7 +286,14 @@ describe("CountdownGriefingEscrow", function () {
 
                 // deposit NMR in the escrow
 
-                const depositTx = await g.Instance.from(fulfiller).depositStake();
+                let depositTx;
+                const currentSeller = await g.Instance.getSeller();
+                if (currentSeller === ethers.constants.AddressZero) {
+                    depositTx = await g.Instance.from(fulfiller).depositAndSetSeller(fulfiller);
+                } else {
+                    depositTx = await g.Instance.from(fulfiller).depositStake();
+                }
+
                 const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
                 let events = {};
@@ -427,7 +448,14 @@ describe("CountdownGriefingEscrow", function () {
 
                 // deposit NMR in the escrow
 
-                const depositTx = await g.Instance.from(buyer).depositPayment();
+                let depositTx;
+                const currentBuyer = await g.Instance.getBuyer();
+                if (currentBuyer === ethers.constants.AddressZero) {
+                    depositTx = await g.Instance.from(buyer).depositAndSetBuyer(buyer);
+                } else {
+                    depositTx = await g.Instance.from(buyer).depositPayment();
+                }
+
                 const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
                 let events = {};
@@ -606,7 +634,14 @@ describe("CountdownGriefingEscrow", function () {
 
                 // deposit NMR in the escrow
 
-                const depositTx = await g.Instance.from(buyer).depositPayment();
+                let depositTx;
+                const currentBuyer = await g.Instance.getBuyer();
+                if (currentBuyer === ethers.constants.AddressZero) {
+                    depositTx = await g.Instance.from(buyer).depositAndSetBuyer(buyer);
+                } else {
+                    depositTx = await g.Instance.from(buyer).depositPayment();
+                }
+
                 const receipt = await g.Instance.verboseWaitForTransaction(depositTx);
 
                 let events = {};
