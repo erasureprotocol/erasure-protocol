@@ -16,6 +16,20 @@ import "../modules/Template.sol";
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
 /// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/escrows/CountdownGriefingEscrow.png
+/// @notice This escrow allows for a buyer and a seller to deposit their stake and payment before sending it to a CountdownGriefing agreement.
+///         A new instance is initialized by the factory using the `initData` received. See the `initialize()` function for details.
+///         Notable features:
+///             - The deposited payment and stake become the stake of the agreement once the escrow is finalized.
+///             - If the buyer is not defined on creation, the first user to deposit the payment becomes the buyer.
+///             - If the seller is not defined on creation, the first user to deposit the stake becomes the seller.
+///             - Either party is able to cancel the escrow and retrieve their deposit if their counterparty never completes their deposit.
+///             - If the buyer deposits their payment after the stake has already been deposited by the seller, this starts a countdown for the seller to finalize the escrow.
+///             - If the seller does not finalize the escrow before the end of the countdown, the buyer can timeout the escrow and recover their stake.
+///             - An operator can optionally be defined to grant full permissions to a trusted external address or contract.
+///         **Note**
+///             Given the nature of ethereum, it is possible that while a cancel request is pending, the counterparty finalizes the escrow and the deposits are transfered to the agreement.
+///             This contract is designed such that there is only two end states: deposits are returned to the buyer and the seller OR the agreement is successfully created.
+///             This is why a user CANNOT rely on the cancellation feature to always work.
 contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
@@ -52,19 +66,19 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     event DataSubmitted(bytes data);
     event Cancelled();
 
-    /// @notice Constructor
+    /// @notice Constructor used to initialize the escrow parameters.
     /// @dev Access Control: only factory
     ///      State Machine: before all
-    /// @param buyer Address of the user that will deposit payment
-    /// @param seller Address of the user that will deposit stake and submit data
-    /// @param operator Address of the user that overrides access control
-    /// @param paymentAmount Amount of NMR (18 decimals) to be deposited by buyer as payment
-    /// @param stakeAmount Amount of NMR (18 decimals) to be deposited by seller as stake
-    /// @param escrowCountdown Amount of time (in seconds) the seller has to finalize the escrow after the payment is deposited
-    /// @param metadata Data (any format) to emit as event on initialization
-    /// @param agreementParams Encoded CountdownGriefing Agreement initialization parameters `abi.encode(ratio, ratioType, agreementCountdown)`.
-    ///                        The agreement is created on escrow completion. `ratio` is limited to uint120 and `agreementCountdown` is limited to uint128.
-    ///                        See CountdownGriefing contract for additional details.
+    /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
+    /// @param buyer address of the buyer. Optional parameter. This address is the only one able to deposit the payment. If not set, the first to deposit the payment becomes the buyer.
+    /// @param seller address of the seller. Optional parameter. This address is the only one able to deposit the stake. If not set, the first to deposit the stake becomes the seller.
+    /// @param paymentAmount uint256 amount of NMR (18 decimals) to be deposited by buyer as payment. Required parameter. This number must fit in a uint128 for optimization reasons.
+    /// @param stakeAmount uint256 amount of NMR (18 decimals) to be deposited by seller as stake. Required parameter. This number must fit in a uint128 for optimization reasons.
+    /// @param escrowCountdown uint256 amount of time (in seconds) the seller has to finalize the escrow after the payment and stake is deposited. Required parameter.
+    /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
+    /// @param agreementParams bytes ABI-encoded parameters used by CountdownGriefing agreement on initialization. Required parameter.
+    ///                        This encoded data blob must contain the uint120 ratio, Griefing.RatioType ratioType, and uint128 agreementCountdown encoded as `abi.encode(ratio, ratioType, agreementCountdown)`.
+    ///                        See CountdownGriefing initialize function for additional details.
     function initialize(
         address operator,
         address buyer,
