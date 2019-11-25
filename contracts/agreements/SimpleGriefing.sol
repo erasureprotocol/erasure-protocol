@@ -40,7 +40,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param counterparty address of the counterparty who has the right to reward, release, and punish the stake. Required parameter. This address cannot be changed.
     /// @param ratio uint256 number (18 decimals) used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param ratioType Griefing.RatioType number used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
-    /// @param metadata bytes data (any format) to emit as event on initialization.
+    /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
     function initialize(
         address operator,
         address staker,

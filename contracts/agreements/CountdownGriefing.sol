@@ -41,8 +41,8 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @param counterparty address of the counterparty who has the right to reward, release, and punish the stake. Required parameter. This address cannot be changed.
     /// @param ratio uint256 number (18 decimals) used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param ratioType Griefing.RatioType number used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
-    /// @param countdownLength uint256 amount of time (in seconds) the counterparty has to punish or reward before the agreement ends.
-    /// @param metadata bytes data (any format) to emit as event on initialization.
+    /// @param countdownLength uint256 amount of time (in seconds) the counterparty has to punish or reward before the agreement ends. Required parameter.
+    /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
     function initialize(
         address operator,
         address staker,
