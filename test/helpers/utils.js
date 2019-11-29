@@ -63,6 +63,11 @@ function createInstanceAddressWithCallData(
       ["address", "uint256"],
       [sender, nonce]
     );
+  } else {
+    salt = ethers.utils.solidityKeccak256(
+      ["address", "bytes32"],
+      [sender, salt]
+    );
   }
 
   const create2hash = ethers.utils.solidityKeccak256(

@@ -30,6 +30,7 @@ function testFactory(
     const [operatorWallet, , creatorWallet] = accounts;
     const operator = operatorWallet.signer.signingKey.address;
     const creator = creatorWallet.signer.signingKey.address;
+    let _creator;
 
     // variables used in tests
     const initializeFunctionName = "initialize";
@@ -56,7 +57,7 @@ function testFactory(
       const { instanceAddress, callData } = createInstanceAddress(
         this.Factory.contractAddress,
         logicContractAddress,
-        creator,
+        _creator,
         initializeFunctionName,
         createTypes,
         createArgs,
@@ -79,9 +80,9 @@ function testFactory(
         createArgs
       );
       for (let i = 0; i < count; i++) {
-        await this.Factory.from(creator).create(callData);
+        await this.Factory.from(_creator).create(callData);
         createLocalInstance();
-      }
+      };
     };
 
     describe("Factory._initialize", () => {
@@ -148,7 +149,7 @@ function testFactory(
       // check the emitted event's arguments
 
       assert.isDefined(instanceCreatedEvent);
-      assert.equal(instanceCreatedEvent.args.creator, creator);
+      assert.equal(instanceCreatedEvent.args.creator, _creator);
 
       // test for correctness of proxy address generation
 
@@ -172,38 +173,77 @@ function testFactory(
 
     describe(`${factoryName}.create`, () => {
       it("should create instance correctly", async () => {
+        _creator = creator;
+
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
           createArgs
         );
+
         const expectedAddress = await this.Factory.from(
           creator
-        ).getNextInstance(callData);
-        const txn = await this.Factory.from(creator).create(callData);
+        ).getNextNonceInstance(_creator, callData);
+
+        const txn = await this.Factory.from(_creator).create(callData);
+
         await validateCreateTxn(txn, null, expectedAddress);
       });
     });
 
     describe(`${factoryName}.createSalty`, () => {
       it("should create instance correctly", async () => {
+        _creator = creator;
+
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
           createArgs
         );
+
         const testSalt = ethers.utils.formatBytes32String("testSalt");
-        const txn = await this.Factory.from(creator).createSalty(
+
+        const expectedAddress = await this.Factory.from(
+          _creator
+        ).getSaltyInstance(_creator, callData, testSalt);
+
+        assert.equal(expectedAddress.validity, true);
+
+        const txn = await this.Factory.from(_creator).createSalty(
           callData,
           testSalt
         );
-        const expectedAddress = await this.Factory.from(
-          creator
-        ).getSaltyInstance(callData, testSalt);
-        await validateCreateTxn(txn, testSalt, expectedAddress);
+
+        await validateCreateTxn(txn, testSalt, expectedAddress.instance);
       });
 
-      it("should revert with duplicate salt", async () => {
+      it("should create instance correctly with same salt from different address", async () => {
+        _creator = operator;
+
+        const callData = abiEncodeWithSelector(
+          initializeFunctionName,
+          createTypes,
+          createArgs
+        );
+
+        const testSalt = ethers.utils.formatBytes32String("testSalt");
+
+        const expectedAddress = await this.Factory.from(
+          _creator
+        ).getSaltyInstance(_creator, callData, testSalt);
+
+        assert.equal(expectedAddress.validity, true);
+
+        const txn = await this.Factory.from(_creator).createSalty(
+          callData,
+          testSalt
+        );
+
+        await validateCreateTxn(txn, testSalt, expectedAddress.instance);
+      });
+
+      it("should revert with same salt from same address", async () => {
+        _creator = creator;
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
@@ -211,7 +251,7 @@ function testFactory(
         );
         const testSalt = ethers.utils.formatBytes32String("testSalt");
         await assert.revertWith(
-          this.Factory.from(creator).createSalty(callData, testSalt),
+          this.Factory.from(_creator).createSalty(callData, testSalt),
           "contract already deployed with supplied salt"
         );
       });

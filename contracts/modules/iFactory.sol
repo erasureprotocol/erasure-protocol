@@ -6,15 +6,15 @@ pragma solidity ^0.5.13;
 /// @dev Version: 1.2.0
 interface iFactory {
 
-    event InstanceCreated(address indexed instance, address indexed creator, string initABI, bytes initData);
+    event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
 
-    function create(bytes calldata initData) external returns (address instance);
-    function createSalty(bytes calldata initData, bytes32 salt) external returns (address instance);
+    function create(bytes calldata callData) external returns (address instance);
+    function createSalty(bytes calldata callData, bytes32 salt) external returns (address instance);
     function getInitSelector() external view returns (bytes4 initSelector);
     function getInstanceRegistry() external view returns (address instanceRegistry);
     function getTemplate() external view returns (address template);
-    function getSaltyInstance(bytes calldata, bytes32 salt) external view returns (address instance);
-    function getNextInstance(bytes calldata) external view returns (address instance);
+    function getSaltyInstance(address creator, bytes calldata callData, bytes32 salt) external view returns (address instance, bool validity);
+    function getNextNonceInstance(address creator, bytes calldata callData) external view returns (address instance);
 
     function getInstanceCreator(address instance) external view returns (address creator);
     function getInstanceType() external view returns (bytes4 instanceType);
