@@ -54,6 +54,18 @@ let c = {
   }
 };
 
+var ArgumentParser = require("argparse").ArgumentParser;
+var parser = new ArgumentParser({
+  version: "0.0.1",
+  addHelp: true,
+  description: "Argparse example"
+});
+parser.addArgument(["-e", "--exit-on-success"], {
+  help: "use to close ganache instance after successful deployment",
+  action: "storeTrue"
+});
+var args = parser.parseArgs();
+
 let ganacheConfig = {
   port: 8545,
   unlocked_accounts: ["0x9608010323ed882a38ede9211d7691102b4f0ba0"],
@@ -64,10 +76,17 @@ let ganacheConfig = {
     "myth like bonus scare over problem client lizard pioneer submit female collect"
 };
 
-const server = ganache.server(ganacheConfig);
-server.listen("8545");
+let provider;
+if (args.exit_on_success) {
+  console.log('server');
+  const server = ganache.server(ganacheConfig);
+  server.listen("8545");
+  provider = new ethers.providers.JsonRpcProvider();
+} else {
+  console.log('provider');
+  provider = new ethers.providers.Web3Provider(ganache.provider(ganacheConfig));
+}
 
-const provider = new ethers.providers.JsonRpcProvider();
 const deployKey =
   "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d";
 const nmrDeployAddress = "0x9608010323ed882a38ede9211d7691102b4f0ba0";
@@ -151,6 +170,8 @@ async function deployFactory(contractName, registry, signer, factoryData = "0x0"
       );
     });
 
+  console.log(``);
+
   return [templateContract, factoryContract];
 }
 
@@ -167,6 +188,32 @@ async function deployNMR(signer) {
   assert.equal(contract.address, nmrAddress);
 
   return [contract, receipt];
+}
+
+async function createInstance(name, calldata) {
+  await c[name].factory.wrap.functions
+    .create(calldata)
+    .then(async txn => {
+      const receipt = await provider.getTransactionReceipt(txn.hash);
+      console.log(
+        `create()      | ${receipt.gasUsed.toString()} gas | ${name}`
+      );
+    });
+  const testSalt = ethers.utils.formatBytes32String("testSalt");
+  await c[name].factory.wrap.functions
+    .createSalty(calldata, testSalt)
+    .then(async txn => {
+      const receipt = await provider.getTransactionReceipt(txn.hash);
+      console.log(
+        `createSalty() | ${receipt.gasUsed.toString()} gas | ${name}`
+      );
+    });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 }
 
 const main = async () => {
@@ -244,19 +291,79 @@ Deploy Factories
     agreementFactory
   );
 
+  console.log(``);
+  console.log(`Create test instance from factories`);
+  console.log(``);
+
+  const userAddress = "0x6087555A70E2F96B7838806e7743041E035a37e5";
+  const proofhash = ethers.utils.sha256(ethers.utils.toUtf8Bytes("proofhash"));
+  const IPFShash = createIPFShash("multihash");
+  console.log(`userAddress: ${userAddress}`);
+  console.log(`proofhash: ${proofhash}`);
+  console.log(`IPFShash: ${IPFShash}`);
+  console.log(``);
+
+  // Feed
+  await createInstance("Feed", abiEncodeWithSelector(
+    "initialize",
+    ["address", "bytes32", "bytes"],
+    [userAddress, proofhash, IPFShash]
+  ));
+
+  // SimpleGriefing
+  await createInstance("SimpleGriefing", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint8", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefing
+  await createInstance("CountdownGriefing", abiEncodeWithSelector(
+    "initialize",
+    [
+      "address",
+      "address",
+      "address",
+      "uint256",
+      "uint8",
+      "uint256",
+      "bytes"
+    ],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      2,
+      100000000,
+      IPFShash
+    ]
+  ));
+
+  // CountdownGriefingEscrow
+  await createInstance("CountdownGriefingEscrow", abiEncodeWithSelector(
+    "initialize",
+    ["address", "address", "address", "uint256", "uint256", "uint256", "bytes", "bytes"],
+    [
+      userAddress,
+      userAddress,
+      userAddress,
+      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("1"),
+      100000000,
+      IPFShash,
+      abiEncoder.encode(["uint256", "uint8", "uint256"], [ethers.utils.parseEther("1"), 2, 100000000])
+    ]
+  ));
+
   if (args.exit_on_success) process.exit(0);
 };
-
-var ArgumentParser = require("argparse").ArgumentParser;
-var parser = new ArgumentParser({
-  version: "0.0.1",
-  addHelp: true,
-  description: "Argparse example"
-});
-parser.addArgument(["-e", "--exit-on-success"], {
-  help: "foo bar",
-  action: "storeTrue"
-});
-var args = parser.parseArgs();
 
 main(args);

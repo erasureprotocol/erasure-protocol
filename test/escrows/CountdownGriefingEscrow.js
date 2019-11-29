@@ -101,6 +101,7 @@ describe("CountdownGriefingEscrow", function () {
         let events = {};
 
         const tx = await g.Factory.from(_creator).create(calldata);
+        // const tx = await g.Factory.from(_creator).createSalty(calldata, ethers.utils.sha256(hexlify('hello')));
         const receipt = await g.Factory.verboseWaitForTransaction(tx);
 
         // get escrow contract
@@ -265,7 +266,7 @@ describe("CountdownGriefingEscrow", function () {
 
                 // create escrow
 
-                await createEscrow(requester, requester, ethers.constants.AddressZero, ethers.constants.AddressZero);
+                await createEscrow(fulfiller, requester, ethers.constants.AddressZero, ethers.constants.AddressZero);
 
             });
 
