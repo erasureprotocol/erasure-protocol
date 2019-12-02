@@ -4,6 +4,7 @@
 *.pem
 build/
 node_modules/
+generated/
 temp/
 *.bin
 *.swp

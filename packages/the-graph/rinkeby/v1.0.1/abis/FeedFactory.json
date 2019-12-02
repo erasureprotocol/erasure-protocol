@@ -1,0 +1,267 @@
+[
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceType",
+    "outputs": [
+      {
+        "name": "instanceType",
+        "type": "bytes4"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getTemplate",
+    "outputs": [
+      {
+        "name": "template",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "instance",
+        "type": "address"
+      }
+    ],
+    "name": "getInstanceCreator",
+    "outputs": [
+      {
+        "name": "creator",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceRegistry",
+    "outputs": [
+      {
+        "name": "instanceRegistry",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInitdataABI",
+    "outputs": [
+      {
+        "name": "initdataABI",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstanceCount",
+    "outputs": [
+      {
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "startIndex",
+        "type": "uint256"
+      },
+      {
+        "name": "endIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPaginatedInstances",
+    "outputs": [
+      {
+        "name": "instances",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getInstances",
+    "outputs": [
+      {
+        "name": "instances",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getInstance",
+    "outputs": [
+      {
+        "name": "instance",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "instanceRegistry",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "postRegistry",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "feedStaticMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "ExplicitInitData",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "instance",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "callData",
+        "type": "bytes"
+      }
+    ],
+    "name": "InstanceCreated",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "callData",
+        "type": "bytes"
+      }
+    ],
+    "name": "create",
+    "outputs": [
+      {
+        "name": "instance",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "initdata",
+        "type": "bytes"
+      }
+    ],
+    "name": "createEncoded",
+    "outputs": [
+      {
+        "name": "instance",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "name": "postRegistry",
+        "type": "address"
+      },
+      {
+        "name": "feedStaticMetadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "createExplicit",
+    "outputs": [
+      {
+        "name": "instance",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
