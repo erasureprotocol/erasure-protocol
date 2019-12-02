@@ -74,6 +74,13 @@ contract Factory is Spawner, iFactory {
         return instance;
     }
 
+    /// @notice Private function to help with the creation of the clone.
+    ///         Stores the address of the clone in this contract.
+    ///         Stores the creator of the clone in this contract.
+    ///         Registers the address of the clone in the registry. Fails if the factory is deprecated.
+    ///         Emits standard InstanceCreated event
+    /// @param instance address The address of the clone that was created.
+    /// @param callData bytes The initialization calldata to use on the clone.
     function _createHelper(address instance, bytes memory callData) private {
         // add the instance to the array
         _instances.push(instance);

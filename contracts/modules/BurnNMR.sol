@@ -6,7 +6,8 @@ import "./iNMR.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
-/// @notice Allows for calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.
+/// @notice This module simplifies calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.
+///         This helper is required given the non-standard implementation of the NMR burn functions: https://github.com/numerai/contract
 contract BurnNMR {
 
     // address of the token
@@ -18,7 +19,7 @@ contract BurnNMR {
         require(iNMR(_Token).mint(value), "nmr burn failed");
     }
 
-    /// @dev Burns a specific amount of NMR from the target address and decrements allowance.
+    /// @notice Burns a specific amount of NMR from the target address and decrements allowance.
     /// @param from address The account whose tokens will be burned.
     /// @param value uint256 The amount of NMR (18 decimals) to be burned.
     function _burnFrom(address from, uint256 value) internal {

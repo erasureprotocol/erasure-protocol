@@ -9,6 +9,7 @@ import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.2.0
 /// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Deposit.png
+/// @notice This module allows for tracking user deposits for fungible amounts.
 contract Deposit {
 
     using SafeMath for uint256;
@@ -18,6 +19,10 @@ contract Deposit {
     event DepositIncreased(address user, uint256 amount, uint256 newDeposit);
     event DepositDecreased(address user, uint256 amount, uint256 newDeposit);
 
+    /// @notice Increase the deposit of a user.
+    /// @param user address of the user.
+    /// @param amountToAdd uint256 amount by which to increase the deposit.
+    /// @return newDeposit uint256 amount of the updated deposit.
     function _increaseDeposit(address user, uint256 amountToAdd) internal returns (uint256 newDeposit) {
         // calculate new deposit amount
         newDeposit = _deposit[user].add(amountToAdd);
@@ -32,6 +37,10 @@ contract Deposit {
         return newDeposit;
     }
 
+    /// @notice Decrease the deposit of a user.
+    /// @param user address of the user.
+    /// @param amountToRemove uint256 amount by which to decrease the deposit.
+    /// @return newDeposit uint256 amount of the updated deposit.
     function _decreaseDeposit(address user, uint256 amountToRemove) internal returns (uint256 newDeposit) {
         // get current deposit
         uint256 currentDeposit = _deposit[user];
@@ -52,6 +61,9 @@ contract Deposit {
         return newDeposit;
     }
 
+    /// @notice Set the deposit of a user to zero.
+    /// @param user address of the user.
+    /// @return amountRemoved uint256 amount removed from deposit.
     function _clearDeposit(address user) internal returns (uint256 amountRemoved) {
         // get current deposit
         uint256 currentDeposit = _deposit[user];
@@ -65,6 +77,9 @@ contract Deposit {
 
     // view functions
 
+    /// @notice Get the current deposit of a user.
+    /// @param user address of the user.
+    /// @return deposit uint256 current amount of the deposit.
     function getDeposit(address user) public view returns (uint256 deposit) {
         return _deposit[user];
     }
