@@ -25,7 +25,7 @@ import "../modules/Template.sol";
 ///             - Either party is able to cancel the escrow and retrieve their deposit if their counterparty never completes their deposit.
 ///             - If the buyer deposits their payment after the stake has already been deposited by the seller, this starts a countdown for the seller to finalize the escrow.
 ///             - If the seller does not finalize the escrow before the end of the countdown, the buyer can timeout the escrow and recover their stake.
-///             - An operator can optionally be defined to grant full permissions to a trusted external address or contract.
+///             - An operator can optionally be defined to grant full permissions to a trusted external address or contract. This operator will be inherited by the spawned agreement.
 ///         **Note**
 ///             Given the nature of ethereum, it is possible that while a cancel request is pending, the counterparty finalizes the escrow and the deposits are transfered to the agreement.
 ///             This contract is designed such that there is only two end states: deposits are returned to the buyer and the seller OR the agreement is successfully created.
@@ -153,8 +153,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///          - if buyer already deposited the payment, finalize the escrow
     /// @dev Access Control: anyone
     ///      State Machine: before finalize() OR before cancel()
+    /// @param seller address of the seller
     function depositAndSetSeller(address seller) public {
-        // restrict access control
+        // restrict state machine
         require(_data.seller == address(0), "seller already set");
 
         // set seller
@@ -171,8 +172,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: before finalize() OR before cancel()
     function depositStake() public {
         // restrict access control
-        require(_data.seller != address(0), "seller not yet set");
         require(isSeller(msg.sender) || Operated.isOperator(msg.sender), "only seller or operator");
+
+        // restrict state machine
+        require(_data.seller != address(0), "seller not yet set");
 
         // deposit stake
         _depositStake();
@@ -206,10 +209,11 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @notice Deposit Payment in NMR and set buyer address
     ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     ///          - if seller already deposited the stake, start the finalization countdown
-    /// @dev Access Control: buyer OR operator
+    /// @dev Access Control: anyone
     ///      State Machine: before finalize() OR before cancel()
+    /// @param buyer address of the buyer
     function depositAndSetBuyer(address buyer) public {
-        // restrict access control
+        // restrict state machine
         require(_data.buyer == address(0), "buyer already set");
 
         // set buyer
@@ -226,8 +230,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     ///      State Machine: before finalize() OR before cancel()
     function depositPayment() public {
         // restrict access control
-        require(_data.buyer != address(0), "buyer not yet set");
         require(isBuyer(msg.sender) || Operated.isOperator(msg.sender), "only buyer or operator");
+
+        // restrict state machine
+        require(_data.buyer != address(0), "buyer not yet set");
 
         // deposit payment
         _depositPayment();
@@ -276,21 +282,20 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address agreement;
         {
             // get the agreement factory address
-
             address escrowFactory = Template.getFactory();
             address escrowRegistry = iFactory(escrowFactory).getInstanceRegistry();
             address agreementFactory = abi.decode(iRegistry(escrowRegistry).getFactoryData(escrowFactory), (address));
 
             // encode initialization function
-            bytes memory initCalldata = abi.encodeWithSignature(
-                'initialize(address,address,address,uint256,uint8,uint256,bytes)',
-                address(this),
-                _data.seller,
-                _data.buyer,
-                uint256(_data.agreementParams.ratio),
-                _data.agreementParams.ratioType,
-                uint256(_data.agreementParams.countdownLength),
-                bytes("")
+            bytes memory initCalldata = abi.encodeWithSelector(
+                iFactory(agreementFactory).getInitSelector(),
+                address(this), // operator
+                _data.seller,  // staker
+                _data.buyer,   // counterparty
+                uint256(_data.agreementParams.ratio),           // griefRatio
+                _data.agreementParams.ratioType,                // ratioType
+                uint256(_data.agreementParams.countdownLength), // countdownLength
+                bytes("")      // metadata
             );
 
             // deploy and initialize agreement contract
@@ -433,27 +438,27 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// View functions
 
     /// @notice Get the address of the buyer (if set)
-    /// @return buyer Buyer account address
+    /// @return buyer address of the buyer
     function getBuyer() public view returns (address buyer) {
         return _data.buyer;
     }
 
     /// @notice Validate if the address matches the stored buyer address
-    /// @param caller Address to validate
-    /// @return validity True if matching address
+    /// @param caller address to validate
+    /// @return validity bool true if matching address
     function isBuyer(address caller) internal view returns (bool validity) {
         return caller == getBuyer();
     }
 
     /// @notice Get the address of the seller (if set)
-    /// @return seller Seller account address
+    /// @return buyer address of the buyer
     function getSeller() public view returns (address seller) {
         return _data.seller;
     }
 
     /// @notice Validate if the address matches the stored seller address
-    /// @param caller Address to validate
-    /// @return validity True if matching address
+    /// @param caller address to validate
+    /// @return validity bool true if matching address
     function isSeller(address caller) internal view returns (bool validity) {
         return caller == getSeller();
     }
@@ -493,26 +498,38 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return _data.status;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.isOpen state
+    /// @return validity bool true if correct state
     function isOpen() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isOpen;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.onlyStakeDeposited state
+    /// @return validity bool true if correct state
     function onlyStakeDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.onlyStakeDeposited;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.onlyPaymentDeposited state
+    /// @return validity bool true if correct state
     function onlyPaymentDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.onlyPaymentDeposited;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.isDeposited state
+    /// @return validity bool true if correct state
     function isDeposited() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isDeposited;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.isFinalized state
+    /// @return validity bool true if correct state
     function isFinalized() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isFinalized;
     }
 
+    /// @notice Validate if the state machine is in the EscrowStatus.isCancelled state
+    /// @return validity bool true if correct state
     function isCancelled() internal view returns (bool validity) {
         return getEscrowStatus() == EscrowStatus.isCancelled;
     }
