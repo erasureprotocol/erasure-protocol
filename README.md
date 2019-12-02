@@ -71,4 +71,7 @@ Using the Spawner library, every item on Erasure is created as a clone of a prev
 See [latest release](https://github.com/erasureprotocol/erasure-next-contracts/releases).
 
 ## Packages
-- [Erasure Crypto + IPFS Helpers](https://github.com/erasureprotocol/erasure-protocol/tree/master/packages/crypto-ipfs)
+- [Erasure Crypto + IPFS Helpers](packages/crypto-ipfs)
+- [GraphQL API](packages/the-graph)
+- [Local Dev Environment](packages/testenv)
+- [Erasure Usage Statistics](packages/statistics)
