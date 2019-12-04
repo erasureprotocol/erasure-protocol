@@ -74,4 +74,3 @@ See [latest release](https://github.com/erasureprotocol/erasure-next-contracts/r
 - [Erasure Crypto + IPFS Helpers](packages/crypto-ipfs)
 - [GraphQL API](packages/the-graph)
 - [Local Dev Environment](packages/testenv)
-- [Erasure Usage Statistics](packages/statistics)
