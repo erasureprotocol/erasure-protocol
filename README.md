@@ -43,7 +43,7 @@ Take for example an agreement between Alice and Bob. Alice is anonymous and has 
 | Alice stakes 500 NMR with ratio 0.5        | 500                   | 0                   |
 | Bob stakes 100 NMR with ratio 1.0          | 500                   | 100                 |
 | Bob pays 5 NMR to punish Alice for 10 NMR  | 490                   | 100                 |
-| Alice pays 10 NMR to punish Bob for 10 NMR | 490                   | 85                  |
+| Alice pays 10 NMR to punish Bob for 10 NMR | 490                   | 90                  |
 
 Griefing avoids relying on a centralized oracle or a trusted third party to perform arbitration over the terms of the agreement and instead allows the parties to come to a resolution on their own. As new techniques for resolution like decentralized oracles are built on Ethereum, it will be possible to add them to the set of `Erasure_Agreements`.
 
