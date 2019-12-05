@@ -68,6 +68,7 @@ var args = parser.parseArgs();
 
 let ganacheConfig = {
   port: 8545,
+  host: '0.0.0.0',
   unlocked_accounts: ["0x9608010323ed882a38ede9211d7691102b4f0ba0"],
   default_balance_ether: 1000,
   total_accounts: 10,
@@ -78,13 +79,13 @@ let ganacheConfig = {
 
 let provider;
 if (args.exit_on_success) {
+  console.log('provider');
+  provider = new ethers.providers.Web3Provider(ganache.provider(ganacheConfig));
+} else {
   console.log('server');
   const server = ganache.server(ganacheConfig);
   server.listen("8545");
   provider = new ethers.providers.JsonRpcProvider();
-} else {
-  console.log('provider');
-  provider = new ethers.providers.Web3Provider(ganache.provider(ganacheConfig));
 }
 
 const deployKey =
