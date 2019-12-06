@@ -8,12 +8,18 @@
   "scripts": {
     "compile": "yarn sol-compiler",
     "deploy": "node deploy.js",
-    "deploy_subgraph": "bash run-deploy-subgraph.sh"
+    "deploy_subgraph": "bash run-deploy-subgraph.sh",
+    "graph-codegen": "graph codegen",
+    "graph-create-local": "graph create erasureprotocol/testenv --node http://127.0.0.1:8020",
+    "graph-deploy-local": "graph deploy erasureprotocol/testenv --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "graph-remove-local": "graph remove erasureprotocol/testenv --node http://127.0.0.1:8020"
   },
   "dependencies": {
     "@0x/sol-compiler": "^3.1.15",
     "argparse": "^1.0.10",
     "ethers": "^4.0.37",
-    "ganache-cli": "^6.7.0"
+    "ganache-cli": "^6.8.0",
+    "@graphprotocol/graph-cli": "^0.16.0",
+    "@graphprotocol/graph-ts": "^0.16.0"
   }
 }
