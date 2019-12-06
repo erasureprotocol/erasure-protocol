@@ -1,9 +1,5 @@
 #!/bin/bash
 
-cd subgraph/
-
-yarn
-
-yarn codegen
-yarn create-local
-yarn deploy-local
+yarn graph-codegen
+yarn graph-create-local
+yarn graph-deploy-local
