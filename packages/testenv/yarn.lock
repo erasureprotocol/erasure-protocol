@@ -1337,10 +1337,10 @@ function-bind@^1.1.1:
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
   integrity sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
 
-ganache-cli@^6.8.0:
-  version "6.8.0-istanbul.0"
-  resolved "https://registry.yarnpkg.com/ganache-cli/-/ganache-cli-6.8.0-istanbul.0.tgz#ec19bc08ff30d250ae13c6f57c16069ecf583fa6"
-  integrity sha512-ELGCztyrqhSTQyPFAx5++iAFPODKCv8i3qoaPj7oq1DtyJQwZp6XjQb9Yu39kdW/VYR4rA0HuHW1oxRtTkmr9Q==
+ganache-cli@^6.7.0:
+  version "6.7.0"
+  resolved "https://registry.yarnpkg.com/ganache-cli/-/ganache-cli-6.7.0.tgz#b59845578221bdf686cf124d007c5ee62e85a62f"
+  integrity sha512-9CZsClo9hl5MxGL7hkk14mie89Q94P0idh92jcV7LmppTYTCG7SHatuwcfqN7emFHArMt3fneN4QbH2do2N6Ow==
   dependencies:
     ethereumjs-util "6.1.0"
     source-map-support "0.5.12"
