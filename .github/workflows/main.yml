@@ -36,3 +36,4 @@ jobs:
         run: |
           yarn run compile
           yarn run deploy -e
+          yarn run deploy_subgraph
