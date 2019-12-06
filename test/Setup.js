@@ -1,5 +1,5 @@
-const { setupDeployment } = require("./helpers/setup");
+const { setupDeployment } = require('./helpers/setup')
 
 before(async () => {
-  [this.deployer, this.MockNMR] = await setupDeployment();
-});
+  ;[this.deployer, this.MockNMR] = await setupDeployment()
+})

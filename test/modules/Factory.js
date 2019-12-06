@@ -3,8 +3,8 @@ const {
   createEip1167RuntimeCode,
   getLatestContractAddressFrom,
   abiEncodeWithSelector,
-  createSelector
-} = require("../helpers/utils");
+  createSelector,
+} = require('../helpers/utils')
 
 function testFactory(
   deployer, // etherlime's ganache deployer instance
@@ -22,35 +22,31 @@ function testFactory(
   // ABI types are different. Default to the create call parameters
   // anything else, pass in a different set of ABI
   createTypes = createExplicitTypes,
-  getCreateArgs = () => createExplicitArgs
+  getCreateArgs = () => createExplicitArgs,
 ) {
-  describe(factoryName, function () {
-
+  describe(factoryName, function() {
     // wallets and addresses
-    const [operatorWallet, , creatorWallet] = accounts;
-    const operator = operatorWallet.signer.signingKey.address;
-    const creator = creatorWallet.signer.signingKey.address;
-    let _creator;
+    const [operatorWallet, , creatorWallet] = accounts
+    const operator = operatorWallet.signer.signingKey.address
+    const creator = creatorWallet.signer.signingKey.address
+    let _creator
 
     // variables used in tests
-    const initializeFunctionName = "initialize";
-    const initSelector = createSelector(
-      initializeFunctionName,
-      createTypes
-    );
+    const initializeFunctionName = 'initialize'
+    const initSelector = createSelector(initializeFunctionName, createTypes)
 
     // variables used to track local instances
-    let logicContractAddress;
-    let nonce = 0;
-    const totalInstanceCount = 4;
-    let instances = [];
-    let createArgs;
+    let logicContractAddress
+    let nonce = 0
+    const totalInstanceCount = 4
+    let instances = []
+    let createArgs
 
     before(async () => {
-      this.Registry = await deployer.deploy(registryArtifact);
-      this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact);
-      createArgs = getCreateArgs();
-    });
+      this.Registry = await deployer.deploy(registryArtifact)
+      this.WrongRegistry = await deployer.deploy(wrongRegistryArtifact)
+      createArgs = getCreateArgs()
+    })
 
     const createLocalInstance = salt => {
       // this should accommodate tests where createargs is different from initABI
@@ -62,274 +58,266 @@ function testFactory(
         createTypes,
         createArgs,
         nonce,
-        salt
-      );
+        salt,
+      )
 
-      instances.push(instanceAddress);
+      instances.push(instanceAddress)
       if (!salt) {
-        nonce++;
+        nonce++
       }
 
-      return { instanceAddress, callData };
-    };
+      return { instanceAddress, callData }
+    }
 
     const populateInstances = async count => {
       const callData = abiEncodeWithSelector(
         initializeFunctionName,
         createTypes,
-        createArgs
-      );
+        createArgs,
+      )
       for (let i = 0; i < count; i++) {
-        await this.Factory.from(_creator).create(callData);
-        createLocalInstance();
-      };
-    };
+        await this.Factory.from(_creator).create(callData)
+        createLocalInstance()
+      }
+    }
 
-    describe("Factory._initialize", () => {
-      it("should revert when wrong instanceType for registry", async () => {
+    describe('Factory._initialize', () => {
+      it('should revert when wrong instanceType for registry', async () => {
         await assert.revertWith(
           deployer.deploy(
             factoryArtifact,
             false,
             this.WrongRegistry.contractAddress,
-            ...factoryConstructorArgs
+            ...factoryConstructorArgs,
           ),
-          "incorrect instance type"
-        );
-      });
+          'incorrect instance type',
+        )
+      })
 
-      it("should initialize factory correctly", async () => {
+      it('should initialize factory correctly', async () => {
         this.Factory = await deployer.deploy(
           factoryArtifact,
           false,
           this.Registry.contractAddress,
-          ...factoryConstructorArgs
-        );
+          ...factoryConstructorArgs,
+        )
 
         // Factory.getInstanceType
-        const actualInstanceType = await this.Factory.getInstanceType();
+        const actualInstanceType = await this.Factory.getInstanceType()
         assert.equal(
           actualInstanceType,
           // instanceType is a bytes4
           ethers.utils.hexDataSlice(
             ethers.utils.keccak256(ethers.utils.toUtf8Bytes(instanceType)),
             0,
-            4
-          )
-        );
+            4,
+          ),
+        )
 
         // Factory.getInitSelector
-        const actualInitSelector = await this.Factory.getInitSelector();
-        assert.equal(actualInitSelector, initSelector);
+        const actualInitSelector = await this.Factory.getInitSelector()
+        assert.equal(actualInitSelector, initSelector)
 
         // Factory.getInstanceRegistry
-        const actualInstanceRegistry = await this.Factory.getInstanceRegistry();
-        assert.equal(actualInstanceRegistry, this.Registry.contractAddress);
+        const actualInstanceRegistry = await this.Factory.getInstanceRegistry()
+        assert.equal(actualInstanceRegistry, this.Registry.contractAddress)
 
         // Factory.getTemplate
-        logicContractAddress = await this.Factory.getTemplate();
+        logicContractAddress = await this.Factory.getTemplate()
 
         // register the factory into the registry
         await this.Registry.addFactory(
           this.Factory.contractAddress,
-          Buffer.from("")
-        );
-      });
-    });
+          Buffer.from(''),
+        )
+      })
+    })
 
     const validateCreateTxn = async (txn, salt, expectedAddress) => {
-      const receipt = await this.Factory.verboseWaitForTransaction(txn);
+      const receipt = await this.Factory.verboseWaitForTransaction(txn)
 
-      const expectedEvent = "InstanceCreated";
+      const expectedEvent = 'InstanceCreated'
       const instanceCreatedEvent = receipt.events.find(
         emittedEvent => emittedEvent.event === expectedEvent,
-        "There is no such event"
-      );
+        'There is no such event',
+      )
 
       // check the emitted event's arguments
 
-      assert.isDefined(instanceCreatedEvent);
-      assert.equal(instanceCreatedEvent.args.creator, _creator);
+      assert.isDefined(instanceCreatedEvent)
+      assert.equal(instanceCreatedEvent.args.creator, _creator)
 
       // test for correctness of proxy address generation
 
-      const { instanceAddress, callData } = createLocalInstance(salt);
+      const { instanceAddress, callData } = createLocalInstance(salt)
 
-      assert.equal(instanceCreatedEvent.args.instance, instanceAddress);
-      assert.equal(instanceCreatedEvent.args.callData, callData);
+      assert.equal(instanceCreatedEvent.args.instance, instanceAddress)
+      assert.equal(instanceCreatedEvent.args.callData, callData)
 
       if (expectedAddress) {
-        assert.equal(instanceCreatedEvent.args.instance, expectedAddress);
+        assert.equal(instanceCreatedEvent.args.instance, expectedAddress)
       }
 
       // check the EIP1167 runtime code
 
-      const actualRuntimeCode = await deployer.provider.getCode(
-        instanceAddress
-      );
-      const runtimeCode = createEip1167RuntimeCode(logicContractAddress);
-      assert.equal(actualRuntimeCode, runtimeCode);
-    };
+      const actualRuntimeCode = await deployer.provider.getCode(instanceAddress)
+      const runtimeCode = createEip1167RuntimeCode(logicContractAddress)
+      assert.equal(actualRuntimeCode, runtimeCode)
+    }
 
     describe(`${factoryName}.create`, () => {
-      it("should create instance correctly", async () => {
-        _creator = creator;
+      it('should create instance correctly', async () => {
+        _creator = creator
 
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          createArgs
-        );
+          createArgs,
+        )
 
         const expectedAddress = await this.Factory.from(
-          creator
-        ).getNextNonceInstance(_creator, callData);
+          creator,
+        ).getNextNonceInstance(_creator, callData)
 
-        const txn = await this.Factory.from(_creator).create(callData);
+        const txn = await this.Factory.from(_creator).create(callData)
 
-        await validateCreateTxn(txn, null, expectedAddress);
-      });
-    });
+        await validateCreateTxn(txn, null, expectedAddress)
+      })
+    })
 
     describe(`${factoryName}.createSalty`, () => {
-      it("should create instance correctly", async () => {
-        _creator = creator;
+      it('should create instance correctly', async () => {
+        _creator = creator
 
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          createArgs
-        );
+          createArgs,
+        )
 
-        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        const testSalt = ethers.utils.formatBytes32String('testSalt')
 
         const expectedAddress = await this.Factory.from(
-          _creator
-        ).getSaltyInstance(_creator, callData, testSalt);
+          _creator,
+        ).getSaltyInstance(_creator, callData, testSalt)
 
-        assert.equal(expectedAddress.validity, true);
+        assert.equal(expectedAddress.validity, true)
 
         const txn = await this.Factory.from(_creator).createSalty(
           callData,
-          testSalt
-        );
+          testSalt,
+        )
 
-        await validateCreateTxn(txn, testSalt, expectedAddress.instance);
-      });
+        await validateCreateTxn(txn, testSalt, expectedAddress.instance)
+      })
 
-      it("should create instance correctly with same salt from different address", async () => {
-        _creator = operator;
+      it('should create instance correctly with same salt from different address', async () => {
+        _creator = operator
 
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          createArgs
-        );
+          createArgs,
+        )
 
-        const testSalt = ethers.utils.formatBytes32String("testSalt");
+        const testSalt = ethers.utils.formatBytes32String('testSalt')
 
         const expectedAddress = await this.Factory.from(
-          _creator
-        ).getSaltyInstance(_creator, callData, testSalt);
+          _creator,
+        ).getSaltyInstance(_creator, callData, testSalt)
 
-        assert.equal(expectedAddress.validity, true);
+        assert.equal(expectedAddress.validity, true)
 
         const txn = await this.Factory.from(_creator).createSalty(
           callData,
-          testSalt
-        );
+          testSalt,
+        )
 
-        await validateCreateTxn(txn, testSalt, expectedAddress.instance);
-      });
+        await validateCreateTxn(txn, testSalt, expectedAddress.instance)
+      })
 
-      it("should revert with same salt from same address", async () => {
-        _creator = creator;
+      it('should revert with same salt from same address', async () => {
+        _creator = creator
         const callData = abiEncodeWithSelector(
           initializeFunctionName,
           createTypes,
-          createArgs
-        );
-        const testSalt = ethers.utils.formatBytes32String("testSalt");
+          createArgs,
+        )
+        const testSalt = ethers.utils.formatBytes32String('testSalt')
         await assert.revertWith(
           this.Factory.from(_creator).createSalty(callData, testSalt),
-          "contract already deployed with supplied salt"
-        );
-      });
-    });
+          'contract already deployed with supplied salt',
+        )
+      })
+    })
 
-    describe("Factory.getInstanceCount", () => {
-      it("should get correct instance count", async () => {
-        const populateCount = 5;
-        await populateInstances(populateCount); // -1 because we created 1 instance before this
+    describe('Factory.getInstanceCount', () => {
+      it('should get correct instance count', async () => {
+        const populateCount = 5
+        await populateInstances(populateCount) // -1 because we created 1 instance before this
 
-        const actualCount = await this.Factory.getInstanceCount();
-        assert.equal(actualCount.toNumber(), instances.length);
-      });
-    });
+        const actualCount = await this.Factory.getInstanceCount()
+        assert.equal(actualCount.toNumber(), instances.length)
+      })
+    })
 
-    describe("Factory.getInstance", () => {
-      it("should get instance correctly", async () => {
+    describe('Factory.getInstance', () => {
+      it('should get instance correctly', async () => {
         // iterate through all the instance index and check against the instances array
         // ensure that the order is preserved
         for (let i = 0; i < totalInstanceCount; i++) {
-          const actualInstanceAddress = await this.Factory.getInstance(i);
-          const expectedInstanceAddress = instances[i];
-          assert.equal(actualInstanceAddress, expectedInstanceAddress);
+          const actualInstanceAddress = await this.Factory.getInstance(i)
+          const expectedInstanceAddress = instances[i]
+          assert.equal(actualInstanceAddress, expectedInstanceAddress)
         }
-      });
-    });
+      })
+    })
 
-    describe("Factory.getInstances", () => {
-      it("should get all instances correctly", async () => {
+    describe('Factory.getInstances', () => {
+      it('should get all instances correctly', async () => {
         // check that both instance arrays from blockchain and locally match
-        const actualInstances = await this.Factory.getInstances();
-        assert.deepEqual(actualInstances, instances); // deepEqual because array comparison
-      });
-    });
+        const actualInstances = await this.Factory.getInstances()
+        assert.deepEqual(actualInstances, instances) // deepEqual because array comparison
+      })
+    })
 
-    describe("Factory.getPaginatedInstances", () => {
-      it("should revert when startIndex >= endIndex", async () => {
+    describe('Factory.getPaginatedInstances', () => {
+      it('should revert when startIndex >= endIndex', async () => {
         await assert.revertWith(
           this.Factory.getPaginatedInstances(3, 2),
-          "startIndex must be less than endIndex"
-        );
-      });
+          'startIndex must be less than endIndex',
+        )
+      })
 
-      it("should revert when endIndex > instances.length", async () => {
+      it('should revert when endIndex > instances.length', async () => {
         await assert.revertWith(
           this.Factory.getPaginatedInstances(
             instances.length - 1,
-            instances.length + 1
+            instances.length + 1,
           ),
-          "end index out of range"
-        );
-      });
+          'end index out of range',
+        )
+      })
 
-      it("should get paginated instances correctly", async () => {
-        let startIndex = 0;
-        let endIndex = 3;
+      it('should get paginated instances correctly', async () => {
+        let startIndex = 0
+        let endIndex = 3
         let actualInstances = await this.Factory.getPaginatedInstances(
           startIndex,
-          endIndex
-        );
-        assert.deepEqual(
-          actualInstances,
-          instances.slice(startIndex, endIndex)
-        ); // deepEqual because array comparison
+          endIndex,
+        )
+        assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)) // deepEqual because array comparison
 
-        startIndex = 3;
-        endIndex = 5;
+        startIndex = 3
+        endIndex = 5
         actualInstances = await this.Factory.getPaginatedInstances(
           startIndex,
-          endIndex
-        );
-        assert.deepEqual(
-          actualInstances,
-          instances.slice(startIndex, endIndex)
-        ); // deepEqual because array comparison
-      });
-    });
-  });
+          endIndex,
+        )
+        assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)) // deepEqual because array comparison
+      })
+    })
+  })
 }
 
-module.exports = testFactory;
+module.exports = testFactory

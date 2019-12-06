@@ -1,494 +1,485 @@
-const ethers = require("ethers");
-const { createDeployer } = require("../helpers/setup");
-const { hexlify } = require("../helpers/utils");
-const RegistryArtifact = require("../../build/Registry.json");
+const ethers = require('ethers')
+const { createDeployer } = require('../helpers/setup')
+const { hexlify } = require('../helpers/utils')
+const RegistryArtifact = require('../../build/Registry.json')
 
-describe("Registry", function () {
-
-  const instanceType = "TestRegistry";
-  const factoryExtraData = "FACTORY_EXTRA_DATA";
+describe('Registry', function() {
+  const instanceType = 'TestRegistry'
+  const factoryExtraData = 'FACTORY_EXTRA_DATA'
 
   const FACTORY_STATUS = {
     Unregistered: 0,
     Registered: 1,
-    Retired: 2
-  };
+    Retired: 2,
+  }
 
   // wallets and addresses
-  let [ownerWallet, buyerWallet, sellerWallet] = accounts;
-  let owner = ownerWallet.signer.signingKey.address; // normalize address
-  const buyer = buyerWallet.signer.signingKey.address; // normalize address
-  const seller = sellerWallet.signer.signingKey.address; // normalize address
+  let [ownerWallet, buyerWallet, sellerWallet] = accounts
+  let owner = ownerWallet.signer.signingKey.address // normalize address
+  const buyer = buyerWallet.signer.signingKey.address // normalize address
+  const seller = sellerWallet.signer.signingKey.address // normalize address
   // nonce used to generate random address
-  let factoryNonce = 0;
+  let factoryNonce = 0
 
   // tracks local factory addresses to compare against blockchain
-  let factories = [];
-  let factoryStatuses = {};
+  let factories = []
+  let factoryStatuses = {}
 
   const generateRandomAddress = () => {
     // a factory address is just a hash generated from a nonce
     const hexdigest = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(factoryNonce.toString())
-    );
+      ethers.utils.toUtf8Bytes(factoryNonce.toString()),
+    )
 
-    const addr = "0x" + hexdigest.slice(12).substring(14);
-    factoryNonce++;
-    return ethers.utils.getAddress(addr); // normalize the address
-  };
+    const addr = '0x' + hexdigest.slice(12).substring(14)
+    factoryNonce++
+    return ethers.utils.getAddress(addr) // normalize the address
+  }
 
   // create a local factory address stored in factories array and factoryStatuses is updated
   const addLocalFactory = factoryAddress => {
-    const factoryId = factories.push(factoryAddress) - 1;
-    factoryStatuses[factoryAddress] = FACTORY_STATUS.Registered;
-    return factoryId;
-  };
+    const factoryId = factories.push(factoryAddress) - 1
+    factoryStatuses[factoryAddress] = FACTORY_STATUS.Registered
+    return factoryId
+  }
 
   const retireLocalFactory = factoryAddress => {
-    factoryStatuses[factoryAddress] = FACTORY_STATUS.Retired;
-  };
+    factoryStatuses[factoryAddress] = FACTORY_STATUS.Retired
+  }
 
   const validateFactory = async (factoryId, factoryAddress) => {
-    const factoryStatus = factoryStatuses[factoryAddress];
+    const factoryStatus = factoryStatuses[factoryAddress]
 
     // Registry.getFactoryID
-    let actualFactoryId = await this.Registry.getFactoryID(factoryAddress);
-    assert.equal(actualFactoryId, factoryId);
+    let actualFactoryId = await this.Registry.getFactoryID(factoryAddress)
+    assert.equal(actualFactoryId, factoryId)
 
     // Registry.getFactoryStatus = Registered
     let actualFactoryStatus = await this.Registry.getFactoryStatus(
-      factoryAddress
-    );
-    assert.equal(actualFactoryStatus, factoryStatus);
+      factoryAddress,
+    )
+    assert.equal(actualFactoryStatus, factoryStatus)
 
     // Registry.getExtraData
-    let actualExtraData = await this.Registry.getFactoryData(factoryAddress);
-    assert.equal(actualExtraData, hexlify(factoryExtraData));
+    let actualExtraData = await this.Registry.getFactoryData(factoryAddress)
+    assert.equal(actualExtraData, hexlify(factoryExtraData))
 
     // Registry.getFactory
-    [
+    ;[
       actualFactoryStatus,
       actualFactoryId,
-      actualExtraData
-    ] = await this.Registry.getFactory(factoryAddress);
-    assert.equal(actualFactoryStatus, factoryStatus);
-    assert.equal(actualFactoryId, factoryId);
-    assert.equal(actualExtraData, hexlify(factoryExtraData));
-  };
+      actualExtraData,
+    ] = await this.Registry.getFactory(factoryAddress)
+    assert.equal(actualFactoryStatus, factoryStatus)
+    assert.equal(actualFactoryId, factoryId)
+    assert.equal(actualExtraData, hexlify(factoryExtraData))
+  }
 
-  let deployer;
+  let deployer
   before(async () => {
-    deployer = await createDeployer();
-    ownerWallet = deployer;
-    owner = ownerWallet.signer.signingKey.address;
-  });
+    deployer = await createDeployer()
+    ownerWallet = deployer
+    owner = ownerWallet.signer.signingKey.address
+  })
 
-  describe("Registry.constructor", () => {
-    it("should deploy correctly", async () => {
+  describe('Registry.constructor', () => {
+    it('should deploy correctly', async () => {
       this.Registry = await deployer.deploy(
         RegistryArtifact,
         false,
-        instanceType
-      );
+        instanceType,
+      )
 
-      const actualInstanceType = await this.Registry.getInstanceType();
+      const actualInstanceType = await this.Registry.getInstanceType()
 
       // _instanceType stored as bytes4
       const instanceTypeHash = ethers.utils.hexDataSlice(
         ethers.utils.keccak256(Buffer.from(instanceType)),
         0,
-        4
-      );
-      assert.equal(actualInstanceType, instanceTypeHash);
-    });
-  });
+        4,
+      )
+      assert.equal(actualInstanceType, instanceTypeHash)
+    })
+  })
 
   // Factory state functions
 
-  describe("Registry.addFactory", () => {
-    const factoryAddress = generateRandomAddress();
+  describe('Registry.addFactory', () => {
+    const factoryAddress = generateRandomAddress()
 
-    it("should revert when not owner", async () => {
+    it('should revert when not owner', async () => {
       await assert.revertWith(
         this.Registry.from(seller).addFactory(
           factoryAddress,
-          Buffer.from(factoryExtraData)
+          Buffer.from(factoryExtraData),
         ),
-        "Ownable: caller is not the owner"
-      );
-    });
+        'Ownable: caller is not the owner',
+      )
+    })
 
-    it("should add factory correctly", async () => {
+    it('should add factory correctly', async () => {
       const txn = await this.Registry.addFactory(
         factoryAddress,
-        Buffer.from(factoryExtraData)
-      );
+        Buffer.from(factoryExtraData),
+      )
 
-      await assert.emit(txn, "FactoryAdded");
+      await assert.emit(txn, 'FactoryAdded')
       await assert.emitWithArgs(txn, [
         owner,
         factoryAddress,
         0,
-        hexlify(factoryExtraData)
-      ]);
+        hexlify(factoryExtraData),
+      ])
 
-      const factoryId = addLocalFactory(factoryAddress);
+      const factoryId = addLocalFactory(factoryAddress)
 
-      validateFactory(factoryId, factoryAddress);
-    });
+      validateFactory(factoryId, factoryAddress)
+    })
 
-    it("should revert when factory already added", async () => {
+    it('should revert when factory already added', async () => {
       await assert.revertWith(
-        this.Registry.addFactory(
-          factoryAddress,
-          Buffer.from(factoryExtraData)
-        ),
-        "factory already exists at the provided factory address"
-      );
-    });
+        this.Registry.addFactory(factoryAddress, Buffer.from(factoryExtraData)),
+        'factory already exists at the provided factory address',
+      )
+    })
 
-    it("should revert when factory is retired", async () => {
+    it('should revert when factory is retired', async () => {
       // retire the added factory
-      await this.Registry.retireFactory(factoryAddress);
-      retireLocalFactory(factoryAddress);
+      await this.Registry.retireFactory(factoryAddress)
+      retireLocalFactory(factoryAddress)
 
       await assert.revertWith(
         this.Registry.addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData),
-          { gasLimit: 30000 }
+          { gasLimit: 30000 },
         ),
-        "factory already exists at the provided factory address"
-      );
-    });
-  });
+        'factory already exists at the provided factory address',
+      )
+    })
+  })
 
-  describe("Registry.retireFactory", () => {
-    const factoryAddress = generateRandomAddress();
+  describe('Registry.retireFactory', () => {
+    const factoryAddress = generateRandomAddress()
 
-    it("should revert when not owner", async () => {
+    it('should revert when not owner', async () => {
       await assert.revertWith(
         this.Registry.from(seller).retireFactory(factoryAddress),
-        "Ownable: caller is not the owner"
-      );
-    });
+        'Ownable: caller is not the owner',
+      )
+    })
 
-    it("should revert when factory is not added", async () => {
+    it('should revert when factory is not added', async () => {
       await assert.revertWith(
         this.Registry.retireFactory(factoryAddress),
-        "factory is not currently registered"
-      );
-    });
+        'factory is not currently registered',
+      )
+    })
 
-    it("should revert when factory is already retired", async () => {
+    it('should revert when factory is already retired', async () => {
       await this.Registry.addFactory(
         factoryAddress,
-        Buffer.from(factoryExtraData)
-      );
-      addLocalFactory(factoryAddress);
+        Buffer.from(factoryExtraData),
+      )
+      addLocalFactory(factoryAddress)
 
-      await this.Registry.retireFactory(factoryAddress);
-      retireLocalFactory(factoryAddress);
+      await this.Registry.retireFactory(factoryAddress)
+      retireLocalFactory(factoryAddress)
 
       await assert.revertWith(
         this.Registry.retireFactory(factoryAddress),
-        "factory is not currently registered"
-      );
-    });
+        'factory is not currently registered',
+      )
+    })
 
-    it("should retire factory correctly", async () => {
-      const factoryAddress = generateRandomAddress();
+    it('should retire factory correctly', async () => {
+      const factoryAddress = generateRandomAddress()
 
       await this.Registry.addFactory(
         factoryAddress,
-        Buffer.from(factoryExtraData)
-      );
-      const factoryId = addLocalFactory(factoryAddress);
+        Buffer.from(factoryExtraData),
+      )
+      const factoryId = addLocalFactory(factoryAddress)
 
-      const txn = await this.Registry.retireFactory(factoryAddress);
-      retireLocalFactory(factoryAddress);
+      const txn = await this.Registry.retireFactory(factoryAddress)
+      retireLocalFactory(factoryAddress)
 
-      assert.emit(txn, "FactoryRetired");
-      assert.emitWithArgs(txn, [owner, factoryAddress, factoryId]);
+      assert.emit(txn, 'FactoryRetired')
+      assert.emitWithArgs(txn, [owner, factoryAddress, factoryId])
 
-      const actualStatus = await this.Registry.getFactoryStatus(factoryAddress);
-      assert.equal(actualStatus, FACTORY_STATUS.Retired);
-    });
-  });
+      const actualStatus = await this.Registry.getFactoryStatus(factoryAddress)
+      assert.equal(actualStatus, FACTORY_STATUS.Retired)
+    })
+  })
 
   // Factory view functions
 
-  describe("Registry.getFactoryCount", () => {
-    it("should get factory count correctly", async () => {
-      const populateCount = 5;
+  describe('Registry.getFactoryCount', () => {
+    it('should get factory count correctly', async () => {
+      const populateCount = 5
 
       for (let i = 0; i < populateCount; i++) {
-        const factoryAddress = generateRandomAddress();
+        const factoryAddress = generateRandomAddress()
         await this.Registry.addFactory(
           factoryAddress,
-          Buffer.from(factoryExtraData)
-        );
+          Buffer.from(factoryExtraData),
+        )
 
-        addLocalFactory(factoryAddress);
+        addLocalFactory(factoryAddress)
       }
 
-      const factoryCount = await this.Registry.getFactoryCount();
-      assert.equal(factoryCount.toNumber(), factories.length);
-    });
-  });
+      const factoryCount = await this.Registry.getFactoryCount()
+      assert.equal(factoryCount.toNumber(), factories.length)
+    })
+  })
 
-  describe("Registry.getFactory", () => {
-    it("gets factory correctly", async () => {
+  describe('Registry.getFactory', () => {
+    it('gets factory correctly', async () => {
       for (let factoryId = 0; factoryId < factories.length; factoryId++) {
-        const factoryAddress = factories[factoryId];
+        const factoryAddress = factories[factoryId]
 
-        await validateFactory(factoryId, factoryAddress);
+        await validateFactory(factoryId, factoryAddress)
       }
-    });
-  });
+    })
+  })
 
-  describe("Registry.getFactoryAddress", () => {
-    it("gets factory address correctly", async () => {
-
+  describe('Registry.getFactoryAddress', () => {
+    it('gets factory address correctly', async () => {
       for (let factoryId = 0; factoryId < factories.length; factoryId++) {
-        const factoryAddress = factories[factoryId];
+        const factoryAddress = factories[factoryId]
         const actualFactoryAddress = await this.Registry.getFactoryAddress(
-          factoryId
-        );
-        assert.equal(factoryAddress, actualFactoryAddress);
+          factoryId,
+        )
+        assert.equal(factoryAddress, actualFactoryAddress)
       }
-    });
-  });
+    })
+  })
 
-  describe("Registry.getFactories", () => {
-    it("should get factories correctly", async () => {
+  describe('Registry.getFactories', () => {
+    it('should get factories correctly', async () => {
+      const actualFactories = await this.Registry.getFactories()
+      assert.deepEqual(actualFactories, factories)
+    })
+  })
 
-      const actualFactories = await this.Registry.getFactories();
-      assert.deepEqual(actualFactories, factories);
-    });
-  });
-
-  describe("Registry.getPaginatedFactories", () => {
-    it("should revert when startIndex >= endIndex", async () => {
+  describe('Registry.getPaginatedFactories', () => {
+    it('should revert when startIndex >= endIndex', async () => {
       await assert.revertWith(
         this.Registry.getPaginatedFactories(3, 2),
-        "startIndex must be less than endIndex"
-      );
-    });
+        'startIndex must be less than endIndex',
+      )
+    })
 
-    it("should revert when endIndex > instances.length", async () => {
+    it('should revert when endIndex > instances.length', async () => {
       await assert.revertWith(
         this.Registry.getPaginatedFactories(
           factories.length - 1,
-          factories.length + 1
+          factories.length + 1,
         ),
-        "end index out of range"
-      );
-    });
+        'end index out of range',
+      )
+    })
 
-    it("should get paginated instances correctly", async () => {
-      let startIndex = 0;
-      let endIndex = 3;
+    it('should get paginated instances correctly', async () => {
+      let startIndex = 0
+      let endIndex = 3
       let actualFactories = await this.Registry.getPaginatedFactories(
         startIndex,
-        endIndex
-      );
-      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)); // deepEqual because array comparison
+        endIndex,
+      )
+      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)) // deepEqual because array comparison
 
-      startIndex = 3;
-      endIndex = 5;
+      startIndex = 3
+      endIndex = 5
       actualFactories = await this.Registry.getPaginatedFactories(
         startIndex,
-        endIndex
-      );
-      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)); // deepEqual because array comparison
-    });
-  });
+        endIndex,
+      )
+      assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)) // deepEqual because array comparison
+    })
+  })
 
   // Instance state functions
 
-  const instanceExtraData = 0;
+  const instanceExtraData = 0
 
-  let instances = [];
+  let instances = []
 
   const addLocalInstance = instanceAddress => {
-    const instanceIndex = instances.push(instanceAddress) - 1;
-    return instanceIndex;
-  };
+    const instanceIndex = instances.push(instanceAddress) - 1
+    return instanceIndex
+  }
 
-  describe("Registry.register", () => {
+  describe('Registry.register', () => {
     // pretend that the buyer address is one of the factory
-    const factoryAddress = buyer;
+    const factoryAddress = buyer
 
-    it("should revert when factory not added", async () => {
-      const instanceAddress = generateRandomAddress();
+    it('should revert when factory not added', async () => {
+      const instanceAddress = generateRandomAddress()
 
       await assert.revertWith(
         this.Registry.from(factoryAddress).register(
           instanceAddress,
           buyer,
-          instanceExtraData
+          instanceExtraData,
         ),
-        "factory in wrong status"
-      );
-    });
+        'factory in wrong status',
+      )
+    })
 
-    it("should revert when factory is retired", async () => {
-      const factoryAddress = seller;
+    it('should revert when factory is retired', async () => {
+      const factoryAddress = seller
 
-      await this.Registry.addFactory(
-        seller,
-        Buffer.from(factoryExtraData)
-      );
-      await this.Registry.retireFactory(seller);
+      await this.Registry.addFactory(seller, Buffer.from(factoryExtraData))
+      await this.Registry.retireFactory(seller)
 
-      addLocalFactory(factoryAddress);
+      addLocalFactory(factoryAddress)
 
-      const instanceAddress = generateRandomAddress();
+      const instanceAddress = generateRandomAddress()
 
       await assert.revertWith(
         this.Registry.from(factoryAddress).register(
           instanceAddress,
           seller,
-          instanceExtraData
+          instanceExtraData,
         ),
-        "factory in wrong status"
-      );
-    });
+        'factory in wrong status',
+      )
+    })
 
-    it("should register instance correctly", async () => {
+    it('should register instance correctly', async () => {
       await this.Registry.addFactory(
         factoryAddress,
-        Buffer.from(factoryExtraData)
-      );
-      const factoryId = addLocalFactory(factoryAddress);
+        Buffer.from(factoryExtraData),
+      )
+      const factoryId = addLocalFactory(factoryAddress)
 
-      const instanceAddress = generateRandomAddress();
+      const instanceAddress = generateRandomAddress()
 
       const txn = await this.Registry.from(factoryAddress).register(
         instanceAddress,
         seller,
-        instanceExtraData
-      );
+        instanceExtraData,
+      )
 
-      const instanceIndex = addLocalInstance(instanceAddress);
+      const instanceIndex = addLocalInstance(instanceAddress)
 
-      await assert.emit(txn, "InstanceRegistered");
+      await assert.emit(txn, 'InstanceRegistered')
       await assert.emitWithArgs(txn, [
         instanceAddress,
         factoryAddress,
         seller,
         instanceIndex,
-        factoryId
-      ]);
-    });
-  });
+        factoryId,
+      ])
+    })
+  })
 
-  describe("Registry.getInstanceCount", () => {
-    const factoryAddress = buyer;
+  describe('Registry.getInstanceCount', () => {
+    const factoryAddress = buyer
 
-    it("should get instance count correctly", async () => {
-      const populateCount = 5;
+    it('should get instance count correctly', async () => {
+      const populateCount = 5
 
       for (let i = 0; i < populateCount; i++) {
-        const instanceAddress = generateRandomAddress();
+        const instanceAddress = generateRandomAddress()
 
         await this.Registry.from(factoryAddress).register(
           instanceAddress,
           buyer,
-          instanceExtraData
-        );
-        addLocalInstance(instanceAddress);
+          instanceExtraData,
+        )
+        addLocalInstance(instanceAddress)
       }
 
-      const instanceCount = await this.Registry.getInstanceCount();
-      assert.equal(instanceCount, instances.length);
-    });
-  });
+      const instanceCount = await this.Registry.getInstanceCount()
+      assert.equal(instanceCount, instances.length)
+    })
+  })
 
-  describe("Registry.getInstance", () => {
-    it("should revert when out of range", async () => {
+  describe('Registry.getInstance', () => {
+    it('should revert when out of range', async () => {
       await assert.revertWith(
         this.Registry.getInstance(instances.length + 1),
-        "index out of range"
-      );
-    });
+        'index out of range',
+      )
+    })
 
-    it("should get instance correctly", async () => {
+    it('should get instance correctly', async () => {
       for (let i = 0; i < instances.length; i++) {
-        const instanceAddress = await this.Registry.getInstance(i);
-        assert.equal(instanceAddress, instances[i]);
+        const instanceAddress = await this.Registry.getInstance(i)
+        assert.equal(instanceAddress, instances[i])
       }
-    });
-  });
+    })
+  })
 
-  describe("Registry.getInstanceData", () => {
-    const factoryAddress = buyer;
+  describe('Registry.getInstanceData', () => {
+    const factoryAddress = buyer
 
-    it("should revert when out of range", async () => {
+    it('should revert when out of range', async () => {
       await assert.revertWith(
         this.Registry.getInstanceData(instances.length + 1),
-        "index out of range"
-      );
-    });
+        'index out of range',
+      )
+    })
 
-    it("should get instance data correctly", async () => {
-      const factoryID = factories.indexOf(factoryAddress);
+    it('should get instance data correctly', async () => {
+      const factoryID = factories.indexOf(factoryAddress)
 
       for (let i = 0; i < instances.length; i++) {
         const [
           instanceAddress,
           actualFactoryID,
-          extraData
-        ] = await this.Registry.getInstanceData(i);
-        assert.equal(instanceAddress, instances[i]);
-        assert.equal(actualFactoryID, factoryID);
-        assert.equal(extraData.toNumber(), instanceExtraData);
+          extraData,
+        ] = await this.Registry.getInstanceData(i)
+        assert.equal(instanceAddress, instances[i])
+        assert.equal(actualFactoryID, factoryID)
+        assert.equal(extraData.toNumber(), instanceExtraData)
       }
-    });
-  });
+    })
+  })
 
-  describe("Registry.getInstances", () => {
-    it("should get instances correctly", async () => {
-      const actualInstances = await this.Registry.getInstances();
-      assert.deepEqual(actualInstances, instances);
-    });
-  });
+  describe('Registry.getInstances', () => {
+    it('should get instances correctly', async () => {
+      const actualInstances = await this.Registry.getInstances()
+      assert.deepEqual(actualInstances, instances)
+    })
+  })
 
-  describe("Registry.getPaginatedInstances", () => {
-    it("should revert when startIndex >= endIndex", async () => {
+  describe('Registry.getPaginatedInstances', () => {
+    it('should revert when startIndex >= endIndex', async () => {
       await assert.revertWith(
         this.Registry.getPaginatedInstances(3, 2),
-        "startIndex must be less than endIndex"
-      );
-    });
+        'startIndex must be less than endIndex',
+      )
+    })
 
-    it("should revert when endIndex > instances.length", async () => {
+    it('should revert when endIndex > instances.length', async () => {
       await assert.revertWith(
         this.Registry.getPaginatedInstances(
           instances.length - 1,
-          instances.length + 1
+          instances.length + 1,
         ),
-        "end index out of range"
-      );
-    });
+        'end index out of range',
+      )
+    })
 
-    it("should get paginated instances correctly", async () => {
-      let startIndex = 0;
-      let endIndex = 3;
+    it('should get paginated instances correctly', async () => {
+      let startIndex = 0
+      let endIndex = 3
       let actualInstances = await this.Registry.getPaginatedInstances(
         startIndex,
-        endIndex
-      );
-      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
+        endIndex,
+      )
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)) // deepEqual because array comparison
 
-      startIndex = 3;
-      endIndex = 5;
+      startIndex = 3
+      endIndex = 5
       actualInstances = await this.Registry.getPaginatedInstances(
         startIndex,
-        endIndex
-      );
-      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)); // deepEqual because array comparison
-    });
-  });
-});
+        endIndex,
+      )
+      assert.deepEqual(actualInstances, instances.slice(startIndex, endIndex)) // deepEqual because array comparison
+    })
+  })
+})
