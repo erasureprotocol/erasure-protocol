@@ -1,50 +1,49 @@
 // require artifacts
-const CountdownGriefingArtifact = require("../../build/CountdownGriefing.json");
-const CountdownGriefing_FactoryArtifact = require("../../build/CountdownGriefing_Factory.json");
-const MockNMRArtifact = require("../../build/MockNMR.json");
-const ErasureAgreementsRegistryArtifact = require("../../build/Erasure_Agreements.json");
-const ErasurePostsRegistryArtifact = require("../../build/Erasure_Posts.json");
+const CountdownGriefingArtifact = require('../../build/CountdownGriefing.json')
+const CountdownGriefing_FactoryArtifact = require('../../build/CountdownGriefing_Factory.json')
+const MockNMRArtifact = require('../../build/MockNMR.json')
+const ErasureAgreementsRegistryArtifact = require('../../build/Erasure_Agreements.json')
+const ErasurePostsRegistryArtifact = require('../../build/Erasure_Posts.json')
 
 // test helpers
-const { initDeployment } = require("../helpers/setup");
-const testFactory = require("../modules/Factory");
-const { RATIO_TYPES } = require("../helpers/variables");
+const { initDeployment } = require('../helpers/setup')
+const testFactory = require('../modules/Factory')
+const { RATIO_TYPES } = require('../helpers/variables')
 
 // variables used in initialize()
-const factoryName = "CountdownGriefing_Factory";
-const instanceType = "Agreement";
-const ratio = ethers.utils.parseEther("2");
-const ratioType = RATIO_TYPES.Dec;
-const countdownLength = 1000;
-const staticMetadata = "TESTING";
+const factoryName = 'CountdownGriefing_Factory'
+const instanceType = 'Agreement'
+const ratio = ethers.utils.parseEther('2')
+const ratioType = RATIO_TYPES.Dec
+const countdownLength = 1000
+const staticMetadata = 'TESTING'
 
 const createTypes = [
-  "address",
-  "address",
-  "address",
-  "uint256",
-  "uint8",
-  "uint256",
-  "bytes"
-];
+  'address',
+  'address',
+  'address',
+  'uint256',
+  'uint8',
+  'uint256',
+  'bytes',
+]
 
-let CountdownGriefing;
-let deployer, MockNMR;
+let CountdownGriefing
+let deployer, MockNMR
 
 before(async () => {
-  [deployer, MockNMR] = await initDeployment();
-  CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact);
-});
+  ;[deployer, MockNMR] = await initDeployment()
+  CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
+})
 
 function runFactoryTest() {
-
-  const [ownerWallet, stakerWallet, counterpartyWallet] = accounts;
-  const owner = ownerWallet.signer.signingKey.address;
-  const staker = stakerWallet.signer.signingKey.address;
-  const counterparty = counterpartyWallet.signer.signingKey.address;
+  const [ownerWallet, stakerWallet, counterpartyWallet] = accounts
+  const owner = ownerWallet.signer.signingKey.address
+  const staker = stakerWallet.signer.signingKey.address
+  const counterparty = counterpartyWallet.signer.signingKey.address
 
   describe(factoryName, () => {
-    it("setups test", () => {
+    it('setups test', () => {
       const createArgs = [
         owner,
         staker,
@@ -52,8 +51,8 @@ function runFactoryTest() {
         ratio,
         ratioType,
         countdownLength,
-        Buffer.from(staticMetadata)
-      ];
+        Buffer.from(staticMetadata),
+      ]
 
       testFactory(
         deployer,
@@ -64,10 +63,10 @@ function runFactoryTest() {
         CountdownGriefing_FactoryArtifact,
         ErasureAgreementsRegistryArtifact,
         ErasurePostsRegistryArtifact,
-        [CountdownGriefing.contractAddress]
-      );
-    });
-  });
+        [CountdownGriefing.contractAddress],
+      )
+    })
+  })
 }
 
-runFactoryTest();
+runFactoryTest()

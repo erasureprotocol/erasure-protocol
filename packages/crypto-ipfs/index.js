@@ -2,7 +2,7 @@ const fernet = require('fernet')
 const tweetnacl = require('tweetnacl')
 const pbkdf2 = require('pbkdf2')
 const getRandomValues = require('get-random-values')
-const multihash = require('multihashes');
+const multihash = require('multihashes')
 const Hash = require('ipfs-only-hash')
 
 const MAX_UINT32 = Math.pow(2, 32) - 1
@@ -21,26 +21,28 @@ const randomNumber = () => {
 }
 
 const randomString = () => {
-  let result = '';
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  for ( let i = 0; i < FERNET_SECRET_LENGTH; i++ ) {
-      result += characters.charAt(Math.floor(randomNumber() * charactersLength));
+  let result = ''
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const charactersLength = characters.length
+  for (let i = 0; i < FERNET_SECRET_LENGTH; i++) {
+    result += characters.charAt(Math.floor(randomNumber() * charactersLength))
   }
   return result
 }
 
 const ErasureHelper = {
   ipfs: {
-    hashToHex: (IPFSHash) => "0x" + multihash.toHexString(multihash.fromB58String(IPFSHash)),
-    onlyHash: async (data) => {
+    hashToHex: IPFSHash =>
+      '0x' + multihash.toHexString(multihash.fromB58String(IPFSHash)),
+    onlyHash: async data => {
       let buf = data
       if (!Buffer.isBuffer(data)) {
         buf = Buffer.from(data)
       }
       const hash = await Hash.of(buf)
       return hash
-    }
+    },
   },
   crypto: {
     symmetric: {
@@ -55,24 +57,36 @@ const ErasureHelper = {
       },
       encryptMessage: (secretKey, msg) => {
         const secret = new fernet.Secret(secretKey)
-        const token = new fernet.Token({secret, ttl: 0})
+        const token = new fernet.Token({ secret, ttl: 0 })
         return token.encode(msg)
       },
-      decryptMessage: (secretKey, encryptedMessage) =>  {
+      decryptMessage: (secretKey, encryptedMessage) => {
         const secret = new fernet.Secret(secretKey)
-        const token = new fernet.Token({secret, ttl: 0, token: encryptedMessage})
+        const token = new fernet.Token({
+          secret,
+          ttl: 0,
+          token: encryptedMessage,
+        })
         return token.decode()
-      }
+      },
     },
     asymmetric: {
-      generateKeyPair: (sig, salt) => tweetnacl.box.keyPair.fromSecretKey(pbkdf2.pbkdf2Sync(sig, salt, 1000, 32)),
+      generateKeyPair: (sig, salt) =>
+        tweetnacl.box.keyPair.fromSecretKey(
+          pbkdf2.pbkdf2Sync(sig, salt, 1000, 32),
+        ),
       generateNonce: () => tweetnacl.randomBytes(NONCE_LENGTH),
       encryptMessage: (msg, nonce, publicKey, secretKey) => {
         const encodedMessage = encoder.encode(msg)
         return tweetnacl.box(encodedMessage, nonce, publicKey, secretKey)
       },
       decryptMessage: (box, nonce, publicKey, secretKey) => {
-        const encodedMessage = tweetnacl.box.open(box, nonce, publicKey, secretKey)
+        const encodedMessage = tweetnacl.box.open(
+          box,
+          nonce,
+          publicKey,
+          secretKey,
+        )
         return decoder.decode(encodedMessage)
       },
       secretBox: {
@@ -83,10 +97,10 @@ const ErasureHelper = {
         decryptMessage: (box, nonce, secretKey) => {
           const encodedMessage = tweetnacl.secretbox.open(box, nonce, secretKey)
           return decoder.decode(encodedMessage)
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 }
 
 module.exports = ErasureHelper
