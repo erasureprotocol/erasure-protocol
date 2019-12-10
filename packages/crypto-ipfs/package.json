@@ -1,6 +1,6 @@
 {
   "name": "@erasure/crypto-ipfs",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "asymmetric and symmetric crypto for use with erasure, ipfs and private backend. warning: unaudited.",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,6 @@
     "crypto",
     "ipfs"
   ],
-  "author": "James Geary <james@numer.ai>",
   "license": "MIT",
   "dependencies": {
     "fernet": "^0.3.1",

@@ -2,28 +2,129 @@ const assert = require('assert')
 const isBase64 = require('is-base64')
 const ErasureHelper = require('../index')
 
-describe('ipfs', () => {
-  describe('hashToHex', () => {
-    it('should convert a b58 ipfs hash to to hex with 0x prefix', () => {
+describe('multihash', () => {
+  describe('test inputs', () => {
+    it('should correctly parse a b58 multihash', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'hex',
+      })
       assert.equal(
-        ErasureHelper.ipfs.hashToHex(
-          'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
-        ),
+        hash,
         '0x1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
       )
     })
-  })
 
-  describe('onlyHash', () => {
-    it('should calculate the would-be ipfs of a string', async () => {
-      const hash = await ErasureHelper.ipfs.onlyHash('Hello World!\n')
+    it('should correctly parse a hex multihash with 0x prefix', async () => {
+      const hash = await ErasureHelper.multihash({
+        input:
+          '0x1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+        inputType: 'hex',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2')
+    })
+
+    it('should correctly parse a hex multihash', async () => {
+      const hash = await ErasureHelper.multihash({
+        input:
+          '1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+        inputType: 'hex',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2')
+    })
+
+    it('should correctly parse a sha2-256 with 0x prefix', async () => {
+      const hash = await ErasureHelper.multihash({
+        input:
+          '0x227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+        inputType: 'sha2-256',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2')
+    })
+
+    it('should correctly parse a sha2-256', async () => {
+      const hash = await ErasureHelper.multihash({
+        input:
+          '227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+        inputType: 'sha2-256',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2')
+    })
+
+    it('should calculate the multihash of a string', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'Hello World!\n',
+        inputType: 'raw',
+        outputType: 'b58',
+      })
       assert.equal(hash, 'QmfM2r8seH2GiRaC4esTjeraXEachRt8ZsSeGaWTPLyMoG')
     })
-    it('should calculate the would-be ipfs hash of a buffer', async () => {
-      const hash = await ErasureHelper.ipfs.onlyHash(
-        Buffer.from('Hello World!\n'),
-      )
+
+    it('should calculate the multihash of a buffer', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: Buffer.from('Hello World!\n'),
+        inputType: 'raw',
+        outputType: 'b58',
+      })
       assert.equal(hash, 'QmfM2r8seH2GiRaC4esTjeraXEachRt8ZsSeGaWTPLyMoG')
+    })
+
+    it('should calculate the multihash of a JSON', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: JSON.stringify({ proofhash: 'hello' }),
+        inputType: 'raw',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmbYQZq5qF6D4mfnB4ahpBqr8HfzyjJDcYk6cszRbNwkhs')
+    })
+  })
+
+  describe('test outputs', () => {
+    it('should output correct prefix', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'prefix',
+      })
+      assert.equal(hash, '0x1220')
+    })
+
+    it('should output correct digest', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'digest',
+      })
+      assert.equal(
+        hash,
+        '0x227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+      )
+    })
+
+    it('should output correct hex', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'hex',
+      })
+      assert.equal(
+        hash,
+        '0x1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+      )
+    })
+
+    it('should output correct b58', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'b58',
+      })
+      assert.equal(hash, 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2')
     })
   })
 })

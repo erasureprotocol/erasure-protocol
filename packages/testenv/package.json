@@ -1,10 +1,17 @@
 {
   "name": "@erasure/testenv",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Deploy local version of the erasure protocol for testing purposes.",
-  "homepage": "https://github.com/erasureprotocol/erasure-protocol/packages/testenv/README.md",
-  "author": "Stephane Gosselin <stephane@numer.ai>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erasureprotocol/erasure-protocol/tree/master/packages/testenv"
+  },
+  "keywords": [
+    "erasure",
+    "graphql",
+    "ganache"
+  ],
   "scripts": {
     "compile": "yarn sol-compiler",
     "deploy": "node deploy.js",

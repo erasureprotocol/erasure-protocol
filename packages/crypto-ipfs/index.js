@@ -3,7 +3,7 @@ const tweetnacl = require('tweetnacl')
 const pbkdf2 = require('pbkdf2')
 const getRandomValues = require('get-random-values')
 const multihash = require('multihashes')
-const Hash = require('ipfs-only-hash')
+const sha256_cid = require('ipfs-only-hash')
 
 const MAX_UINT32 = Math.pow(2, 32) - 1
 const MAX_UINT8 = Math.pow(2, 8) - 1
@@ -31,17 +31,72 @@ const randomString = () => {
   return result
 }
 
+/// Convert multihash from input of specified type to multihash buffer object
+/// Valid input types:
+/// - 'raw': raw data of any form - will caculate chunked ipld content id using sha2-256
+/// - 'sha2-256': hex encoded sha2-256 hash - will append multihash prefix
+/// - 'hex': hex encoded multihash
+/// - 'b58': base58 encoded multihash
+async function multihashFrom(input, inputType) {
+  const inputTypes = ['raw', 'sha2-256', 'hex', 'b58']
+  let contentid
+  if (inputType === 'raw') {
+    contentid = multihash.fromB58String(await sha256_cid.of(input))
+  } else if (inputType === 'sha2-256') {
+    input = input.slice(0, 2) === '0x' ? input.slice(2) : input
+    contentid = multihash.fromHexString('1220' + input)
+  } else if (inputType === 'hex') {
+    input = input.slice(0, 2) === '0x' ? input.slice(2) : input
+    contentid = multihash.fromHexString(input)
+  } else if (inputType === 'b58') {
+    contentid = multihash.fromB58String(input)
+  } else {
+    throw new Error(
+      `Invalid inputType: ${inputType} should be one of [${inputTypes}]`,
+    )
+  }
+
+  multihash.validate(contentid)
+
+  return contentid
+}
+
+/// Convert multihash from buffer object to output of specified type
+/// Valid output types:
+/// - 'prefix': hex encoded multihash prefix
+/// - 'digest': hex encoded hash
+/// - 'hex': hex encoded multihash
+/// - 'b58': base58 encoded multihash
+async function multihashTo(contentid, outputType) {
+  const outputTypes = ['prefix', 'digest', 'hex', 'b58']
+  if (outputType === 'prefix') {
+    return '0x' + multihash.prefix(contentid).toString('hex')
+  } else if (outputType === 'digest') {
+    return '0x' + multihash.toHexString(multihash.decode(contentid).digest)
+  } else if (outputType === 'hex') {
+    return '0x' + multihash.toHexString(contentid)
+  } else if (outputType === 'b58') {
+    return multihash.toB58String(contentid)
+  } else {
+    throw new Error(
+      `Invalid outputType: ${outputType} should be one of [${outputTypes}]`,
+    )
+  }
+}
+
 const ErasureHelper = {
+  multihash: async ({ input, inputType, outputType }) =>
+    multihashTo(await multihashFrom(input, inputType), outputType),
   ipfs: {
-    hashToHex: IPFSHash =>
-      '0x' + multihash.toHexString(multihash.fromB58String(IPFSHash)),
-    onlyHash: async data => {
-      let buf = data
-      if (!Buffer.isBuffer(data)) {
-        buf = Buffer.from(data)
-      }
-      const hash = await Hash.of(buf)
-      return hash
+    hashToHex: async () => {
+      throw new Error(
+        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'b58', outputType:'hex'})`,
+      )
+    },
+    onlyHash: async () => {
+      throw new Error(
+        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'raw', outputType:'b58'})`,
+      )
     },
   },
   crypto: {
