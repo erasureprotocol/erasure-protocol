@@ -4,11 +4,14 @@ const ErasureHelper = require('../index')
 
 describe('ipfs', () => {
   describe('hashToHex', () => {
-    it('should convert a b58 ipfs hash to to hex with 0x prefix', () => {
+    it('should convert a b58 ipfs hash to to hex with 0x prefix', async () => {
+      const hash = await ErasureHelper.multihash({
+        input: 'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
+        inputType: 'b58',
+        outputType: 'hex',
+      })
       assert.equal(
-        ErasureHelper.ipfs.hashToHex(
-          'QmQfJQtxGA5MzWi5HZPyCaZiPAzNkxq8U9yApihkKsWZx2',
-        ),
+        hash,
         '0x1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
       )
     })
@@ -16,13 +19,19 @@ describe('ipfs', () => {
 
   describe('onlyHash', () => {
     it('should calculate the would-be ipfs of a string', async () => {
-      const hash = await ErasureHelper.ipfs.onlyHash('Hello World!\n')
+      const hash = await ErasureHelper.multihash({
+        input: 'Hello World!\n',
+        inputType: 'raw',
+        outputType: 'b58',
+      })
       assert.equal(hash, 'QmfM2r8seH2GiRaC4esTjeraXEachRt8ZsSeGaWTPLyMoG')
     })
     it('should calculate the would-be ipfs hash of a buffer', async () => {
-      const hash = await ErasureHelper.ipfs.onlyHash(
-        Buffer.from('Hello World!\n'),
-      )
+      const hash = await ErasureHelper.multihash({
+        input: Buffer.from('Hello World!\n'),
+        inputType: 'raw',
+        outputType: 'b58',
+      })
       assert.equal(hash, 'QmfM2r8seH2GiRaC4esTjeraXEachRt8ZsSeGaWTPLyMoG')
     })
   })

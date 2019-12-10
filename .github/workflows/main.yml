@@ -38,3 +38,19 @@ jobs:
         run: |
           yarn run compile
           yarn run deploy -e
+
+  crypto-ipfs:
+    name: ErasureCrypto Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '11.x'
+      - name: Install
+        working-directory: ./packages/crypto-ipfs/
+        run: yarn install
+      - name: Run Tests
+        working-directory: ./packages/crypto-ipfs/
+        run: yarn run test
