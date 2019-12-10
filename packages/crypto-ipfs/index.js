@@ -31,11 +31,20 @@ const randomString = () => {
   return result
 }
 
+/// Convert multihash from input of specified type to multihash buffer object
+/// Valid input types:
+/// - 'raw': raw data of any form - will caculate chunked ipld content id using sha2-256
+/// - 'sha2-256': hex encoded sha2-256 hash - will append multihash prefix
+/// - 'hex': hex encoded multihash
+/// - 'b58': base58 encoded multihash
 async function multihashFrom(input, inputType) {
-  const inputTypes = ['raw', 'hex', 'b58']
+  const inputTypes = ['raw', 'sha2-256', 'hex', 'b58']
   let contentid
   if (inputType === 'raw') {
     contentid = multihash.fromB58String(await sha256_cid.of(input))
+  } else if (inputType === 'sha2-256') {
+    input = input.slice(0, 2) === '0x' ? input.slice(2) : input
+    contentid = multihash.fromHexString('1220' + input)
   } else if (inputType === 'hex') {
     input = input.slice(0, 2) === '0x' ? input.slice(2) : input
     contentid = multihash.fromHexString(input)
@@ -52,6 +61,12 @@ async function multihashFrom(input, inputType) {
   return contentid
 }
 
+/// Convert multihash from buffer object to output of specified type
+/// Valid output types:
+/// - 'prefix': hex encoded multihash prefix
+/// - 'digest': hex encoded hash
+/// - 'hex': hex encoded multihash
+/// - 'b58': base58 encoded multihash
 async function multihashTo(contentid, outputType) {
   const outputTypes = ['prefix', 'digest', 'hex', 'b58']
   if (outputType === 'prefix') {
