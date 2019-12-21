@@ -23,3 +23,12 @@ coverage-artifacts/
 *.outputParameter
 flat/
 venv/
+
+# python stuff
+.eggs
+.mypy_cache
+.tox
+python-packages/*/build
+python-packages/*/dist
+__pycache__
+python-packages/*/*.egg-info
