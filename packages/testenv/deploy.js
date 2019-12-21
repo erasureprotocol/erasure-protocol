@@ -7,6 +7,9 @@ let c = {
   NMR: {
     artifact: require('./build/MockNMR.json'),
   },
+  Erasure_Users: {
+    artifact: require('./build/Erasure_Users.json'),
+  },
   Erasure_Agreements: {
     artifact: require('./build/Erasure_Agreements.json'),
   },
@@ -226,13 +229,16 @@ const main = async () => {
   console.log(`
 Deploy MockNMR
       `)
-
   ;[c.NMR.wrap, _] = await deployNMR(nmrSigner)
 
   console.log(`
 Deploy Registries
       `)
-
+  ;[c.Erasure_Users.wrap, _] = await deployContract(
+    'Erasure_Users',
+    [],
+    deploySigner,
+  )
   ;[c.Erasure_Posts.wrap, _] = await deployContract(
     'Erasure_Posts',
     [],
@@ -252,7 +258,6 @@ Deploy Registries
   console.log(`
 Deploy Factories
       `)
-
   ;[
     c.SimpleGriefing.template.wrap,
     c.SimpleGriefing.factory.wrap,
@@ -261,7 +266,6 @@ Deploy Factories
     c.Erasure_Agreements.wrap,
     deploySigner,
   )
-
   ;[
     c.CountdownGriefing.template.wrap,
     c.CountdownGriefing.factory.wrap,
@@ -270,7 +274,6 @@ Deploy Factories
     c.Erasure_Agreements.wrap,
     deploySigner,
   )
-
   ;[c.Feed.template.wrap, c.Feed.factory.wrap] = await deployFactory(
     'Feed',
     c.Erasure_Posts.wrap,
