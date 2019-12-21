@@ -13,11 +13,11 @@ contract TestGriefing is Griefing {
     }
 
     function addStake(address staker, address funder, uint256 amountToAdd) public {
-        Staking._addStake(staker, funder, amountToAdd);
+        Staking._addStake(Griefing.getToken(staker), staker, funder, amountToAdd);
     }
 
-    function setRatio(address staker, uint256 ratio, RatioType ratioType) public {
-        Griefing._setRatio(staker, ratio, ratioType);
+    function setRatio(address staker, TokenManager.Tokens token, uint256 ratio, RatioType ratioType) public {
+        Griefing._setRatio(staker, token, ratio, ratioType);
     }
 
     function grief(
