@@ -1,7 +1,7 @@
 # Erasure Protocol
 
 [![Build Status](https://github.com/erasureprotocol/erasure-protocol/workflows/CI/badge.svg)](https://github.com/erasureprotocol/erasure-protocol/actions)
-[![version](https://img.shields.io/badge/version-1.2.x-green)](https://github.com/erasureprotocol/erasure-protocol/releases/tag/v1.2.0)
+[![version](https://img.shields.io/badge/version-1.2.x-blue)](https://github.com/erasureprotocol/erasure-protocol/releases/tag/v1.2.0)
 
 ## Philosophy of Erasure
 
