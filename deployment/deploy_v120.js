@@ -30,7 +30,7 @@ const deploy = async (network, secret) => {
     ///////////////////////////////////////////////
     multisig = '0x6087555A70E2F96B7838806e7743041E035a37e5'
   } else if (network == 'mainnet') {
-    multisig = '0x0000000000377d181a0ebd08590c6b399b272000'
+    multisig = '0x0000000000377D181A0ebd08590c6B399b272000'
   }
 
   // initialize deployer
@@ -194,6 +194,7 @@ const deploy = async (network, secret) => {
 total gas used: ${gasUsed.toString()}
 
 Registries:
+  Erasure_Users           ${c.Erasure_Users[network].address}
   Erasure_Posts           ${c.Erasure_Posts[network].address}
   Erasure_Agreements      ${c.Erasure_Agreements[network].address}
   Erasure_Escrows         ${c.Erasure_Escrows[network].address}
