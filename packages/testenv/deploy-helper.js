@@ -82,8 +82,8 @@ if (args.exit_on_success) {
   provider = new ethers.providers.Web3Provider(ganache.provider(ganacheConfig))
 } else {
   console.log('server')
-  const server = ganache.server(ganacheConfig)
-  server.listen('8545')
+  // const server = ganache.server(ganacheConfig)
+  // server.listen('8545')
   provider = new ethers.providers.JsonRpcProvider()
 }
 
@@ -203,14 +203,14 @@ async function createInstance(name, calldata) {
     createAdddress = receipt.logs[0].address
     console.log(`create()      | ${receipt.gasUsed.toString()} gas | ${name}`)
   })
-  const testSalt = ethers.utils.formatBytes32String('testSalt')
-  await c[name].factory.wrap.functions
-    .createSalty(calldata, testSalt)
-    .then(async txn => {
-      const receipt = await provider.getTransactionReceipt(txn.hash)
-      createSaltyAdddress = receipt.logs[0].address
-      console.log(`createSalty() | ${receipt.gasUsed.toString()} gas | ${name}`)
-    })
+  // const testSalt = ethers.utils.formatBytes32String('testSalt')
+  // await c[name].factory.wrap.functions
+  //   .createSalty(calldata, testSalt)
+  //   .then(async txn => {
+  //     const receipt = await provider.getTransactionReceipt(txn.hash)
+  //     createSaltyAdddress = receipt.logs[0].address
+  //     console.log(`createSalty() | ${receipt.gasUsed.toString()} gas | ${name}`)
+  //   })
 
   return [createAdddress, createSaltyAdddress]
 }
@@ -231,77 +231,102 @@ const main = async () => {
 
   let deploySigner = provider.getSigner(0)
   let nmrSigner = provider.getSigner(nmrDeployAddress)
-  console.log(nmrSigner.address)
 
-  console.log(`
-Deploy MockNMR
-      `)
-  ;[c.NMR.wrap, _] = await deployNMR(nmrSigner)
+  //   console.log(`
+  // Deploy MockNMR
+  //       `)
+  //   ;[c.NMR.wrap, _] = await deployNMR(nmrSigner)
 
-  console.log(`
-Deploy Registries
-      `)
-  ;[c.Erasure_Users.wrap, _] = await deployContract(
-    'Erasure_Users',
-    [],
-    deploySigner,
-  )
-  ;[c.Erasure_Posts.wrap, _] = await deployContract(
-    'Erasure_Posts',
-    [],
-    deploySigner,
-  )
-  ;[c.Erasure_Agreements.wrap, _] = await deployContract(
-    'Erasure_Agreements',
-    [],
-    deploySigner,
-  )
-  ;[c.Erasure_Escrows.wrap, _] = await deployContract(
-    'Erasure_Escrows',
-    [],
-    deploySigner,
+  //   console.log(`
+  // Deploy Registries
+  //       `)
+  //   ;[c.Erasure_Users.wrap, _] = await deployContract(
+  //     'Erasure_Users',
+  //     [],
+  //     deploySigner,
+  //   )
+  //   ;[c.Erasure_Posts.wrap, _] = await deployContract(
+  //     'Erasure_Posts',
+  //     [],
+  //     deploySigner,
+  //   )
+  //   ;[c.Erasure_Agreements.wrap, _] = await deployContract(
+  //     'Erasure_Agreements',
+  //     [],
+  //     deploySigner,
+  //   )
+  //   ;[c.Erasure_Escrows.wrap, _] = await deployContract(
+  //     'Erasure_Escrows',
+  //     [],
+  //     deploySigner,
+  //   )
+
+  //   console.log(`
+  // Deploy Factories
+  //       `)
+  //   ;[
+  //     c.SimpleGriefing.template.wrap,
+  //     c.SimpleGriefing.factory.wrap,
+  //   ] = await deployFactory(
+  //     'SimpleGriefing',
+  //     c.Erasure_Agreements.wrap,
+  //     deploySigner,
+  //   )
+  //   ;[
+  //     c.CountdownGriefing.template.wrap,
+  //     c.CountdownGriefing.factory.wrap,
+  //   ] = await deployFactory(
+  //     'CountdownGriefing',
+  //     c.Erasure_Agreements.wrap,
+  //     deploySigner,
+  //   )
+  //   ;[c.Feed.template.wrap, c.Feed.factory.wrap] = await deployFactory(
+  //     'Feed',
+  //     c.Erasure_Posts.wrap,
+  //     deploySigner,
+  //   )
+
+  // const abiEncoder = new ethers.utils.AbiCoder()
+  //   const agreementFactory = abiEncoder.encode(
+  //     ['address'],
+  //     [c.CountdownGriefing.factory.wrap.address],
+  //   )
+
+  //   ;[
+  //     c.CountdownGriefingEscrow.template.wrap,
+  //     c.CountdownGriefingEscrow.factory.wrap,
+  //   ] = await deployFactory(
+  //     'CountdownGriefingEscrow',
+  //     c.Erasure_Escrows.wrap,
+  //     deploySigner,
+  //     agreementFactory,
+  //   )
+
+  c.Feed.factory.wrap = new ethers.Contract(
+    '0x67B5656d60a809915323Bf2C40A8bEF15A152e3e',
+    c.Feed.factory.artifact.compilerOutput.abi,
+    deploymentWallet,
   )
 
-  console.log(`
-Deploy Factories
-      `)
-  ;[
-    c.SimpleGriefing.template.wrap,
-    c.SimpleGriefing.factory.wrap,
-  ] = await deployFactory(
-    'SimpleGriefing',
-    c.Erasure_Agreements.wrap,
-    deploySigner,
+  c.SimpleGriefing.factory.wrap = new ethers.Contract(
+    '0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb',
+    c.SimpleGriefing.factory.artifact.compilerOutput.abi,
+    deploymentWallet,
   )
-  ;[
-    c.CountdownGriefing.template.wrap,
-    c.CountdownGriefing.factory.wrap,
-  ] = await deployFactory(
-    'CountdownGriefing',
-    c.Erasure_Agreements.wrap,
-    deploySigner,
+
+  c.CountdownGriefing.factory.wrap = new ethers.Contract(
+    '0x59d3631c86BbE35EF041872d502F218A39FBa150',
+    c.CountdownGriefing.factory.artifact.compilerOutput.abi,
+    deploymentWallet,
   )
-  ;[c.Feed.template.wrap, c.Feed.factory.wrap] = await deployFactory(
-    'Feed',
-    c.Erasure_Posts.wrap,
-    deploySigner,
+
+  c.CountdownGriefingEscrow.factory.wrap = new ethers.Contract(
+    '0x26b4AFb60d6C903165150C6F0AA14F8016bE4aec',
+    c.Feed.factory.artifact.compilerOutput.abi,
+    deploymentWallet,
   )
 
   const abiEncoder = new ethers.utils.AbiCoder()
-  const agreementFactory = abiEncoder.encode(
-    ['address'],
-    [c.CountdownGriefing.factory.wrap.address],
-  )
-
-  ;[
-    c.CountdownGriefingEscrow.template.wrap,
-    c.CountdownGriefingEscrow.factory.wrap,
-  ] = await deployFactory(
-    'CountdownGriefingEscrow',
-    c.Erasure_Escrows.wrap,
-    deploySigner,
-    agreementFactory,
-  )
 
   console.log(``)
   console.log(`Create test instance from factories`)
@@ -326,7 +351,6 @@ Deploy Factories
   )
 
   await submitHash(instance1, proofhash)
-  await submitHash(instance2, proofhash)
 
   async function submitHash(address, proofhash) {
     c.Feed.instance = new ethers.Contract(
@@ -342,71 +366,71 @@ Deploy Factories
     })
   }
 
-  // SimpleGriefing
-  await createInstance(
-    'SimpleGriefing',
-    abiEncodeWithSelector(
-      'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        ethers.utils.parseEther('1'),
-        2,
-        IPFShash,
-      ],
-    ),
-  )
+  // // SimpleGriefing
+  // await createInstance(
+  //   'SimpleGriefing',
+  //   abiEncodeWithSelector(
+  //     'initialize',
+  //     ['address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
+  //     [
+  //       userAddress,
+  //       userAddress,
+  //       userAddress,
+  //       ethers.utils.parseEther('1'),
+  //       2,
+  //       IPFShash,
+  //     ],
+  //   ),
+  // )
 
-  // CountdownGriefing
-  await createInstance(
-    'CountdownGriefing',
-    abiEncodeWithSelector(
-      'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        ethers.utils.parseEther('1'),
-        2,
-        100000000,
-        IPFShash,
-      ],
-    ),
-  )
+  // // CountdownGriefing
+  // await createInstance(
+  //   'CountdownGriefing',
+  //   abiEncodeWithSelector(
+  //     'initialize',
+  //     ['address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
+  //     [
+  //       userAddress,
+  //       userAddress,
+  //       userAddress,
+  //       ethers.utils.parseEther('1'),
+  //       2,
+  //       100000000,
+  //       IPFShash,
+  //     ],
+  //   ),
+  // )
 
-  // CountdownGriefingEscrow
-  await createInstance(
-    'CountdownGriefingEscrow',
-    abiEncodeWithSelector(
-      'initialize',
-      [
-        'address',
-        'address',
-        'address',
-        'uint256',
-        'uint256',
-        'uint256',
-        'bytes',
-        'bytes',
-      ],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        ethers.utils.parseEther('1'),
-        ethers.utils.parseEther('1'),
-        100000000,
-        IPFShash,
-        abiEncoder.encode(
-          ['uint256', 'uint8', 'uint256'],
-          [ethers.utils.parseEther('1'), 2, 100000000],
-        ),
-      ],
-    ),
-  )
+  // // CountdownGriefingEscrow
+  // await createInstance(
+  //   'CountdownGriefingEscrow',
+  //   abiEncodeWithSelector(
+  //     'initialize',
+  //     [
+  //       'address',
+  //       'address',
+  //       'address',
+  //       'uint256',
+  //       'uint256',
+  //       'uint256',
+  //       'bytes',
+  //       'bytes',
+  //     ],
+  //     [
+  //       userAddress,
+  //       userAddress,
+  //       userAddress,
+  //       ethers.utils.parseEther('1'),
+  //       ethers.utils.parseEther('1'),
+  //       100000000,
+  //       IPFShash,
+  //       abiEncoder.encode(
+  //         ['uint256', 'uint8', 'uint256'],
+  //         [ethers.utils.parseEther('1'), 2, 100000000],
+  //       ),
+  //     ],
+  //   ),
+  // )
 
   if (args.exit_on_success) process.exit(0)
 }

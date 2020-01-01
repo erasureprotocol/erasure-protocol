@@ -6,7 +6,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      address: '0xA57B8a5584442B467b4689F1144D269d096A3daF'
+      address: '0x26b4AFb60d6C903165150C6F0AA14F8016bE4aec'
       abi: CountdownGriefingEscrowFactory
     mapping:
       kind: ethereum/events
@@ -25,7 +25,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      address: '0xe982E462b094850F12AF94d21D470e21bE9D0E9C'
+      address: '0x59d3631c86BbE35EF041872d502F218A39FBa150'
       abi: CountdownGriefingFactory
     mapping:
       kind: ethereum/events
@@ -44,7 +44,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      address: '0xC89Ce4735882C9F0f0FE26686c53074E09B0D550'
+      address: '0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb'
       abi: SimpleGriefingFactory
     mapping:
       kind: ethereum/events
@@ -63,7 +63,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      address: '0x9b1f7F645351AF3631a656421eD2e40f2802E6c0'
+      address: '0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb'
       abi: FeedFactory
     mapping:
       kind: ethereum/events
