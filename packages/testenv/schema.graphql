@@ -39,6 +39,7 @@ type InstanceCreatedCountdownGriefingEscrowFactory @entity {
 
 type CancelledCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -47,6 +48,7 @@ type CancelledCountdownGriefingEscrow @entity {
 
 type DataSubmittedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   data: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -56,6 +58,7 @@ type DataSubmittedCountdownGriefingEscrow @entity {
 
 type DeadlineSetCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   deadline: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -65,6 +68,7 @@ type DeadlineSetCountdownGriefingEscrow @entity {
 
 type FinalizedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   agreement: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -74,6 +78,7 @@ type FinalizedCountdownGriefingEscrow @entity {
 
 type InitializedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   buyer: Bytes!
   seller: Bytes!
@@ -91,6 +96,7 @@ type InitializedCountdownGriefingEscrow @entity {
 
 type MetadataSetCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   metadata: Bytes!
   metadataB58: String!
   blockNumber: BigInt!
@@ -101,6 +107,7 @@ type MetadataSetCountdownGriefingEscrow @entity {
 
 type OperatorUpdatedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -110,6 +117,7 @@ type OperatorUpdatedCountdownGriefingEscrow @entity {
 
 type PaymentDepositedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   buyer: Bytes!
   amount: BigInt!
   blockNumber: BigInt!
@@ -120,6 +128,7 @@ type PaymentDepositedCountdownGriefingEscrow @entity {
 
 type StakeDepositedCountdownGriefingEscrow @entity {
   id: ID!
+  contract: Bytes!
   seller: Bytes!
   amount: BigInt!
   blockNumber: BigInt!
@@ -163,6 +172,7 @@ type InstanceCreatedCountdownGriefingFactory @entity {
 
 type InitializedCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   staker: Bytes!
   counterparty: Bytes!
@@ -179,6 +189,7 @@ type InitializedCountdownGriefing @entity {
 
 type RatioSetCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   ratio: BigInt!
   ratioType: Int!
@@ -190,6 +201,7 @@ type RatioSetCountdownGriefing @entity {
 
 type GriefedCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   punisher: Bytes!
   staker: Bytes!
   punishment: BigInt!
@@ -203,6 +215,7 @@ type GriefedCountdownGriefing @entity {
 
 type LengthSetCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   length: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -212,6 +225,7 @@ type LengthSetCountdownGriefing @entity {
 
 type OperatorUpdatedCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -221,6 +235,7 @@ type OperatorUpdatedCountdownGriefing @entity {
 
 type MetadataSetCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   metadata: Bytes!
   metadataB58: String!
   blockNumber: BigInt!
@@ -231,6 +246,7 @@ type MetadataSetCountdownGriefing @entity {
 
 type StakeAddedCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   funder: Bytes!
   amount: BigInt!
@@ -242,6 +258,7 @@ type StakeAddedCountdownGriefing @entity {
 
 type StakeTakenCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   recipient: Bytes!
   amount: BigInt!
@@ -253,6 +270,7 @@ type StakeTakenCountdownGriefing @entity {
 
 type StakeBurnedCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   amount: BigInt!
   blockNumber: BigInt!
@@ -263,6 +281,7 @@ type StakeBurnedCountdownGriefing @entity {
 
 type DeadlineSetCountdownGriefing @entity {
   id: ID!
+  contract: Bytes!
   deadline: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -303,6 +322,7 @@ type InstanceCreatedSimpleGriefingFactory @entity {
 
 type GriefedSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   punisher: Bytes!
   staker: Bytes!
   punishment: BigInt!
@@ -316,6 +336,7 @@ type GriefedSimpleGriefing @entity {
 
 type InitializedSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   staker: Bytes!
   counterparty: Bytes!
@@ -331,6 +352,7 @@ type InitializedSimpleGriefing @entity {
 
 type MetadataSetSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   metadata: Bytes!
   metadataB58: String!
   blockNumber: BigInt!
@@ -341,6 +363,7 @@ type MetadataSetSimpleGriefing @entity {
 
 type OperatorUpdatedSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -350,6 +373,7 @@ type OperatorUpdatedSimpleGriefing @entity {
 
 type RatioSetSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   ratio: BigInt!
   ratioType: Int!
@@ -361,6 +385,7 @@ type RatioSetSimpleGriefing @entity {
 
 type StakeAddedSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   funder: Bytes!
   amount: BigInt!
@@ -372,6 +397,7 @@ type StakeAddedSimpleGriefing @entity {
 
 type StakeBurnedSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   amount: BigInt!
   blockNumber: BigInt!
@@ -382,6 +408,7 @@ type StakeBurnedSimpleGriefing @entity {
 
 type StakeTakenSimpleGriefing @entity {
   id: ID!
+  contract: Bytes!
   staker: Bytes!
   recipient: Bytes!
   amount: BigInt!
@@ -418,6 +445,7 @@ type InstanceCreatedFeedFactory @entity {
 
 type InitializedFeed @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   proofHash: Bytes!
   metadata: Bytes!
@@ -430,6 +458,7 @@ type InitializedFeed @entity {
 
 type HashSubmittedFeed @entity {
   id: ID!
+  contract: Bytes!
   hash: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -439,6 +468,7 @@ type HashSubmittedFeed @entity {
 
 type OperatorUpdatedFeed @entity {
   id: ID!
+  contract: Bytes!
   operator: Bytes!
   blockNumber: BigInt!
   timestamp: BigInt!
@@ -448,6 +478,7 @@ type OperatorUpdatedFeed @entity {
 
 type MetadataSetFeed @entity {
   id: ID!
+  contract: Bytes!
   metadata: Bytes!
   metadataB58: String!
   blockNumber: BigInt!

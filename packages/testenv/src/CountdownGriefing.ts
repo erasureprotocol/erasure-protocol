@@ -1,5 +1,5 @@
-import { BigInt } from "@graphprotocol/graph-ts"
-import { InstanceCreated } from "../generated/CountdownGriefingFactory/CountdownGriefingFactory"
+import { BigInt } from '@graphprotocol/graph-ts'
+import { InstanceCreated } from '../generated/CountdownGriefingFactory/CountdownGriefingFactory'
 import {
   Initialized,
   RatioSet,
@@ -10,9 +10,9 @@ import {
   StakeAdded,
   StakeTaken,
   StakeBurned,
-  DeadlineSet
-} from "../generated/templates/CountdownGriefing/CountdownGriefing"
-import { CountdownGriefing as CountdownGriefingDataSource } from "../generated/templates"
+  DeadlineSet,
+} from '../generated/templates/CountdownGriefing/CountdownGriefing'
+import { CountdownGriefing as CountdownGriefingDataSource } from '../generated/templates'
 import {
   CountdownGriefing,
   InstanceCreatedCountdownGriefingFactory,
@@ -25,11 +25,13 @@ import {
   StakeAddedCountdownGriefing,
   StakeTakenCountdownGriefing,
   StakeBurnedCountdownGriefing,
-  DeadlineSetCountdownGriefing
-} from "../generated/schema"
+  DeadlineSetCountdownGriefing,
+} from '../generated/schema'
 
 export function handleInstanceCreated(event: InstanceCreated): void {
-  let entity = new InstanceCreatedCountdownGriefingFactory(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new InstanceCreatedCountdownGriefingFactory(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
   entity.instance = event.params.instance
   entity.creator = event.params.creator
   entity.callData = event.params.callData
@@ -49,7 +51,10 @@ export function handleInstanceCreated(event: InstanceCreated): void {
 }
 
 export function handleInitialized(event: Initialized): void {
-  let entity = new InitializedCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new InitializedCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.staker = event.params.staker
   entity.counterparty = event.params.counterparty
@@ -79,7 +84,10 @@ export function handleInitialized(event: Initialized): void {
 }
 
 export function handleRatioSet(event: RatioSet): void {
-  let entity = new RatioSetCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new RatioSetCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.ratio = event.params.ratio
   entity.ratioType = event.params.ratioType
@@ -91,7 +99,10 @@ export function handleRatioSet(event: RatioSet): void {
 }
 
 export function handleGriefed(event: Griefed): void {
-  let entity = new GriefedCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new GriefedCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.punisher = event.params.punisher
   entity.staker = event.params.staker
   entity.punishment = event.params.punishment
@@ -105,7 +116,10 @@ export function handleGriefed(event: Griefed): void {
 }
 
 export function handleLengthSet(event: LengthSet): void {
-  let entity = new LengthSetCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new LengthSetCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.length = event.params.length
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -115,7 +129,10 @@ export function handleLengthSet(event: LengthSet): void {
 }
 
 export function handleOperatorUpdated(event: OperatorUpdated): void {
-  let entity = new OperatorUpdatedCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new OperatorUpdatedCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -129,7 +146,10 @@ export function handleOperatorUpdated(event: OperatorUpdated): void {
 }
 
 export function handleMetadataSet(event: MetadataSet): void {
-  let entity = new MetadataSetCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new MetadataSetCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.metadata = event.params.metadata
   entity.metadataB58 = event.params.metadata.toBase58()
   entity.blockNumber = event.block.number
@@ -145,7 +165,10 @@ export function handleMetadataSet(event: MetadataSet): void {
 }
 
 export function handleStakeAdded(event: StakeAdded): void {
-  let entity = new StakeAddedCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeAddedCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.funder = event.params.funder
   entity.amount = event.params.amount
@@ -156,12 +179,17 @@ export function handleStakeAdded(event: StakeAdded): void {
   entity.save()
 
   let countdownGriefing = new CountdownGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
 
 export function handleStakeTaken(event: StakeTaken): void {
-  let entity = new StakeTakenCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeTakenCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.recipient = event.params.recipient
   entity.amount = event.params.amount
@@ -172,13 +200,20 @@ export function handleStakeTaken(event: StakeTaken): void {
   entity.save()
 
   let countdownGriefing = new CountdownGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(entity.amount)
-  countdownGriefing.totalTaken = countdownGriefing.totalTaken.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(
+    entity.amount,
+  )
+  countdownGriefing.totalTaken = countdownGriefing.totalTaken.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
 
 export function handleStakeBurned(event: StakeBurned): void {
-  let entity = new StakeBurnedCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeBurnedCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.amount = event.params.amount
   entity.blockNumber = event.block.number
@@ -188,13 +223,20 @@ export function handleStakeBurned(event: StakeBurned): void {
   entity.save()
 
   let countdownGriefing = new CountdownGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(entity.amount)
-  countdownGriefing.totalBurned = countdownGriefing.totalBurned.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(
+    entity.amount,
+  )
+  countdownGriefing.totalBurned = countdownGriefing.totalBurned.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
 
 export function handleDeadlineSet(event: DeadlineSet): void {
-  let entity = new DeadlineSetCountdownGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new DeadlineSetCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.deadline = event.params.deadline
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp

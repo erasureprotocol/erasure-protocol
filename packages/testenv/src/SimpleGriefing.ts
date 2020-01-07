@@ -1,5 +1,5 @@
-import { BigInt } from "@graphprotocol/graph-ts"
-import { InstanceCreated } from "../generated/SimpleGriefingFactory/SimpleGriefingFactory"
+import { BigInt } from '@graphprotocol/graph-ts'
+import { InstanceCreated } from '../generated/SimpleGriefingFactory/SimpleGriefingFactory'
 import {
   Griefed,
   Initialized,
@@ -8,9 +8,9 @@ import {
   RatioSet,
   StakeAdded,
   StakeBurned,
-  StakeTaken
-} from "../generated/templates/SimpleGriefing/SimpleGriefing"
-import { SimpleGriefing as SimpleGriefingDataSource } from "../generated/templates"
+  StakeTaken,
+} from '../generated/templates/SimpleGriefing/SimpleGriefing'
+import { SimpleGriefing as SimpleGriefingDataSource } from '../generated/templates'
 import {
   SimpleGriefing,
   GriefedSimpleGriefing,
@@ -21,11 +21,13 @@ import {
   StakeAddedSimpleGriefing,
   StakeBurnedSimpleGriefing,
   StakeTakenSimpleGriefing,
-  InstanceCreatedSimpleGriefingFactory
-} from "../generated/schema"
+  InstanceCreatedSimpleGriefingFactory,
+} from '../generated/schema'
 
 export function handleInstanceCreated(event: InstanceCreated): void {
-  let entity = new InstanceCreatedSimpleGriefingFactory(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new InstanceCreatedSimpleGriefingFactory(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
   entity.instance = event.params.instance
   entity.creator = event.params.creator
   entity.callData = event.params.callData
@@ -45,7 +47,10 @@ export function handleInstanceCreated(event: InstanceCreated): void {
 }
 
 export function handleGriefed(event: Griefed): void {
-  let entity = new GriefedSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new GriefedSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.punisher = event.params.punisher
   entity.staker = event.params.staker
   entity.punishment = event.params.punishment
@@ -59,7 +64,10 @@ export function handleGriefed(event: Griefed): void {
 }
 
 export function handleInitialized(event: Initialized): void {
-  let entity = new InitializedSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new InitializedSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.staker = event.params.staker
   entity.counterparty = event.params.counterparty
@@ -87,7 +95,10 @@ export function handleInitialized(event: Initialized): void {
 }
 
 export function handleMetadataSet(event: MetadataSet): void {
-  let entity = new MetadataSetSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new MetadataSetSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.metadata = event.params.metadata
   entity.metadataB58 = event.params.metadata.toBase58()
   entity.blockNumber = event.block.number
@@ -103,7 +114,10 @@ export function handleMetadataSet(event: MetadataSet): void {
 }
 
 export function handleOperatorUpdated(event: OperatorUpdated): void {
-  let entity = new OperatorUpdatedSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new OperatorUpdatedSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -117,7 +131,10 @@ export function handleOperatorUpdated(event: OperatorUpdated): void {
 }
 
 export function handleRatioSet(event: RatioSet): void {
-  let entity = new RatioSetSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new RatioSetSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.ratio = event.params.ratio
   entity.ratioType = event.params.ratioType
@@ -129,7 +146,10 @@ export function handleRatioSet(event: RatioSet): void {
 }
 
 export function handleStakeAdded(event: StakeAdded): void {
-  let entity = new StakeAddedSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeAddedSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.funder = event.params.funder
   entity.amount = event.params.amount
@@ -140,12 +160,17 @@ export function handleStakeAdded(event: StakeAdded): void {
   entity.save()
 
   let countdownGriefing = new SimpleGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
 
 export function handleStakeBurned(event: StakeBurned): void {
-  let entity = new StakeBurnedSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeBurnedSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.amount = event.params.amount
   entity.blockNumber = event.block.number
@@ -155,13 +180,20 @@ export function handleStakeBurned(event: StakeBurned): void {
   entity.save()
 
   let countdownGriefing = new SimpleGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(entity.amount)
-  countdownGriefing.totalBurned = countdownGriefing.totalBurned.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(
+    entity.amount,
+  )
+  countdownGriefing.totalBurned = countdownGriefing.totalBurned.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
 
 export function handleStakeTaken(event: StakeTaken): void {
-  let entity = new StakeTakenSimpleGriefing(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+  let entity = new StakeTakenSimpleGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
   entity.staker = event.params.staker
   entity.recipient = event.params.recipient
   entity.amount = event.params.amount
@@ -172,7 +204,11 @@ export function handleStakeTaken(event: StakeTaken): void {
   entity.save()
 
   let countdownGriefing = new SimpleGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(entity.amount)
-  countdownGriefing.totalTaken = countdownGriefing.totalTaken.plus(entity.amount)
+  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(
+    entity.amount,
+  )
+  countdownGriefing.totalTaken = countdownGriefing.totalTaken.plus(
+    entity.amount,
+  )
   countdownGriefing.save()
 }
