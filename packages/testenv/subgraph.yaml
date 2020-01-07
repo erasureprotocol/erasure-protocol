@@ -63,7 +63,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      address: '0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb'
+      address: '0x67B5656d60a809915323Bf2C40A8bEF15A152e3e'
       abi: FeedFactory
     mapping:
       kind: ethereum/events
