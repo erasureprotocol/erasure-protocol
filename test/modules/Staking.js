@@ -467,7 +467,12 @@ describe('Staking', function() {
 
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositDecreased')
-      await assert.emitWithArgs(txn, [tokenID, staker, amountToAdd, 0])
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountToAdd,
+        0,
+      ])
       await assert.emit(txn, 'StakeBurned')
       // await assert.emitWithArgs(txn, [
       //   tokenID,
