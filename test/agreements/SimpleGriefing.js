@@ -187,6 +187,7 @@ describe('SimpleGriefing', function() {
       await assert.emit(txn, 'MetadataSet')
       await assert.emitWithArgs(
         txn,
+        'MetadataSet',
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(operatorMetadata)),
       )
     })
@@ -484,7 +485,7 @@ describe('SimpleGriefing', function() {
         newOperator,
       )
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [newOperator])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await this.TestSimpleGriefing.getOperator()
       assert.equal(actualOperator, newOperator)
@@ -511,7 +512,9 @@ describe('SimpleGriefing', function() {
         newOperator,
       ).renounceOperator()
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [
+        ethers.constants.AddressZero,
+      ])
 
       const actualOperator = await this.TestSimpleGriefing.getOperator()
       assert.equal(actualOperator, ethers.constants.AddressZero)

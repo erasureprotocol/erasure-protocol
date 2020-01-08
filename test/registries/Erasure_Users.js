@@ -39,7 +39,7 @@ describe('Erasure_Users', function() {
 
       const txn = await this.ErasureUsers.from(user).registerUser(userData)
       await assert.emit(txn, 'UserRegistered')
-      await assert.emitWithArgs(txn, [user, userData])
+      await assert.emitWithArgs(txn, 'UserRegistered', [user, userData])
 
       const actualUserData = await this.ErasureUsers.getUserData(user)
       assert.equal(actualUserData, userData)
@@ -125,7 +125,7 @@ describe('Erasure_Users', function() {
       const user = removeUser()
       const txn = await this.ErasureUsers.from(user).removeUser()
       await assert.emit(txn, 'UserRemoved')
-      await assert.emitWithArgs(txn, [user])
+      await assert.emitWithArgs(txn, 'UserRemoved', [user])
 
       // ensure user data is deleted
       const actualUserData = await this.ErasureUsers.getUserData(user)

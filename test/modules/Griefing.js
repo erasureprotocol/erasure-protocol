@@ -204,7 +204,12 @@ describe('Griefing', function() {
         ratioType,
       )
       await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, tokenID, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,
@@ -224,7 +229,12 @@ describe('Griefing', function() {
         ratioType,
       )
       await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, tokenID, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,

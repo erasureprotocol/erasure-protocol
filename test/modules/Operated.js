@@ -28,7 +28,7 @@ describe('Operated', function() {
     it('should setOperator correctly', async () => {
       const txn = await contracts.TestOperated.instance.setOperator(operator)
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [operator])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [operator])
 
       const actualOperator = await contracts.TestOperated.instance.getOperator()
       assert.equal(actualOperator, operator)
@@ -65,7 +65,7 @@ describe('Operated', function() {
         newOperator,
       )
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [newOperator])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await contracts.TestOperated.instance.getOperator()
       assert.equal(actualOperator, newOperator)
@@ -99,7 +99,9 @@ describe('Operated', function() {
       await contracts.TestOperated.instance.setOperator(operator)
       const txn = await contracts.TestOperated.instance.renounceOperator()
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [
+        ethers.constants.AddressZero,
+      ])
 
       const actualOperator = await contracts.TestOperated.instance.getOperator()
       assert.equal(actualOperator, ethers.constants.AddressZero)

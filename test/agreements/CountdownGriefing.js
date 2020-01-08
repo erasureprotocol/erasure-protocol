@@ -218,6 +218,7 @@ describe('CountdownGriefing', function() {
       await assert.emit(txn, 'MetadataSet')
       await assert.emitWithArgs(
         txn,
+        'MetadataSet',
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(operatorMetadata)),
       )
     })
@@ -234,7 +235,7 @@ describe('CountdownGriefing', function() {
       const deadline = blockTimestamp + countdownLength
 
       await assert.emit(txn, 'DeadlineSet')
-      await assert.emitWithArgs(txn, deadline)
+      await assert.emitWithArgs(txn, 'DeadlineSet', deadline)
     }
 
     it('should revert when msg.sender is not staker or active operator', async () => {
@@ -763,7 +764,7 @@ describe('CountdownGriefing', function() {
         operator,
       ).transferOperator(newOperator)
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [newOperator])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await this.TestCountdownGriefing.getOperator()
       assert.equal(actualOperator, newOperator)
@@ -792,7 +793,9 @@ describe('CountdownGriefing', function() {
         operator,
       ).renounceOperator()
       await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [
+        ethers.constants.AddressZero,
+      ])
 
       const actualOperator = await this.TestCountdownGriefing.getOperator()
       assert.equal(actualOperator, ethers.constants.AddressZero)

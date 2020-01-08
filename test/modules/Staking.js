@@ -95,7 +95,7 @@ describe('Staking', function() {
 
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositIncreased')
-      await assert.emitWithArgs(txn, [
+      await assert.emitWithArgs(txn, 'DepositIncreased', [
         tokenID,
         staker,
         amountToAdd,
@@ -235,7 +235,7 @@ describe('Staking', function() {
 
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositDecreased')
-      await assert.emitWithArgs(txn, [
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
         staker,
         amountTaken,
@@ -292,7 +292,7 @@ describe('Staking', function() {
 
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositDecreased')
-      await assert.emitWithArgs(txn, [tokenID, staker, amountStaked, 0])
+      await assert.emitWithArgs(txn, 'DepositDecreased', [tokenID, staker, amountStaked, 0])
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()
@@ -413,18 +413,18 @@ describe('Staking', function() {
 
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositDecreased')
-      await assert.emitWithArgs(txn, [
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
         staker,
         amountBurn,
         amountToAdd - amountBurn,
       ])
       await assert.emit(txn, 'StakeBurned')
-      // await assert.emitWithArgs(txn, [
-      //   tokenID,
-      //   staker,
-      //   amountBurn,
-      // ])
+      await assert.emitWithArgs(txn, 'StakeBurned', [
+        tokenID,
+        staker,
+        amountBurn,
+      ])
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
@@ -465,6 +465,20 @@ describe('Staking', function() {
         staker,
       )
 
+      let txReceipt = await txn.wait()
+      let eventName = txReceipt.events[0].event
+      let args = txReceipt.events[0].args
+      console.log('eventName', eventName)
+      console.log('args', args)
+      console.log('receipt', txReceipt)
+
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountToAdd,
+        0,
+      ])
+
       // check receipt for correct event logs
       await assert.emit(txn, 'DepositDecreased')
       await assert.emitWithArgs(txn, 'DepositDecreased', [
@@ -474,11 +488,11 @@ describe('Staking', function() {
         0,
       ])
       await assert.emit(txn, 'StakeBurned')
-      // await assert.emitWithArgs(txn, [
-      //   tokenID,
-      //   staker,
-      //   amountToAdd,
-      // ])
+      await assert.emitWithArgs(txn, 'StakeBurned', [
+        tokenID,
+        staker,
+        amountToAdd,
+      ])
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()

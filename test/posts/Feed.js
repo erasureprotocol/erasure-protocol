@@ -172,13 +172,13 @@ describe('Feed', function() {
         newFeedMetadata,
       )
       await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
 
     it('should set feed metadata from creator', async () => {
       const txn = await this.TestFeed.from(creator).setMetadata(newFeedMetadata)
       await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
   })
 })
