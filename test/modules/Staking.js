@@ -465,20 +465,6 @@ describe('Staking', function() {
         staker,
       )
 
-      let txReceipt = await txn.wait()
-      let eventName = txReceipt.events[0].event
-      let args = txReceipt.events[0].args
-      console.log('eventName', eventName)
-      console.log('args', args)
-      console.log('receipt', txReceipt)
-
-      await assert.emitWithArgs(txn, 'DepositDecreased', [
-        tokenID,
-        staker,
-        amountToAdd,
-        0,
-      ])
-
       // check receipt for correct event logs
       await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
