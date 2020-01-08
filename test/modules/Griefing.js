@@ -203,8 +203,12 @@ describe('Griefing', function() {
         ratio.toHexString(),
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, tokenID, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,
@@ -223,8 +227,12 @@ describe('Griefing', function() {
         ratio,
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, tokenID, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,

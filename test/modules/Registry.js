@@ -123,8 +123,7 @@ describe('Registry', function() {
         Buffer.from(factoryExtraData),
       )
 
-      await assert.emit(txn, 'FactoryAdded')
-      await assert.emitWithArgs(txn, [
+      await assert.emitWithArgs(txn, 'FactoryAdded', [
         owner,
         factoryAddress,
         0,
@@ -204,8 +203,11 @@ describe('Registry', function() {
       const txn = await this.Registry.retireFactory(factoryAddress)
       retireLocalFactory(factoryAddress)
 
-      assert.emit(txn, 'FactoryRetired')
-      assert.emitWithArgs(txn, [owner, factoryAddress, factoryId])
+      assert.emitWithArgs(txn, 'FactoryRetired', [
+        owner,
+        factoryAddress,
+        factoryId,
+      ])
 
       const actualStatus = await this.Registry.getFactoryStatus(factoryAddress)
       assert.equal(actualStatus, FACTORY_STATUS.Retired)
@@ -364,8 +366,7 @@ describe('Registry', function() {
 
       const instanceIndex = addLocalInstance(instanceAddress)
 
-      await assert.emit(txn, 'InstanceRegistered')
-      await assert.emitWithArgs(txn, [
+      await assert.emitWithArgs(txn, 'InstanceRegistered', [
         instanceAddress,
         factoryAddress,
         seller,
