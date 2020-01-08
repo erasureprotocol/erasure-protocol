@@ -4,7 +4,7 @@ pragma solidity ^0.5.13;
 /// @title iNMR
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 contract iNMR {
 
     // ERC20

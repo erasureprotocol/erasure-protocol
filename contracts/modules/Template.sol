@@ -6,7 +6,7 @@ import "./iFactory.sol";
 /// @title Template
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 /// @notice This module is imported by all template contracts to implement core functionality associated with the factories.
 contract Template {
 
