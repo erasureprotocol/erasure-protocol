@@ -16,87 +16,87 @@ contract Staking is Deposit, TokenManager {
 
     using SafeMath for uint256;
 
-    event StakeBurned(address staker, uint256 amount);
+    event StakeBurned(TokenManager.Tokens tokenID, address staker, uint256 amount);
 
     /// @notice Transfer and deposit ERC20 tokens to this contract.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
     /// @param funder Address of the funder from whom the tokens are transfered.
     /// @param amountToAdd uint256 amount of tokens (18 decimals) to be added to the stake.
     /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
-    function _addStake(TokenManager.Tokens token, address staker, address funder, uint256 amountToAdd) internal returns (uint256 newStake) {
+    function _addStake(TokenManager.Tokens tokenID, address staker, address funder, uint256 amountToAdd) internal returns (uint256 newStake) {
         // update deposit
-        newStake = Deposit._increaseDeposit(token, staker, amountToAdd);
+        newStake = Deposit._increaseDeposit(tokenID, staker, amountToAdd);
 
         // transfer the stake amount
-        TokenManager._transferFrom(token, funder, address(this), amountToAdd);
+        TokenManager._transferFrom(tokenID, funder, address(this), amountToAdd);
 
         // explicit return
         return newStake;
     }
 
     /// @notice Withdraw some deposited stake and transfer to recipient.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
     /// @param recipient Address of the recipient who receives the tokens.
     /// @param amountToTake uint256 amount of tokens (18 decimals) to be remove from the stake.
     /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
-    function _takeStake(TokenManager.Tokens token, address staker, address recipient, uint256 amountToTake) internal returns (uint256 newStake) {
+    function _takeStake(TokenManager.Tokens tokenID, address staker, address recipient, uint256 amountToTake) internal returns (uint256 newStake) {
         // update deposit
-        newStake = Deposit._decreaseDeposit(token, staker, amountToTake);
+        newStake = Deposit._decreaseDeposit(tokenID, staker, amountToTake);
 
         // transfer the stake amount
-        TokenManager._transfer(token, recipient, amountToTake);
+        TokenManager._transfer(tokenID, recipient, amountToTake);
 
         // explicit return
         return newStake;
     }
 
     /// @notice Withdraw all deposited stake and transfer to recipient.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
     /// @param recipient Address of the recipient who receives the tokens.
     /// @return amountTaken uint256 amount of tokens (18 decimals) taken from the stake.
-    function _takeFullStake(TokenManager.Tokens token, address staker, address recipient) internal returns (uint256 amountTaken) {
+    function _takeFullStake(TokenManager.Tokens tokenID, address staker, address recipient) internal returns (uint256 amountTaken) {
         // get deposit
-        uint256 currentDeposit = Deposit.getDeposit(token, staker);
+        uint256 currentDeposit = Deposit.getDeposit(tokenID, staker);
 
         // take full stake
-        _takeStake(token, staker, recipient, currentDeposit);
+        _takeStake(tokenID, staker, recipient, currentDeposit);
 
         // return
         return currentDeposit;
     }
 
     /// @notice Burn some deposited stake.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
     /// @param amountToBurn uint256 amount of tokens (18 decimals) to be burn from the stake.
     /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
-    function _burnStake(TokenManager.Tokens token, address staker, uint256 amountToBurn) internal returns (uint256 newStake) {
+    function _burnStake(TokenManager.Tokens tokenID, address staker, uint256 amountToBurn) internal returns (uint256 newStake) {
         // update deposit
-        uint256 newDeposit = Deposit._decreaseDeposit(token, staker, amountToBurn);
+        uint256 newDeposit = Deposit._decreaseDeposit(tokenID, staker, amountToBurn);
 
         // burn the stake amount
-        TokenManager._burn(token, amountToBurn);
+        TokenManager._burn(tokenID, amountToBurn);
 
         // emit event
-        emit StakeBurned(staker, amountToBurn);
+        emit StakeBurned(tokenID, staker, amountToBurn);
 
         // return
         return newDeposit;
     }
 
     /// @notice Burn all deposited stake.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
     /// @return amountBurned uint256 amount of tokens (18 decimals) taken from the stake.
-    function _burnFullStake(TokenManager.Tokens token, address staker) internal returns (uint256 amountBurned) {
+    function _burnFullStake(TokenManager.Tokens tokenID, address staker) internal returns (uint256 amountBurned) {
         // get deposit
-        uint256 currentDeposit = Deposit.getDeposit(token, staker);
+        uint256 currentDeposit = Deposit.getDeposit(tokenID, staker);
 
         // burn full stake
-        _burnStake(token, staker, currentDeposit);
+        _burnStake(tokenID, staker, currentDeposit);
 
         // return
         return currentDeposit;

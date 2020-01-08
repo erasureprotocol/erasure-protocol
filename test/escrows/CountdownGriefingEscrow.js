@@ -2,6 +2,7 @@ const etherlime = require('etherlime-lib')
 const ethers = require('ethers')
 
 const { setupDeployment, initDeployment } = require('../helpers/setup')
+const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 const {
   hexlify,
   abiEncodeWithSelector,
@@ -28,12 +29,13 @@ describe('CountdownGriefingEscrow', function() {
   const fulfiller = accounts[3].signer.signingKey.address
 
   // shared params
+  const tokenID = TOKEN_TYPES.NMR
   const escrowCountdown = 2 * 24 * 60 * 60 // 2 days
   const agreementCountdown = 30 * 24 * 60 * 60 // 30 days
   const paymentAmount = ethers.utils.parseEther('2')
   const stakeAmount = ethers.utils.parseEther('1')
   const griefRatio = ethers.utils.parseEther('3')
-  const ratioType = 2
+  const ratioType = RATIO_TYPES.Dec
   const encryptedData = '0x12341234123412341234'
 
   // ABICoder
@@ -95,6 +97,7 @@ describe('CountdownGriefingEscrow', function() {
       'address',
       'address',
       'address',
+      'uint8',
       'uint256',
       'uint256',
       'uint256',
@@ -105,6 +108,7 @@ describe('CountdownGriefingEscrow', function() {
       _operator,
       _buyer,
       _seller,
+      tokenID,
       paymentAmount,
       stakeAmount,
       escrowCountdown,
@@ -199,7 +203,6 @@ describe('CountdownGriefingEscrow', function() {
       g.Instance,
       'PaymentDeposited',
     )
-    ;[events.StakeAdded] = utils.parseLogs(receipt, g.Instance, 'StakeAdded')
     ;[events.DepositIncreased] = utils.parseLogs(
       receipt,
       g.Instance,
@@ -212,9 +215,6 @@ describe('CountdownGriefingEscrow', function() {
       events.PaymentDeposited.amount.toString(),
       paymentAmount.toString(),
     )
-    assert.equal(events.StakeAdded.staker, _buyer)
-    assert.equal(events.StakeAdded.funder, _buyer)
-    assert.equal(events.StakeAdded.amount.toString(), paymentAmount.toString())
     assert.equal(events.DepositIncreased.user, _buyer)
     assert.equal(
       events.DepositIncreased.amount.toString(),
@@ -232,7 +232,7 @@ describe('CountdownGriefingEscrow', function() {
 
     assert.equal(await g.Instance.getBuyer(), _buyer)
     assert.equal(
-      (await g.Instance.getStake(_buyer)).toString(),
+      (await g.Instance.getDeposit(_buyer)).toString(),
       paymentAmount.toString(),
     )
     assert.equal(await g.Instance.getEscrowStatus(), 2)
@@ -268,7 +268,6 @@ describe('CountdownGriefingEscrow', function() {
       g.Instance,
       'StakeDeposited',
     )
-    ;[events.StakeAdded] = utils.parseLogs(receipt, g.Instance, 'StakeAdded')
     ;[events.DepositIncreased] = utils.parseLogs(
       receipt,
       g.Instance,
@@ -281,9 +280,6 @@ describe('CountdownGriefingEscrow', function() {
       events.StakeDeposited.amount.toString(),
       stakeAmount.toString(),
     )
-    assert.equal(events.StakeAdded.staker, _seller)
-    assert.equal(events.StakeAdded.funder, _seller)
-    assert.equal(events.StakeAdded.amount.toString(), stakeAmount.toString())
     assert.equal(events.DepositIncreased.user, _seller)
     assert.equal(
       events.DepositIncreased.amount.toString(),
@@ -301,7 +297,7 @@ describe('CountdownGriefingEscrow', function() {
 
     assert.equal(await g.Instance.getSeller(), _seller)
     assert.equal(
-      (await g.Instance.getStake(_seller)).toString(),
+      (await g.Instance.getDeposit(_seller)).toString(),
       stakeAmount.toString(),
     )
     assert.equal(await g.Instance.getEscrowStatus(), 1)
@@ -393,11 +389,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'StakeDeposited',
         )
-        ;[events.StakeAdded] = utils.parseLogs(
-          receipt,
-          g.Instance,
-          'StakeAdded',
-        )
         events.Transfer = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
         events.DepositDecreased = utils.parseLogs(
           receipt,
@@ -414,12 +405,6 @@ describe('CountdownGriefingEscrow', function() {
         assert.equal(events.StakeDeposited.seller, fulfiller)
         assert.equal(
           events.StakeDeposited.amount.toString(),
-          stakeAmount.toString(),
-        )
-        assert.equal(events.StakeAdded.staker, fulfiller)
-        assert.equal(events.StakeAdded.funder, fulfiller)
-        assert.equal(
-          events.StakeAdded.amount.toString(),
           stakeAmount.toString(),
         )
         assert.equal(events.Transfer[0].from, fulfiller)
@@ -461,9 +446,9 @@ describe('CountdownGriefingEscrow', function() {
         // validate state change
 
         assert.equal(await g.Instance.getSeller(), fulfiller)
-        assert.equal((await g.Instance.getStake(fulfiller)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(fulfiller)).toNumber(), 0)
         assert.equal(await g.Instance.getBuyer(), requester)
-        assert.equal((await g.Instance.getStake(requester)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(requester)).toNumber(), 0)
         assert.equal(await g.Instance.getEscrowStatus(), 4)
       })
 
@@ -511,11 +496,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'DepositDecreased',
         )
-        ;[events.StakeTaken] = utils.parseLogs(
-          receipt,
-          g.Instance,
-          'StakeTaken',
-        )
 
         assert.equal(events.Transfer.from, g.Instance.contractAddress)
         assert.equal(events.Transfer.to, requester)
@@ -526,16 +506,10 @@ describe('CountdownGriefingEscrow', function() {
           paymentAmount.toString(),
         )
         assert.equal(events.DepositDecreased.newDeposit.toNumber(), 0)
-        assert.equal(events.StakeTaken.staker, requester)
-        assert.equal(events.StakeTaken.recipient, requester)
-        assert.equal(
-          events.StakeTaken.amount.toString(),
-          paymentAmount.toString(),
-        )
 
         // validate state change
 
-        assert.equal((await g.Instance.getStake(requester)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(requester)).toNumber(), 0)
         assert.equal(await g.Instance.getEscrowStatus(), 5)
       })
     })
@@ -594,11 +568,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'PaymentDeposited',
         )
-        ;[events.StakeAdded] = utils.parseLogs(
-          receipt,
-          g.Instance,
-          'StakeAdded',
-        )
         ;[events.DepositIncreased] = utils.parseLogs(
           receipt,
           g.Instance,
@@ -609,12 +578,6 @@ describe('CountdownGriefingEscrow', function() {
         assert.equal(events.PaymentDeposited.buyer, buyer)
         assert.equal(
           events.PaymentDeposited.amount.toString(),
-          paymentAmount.toString(),
-        )
-        assert.equal(events.StakeAdded.staker, buyer)
-        assert.equal(events.StakeAdded.funder, buyer)
-        assert.equal(
-          events.StakeAdded.amount.toString(),
           paymentAmount.toString(),
         )
         assert.equal(events.DepositIncreased.user, buyer)
@@ -635,7 +598,7 @@ describe('CountdownGriefingEscrow', function() {
 
         assert.equal(await g.Instance.getBuyer(), buyer)
         assert.equal(
-          (await g.Instance.getStake(buyer)).toString(),
+          (await g.Instance.getDeposit(buyer)).toString(),
           paymentAmount.toString(),
         )
         assert.equal(await g.Instance.getEscrowStatus(), 3)
@@ -711,9 +674,9 @@ describe('CountdownGriefingEscrow', function() {
         // validate state change
 
         assert.equal(await g.Instance.getSeller(), seller)
-        assert.equal((await g.Instance.getStake(seller)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(seller)).toNumber(), 0)
         assert.equal(await g.Instance.getBuyer(), buyer)
-        assert.equal((await g.Instance.getStake(buyer)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(buyer)).toNumber(), 0)
         assert.equal(await g.Instance.getEscrowStatus(), 4)
       })
 
@@ -760,11 +723,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'DepositDecreased',
         )
-        ;[events.StakeTaken] = utils.parseLogs(
-          receipt,
-          g.Instance,
-          'StakeTaken',
-        )
 
         assert.equal(events.Transfer.from, g.Instance.contractAddress)
         assert.equal(events.Transfer.to, seller)
@@ -775,16 +733,10 @@ describe('CountdownGriefingEscrow', function() {
           stakeAmount.toString(),
         )
         assert.equal(events.DepositDecreased.newDeposit.toNumber(), 0)
-        assert.equal(events.StakeTaken.staker, seller)
-        assert.equal(events.StakeTaken.recipient, seller)
-        assert.equal(
-          events.StakeTaken.amount.toString(),
-          stakeAmount.toString(),
-        )
 
         // validate state change
 
-        assert.equal((await g.Instance.getStake(seller)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(seller)).toNumber(), 0)
         assert.equal(await g.Instance.getEscrowStatus(), 5)
       })
     })
@@ -841,11 +793,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'PaymentDeposited',
         )
-        ;[events.StakeAdded] = utils.parseLogs(
-          receipt,
-          g.Instance,
-          'StakeAdded',
-        )
         ;[events.DepositIncreased] = utils.parseLogs(
           receipt,
           g.Instance,
@@ -856,12 +803,6 @@ describe('CountdownGriefingEscrow', function() {
         assert.equal(events.PaymentDeposited.buyer, buyer)
         assert.equal(
           events.PaymentDeposited.amount.toString(),
-          paymentAmount.toString(),
-        )
-        assert.equal(events.StakeAdded.staker, buyer)
-        assert.equal(events.StakeAdded.funder, buyer)
-        assert.equal(
-          events.StakeAdded.amount.toString(),
           paymentAmount.toString(),
         )
         assert.equal(events.DepositIncreased.user, buyer)
@@ -882,7 +823,7 @@ describe('CountdownGriefingEscrow', function() {
 
         assert.equal(await g.Instance.getBuyer(), buyer)
         assert.equal(
-          (await g.Instance.getStake(buyer)).toString(),
+          (await g.Instance.getDeposit(buyer)).toString(),
           paymentAmount.toString(),
         )
         assert.equal(await g.Instance.getEscrowStatus(), 3)
@@ -909,7 +850,6 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'DepositDecreased',
         )
-        events.StakeTaken = utils.parseLogs(receipt, g.Instance, 'StakeTaken')
 
         assert.equal(events.Transfer[0].from, g.Instance.contractAddress)
         assert.equal(events.Transfer[0].to, seller)
@@ -923,12 +863,6 @@ describe('CountdownGriefingEscrow', function() {
           stakeAmount.toString(),
         )
         assert.equal(events.DepositDecreased[0].newDeposit.toNumber(), 0)
-        assert.equal(events.StakeTaken[0].staker, seller)
-        assert.equal(events.StakeTaken[0].recipient, seller)
-        assert.equal(
-          events.StakeTaken[0].amount.toString(),
-          stakeAmount.toString(),
-        )
         assert.equal(events.Transfer[1].from, g.Instance.contractAddress)
         assert.equal(events.Transfer[1].to, buyer)
         assert.equal(
@@ -941,17 +875,11 @@ describe('CountdownGriefingEscrow', function() {
           paymentAmount.toString(),
         )
         assert.equal(events.DepositDecreased[1].newDeposit.toNumber(), 0)
-        assert.equal(events.StakeTaken[1].staker, buyer)
-        assert.equal(events.StakeTaken[1].recipient, buyer)
-        assert.equal(
-          events.StakeTaken[1].amount.toString(),
-          paymentAmount.toString(),
-        )
 
         // validate state change
 
-        assert.equal((await g.Instance.getStake(seller)).toNumber(), 0)
-        assert.equal((await g.Instance.getStake(buyer)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(seller)).toNumber(), 0)
+        assert.equal((await g.Instance.getDeposit(buyer)).toNumber(), 0)
         assert.equal(await g.Instance.getEscrowStatus(), 5)
       })
     })

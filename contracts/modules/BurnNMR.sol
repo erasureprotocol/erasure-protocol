@@ -30,13 +30,13 @@ contract BurnNMR {
 
     /// @notice Get the NMR token address.
     /// @return token address The NMR token address.
-    function getToken() internal pure returns (address token) {
+    function getTokenAddress() internal pure returns (address token) {
         token = _NMRToken;
     }
 
     /// @notice Get the NMR Uniswap exchange address.
     /// @return token address The NMR Uniswap exchange address.
-    function getExchange() internal pure returns (address exchange) {
+    function getExchangeAddress() internal pure returns (address exchange) {
         exchange = _NMRExchange;
     }
 

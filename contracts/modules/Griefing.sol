@@ -18,10 +18,10 @@ contract Griefing is Staking {
     struct GriefRatio {
         uint256 ratio;
         RatioType ratioType;
-        TokenManager.Tokens token;
+        TokenManager.Tokens tokenID;
    }
 
-    event RatioSet(address staker, TokenManager.Tokens token, uint256 ratio, RatioType ratioType);
+    event RatioSet(address staker, TokenManager.Tokens tokenID, uint256 ratio, RatioType ratioType);
     event Griefed(address punisher, address staker, uint256 punishment, uint256 cost, bytes message);
 
     uint256 internal constant e18 = uint256(10) ** uint256(18);
@@ -30,28 +30,28 @@ contract Griefing is Staking {
 
     /// @notice Set the grief ratio and type for a given staker
     /// @param staker Address of the staker
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param ratio Uint256 number (18 decimals)
     ///              NOTE: ratio must be 0 if ratioType is Inf or NaN
     /// @param ratioType Griefing.RatioType number. Ratio Type must be one of the following three values:
     ///                   - Dec: Ratio is a decimal number with 18 decimals
     ///                   - Inf: Punishment at no cost
     ///                   - NaN: No Punishment
-    function _setRatio(address staker, TokenManager.Tokens token, uint256 ratio, RatioType ratioType) internal {
+    function _setRatio(address staker, TokenManager.Tokens tokenID, uint256 ratio, RatioType ratioType) internal {
         if (ratioType == RatioType.NaN || ratioType == RatioType.Inf) {
             require(ratio == 0, "ratio must be 0 when ratioType is NaN or Inf");
         }
 
         // set token in storage
-        require(TokenManager.isValidToken(token), 'invalid token');
-        _griefRatio[staker].token = token;
+        require(TokenManager.isValidTokenID(tokenID), 'invalid tokenID');
+        _griefRatio[staker].tokenID = tokenID;
 
         // set data in storage
         _griefRatio[staker].ratio = ratio;
         _griefRatio[staker].ratioType = ratioType;
 
         // emit event
-        emit RatioSet(staker, token, ratio, ratioType);
+        emit RatioSet(staker, tokenID, ratio, ratioType);
     }
 
     /// @notice Punish a stake through griefing
@@ -71,7 +71,7 @@ contract Griefing is Staking {
         // get grief data from storage
         uint256 ratio = _griefRatio[staker].ratio;
         RatioType ratioType = _griefRatio[staker].ratioType;
-        TokenManager.Tokens token = _griefRatio[staker].token;
+        TokenManager.Tokens tokenID = _griefRatio[staker].tokenID;
 
         require(ratioType != RatioType.NaN, "no punishment allowed");
 
@@ -80,10 +80,10 @@ contract Griefing is Staking {
         cost = getCost(ratio, punishment, ratioType);
 
         // burn the cost from the punisher's balance
-        TokenManager._burnFrom(token, punisher, cost);
+        TokenManager._burnFrom(tokenID, punisher, cost);
 
         // burn the punishment from the target's stake
-        Staking._burnStake(token, staker, punishment);
+        Staking._burnStake(tokenID, staker, punishment);
 
         // emit event
         emit Griefed(punisher, staker, punishment, cost, message);
@@ -96,20 +96,22 @@ contract Griefing is Staking {
 
     /// @notice Get the ratio of a staker
     /// @param staker Address of the staker
-    /// @return token TokenManager.Tokens ID of the ERC20 token.
     /// @return ratio Uint256 number (18 decimals)
     /// @return ratioType Griefing.RatioType number. Ratio Type must be one of the following three values:
     ///                   - Dec: Ratio is a decimal number with 18 decimals
     ///                   - Inf: Punishment at no cost
     ///                   - NaN: No Punishment
-    function getRatio(address staker) public view returns (TokenManager.Tokens token, uint256 ratio, RatioType ratioType) {
+    function getRatio(address staker) public view returns (uint256 ratio, RatioType ratioType) {
         // get stake data from storage
-        return (_griefRatio[staker].token, _griefRatio[staker].ratio, _griefRatio[staker].ratioType);
+        return (_griefRatio[staker].ratio, _griefRatio[staker].ratioType);
     }
 
-    function getToken(address staker) public view returns (TokenManager.Tokens token) {
+    /// @notice Get the tokenID used by a staker
+    /// @param staker Address of the staker
+    /// @return tokenID TokenManager.Tokens ID of the ERC20 token.
+    function getTokenID(address staker) internal view returns (TokenManager.Tokens tokenID) {
         // get stake data from storage
-        return (_griefRatio[staker].token);
+        return (_griefRatio[staker].tokenID);
     }
 
     // pure functions
