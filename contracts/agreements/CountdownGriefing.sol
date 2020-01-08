@@ -34,7 +34,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address operator,
         address staker,
         address counterparty,
-        Staking.Tokens token,
+        TokenManager.Tokens tokenID,
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
@@ -48,7 +48,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
     /// @param staker address of the staker who owns the stake. Required parameter. This address is the only one able to retrieve the stake and cannot be changed.
     /// @param counterparty address of the counterparty who has the right to reward, release, and punish the stake. Required parameter. This address cannot be changed.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
     /// @param ratio uint256 number (18 decimals) used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param ratioType Griefing.RatioType number used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param countdownLength uint256 amount of time (in seconds) the counterparty has to punish or reward before the agreement ends. Required parameter.
@@ -57,7 +57,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address operator,
         address staker,
         address counterparty,
-        TokenManager.Tokens token,
+        TokenManager.Tokens tokenID,
         uint256 ratio,
         Griefing.RatioType ratioType,
         uint256 countdownLength,
@@ -73,7 +73,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         }
 
         // set griefing ratio
-        Griefing._setRatio(staker, token, ratio, ratioType);
+        Griefing._setRatio(staker, tokenID, ratio, ratioType);
 
         // set countdown length
         Countdown._setLength(countdownLength);
@@ -84,7 +84,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         }
 
         // log initialization params
-        emit Initialized(operator, staker, counterparty, token, ratio, ratioType, countdownLength, metadata);
+        emit Initialized(operator, staker, counterparty, tokenID, ratio, ratioType, countdownLength, metadata);
     }
 
     // state functions
@@ -117,7 +117,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address staker = _data.staker;
 
         // add stake
-        Staking._addStake(Griefing.getToken(staker), staker, msg.sender, amountToAdd);
+        Staking._addStake(Griefing.getTokenID(staker), staker, msg.sender, amountToAdd);
     }
 
     /// @notice Called by the counterparty to increase the stake
@@ -136,7 +136,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address staker = _data.staker;
 
         // add stake
-        Staking._addStake(Griefing.getToken(staker), staker, msg.sender, amountToAdd);
+        Staking._addStake(Griefing.getTokenID(staker), staker, msg.sender, amountToAdd);
     }
 
     /// @notice Called by the counterparty to punish the stake
@@ -171,7 +171,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address staker = _data.staker;
 
         // release stake back to the staker
-        Staking._takeStake(Griefing.getToken(staker), staker, staker, amountToRelease);
+        Staking._takeStake(Griefing.getTokenID(staker), staker, staker, amountToRelease);
     }
 
     /// @notice Called by the staker to begin countdown to finalize the agreement
@@ -205,7 +205,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address staker = _data.staker;
 
         // retrieve stake
-        return Staking._takeFullStake(Griefing.getToken(staker), staker, recipient);
+        return Staking._takeFullStake(Griefing.getTokenID(staker), staker, recipient);
     }
 
     /// @notice Called by the operator to transfer control to new operator
@@ -259,17 +259,24 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         return caller == getCounterparty();
     }
 
+    /// @notice Get the token ID and address used by the agreement
+    /// @return tokenID TokenManager.Tokens ID of the ERC20 token.
+    /// @return token address of the ERC20 token.
+    function getToken() public view returns (TokenManager.Tokens tokenID, address token) {
+        tokenID = Griefing.getTokenID(_data.staker);
+        return (tokenID, TokenManager.getTokenAddress(tokenID));
+    }
+
     /// @notice Get the current stake of the agreement
     /// @return stake uint256 amount of tokens (18 decimals) staked.
-    function getCurrentStake() public view returns (TokenManager.Tokens token, uint256 stake) {
-        token = Griefing.getToken(_data.staker);
-        return (token, Deposit.getDeposit(token, _data.staker));
+    function getStake() public view returns (uint256 stake) {
+        return Deposit.getDeposit(Griefing.getTokenID(_data.staker), _data.staker);
     }
 
     /// @notice Validate if the current stake is greater than 0
     /// @return validity bool true if non-zero stake
     function isStaked() public view returns (bool validity) {
-        (, uint256 currentStake) = getCurrentStake();
+        uint256 currentStake = getStake();
         return currentStake > 0;
     }
 
