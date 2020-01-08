@@ -215,7 +215,6 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(operator).setMetadata(
         Buffer.from(operatorMetadata),
       )
-      await assert.emit(txn, 'MetadataSet')
       await assert.emitWithArgs(
         txn,
         'MetadataSet',
@@ -234,7 +233,6 @@ describe('CountdownGriefing', function() {
       const blockTimestamp = block.timestamp
       const deadline = blockTimestamp + countdownLength
 
-      await assert.emit(txn, 'DeadlineSet')
       await assert.emitWithArgs(txn, 'DeadlineSet', deadline)
     }
 
@@ -763,7 +761,6 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(
         operator,
       ).transferOperator(newOperator)
-      await assert.emit(txn, 'OperatorUpdated')
       await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await this.TestCountdownGriefing.getOperator()
@@ -792,7 +789,6 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(
         operator,
       ).renounceOperator()
-      await assert.emit(txn, 'OperatorUpdated')
       await assert.emitWithArgs(txn, 'OperatorUpdated', [
         ethers.constants.AddressZero,
       ])

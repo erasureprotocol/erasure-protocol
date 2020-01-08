@@ -94,7 +94,6 @@ describe('Staking', function() {
       )
 
       // check receipt for correct event logs
-      await assert.emit(txn, 'DepositIncreased')
       await assert.emitWithArgs(txn, 'DepositIncreased', [
         tokenID,
         staker,
@@ -234,7 +233,6 @@ describe('Staking', function() {
       )
 
       // check receipt for correct event logs
-      await assert.emit(txn, 'DepositDecreased')
       await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
         staker,
@@ -291,8 +289,12 @@ describe('Staking', function() {
       )
 
       // check receipt for correct event logs
-      await assert.emit(txn, 'DepositDecreased')
-      await assert.emitWithArgs(txn, 'DepositDecreased', [tokenID, staker, amountStaked, 0])
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountStaked,
+        0,
+      ])
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()
@@ -412,14 +414,12 @@ describe('Staking', function() {
       )
 
       // check receipt for correct event logs
-      await assert.emit(txn, 'DepositDecreased')
       await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
         staker,
         amountBurn,
         amountToAdd - amountBurn,
       ])
-      await assert.emit(txn, 'StakeBurned')
       await assert.emitWithArgs(txn, 'StakeBurned', [
         tokenID,
         staker,
@@ -480,14 +480,12 @@ describe('Staking', function() {
       ])
 
       // check receipt for correct event logs
-      await assert.emit(txn, 'DepositDecreased')
       await assert.emitWithArgs(txn, 'DepositDecreased', [
         tokenID,
         staker,
         amountToAdd,
         0,
       ])
-      await assert.emit(txn, 'StakeBurned')
       await assert.emitWithArgs(txn, 'StakeBurned', [
         tokenID,
         staker,

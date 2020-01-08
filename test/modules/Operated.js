@@ -27,7 +27,6 @@ describe('Operated', function() {
   describe('Operator._setOperator', () => {
     it('should setOperator correctly', async () => {
       const txn = await contracts.TestOperated.instance.setOperator(operator)
-      await assert.emit(txn, 'OperatorUpdated')
       await assert.emitWithArgs(txn, 'OperatorUpdated', [operator])
 
       const actualOperator = await contracts.TestOperated.instance.getOperator()
@@ -64,7 +63,6 @@ describe('Operated', function() {
       const txn = await contracts.TestOperated.instance.transferOperator(
         newOperator,
       )
-      await assert.emit(txn, 'OperatorUpdated')
       await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await contracts.TestOperated.instance.getOperator()
@@ -98,7 +96,6 @@ describe('Operated', function() {
     it('should renounce operator correctly', async () => {
       await contracts.TestOperated.instance.setOperator(operator)
       const txn = await contracts.TestOperated.instance.renounceOperator()
-      await assert.emit(txn, 'OperatorUpdated')
       await assert.emitWithArgs(txn, 'OperatorUpdated', [
         ethers.constants.AddressZero,
       ])

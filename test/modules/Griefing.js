@@ -203,7 +203,6 @@ describe('Griefing', function() {
         ratio.toHexString(),
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
       await assert.emitWithArgs(txn, 'RatioSet', [
         seller,
         tokenID,
@@ -228,7 +227,6 @@ describe('Griefing', function() {
         ratio,
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
       await assert.emitWithArgs(txn, 'RatioSet', [
         seller,
         tokenID,
