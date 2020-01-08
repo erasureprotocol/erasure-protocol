@@ -38,7 +38,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     struct Data {
         address buyer;
         address seller;
-        Staking.Tokens token;
+        TokenManager.Tokens tokenID;
         uint128 paymentAmount;
         uint128 stakeAmount;
         EscrowStatus status;
@@ -55,7 +55,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator,
         address buyer,
         address seller,
-        Staking.Tokens token,
+        TokenManager.Tokens tokenID,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 countdownLength,
@@ -74,7 +74,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
     /// @param buyer address of the buyer. Optional parameter. This address is the only one able to deposit the payment. If not set, the first to deposit the payment becomes the buyer.
     /// @param seller address of the seller. Optional parameter. This address is the only one able to deposit the stake. If not set, the first to deposit the stake becomes the seller.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
     /// @param paymentAmount uint256 amount of tokens (18 decimals) to be deposited by buyer as payment. Required parameter. This number must fit in a uint128 for optimization reasons.
     /// @param stakeAmount uint256 amount of tokens (18 decimals) to be deposited by seller as stake. Required parameter. This number must fit in a uint128 for optimization reasons.
     /// @param escrowCountdown uint256 amount of time (in seconds) the seller has to finalize the escrow after the payment and stake is deposited. Required parameter.
@@ -86,7 +86,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator,
         address buyer,
         address seller,
-        TokenManager.Tokens token,
+        TokenManager.Tokens tokenID,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 escrowCountdown,
@@ -107,8 +107,8 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
 
         // set token
-        require(TokenManager.isValidToken(token), 'invalid token');
-        _data.token = token;
+        require(TokenManager.isValidTokenID(tokenID), 'invalid token');
+        _data.tokenID = tokenID;
 
         // set amounts if defined
         if (paymentAmount != uint256(0)) {
@@ -141,7 +141,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
 
         // emit event
-        emit Initialized(operator, buyer, seller, token, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
+        emit Initialized(operator, buyer, seller, tokenID, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
     }
 
     /// @notice Emit metadata event.
@@ -199,7 +199,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // Add the stake amount
         if (stakeAmount != uint256(0)) {
-            Staking._addStake(_data.token, seller, msg.sender, stakeAmount);
+            Staking._addStake(_data.tokenID, seller, msg.sender, stakeAmount);
         }
 
         // emit event
@@ -257,7 +257,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // Add the payment as a stake
         if (paymentAmount != uint256(0)) {
-            Staking._addStake(_data.token, buyer, msg.sender, paymentAmount);
+            Staking._addStake(_data.tokenID, buyer, msg.sender, paymentAmount);
         }
 
         // emit event
@@ -300,7 +300,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
                 address(this), // operator
                 _data.seller,  // staker
                 _data.buyer,   // counterparty
-                _data.token,   // token
+                _data.tokenID, // tokenID
                 uint256(_data.agreementParams.ratio),           // griefRatio
                 _data.agreementParams.ratioType,                // ratioType
                 uint256(_data.agreementParams.countdownLength), // countdownLength
@@ -315,13 +315,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         uint256 totalStake;
         {
-            uint256 paymentAmount = Deposit._clearDeposit(_data.token, _data.buyer);
-            uint256 stakeAmount = Deposit._clearDeposit(_data.token, _data.seller);
+            uint256 paymentAmount = Deposit._clearDeposit(_data.tokenID, _data.buyer);
+            uint256 stakeAmount = Deposit._clearDeposit(_data.tokenID, _data.seller);
             totalStake = paymentAmount.add(stakeAmount);
         }
 
         if (totalStake > 0) {
-            TokenManager._approve(_data.token, agreement, totalStake);
+            TokenManager._approve(_data.tokenID, agreement, totalStake);
             CountdownGriefing(agreement).increaseStake(totalStake);
         }
 
@@ -341,7 +341,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         _data.status = EscrowStatus.isFinalized;
 
         // delete storage
-        delete _data.token;
+        delete _data.tokenID;
         delete _data.paymentAmount;
         delete _data.stakeAmount;
         delete _data.agreementParams;
@@ -399,23 +399,23 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // declare storage variables in memory
         address seller = _data.seller;
         address buyer = _data.buyer;
-        TokenManager.Tokens token = _data.token;
+        TokenManager.Tokens tokenID = _data.tokenID;
 
         // return stake to seller
-        if (Deposit.getDeposit(token, seller) != 0) {
-            Staking._takeFullStake(token, seller, seller);
+        if (Deposit.getDeposit(tokenID, seller) != 0) {
+            Staking._takeFullStake(tokenID, seller, seller);
         }
 
         // return payment to buyer
-        if (Deposit.getDeposit(token, buyer) != 0) {
-            Staking._takeFullStake(token, buyer, buyer);
+        if (Deposit.getDeposit(tokenID, buyer) != 0) {
+            Staking._takeFullStake(tokenID, buyer, buyer);
         }
 
         // update status
         _data.status = EscrowStatus.isCancelled;
 
         // delete storage
-        delete _data.token;
+        delete _data.tokenID;
         delete _data.paymentAmount;
         delete _data.stakeAmount;
         delete _data.agreementParams;
@@ -475,15 +475,22 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return caller == getSeller();
     }
 
+    /// @notice Return the amount of tokens deposited by the user
+    /// @param user address of the user to query the deposit
+    /// @return amount uint256 amount of tokens deposited
+    function getDeposit(address user) public view returns (uint256 amount) {
+        return Deposit.getDeposit(_data.tokenID, user);
+    }
+
     /// @notice Get the data from storage.
-    /// @return token TokenManager.Tokens ID of the ERC20 token.
+    /// @return tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @return uint128 paymentAmount set in initialization.
     /// @return uint128 stakeAmount set in initialization.
     /// @return uint120 ratio used for initialization of agreement on completion.
     /// @return Griefing.RatioType ratioType used for initialization of agreement on completion.
     /// @return uint128 countdownLength used for initialization of agreement on completion.
     function getData() public view returns (
-        TokenManager.Tokens token,
+        TokenManager.Tokens tokenID,
         uint128 paymentAmount,
         uint128 stakeAmount,
         uint120 ratio,
@@ -491,7 +498,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         uint128 countdownLength
     ) {
         return (
-            _data.token,
+            _data.tokenID,
             _data.paymentAmount,
             _data.stakeAmount,
             _data.agreementParams.ratio,

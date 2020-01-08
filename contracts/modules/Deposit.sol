@@ -17,36 +17,36 @@ contract Deposit {
 
     mapping (uint256 => mapping (address => uint256)) private _deposit;
 
-    event DepositIncreased(TokenManager.Tokens token, address user, uint256 amount, uint256 newDeposit);
-    event DepositDecreased(TokenManager.Tokens token, address user, uint256 amount, uint256 newDeposit);
+    event DepositIncreased(TokenManager.Tokens tokenID, address user, uint256 amount, uint256 newDeposit);
+    event DepositDecreased(TokenManager.Tokens tokenID, address user, uint256 amount, uint256 newDeposit);
 
     /// @notice Increase the deposit of a user.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param user address of the user.
     /// @param amountToAdd uint256 amount by which to increase the deposit.
     /// @return newDeposit uint256 amount of the updated deposit.
-    function _increaseDeposit(TokenManager.Tokens token, address user, uint256 amountToAdd) internal returns (uint256 newDeposit) {
+    function _increaseDeposit(TokenManager.Tokens tokenID, address user, uint256 amountToAdd) internal returns (uint256 newDeposit) {
         // calculate new deposit amount
-        newDeposit = _deposit[uint256(token)][user].add(amountToAdd);
+        newDeposit = _deposit[uint256(tokenID)][user].add(amountToAdd);
 
         // set new stake to storage
-        _deposit[uint256(token)][user] = newDeposit;
+        _deposit[uint256(tokenID)][user] = newDeposit;
 
         // emit event
-        emit DepositIncreased(token, user, amountToAdd, newDeposit);
+        emit DepositIncreased(tokenID, user, amountToAdd, newDeposit);
 
         // return
         return newDeposit;
     }
 
     /// @notice Decrease the deposit of a user.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param user address of the user.
     /// @param amountToRemove uint256 amount by which to decrease the deposit.
     /// @return newDeposit uint256 amount of the updated deposit.
-    function _decreaseDeposit(TokenManager.Tokens token, address user, uint256 amountToRemove) internal returns (uint256 newDeposit) {
+    function _decreaseDeposit(TokenManager.Tokens tokenID, address user, uint256 amountToRemove) internal returns (uint256 newDeposit) {
         // get current deposit
-        uint256 currentDeposit = _deposit[uint256(token)][user];
+        uint256 currentDeposit = _deposit[uint256(tokenID)][user];
 
         // check if sufficient deposit
         require(currentDeposit >= amountToRemove, "insufficient deposit to remove");
@@ -55,25 +55,25 @@ contract Deposit {
         newDeposit = currentDeposit.sub(amountToRemove);
 
         // set new stake to storage
-        _deposit[uint256(token)][user] = newDeposit;
+        _deposit[uint256(tokenID)][user] = newDeposit;
 
         // emit event
-        emit DepositDecreased(token, user, amountToRemove, newDeposit);
+        emit DepositDecreased(tokenID, user, amountToRemove, newDeposit);
 
         // return
         return newDeposit;
     }
 
     /// @notice Set the deposit of a user to zero.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param user address of the user.
     /// @return amountRemoved uint256 amount removed from deposit.
-    function _clearDeposit(TokenManager.Tokens token, address user) internal returns (uint256 amountRemoved) {
+    function _clearDeposit(TokenManager.Tokens tokenID, address user) internal returns (uint256 amountRemoved) {
         // get current deposit
-        uint256 currentDeposit = _deposit[uint256(token)][user];
+        uint256 currentDeposit = _deposit[uint256(tokenID)][user];
 
         // remove deposit
-        _decreaseDeposit(token, user, currentDeposit);
+        _decreaseDeposit(tokenID, user, currentDeposit);
 
         // return
         return currentDeposit;
@@ -82,11 +82,11 @@ contract Deposit {
     // view functions
 
     /// @notice Get the current deposit of a user.
-    /// @param token TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param user address of the user.
     /// @return deposit uint256 current amount of the deposit.
-    function getDeposit(TokenManager.Tokens token, address user) internal view returns (uint256 deposit) {
-        return _deposit[uint256(token)][user];
+    function getDeposit(TokenManager.Tokens tokenID, address user) internal view returns (uint256 deposit) {
+        return _deposit[uint256(tokenID)][user];
     }
 
 }

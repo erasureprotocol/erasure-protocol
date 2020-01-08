@@ -46,7 +46,7 @@ contract BurnDAI is BurnNMR {
             min_tokens_bought,
             min_eth_bought,
             deadline,
-            BurnNMR.getToken()
+            BurnNMR.getTokenAddress()
         );
 
         // burn nmr
@@ -59,19 +59,19 @@ contract BurnDAI is BurnNMR {
     /// @param amountETH uint256 The amount of ETH (18 decimals) required.
     function getExpectedSwapAmount(uint256 amountDAI) internal view returns (uint256 amountNMR, uint256 amountETH) {
         amountETH = UniswapExchangeInterface(_DAIExchange).getTokenToEthInputPrice(amountDAI);
-        amountNMR = UniswapExchangeInterface(BurnNMR.getExchange()).getEthToTokenInputPrice(amountETH);
+        amountNMR = UniswapExchangeInterface(BurnNMR.getExchangeAddress()).getEthToTokenInputPrice(amountETH);
         return (amountNMR, amountETH);
     }
 
     /// @notice Get the DAI token address.
     /// @return token address The DAI token address.
-    function getToken() internal pure returns (address token) {
+    function getTokenAddress() internal pure returns (address token) {
         token = _DAIToken;
     }
 
     /// @notice Get the DAI Uniswap exchange address.
     /// @return token address The DAI Uniswap exchange address.
-    function getExchange() internal pure returns (address exchange) {
+    function getExchangeAddress() internal pure returns (address exchange) {
         exchange = _DAIExchange;
     }
 
