@@ -58,27 +58,27 @@ contract StakedFeed is Staking, ProofHashes, Operated, EventMetadata, Template {
     ///         - This requires the caller to do ERC20 approval for this contract for `amountToAdd`.
     /// @dev Access Control: creator OR operator
     ///      State Machine: anytime
-    /// @param token TokenManager.Tokens id of the ERC20 token.
+    /// @param tokenID TokenManager.Tokens id of the ERC20 token.
     /// @param amountToAdd uint256 amount of ERC20 tokens (18 decimals) to add.
-    function depositStake(TokenManager.Tokens token, uint256 amountToAdd) public returns (uint256 newStake) {
+    function depositStake(TokenManager.Tokens tokenID, uint256 amountToAdd) public returns (uint256 newStake) {
         // only operator or creator
         require(Template.isCreator(msg.sender) || Operated.isOperator(msg.sender), "only operator or creator");
 
         // transfer and add tokens to stake
-        return Staking._addStake(token, Template.getCreator(), msg.sender, amountToAdd);
+        return Staking._addStake(tokenID, Template.getCreator(), msg.sender, amountToAdd);
     }
 
     /// @notice Withdraw one of the supported ERC20 token.
     /// @dev Access Control: creator OR operator
     ///      State Machine: anytime
-    /// @param token TokenManager.Tokens id of the ERC20 token.
+    /// @param tokenID TokenManager.Tokens id of the ERC20 token.
     /// @param amountToRemove uint256 amount of ERC20 tokens (18 decimals) to add.
-    function withdrawStake(TokenManager.Tokens token, uint256 amountToRemove) public returns (uint256 newStake) {
+    function withdrawStake(TokenManager.Tokens tokenID, uint256 amountToRemove) public returns (uint256 newStake) {
         // only operator or creator
         require(Template.isCreator(msg.sender) || Operated.isOperator(msg.sender), "only operator or creator");
 
         // transfer and remove tokens from stake
-        return Staking._takeStake(token, Template.getCreator(), Template.getCreator(), amountToRemove);
+        return Staking._takeStake(tokenID, Template.getCreator(), Template.getCreator(), amountToRemove);
     }
 
     /// @notice Emit metadata event
@@ -119,9 +119,9 @@ contract StakedFeed is Staking, ProofHashes, Operated, EventMetadata, Template {
     /// @notice Get the current stake for a given ERC20 token.
     /// @dev Access Control: creator OR operator
     ///      State Machine: anytime
-    /// @param token TokenManager.Tokens id of the ERC20 token.
-    function getStake(TokenManager.Tokens token) public view returns (uint256 stake) {
-        return Deposit.getDeposit(token, Template.getCreator());
+    /// @param tokenID TokenManager.Tokens id of the ERC20 token.
+    function getStake(TokenManager.Tokens tokenID) public view returns (uint256 stake) {
+        return Deposit.getDeposit(tokenID, Template.getCreator());
     }
 
 }
