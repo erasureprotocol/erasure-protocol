@@ -2,6 +2,7 @@ const ethers = require('ethers')
 const assert = require('assert')
 const ganache = require('ganache-cli')
 const { hexlify, createIPFShash, abiEncodeWithSelector } = require('./utils')
+const { RATIO_TYPES, TOKEN_TYPES } = require('./variables')
 
 let c = {
   NMR: {
@@ -323,13 +324,14 @@ Deploy Factories
     'SimpleGriefing',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
+      ['address', 'address', 'address', 'uint8', 'uint256', 'uint8', 'bytes'],
       [
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
-        2,
+        RATIO_TYPES.Dec,
         IPFShash,
       ],
     ),
@@ -340,13 +342,23 @@ Deploy Factories
     'CountdownGriefing',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
+      [
+        'address',
+        'address',
+        'address',
+        'uint8',
+        'uint256',
+        'uint8',
+        'uint256',
+        'bytes',
+      ],
       [
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
-        2,
+        RATIO_TYPES.Dec,
         100000000,
         IPFShash,
       ],
@@ -362,6 +374,7 @@ Deploy Factories
         'address',
         'address',
         'address',
+        'uint8',
         'uint256',
         'uint256',
         'uint256',
@@ -372,13 +385,14 @@ Deploy Factories
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
         ethers.utils.parseEther('1'),
         100000000,
         IPFShash,
         abiEncoder.encode(
           ['uint256', 'uint8', 'uint256'],
-          [ethers.utils.parseEther('1'), 2, 100000000],
+          [ethers.utils.parseEther('1'), RATIO_TYPES.Dec, 100000000],
         ),
       ],
     ),
