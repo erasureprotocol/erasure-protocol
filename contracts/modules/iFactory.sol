@@ -3,7 +3,7 @@ pragma solidity ^0.5.13;
 /// @title iFactory
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 interface iFactory {
 
     event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
