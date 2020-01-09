@@ -6,7 +6,23 @@ const { RATIO_TYPES, TOKEN_TYPES } = require('./variables')
 
 let c = {
   NMR: {
-    artifact: require('./build/MockNMR.json'),
+    token: {
+      artifact: require('./build/MockNMR.json'),
+    },
+    uniswap: {
+      artifact: require('./build/MockUniswap.json'),
+    },
+  },
+  DAI: {
+    token: {
+      artifact: require('./build/MockERC20.json'),
+    },
+    uniswap: {
+      artifact: require('./build/MockUniswap.json'),
+    },
+  },
+  Authereum: {
+    artifact: require('./build/MockAuthereum.json'),
   },
   Erasure_Users: {
     artifact: require('./build/Erasure_Users.json'),
@@ -66,10 +82,27 @@ parser.addArgument(['-e', '--exit-on-success'], {
 })
 var args = parser.parseArgs()
 
+// Deployer addresses
+const nmrDeployAddress = '0x9608010323ed882a38ede9211d7691102b4f0ba0'
+const daiDeployAddress = '0xb5b06a16621616875A6C2637948bF98eA57c58fa'
+const uniswapFactoryAddress = '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95'
+
+// Contract addresses
+const nmrTokenAddress = '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671'
+const nmrUniswapAddress = '0x2Bf5A5bA29E60682fC56B2Fcf9cE07Bef4F6196f'
+const daiTokenAddress = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+const daiUniswapAddress = '0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667'
+
+const unlocked_accounts = [
+  nmrDeployAddress,
+  daiDeployAddress,
+  uniswapFactoryAddress,
+]
+
 let ganacheConfig = {
   port: 8545,
   host: '0.0.0.0',
-  unlocked_accounts: ['0x9608010323ed882a38ede9211d7691102b4f0ba0'],
+  unlocked_accounts: unlocked_accounts,
   default_balance_ether: 1000,
   total_accounts: 10,
   hardfork: 'constantinople',
@@ -90,23 +123,7 @@ if (args.exit_on_success) {
 
 const deployKey =
   '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d'
-const nmrDeployAddress = '0x9608010323ed882a38ede9211d7691102b4f0ba0'
 const deploymentWallet = new ethers.Wallet(deployKey, provider)
-
-const sendEthToNMRSigner = async () => {
-  // empty out the default signer's balance
-  // and send to nmr signer
-  const defaultSigner = provider.getSigner(9)
-  const balance = await defaultSigner.getBalance(defaultSigner.address)
-  const gasPrice = await provider.getGasPrice()
-  const gasLimit = 21000
-  const value = balance.sub(gasPrice.mul(gasLimit))
-
-  await defaultSigner.sendTransaction({
-    to: nmrDeployAddress,
-    value,
-  })
-}
 
 async function deployer(artifact, params, signer) {
   const factory = new ethers.ContractFactory(
@@ -121,18 +138,118 @@ async function deployer(artifact, params, signer) {
   return [contract, receipt]
 }
 
-async function deployContract(contractName, params, signer) {
-  const [contract, receipt] = await deployer(
-    c[contractName].artifact,
-    params,
-    signer,
-  )
+async function deployContract(contractName, artifact, params, signer) {
+  const [contract, receipt] = await deployer(artifact, params, signer)
   console.log(
     `Deploy | ${
       contract.address
     } | ${contractName} | ${receipt.gasUsed.toString()} gas`,
   )
   return [contract, receipt]
+}
+
+async function deployMocks() {
+  console.log(`Distribute ETH to deployment wallets`)
+  await sendEthToUnlockedAccounts()
+
+  console.log(`Deploy NMR`)
+  await deployNMR()
+
+  console.log(`Deploy DAI`)
+  await deployDAI()
+
+  console.log(`Deploy Authereum`)
+  // await deployAuthereum()
+}
+
+async function deployNMR() {
+  let nmrSigner = provider.getSigner(nmrDeployAddress)
+
+  // needs to increment the nonce to 1
+  await nmrSigner.sendTransaction({ to: nmrSigner.address })
+
+  // deploy mock token
+  ;[c.NMR.token.wrap, _] = await deployContract(
+    'NMR',
+    c.NMR.token.artifact,
+    [],
+    nmrSigner,
+  )
+  assert.equal(c.NMR.token.wrap.address, nmrTokenAddress)
+
+  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
+
+  // needs to increment the nonce to 41
+  for (
+    let index = await provider.getTransactionCount(uniswapFactoryAddress);
+    index < 41;
+    index++
+  ) {
+    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
+  }
+
+  // deploy mock uniswap
+  ;[c.NMR.uniswap.wrap, _] = await deployContract(
+    'NMR',
+    c.NMR.uniswap.artifact,
+    [],
+    uniswapSigner,
+  )
+  assert.equal(c.NMR.uniswap.wrap.address, nmrUniswapAddress)
+}
+
+async function deployDAI() {
+  let daiSigner = provider.getSigner(daiDeployAddress)
+
+  // needs to increment the nonce to 1
+  await daiSigner.sendTransaction({ to: daiSigner.address })
+
+  // deploy mock token
+  ;[c.DAI.token.wrap, _] = await deployContract(
+    'DAI',
+    c.DAI.token.artifact,
+    [],
+    daiSigner,
+  )
+  assert.equal(c.DAI.token.wrap.address, daiTokenAddress)
+
+  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
+
+  // needs to increment the nonce to 1225
+  for (
+    let index = await provider.getTransactionCount(uniswapFactoryAddress);
+    index < 1225;
+    index++
+  ) {
+    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
+  }
+
+  // deploy mock uniswap
+  ;[c.DAI.uniswap.wrap, _] = await deployContract(
+    'DAI',
+    c.DAI.uniswap.artifact,
+    [],
+    uniswapSigner,
+  )
+  assert.equal(c.DAI.uniswap.wrap.address, daiUniswapAddress)
+}
+
+const sendEthToUnlockedAccounts = async () => {
+  // send 10 ETH to each contract deployer
+  const defaultSigner = provider.getSigner(9)
+
+  await asyncForEach(unlocked_accounts, async address => {
+    await defaultSigner.sendTransaction({
+      to: address,
+      value: ethers.utils.parseEther('10'),
+    })
+  })
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array)
+  }
 }
 
 async function deployFactory(
@@ -181,21 +298,6 @@ async function deployFactory(
   return [templateContract, factoryContract]
 }
 
-async function deployNMR(signer) {
-  await sendEthToNMRSigner()
-  console.log('NMR Signer balance updated')
-
-  // needs to increment the nonce to 1 by
-  await signer.sendTransaction({ to: signer.address, value: 0 })
-
-  let nmrAddress = '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671'
-  ;[contract, receipt] = await deployContract('NMR', [], signer)
-
-  assert.equal(contract.address, nmrAddress)
-
-  return [contract, receipt]
-}
-
 async function createInstance(name, calldata) {
   await c[name].factory.wrap.functions.create(calldata).then(async txn => {
     const receipt = await provider.getTransactionReceipt(txn.hash)
@@ -225,33 +327,36 @@ const main = async () => {
   // console.log(await provider.listAccounts());
 
   let deploySigner = provider.getSigner(0)
-  let nmrSigner = provider.getSigner(nmrDeployAddress)
 
   console.log(`
-Deploy MockNMR
+Deploy Mock Contracts
       `)
-  ;[c.NMR.wrap, _] = await deployNMR(nmrSigner)
+  await deployMocks()
 
   console.log(`
 Deploy Registries
       `)
   ;[c.Erasure_Users.wrap, _] = await deployContract(
     'Erasure_Users',
+    c.Erasure_Users.artifact,
     [],
     deploySigner,
   )
   ;[c.Erasure_Posts.wrap, _] = await deployContract(
     'Erasure_Posts',
+    c.Erasure_Posts.artifact,
     [],
     deploySigner,
   )
   ;[c.Erasure_Agreements.wrap, _] = await deployContract(
     'Erasure_Agreements',
+    c.Erasure_Agreements.artifact,
     [],
     deploySigner,
   )
   ;[c.Erasure_Escrows.wrap, _] = await deployContract(
     'Erasure_Escrows',
+    c.Erasure_Escrows.artifact,
     [],
     deploySigner,
   )
@@ -314,8 +419,8 @@ Deploy Factories
     'Feed',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'bytes32', 'bytes'],
-      [userAddress, proofhash, IPFShash],
+      ['address', 'bytes'],
+      [userAddress, IPFShash],
     ),
   )
 
