@@ -81,11 +81,16 @@ export function handleHashSubmitted(event: HashSubmitted): void {
   entity.txHash = event.transaction.hash
   entity.logIndex = event.logIndex
   entity.save()
-
-  let feed = new Feed(event.address.toHex())
-  let hashes = feed.hashes
-  hashes.push(addQm(event.params.hash) as Bytes)
-  feed.hashes = hashes
+  let feed = Feed.load(event.address.toHex())
+  if(feed==null){
+    feed = new Feed(event.address.toHex())
+    feed.hashes=[addQm(event.params.hash) as Bytes]
+  }
+  else{
+    let hashes = feed.hashes
+    hashes.push(addQm(event.params.hash) as Bytes)
+    feed.hashes = hashes
+  }
   feed.save()
 }
 
