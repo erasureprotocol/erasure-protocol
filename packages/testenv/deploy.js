@@ -24,6 +24,9 @@ let c = {
   Authereum: {
     artifact: require('./build/MockAuthereum.json'),
   },
+  RegistryManager: {
+    artifact: require('./build/RegistryManager.json'),
+  },
   Erasure_Users: {
     artifact: require('./build/Erasure_Users.json'),
   },
@@ -121,203 +124,6 @@ if (args.exit_on_success) {
   provider = new ethers.providers.JsonRpcProvider()
 }
 
-const deployKey =
-  '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d'
-const deploymentWallet = new ethers.Wallet(deployKey, provider)
-
-async function deployer(artifact, params, signer) {
-  const factory = new ethers.ContractFactory(
-    artifact.compilerOutput.abi,
-    artifact.compilerOutput.evm.bytecode.object,
-    signer,
-  )
-  const contract = await factory.deploy(...params)
-  const receipt = await provider.getTransactionReceipt(
-    contract.deployTransaction.hash,
-  )
-  return [contract, receipt]
-}
-
-async function deployContract(contractName, artifact, params, signer) {
-  const [contract, receipt] = await deployer(artifact, params, signer)
-  console.log(
-    `Deploy | ${
-      contract.address
-    } | ${contractName} | ${receipt.gasUsed.toString()} gas`,
-  )
-  return [contract, receipt]
-}
-
-async function deployMocks() {
-  console.log(`Distribute ETH to deployment wallets`)
-  await sendEthToUnlockedAccounts()
-
-  console.log(`Deploy NMR`)
-  await deployNMR()
-
-  console.log(`Deploy DAI`)
-  await deployDAI()
-
-  console.log(`Deploy Authereum`)
-  // await deployAuthereum()
-}
-
-async function deployNMR() {
-  let nmrSigner = provider.getSigner(nmrDeployAddress)
-
-  // needs to increment the nonce to 1
-  await nmrSigner.sendTransaction({ to: nmrSigner.address })
-
-  // deploy mock token
-  ;[c.NMR.token.wrap, _] = await deployContract(
-    'NMR',
-    c.NMR.token.artifact,
-    [],
-    nmrSigner,
-  )
-  assert.equal(c.NMR.token.wrap.address, nmrTokenAddress)
-
-  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
-
-  // needs to increment the nonce to 41
-  for (
-    let index = await provider.getTransactionCount(uniswapFactoryAddress);
-    index < 41;
-    index++
-  ) {
-    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
-  }
-
-  // deploy mock uniswap
-  ;[c.NMR.uniswap.wrap, _] = await deployContract(
-    'NMR',
-    c.NMR.uniswap.artifact,
-    [],
-    uniswapSigner,
-  )
-  assert.equal(c.NMR.uniswap.wrap.address, nmrUniswapAddress)
-}
-
-async function deployDAI() {
-  let daiSigner = provider.getSigner(daiDeployAddress)
-
-  // needs to increment the nonce to 1
-  await daiSigner.sendTransaction({ to: daiSigner.address })
-
-  // deploy mock token
-  ;[c.DAI.token.wrap, _] = await deployContract(
-    'DAI',
-    c.DAI.token.artifact,
-    [],
-    daiSigner,
-  )
-  assert.equal(c.DAI.token.wrap.address, daiTokenAddress)
-
-  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
-
-  // needs to increment the nonce to 1225
-  for (
-    let index = await provider.getTransactionCount(uniswapFactoryAddress);
-    index < 1225;
-    index++
-  ) {
-    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
-  }
-
-  // deploy mock uniswap
-  ;[c.DAI.uniswap.wrap, _] = await deployContract(
-    'DAI',
-    c.DAI.uniswap.artifact,
-    [],
-    uniswapSigner,
-  )
-  assert.equal(c.DAI.uniswap.wrap.address, daiUniswapAddress)
-}
-
-const sendEthToUnlockedAccounts = async () => {
-  // send 10 ETH to each contract deployer
-  const defaultSigner = provider.getSigner(9)
-
-  await asyncForEach(unlocked_accounts, async address => {
-    await defaultSigner.sendTransaction({
-      to: address,
-      value: ethers.utils.parseEther('10'),
-    })
-  })
-}
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array)
-  }
-}
-
-async function deployFactory(
-  contractName,
-  registry,
-  signer,
-  factoryData = '0x0',
-) {
-  let templateContract
-  await deployer(c[contractName].template.artifact, [], signer).then(
-    ([contract, receipt]) => {
-      templateContract = contract
-      console.log(
-        `Deploy | ${
-          contract.address
-        } | ${contractName} | Template | ${receipt.gasUsed.toString()} gas`,
-      )
-    },
-  )
-
-  let factoryContract
-  await deployer(
-    c[contractName].factory.artifact,
-    [registry.address, templateContract.address],
-    signer,
-  ).then(([contract, receipt]) => {
-    factoryContract = contract
-    console.log(
-      `Deploy | ${
-        contract.address
-      } | ${contractName} | Factory | ${receipt.gasUsed.toString()} gas`,
-    )
-  })
-
-  let tx = await registry
-    .addFactory(factoryContract.address, factoryData)
-    .then(async tx => {
-      const receipt = await provider.getTransactionReceipt(tx.hash)
-      console.log(
-        `addFactory() | ${contractName} | ${receipt.gasUsed.toString()} gas`,
-      )
-    })
-
-  console.log(``)
-
-  return [templateContract, factoryContract]
-}
-
-async function createInstance(name, calldata) {
-  await c[name].factory.wrap.functions.create(calldata).then(async txn => {
-    const receipt = await provider.getTransactionReceipt(txn.hash)
-    console.log(`create()      | ${receipt.gasUsed.toString()} gas | ${name}`)
-  })
-  const testSalt = ethers.utils.formatBytes32String('testSalt')
-  await c[name].factory.wrap.functions
-    .createSalty(calldata, testSalt)
-    .then(async txn => {
-      const receipt = await provider.getTransactionReceipt(txn.hash)
-      console.log(`createSalty() | ${receipt.gasUsed.toString()} gas | ${name}`)
-    })
-}
-
-function sleep(ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
-}
-
 const main = async () => {
   process.on('unhandledRejection', function(error) {
     console.error(error)
@@ -326,16 +132,14 @@ const main = async () => {
   // console.log(provider);
   // console.log(await provider.listAccounts());
 
-  let deploySigner = provider.getSigner(0)
+  const deploySigner = provider.getSigner(0)
+  // console.log(await deploySigner.getAddress())
 
-  console.log(`
-Deploy Mock Contracts
-      `)
+  console.log(`Deploy Mock Contracts`)
+
   await deployMocks()
 
-  console.log(`
-Deploy Registries
-      `)
+  console.log(`Deploy Registries`)
   ;[c.Erasure_Users.wrap, _] = await deployContract(
     'Erasure_Users',
     c.Erasure_Users.artifact,
@@ -361,9 +165,21 @@ Deploy Registries
     deploySigner,
   )
 
-  console.log(`
-Deploy Factories
-      `)
+  console.log(`Deploy RegistryManager and transfer ownership`)
+  ;[c.RegistryManager.wrap, _] = await deployContract(
+    'RegistryManager',
+    c.RegistryManager.artifact,
+    [],
+    deploySigner,
+  )
+
+  await c.Erasure_Posts.wrap.transferOwnership(c.RegistryManager.wrap.address)
+  await c.Erasure_Agreements.wrap.transferOwnership(
+    c.RegistryManager.wrap.address,
+  )
+  await c.Erasure_Escrows.wrap.transferOwnership(c.RegistryManager.wrap.address)
+
+  console.log(`Deploy Factories`)
   ;[
     c.SimpleGriefing.template.wrap,
     c.SimpleGriefing.factory.wrap,
@@ -371,6 +187,14 @@ Deploy Factories
     'SimpleGriefing',
     c.Erasure_Agreements.wrap,
     deploySigner,
+  )
+  assert.equal(
+    await c.SimpleGriefing.template.wrap.getTokenAddress(TOKEN_TYPES.NMR),
+    nmrTokenAddress,
+  )
+  assert.equal(
+    await c.SimpleGriefing.template.wrap.getTokenAddress(TOKEN_TYPES.DAI),
+    daiTokenAddress,
   )
   ;[
     c.CountdownGriefing.template.wrap,
@@ -380,10 +204,26 @@ Deploy Factories
     c.Erasure_Agreements.wrap,
     deploySigner,
   )
+  assert.equal(
+    await c.CountdownGriefing.template.wrap.getTokenAddress(TOKEN_TYPES.NMR),
+    nmrTokenAddress,
+  )
+  assert.equal(
+    await c.CountdownGriefing.template.wrap.getTokenAddress(TOKEN_TYPES.DAI),
+    daiTokenAddress,
+  )
   ;[c.Feed.template.wrap, c.Feed.factory.wrap] = await deployFactory(
     'Feed',
     c.Erasure_Posts.wrap,
     deploySigner,
+  )
+  assert.equal(
+    await c.Feed.template.wrap.getTokenAddress(TOKEN_TYPES.NMR),
+    nmrTokenAddress,
+  )
+  assert.equal(
+    await c.Feed.template.wrap.getTokenAddress(TOKEN_TYPES.DAI),
+    daiTokenAddress,
   )
 
   const abiEncoder = new ethers.utils.AbiCoder()
@@ -504,6 +344,204 @@ Deploy Factories
   )
 
   if (args.exit_on_success) process.exit(0)
+}
+
+async function deployer(artifact, params, signer) {
+  const factory = new ethers.ContractFactory(
+    artifact.compilerOutput.abi,
+    artifact.compilerOutput.evm.bytecode.object,
+    signer,
+  )
+  const contract = await factory.deploy(...params)
+  const receipt = await provider.getTransactionReceipt(
+    contract.deployTransaction.hash,
+  )
+  return [contract, receipt]
+}
+
+async function deployContract(contractName, artifact, params, signer) {
+  const [contract, receipt] = await deployer(artifact, params, signer)
+  console.log(
+    `Deploy | ${
+      contract.address
+    } | ${contractName} | ${receipt.gasUsed.toString()} gas`,
+  )
+  return [contract, receipt]
+}
+
+async function deployMocks() {
+  console.log(`Distribute ETH to deployment wallets`)
+  await sendEthToUnlockedAccounts()
+
+  console.log(`Deploy NMR`)
+  await deployNMR()
+
+  console.log(`Deploy DAI`)
+  await deployDAI()
+
+  console.log(`Deploy Authereum`)
+  // await deployAuthereum()
+}
+
+async function deployNMR() {
+  let nmrSigner = provider.getSigner(nmrDeployAddress)
+  // console.log(await nmrSigner.getAddress())
+
+  // needs to increment the nonce to 1
+  await nmrSigner.sendTransaction({ to: nmrSigner.address })
+
+  // deploy mock token
+  ;[c.NMR.token.wrap, _] = await deployContract(
+    'NMR',
+    c.NMR.token.artifact,
+    [],
+    nmrSigner,
+  )
+  assert.equal(c.NMR.token.wrap.address, nmrTokenAddress)
+
+  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
+  // console.log(await uniswapSigner.getAddress())
+
+  // needs to increment the nonce to 41
+  for (
+    let index = await provider.getTransactionCount(uniswapFactoryAddress);
+    index < 41;
+    index++
+  ) {
+    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
+  }
+
+  // deploy mock uniswap
+  ;[c.NMR.uniswap.wrap, _] = await deployContract(
+    'NMR',
+    c.NMR.uniswap.artifact,
+    [],
+    uniswapSigner,
+  )
+  assert.equal(c.NMR.uniswap.wrap.address, nmrUniswapAddress)
+}
+
+async function deployDAI() {
+  let daiSigner = provider.getSigner(daiDeployAddress)
+  // console.log(await daiSigner.getAddress())
+
+  // needs to increment the nonce to 1
+  await daiSigner.sendTransaction({ to: daiSigner.address })
+
+  // deploy mock token
+  ;[c.DAI.token.wrap, _] = await deployContract(
+    'DAI',
+    c.DAI.token.artifact,
+    [],
+    daiSigner,
+  )
+  assert.equal(c.DAI.token.wrap.address, daiTokenAddress)
+
+  let uniswapSigner = provider.getSigner(uniswapFactoryAddress)
+  // console.log(await uniswapSigner.getAddress())
+
+  // needs to increment the nonce to 1225
+  for (
+    let index = await provider.getTransactionCount(uniswapFactoryAddress);
+    index < 1225;
+    index++
+  ) {
+    await uniswapSigner.sendTransaction({ to: uniswapSigner.address })
+  }
+
+  // deploy mock uniswap
+  ;[c.DAI.uniswap.wrap, _] = await deployContract(
+    'DAI',
+    c.DAI.uniswap.artifact,
+    [],
+    uniswapSigner,
+  )
+  assert.equal(c.DAI.uniswap.wrap.address, daiUniswapAddress)
+}
+
+const sendEthToUnlockedAccounts = async () => {
+  // send 10 ETH to each contract deployer
+  const defaultSigner = provider.getSigner(9)
+  // console.log(await defaultSigner.getAddress())
+
+  await asyncForEach(unlocked_accounts, async address => {
+    await defaultSigner.sendTransaction({
+      to: address,
+      value: ethers.utils.parseEther('10'),
+    })
+  })
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array)
+  }
+}
+
+async function deployFactory(
+  contractName,
+  registry,
+  signer,
+  factoryData = '0x0',
+) {
+  let templateContract
+  await deployer(c[contractName].template.artifact, [], signer).then(
+    ([contract, receipt]) => {
+      templateContract = contract
+      console.log(
+        `Deploy | ${
+          contract.address
+        } | ${contractName} | Template | ${receipt.gasUsed.toString()} gas`,
+      )
+    },
+  )
+
+  let factoryContract
+  await deployer(
+    c[contractName].factory.artifact,
+    [registry.address, templateContract.address],
+    signer,
+  ).then(([contract, receipt]) => {
+    factoryContract = contract
+    console.log(
+      `Deploy | ${
+        contract.address
+      } | ${contractName} | Factory | ${receipt.gasUsed.toString()} gas`,
+    )
+  })
+
+  await c.RegistryManager.wrap
+    .addFactory(registry.address, factoryContract.address, factoryData)
+    .then(async tx => {
+      const receipt = await provider.getTransactionReceipt(tx.hash)
+      console.log(
+        `addFactory() | ${contractName} | ${receipt.gasUsed.toString()} gas`,
+      )
+    })
+
+  console.log(``)
+
+  return [templateContract, factoryContract]
+}
+
+async function createInstance(name, calldata) {
+  await c[name].factory.wrap.functions.create(calldata).then(async txn => {
+    const receipt = await provider.getTransactionReceipt(txn.hash)
+    console.log(`create()      | ${receipt.gasUsed.toString()} gas | ${name}`)
+  })
+  const testSalt = ethers.utils.formatBytes32String('testSalt')
+  await c[name].factory.wrap.functions
+    .createSalty(calldata, testSalt)
+    .then(async txn => {
+      const receipt = await provider.getTransactionReceipt(txn.hash)
+      console.log(`createSalty() | ${receipt.gasUsed.toString()} gas | ${name}`)
+    })
+}
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 }
 
 main(args)

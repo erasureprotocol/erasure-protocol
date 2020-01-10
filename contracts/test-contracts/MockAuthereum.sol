@@ -1,7 +1,7 @@
 pragma solidity ^0.5.13;
 pragma experimental ABIEncoderV2;
 
-interface IAuthereumAccount {
+interface MockAuthereum {
     // This is required for funds sent to this contract
     function () external payable;
 
