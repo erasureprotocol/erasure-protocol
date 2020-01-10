@@ -14,7 +14,7 @@ contract TokenManager is BurnDAI {
     /// @notice Get the address of the given token ID.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @return tokenAddress address of the ERC20 token.
-    function getTokenAddress(Tokens tokenID) internal pure returns (address tokenAddress) {
+    function getTokenAddress(Tokens tokenID) public pure returns (address tokenAddress) {
         require(isValidTokenID(tokenID), 'invalid token');
         if (tokenID == Tokens.DAI)
             return BurnDAI.getTokenAddress();
