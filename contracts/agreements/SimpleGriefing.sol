@@ -1,6 +1,6 @@
 pragma solidity ^0.5.13;
 
-import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../modules/Griefing.sol";
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
