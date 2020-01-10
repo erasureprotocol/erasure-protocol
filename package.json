@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@0x/sol-compiler": "^3.1.15",
+    "@openzeppelin/contracts": "^2.4.0",
     "coveralls": "^3.0.5",
     "dotenv": "^8.0.0",
     "etherlime": "^2.2.4",
