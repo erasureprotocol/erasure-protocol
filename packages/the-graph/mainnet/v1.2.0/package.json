@@ -1,13 +1,13 @@
 {
   "name": "rinkeby-v120",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ jgeary/erasure-rinkeby120",
-    "create-local": "graph create --node http://localhost:8020/ jgeary/erasure-rinkeby120",
-    "remove-local": "graph remove --node http://localhost:8020/ jgeary/erasure-rinkeby120",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 jgeary/erasure-rinkeby120"
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/v120",
+    "create-local": "graph create --node http://localhost:8020/ erasureprotocol/v120",
+    "remove-local": "graph remove --node http://localhost:8020/ erasureprotocol/v120",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 erasureprotocol/v120"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.16.0",

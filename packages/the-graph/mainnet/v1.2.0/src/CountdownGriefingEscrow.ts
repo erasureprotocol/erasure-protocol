@@ -56,6 +56,7 @@ export function handleCancelled(event: Cancelled): void {
   let entity = new CancelledCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
   entity.txHash = event.transaction.hash
@@ -73,6 +74,7 @@ export function handleDataSubmitted(event: DataSubmitted): void {
   let entity = new DataSubmittedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.data = event.params.data
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -93,6 +95,7 @@ export function handleDeadlineSet(event: DeadlineSet): void {
   let entity = new DeadlineSetCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.deadline = event.params.deadline
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -109,6 +112,7 @@ export function handleFinalized(event: Finalized): void {
   let entity = new FinalizedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.agreement = event.params.agreement
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -128,6 +132,7 @@ export function handleInitialized(event: Initialized): void {
   let entity = new InitializedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.buyer = event.params.buyer
   entity.seller = event.params.seller
@@ -161,6 +166,7 @@ export function handleMetadataSet(event: MetadataSet): void {
   let entity = new MetadataSetCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.metadata = event.params.metadata
   entity.metadataB58 = event.params.metadata.toBase58()
   entity.blockNumber = event.block.number
@@ -179,6 +185,7 @@ export function handleOperatorUpdated(event: OperatorUpdated): void {
   let entity = new OperatorUpdatedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -195,6 +202,7 @@ export function handlePaymentDeposited(event: PaymentDeposited): void {
   let entity = new PaymentDepositedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.buyer = event.params.buyer
   entity.amount = event.params.amount
   entity.blockNumber = event.block.number
@@ -215,6 +223,7 @@ export function handleStakeDeposited(event: StakeDeposited): void {
   let entity = new StakeDepositedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.seller = event.params.seller
   entity.amount = event.params.amount
   entity.blockNumber = event.block.number

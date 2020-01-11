@@ -52,6 +52,7 @@ export function handleInitialized(event: Initialized): void {
   let entity = new InitializedFeed(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.proofHash = event.params.proofHash
   entity.metadata = event.params.metadata
@@ -66,6 +67,7 @@ export function handleInitialized(event: Initialized): void {
   feed.initMetadata = entity.metadata
   feed.initMetadataB58 = entity.metadataB58
   feed.hashes = []
+  feed.hashes.push(addQm(event.params.proofHash) as Bytes)
   feed.save()
 }
 
@@ -73,17 +75,24 @@ export function handleHashSubmitted(event: HashSubmitted): void {
   let entity = new HashSubmittedFeed(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.hash = event.params.hash
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
   entity.txHash = event.transaction.hash
   entity.logIndex = event.logIndex
   entity.save()
-
-  let feed = new Feed(event.address.toHex())
-  let hashes = feed.hashes
-  hashes.push(addQm(entity.hash) as Bytes)
-  feed.hashes = hashes
+  let feed = Feed.load(event.address.toHex())
+  if(feed==null){
+    feed = new Feed(event.address.toHex())
+    feed.hashes=[]
+    feed.hashes.push(addQm(event.params.hash) as Bytes)
+  }
+  else{
+    let hashes = feed.hashes
+    hashes.push(addQm(event.params.hash) as Bytes)
+    feed.hashes = hashes
+  }
   feed.save()
 }
 
@@ -91,6 +100,7 @@ export function handleOperatorUpdated(event: OperatorUpdated): void {
   let entity = new OperatorUpdatedFeed(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.operator = event.params.operator
   entity.blockNumber = event.block.number
   entity.timestamp = event.block.timestamp
@@ -107,6 +117,7 @@ export function handleMetadataSet(event: MetadataSet): void {
   let entity = new MetadataSetFeed(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
+  entity.contract = event.address
   entity.metadata = event.params.metadata
   entity.metadataB58 = event.params.metadata.toBase58()
   entity.blockNumber = event.block.number
