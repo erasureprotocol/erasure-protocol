@@ -5,6 +5,7 @@ const {
   createIPFShash,
   abiEncodeWithSelector,
 } = require('../test/helpers/utils')
+const { RATIO_TYPES, TOKEN_TYPES } = require('../test/helpers/variables')
 const assert = require('assert')
 
 let { c } = require('./deploy_config')
@@ -29,6 +30,11 @@ const deploy = async (network, secret) => {
     /* NOTE: Must update hardcoded token address */
     ///////////////////////////////////////////////
     multisig = '0x6087555A70E2F96B7838806e7743041E035a37e5'
+  } else if (network == 'kovan') {
+    ///////////////////////////////////////////////
+    /* NOTE: Must update hardcoded token address */
+    ///////////////////////////////////////////////
+    multisig = '0x6087555A70E2F96B7838806e7743041E035a37e5'
   } else if (network == 'mainnet') {
     multisig = '0x0000000000377D181A0ebd08590c6B399b272000'
   }
@@ -45,15 +51,11 @@ const deploy = async (network, secret) => {
   console.log(`Deployment Wallet: ${deployer.signer.address}`)
 
   console.log(``)
-  console.log(`Deploy Registries`)
-  console.log(``)
-
-  // Erasure_Escrows
-  await deployRegistry('Erasure_Escrows')
-
-  console.log(``)
   console.log(`Get Deployed Registries`)
   console.log(``)
+
+  // Erasure_Users
+  await getUserRegistry('Erasure_Users')
 
   // Erasure_Posts
   await getRegistry('Erasure_Posts')
@@ -89,18 +91,18 @@ const deploy = async (network, secret) => {
     agreementFactory,
   )
 
-  console.log(``)
-  console.log(`Transfer Registry Ownership`)
-  console.log(``)
+  // console.log(``)
+  // console.log(`Transfer Registry Ownership`)
+  // console.log(``)
 
-  // Erasure_Posts
-  await transferRegistry('Erasure_Posts')
+  // // Erasure_Posts
+  // await transferRegistry('Erasure_Posts')
 
-  // Erasure_Agreements
-  await transferRegistry('Erasure_Agreements')
+  // // Erasure_Agreements
+  // await transferRegistry('Erasure_Agreements')
 
-  // Erasure_Escrows
-  await transferRegistry('Erasure_Escrows')
+  // // Erasure_Escrows
+  // await transferRegistry('Erasure_Escrows')
 
   console.log(``)
   console.log(`Create test instance from factories`)
@@ -119,8 +121,8 @@ const deploy = async (network, secret) => {
     'Feed',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'bytes32', 'bytes'],
-      [userAddress, proofhash, IPFShash],
+      ['address', 'bytes'],
+      [userAddress, IPFShash],
     ),
   )
 
@@ -129,13 +131,14 @@ const deploy = async (network, secret) => {
     'SimpleGriefing',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'bytes'],
+      ['address', 'address', 'address', 'uint8', 'uint256', 'uint8', 'bytes'],
       [
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
-        2,
+        RATIO_TYPES.Dec,
         IPFShash,
       ],
     ),
@@ -146,13 +149,23 @@ const deploy = async (network, secret) => {
     'CountdownGriefing',
     abiEncodeWithSelector(
       'initialize',
-      ['address', 'address', 'address', 'uint256', 'uint8', 'uint256', 'bytes'],
+      [
+        'address',
+        'address',
+        'address',
+        'uint8',
+        'uint256',
+        'uint8',
+        'uint256',
+        'bytes',
+      ],
       [
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
-        2,
+        RATIO_TYPES.Dec,
         100000000,
         IPFShash,
       ],
@@ -168,6 +181,7 @@ const deploy = async (network, secret) => {
         'address',
         'address',
         'address',
+        'uint8',
         'uint256',
         'uint256',
         'uint256',
@@ -178,13 +192,14 @@ const deploy = async (network, secret) => {
         userAddress,
         userAddress,
         userAddress,
+        TOKEN_TYPES.NMR,
         ethers.utils.parseEther('1'),
         ethers.utils.parseEther('1'),
         100000000,
         IPFShash,
         abiEncoder.encode(
           ['uint256', 'uint8', 'uint256'],
-          [ethers.utils.parseEther('1'), 2, 100000000],
+          [ethers.utils.parseEther('1'), RATIO_TYPES.Dec, 100000000],
         ),
       ],
     ),
@@ -213,28 +228,72 @@ Factories:
 `)
 
   async function deployRegistry(registry) {
+    // deploy registry
     await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
       c[registry][network] = {
         wrap: wrap,
         address: wrap.contractAddress,
       }
     })
+
+    // transfer registry ownership
+    await c[registry][network].wrap.transferOwnership(
+      c.RegistryManager[network].address,
+    )
+
+    return c[registry][network].wrap
+  }
+
+  async function getUserRegistry(registry) {
+    // deploy registry if not deployed yet
+    // const code = await deployer.provider.getCode(c[registry][network].address)
+    if (c[registry][network].address.length === 0) {
+      await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
+        c[registry][network] = {
+          wrap: wrap,
+          address: wrap.contractAddress,
+        }
+      })
+    } else {
+      // get registry at cached address
+      c[registry][network].wrap = deployer.wrapDeployedContract(
+        c[registry].artifact,
+        c[registry][network].address,
+      )
+    }
   }
 
   async function getRegistry(registry) {
-    // get registry at cached address
-    c[registry][network].wrap = deployer.wrapDeployedContract(
-      c[registry].artifact,
-      c[registry][network].address,
+    c.RegistryManager[network].wrap = deployer.wrapDeployedContract(
+      c.RegistryManager.artifact,
+      c.RegistryManager[network].address,
     )
 
-    // validate ownership
+    // deploy registry if not deployed yet
+    // const code = await deployer.provider.getCode(c[registry][network].address)
+    if (c[registry][network].address.length === 0) {
+      c[registry][network].wrap = await deployRegistry(registry)
+    } else {
+      // get registry at cached address
+      c[registry][network].wrap = deployer.wrapDeployedContract(
+        c[registry].artifact,
+        c[registry][network].address,
+      )
+    }
+
+    // validate ownership by RegistryManager
     assert.equal(
       await c[registry][network].wrap.owner(),
+      c.RegistryManager[network].address,
+    )
+
+    // validate deployer is manager of RegistryManager
+    assert.equal(
+      await c.RegistryManager[network].wrap.manager(),
       deployer.signer.address,
     )
 
-    console.log(`${registry} has valid owner: ${deployer.signer.address}`)
+    console.log(`${registry} has valid manager: ${deployer.signer.address}`)
   }
 
   async function deployFactory(
@@ -250,6 +309,23 @@ Factories:
       c[name].template.artifact,
       c[name].template[network].address,
     )
+
+    assert.equal(
+      await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.NMR),
+      c.NMR.token[network].address,
+    )
+    assert.equal(
+      await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.DAI),
+      c.DAI.token[network].address,
+    )
+    // assert.equal(
+    //   await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.NMR),
+    //   c.NMR.token[network].address,
+    // )
+    // assert.equal(
+    //   await c[name].template.wrap.getTokenAddress(TOKEN_TYPES.DAI),
+    //   c.DAI.token[network].address,
+    // )
 
     await deployer
       .deployAndVerify(
@@ -267,13 +343,18 @@ Factories:
       c[name].factory[network].address,
     )
 
-    await c[registry][network].wrap
-      .addFactory(c[name].factory[network].address, factoryData, {
-        gasPrice: defaultGas,
-      })
+    await c.RegistryManager[network].wrap
+      .addFactory(
+        c[registry][network].address,
+        c[name].factory[network].address,
+        factoryData,
+        {
+          gasPrice: defaultGas,
+        },
+      )
       .then(async txn => {
         console.log(`addFactory() | ${name}_Factory => ${registry}`)
-        const receipt = await c[registry][
+        const receipt = await c.RegistryManager[
           network
         ].wrap.verboseWaitForTransaction(txn)
         console.log(`gasUsed: ${receipt.gasUsed}`)
