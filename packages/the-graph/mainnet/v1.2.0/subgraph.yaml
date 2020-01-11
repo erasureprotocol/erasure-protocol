@@ -4,9 +4,9 @@ schema:
 dataSources:
   - name: CountdownGriefingEscrowFactory
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
-      address: "0xca851A27C03FDb70D9468372d852D39a5830945b"
+      address: "0xC5E1169F69D744F6CECEA47a50A66bE7E41e0460"
       abi: CountdownGriefingEscrowFactory
     mapping:
       kind: ethereum/events
@@ -23,9 +23,9 @@ dataSources:
       file: ./src/CountdownGriefingEscrow.ts
   - name: CountdownGriefingFactory
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
-      address: "0xCAE071401c9e6a5880b47f79b7aCD1d972eAb0E0"
+      address: "0x053624bd3BA5a3F5b2246A44d2794b5152a6032B"
       abi: CountdownGriefingFactory
     mapping:
       kind: ethereum/events
@@ -42,9 +42,9 @@ dataSources:
       file: ./src/CountdownGriefing.ts
   - name: SimpleGriefingFactory
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
-      address: "0x9B8F36CEa9F84178BC5F31fBF836e8E8058577Af"
+      address: "0x474C80E1e6Bfd3283c9F31979AAc920A0F89a7AA"
       abi: SimpleGriefingFactory
     mapping:
       kind: ethereum/events
@@ -61,9 +61,9 @@ dataSources:
       file: ./src/SimpleGriefing.ts
   - name: FeedFactory
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
-      address: "0x241795381CE24bf3Ea7721778a5Ec66b43a915DF"
+      address: "0xEF078E8330f99186079BE1d2ee6b4a5d6f23E8F1"
       abi: FeedFactory
     mapping:
       kind: ethereum/events

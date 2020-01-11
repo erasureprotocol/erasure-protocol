@@ -1,0 +1,457 @@
+# Countdown Griefing Escrow
+type CountdownGriefingEscrow @entity {
+  id: ID!
+  creator: Bytes
+  operator: Bytes
+  buyer: Bytes
+  seller: Bytes
+  paymentAmount: BigInt
+  stakeAmount: BigInt
+  countdownLength: BigInt
+  agreementParams: Bytes
+  deadline: BigInt
+  data: Bytes
+  dataB58: String
+  dataSubmitted: Boolean
+  paymentDeposited: Boolean
+  stakeDeposited: Boolean
+  finalized: Boolean
+  cancelled: Boolean
+  metadata: Bytes
+  metadataB58: String
+  countdownGriefingAgreement: CountdownGriefing
+  initMetadata: Bytes
+  initMetadataB58: String
+  initCallData: Bytes
+  createdTimestamp: BigInt
+}
+
+type InstanceCreatedCountdownGriefingEscrowFactory @entity {
+  id: ID!
+  instance: Bytes!
+  creator: Bytes!
+  callData: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type CancelledCountdownGriefingEscrow @entity {
+  id: ID!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DataSubmittedCountdownGriefingEscrow @entity {
+  id: ID!
+  data: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DeadlineSetCountdownGriefingEscrow @entity {
+  id: ID!
+  deadline: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type FinalizedCountdownGriefingEscrow @entity {
+  id: ID!
+  agreement: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InitializedCountdownGriefingEscrow @entity {
+  id: ID!
+  operator: Bytes!
+  buyer: Bytes!
+  seller: Bytes!
+  paymentAmount: BigInt!
+  stakeAmount: BigInt!
+  countdownLength: BigInt!
+  metadata: Bytes!
+  metadataB58: String!
+  agreementParams: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type MetadataSetCountdownGriefingEscrow @entity {
+  id: ID!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedCountdownGriefingEscrow @entity {
+  id: ID!
+  operator: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type PaymentDepositedCountdownGriefingEscrow @entity {
+  id: ID!
+  buyer: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeDepositedCountdownGriefingEscrow @entity {
+  id: ID!
+  seller: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+# Countdown Griefing
+type CountdownGriefing @entity {
+  id: ID!
+  creator: Bytes
+  operator: Bytes
+  staker: Bytes
+  currentStake: BigInt
+  totalBurned: BigInt
+  totalTaken: BigInt
+  counterparty: Bytes
+  ratio: BigInt
+  ratioType: Int
+  countdownLength: BigInt
+  deadline: BigInt
+  metadata: Bytes
+  metadataB58: String
+  initMetadata: Bytes
+  initMetadataB58: String
+  initCallData: Bytes
+  createdTimestamp: BigInt
+}
+
+type InstanceCreatedCountdownGriefingFactory @entity {
+  id: ID!
+  instance: Bytes!
+  creator: Bytes!
+  callData: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InitializedCountdownGriefing @entity {
+  id: ID!
+  operator: Bytes!
+  staker: Bytes!
+  counterparty: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  countdownLength: BigInt!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type RatioSetCountdownGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type GriefedCountdownGriefing @entity {
+  id: ID!
+  punisher: Bytes!
+  staker: Bytes!
+  punishment: BigInt!
+  cost: BigInt!
+  message: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type LengthSetCountdownGriefing @entity {
+  id: ID!
+  length: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedCountdownGriefing @entity {
+  id: ID!
+  operator: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type MetadataSetCountdownGriefing @entity {
+  id: ID!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeAddedCountdownGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  funder: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeTakenCountdownGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  recipient: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeBurnedCountdownGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DeadlineSetCountdownGriefing @entity {
+  id: ID!
+  deadline: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+# Simple griefing
+type SimpleGriefing @entity {
+  id: ID!
+  creator: Bytes
+  operator: Bytes
+  staker: Bytes
+  currentStake: BigInt
+  totalBurned: BigInt
+  totalTaken: BigInt
+  counterparty: Bytes
+  ratio: BigInt
+  ratioType: Int
+  metadata: Bytes
+  metadataB58: String
+  initMetadata: Bytes
+  initMetadataB58: String
+  initCallData: Bytes
+  createdTimestamp: BigInt
+}
+
+type InstanceCreatedSimpleGriefingFactory @entity {
+  id: ID!
+  instance: Bytes!
+  creator: Bytes!
+  callData: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type GriefedSimpleGriefing @entity {
+  id: ID!
+  punisher: Bytes!
+  staker: Bytes!
+  punishment: BigInt!
+  cost: BigInt!
+  message: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InitializedSimpleGriefing @entity {
+  id: ID!
+  operator: Bytes!
+  staker: Bytes!
+  counterparty: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type MetadataSetSimpleGriefing @entity {
+  id: ID!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedSimpleGriefing @entity {
+  id: ID!
+  operator: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type RatioSetSimpleGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  ratio: BigInt!
+  ratioType: Int!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeAddedSimpleGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  funder: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeBurnedSimpleGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type StakeTakenSimpleGriefing @entity {
+  id: ID!
+  staker: Bytes!
+  recipient: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+# Feed
+type Feed @entity {
+  id: ID!
+  creator: Bytes
+  operator: Bytes
+  metadata: Bytes
+  metadataB58: String
+  hashes: [Bytes!]
+  initMetadata: Bytes
+  initMetadataB58: String
+  initCallData: Bytes
+  createdTimestamp: BigInt
+}
+
+type InstanceCreatedFeedFactory @entity {
+  id: ID!
+  instance: Bytes!
+  creator: Bytes!
+  callData: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type InitializedFeed @entity {
+  id: ID!
+  operator: Bytes!
+  proofHash: Bytes!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type HashSubmittedFeed @entity {
+  id: ID!
+  hash: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type OperatorUpdatedFeed @entity {
+  id: ID!
+  operator: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type MetadataSetFeed @entity {
+  id: ID!
+  metadata: Bytes!
+  metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
