@@ -84,21 +84,21 @@ async function multihashTo(contentid, outputType) {
   }
 }
 
-const RATIO_TYPES = {
-  NaN: 0,
-  Inf: 1,
-  Dec: 2,
-}
-
-const TOKEN_TYPES = {
-  NaN: 0,
-  NMR: 1,
-  DAI: 2,
-}
-
 const ErasureHelper = {
   multihash: async ({ input, inputType, outputType }) =>
     multihashTo(await multihashFrom(input, inputType), outputType),
+  constants: {
+    RATIO_TYPES: {
+      NaN: 0,
+      Inf: 1,
+      Dec: 2,
+    },
+    TOKEN_TYPES: {
+      NaN: 0,
+      NMR: 1,
+      DAI: 2,
+    },
+  },
   crypto: {
     symmetric: {
       generateKey: () => {
@@ -158,8 +158,4 @@ const ErasureHelper = {
   },
 }
 
-module.exports = {
-  ErasureHelper,
-  RATIO_TYPES,
-  TOKEN_TYPES,
-}
+module.exports = ErasureHelper
