@@ -39,16 +39,12 @@ describe('Feed', function() {
 
   const deployTestFeed = async (
     validInit = true,
-    args = [operator, proofHash, feedMetadata],
+    args = [operator, feedMetadata],
   ) => {
     let callData
 
     if (validInit) {
-      callData = abiEncodeWithSelector(
-        'initialize',
-        ['address', 'bytes32', 'bytes'],
-        args,
-      )
+      callData = abiEncodeWithSelector('initialize', ['address', 'bytes'], args)
       const postID = addPost(proofHash)
     } else {
       // invalid callData is missing first address
@@ -171,14 +167,12 @@ describe('Feed', function() {
       const txn = await this.TestFeed.from(operator).setMetadata(
         newFeedMetadata,
       )
-      await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
 
     it('should set feed metadata from creator', async () => {
       const txn = await this.TestFeed.from(creator).setMetadata(newFeedMetadata)
-      await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
   })
 })

@@ -11,14 +11,15 @@
     "test": "bash run-ganache-tests.sh",
     "test_etherlime": "yarn etherlime test --timeout=10000",
     "coverage": "yarn etherlime coverage",
-    "deploy": "yarn etherlime deploy ./deployment/deploy_v120.js --compile=true",
+    "deploy": "yarn etherlime deploy ./deployment/deploy_v130.js --compile=true",
     "format": "yarn prettier -c 'test/**/*.js' -c 'deployment/**/*.js' --config .prettierrc"
   },
   "dependencies": {
     "@0x/sol-compiler": "^3.1.15",
+    "@openzeppelin/contracts": "^2.4.0",
     "coveralls": "^3.0.5",
     "dotenv": "^8.0.0",
-    "etherlime": "2.2.0",
+    "etherlime": "^2.2.4",
     "etherlime-lib": "^1.1.3",
     "ethers": "^4.0.32",
     "ganache-cli": "6.5.1",

@@ -1,4 +1,5 @@
 const { initDeployment } = require('../helpers/setup')
+const { TOKEN_TYPES } = require('../helpers/variables')
 
 describe('Staking', function() {
   let wallets = {
@@ -32,10 +33,11 @@ describe('Staking', function() {
     // funder has funds to fund for the staker's stake
     const staker = wallets.seller.signer.signingKey.address
     const funder = wallets.numerai.signer.signingKey.address
+    const tokenID = TOKEN_TYPES.NMR
 
     it('should fail when no allowance', async () => {
       await assert.revertWith(
-        contracts.TestStaking.instance.addStake(staker, funder, 10),
+        contracts.TestStaking.instance.addStake(tokenID, staker, funder, 10),
         'insufficient allowance',
       )
     })
@@ -85,26 +87,19 @@ describe('Staking', function() {
 
       // add stake of 10 tokens
       const txn = await contracts.TestStaking.instance.addStake(
+        tokenID,
         staker,
         funder,
         amountToAdd,
       )
 
       // check receipt for correct event logs
-      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
-        txn,
-      )
-      const expectedEvent = 'StakeAdded'
-
-      const stakeAddedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
-        'There is no such event',
-      )
-
-      assert.isDefined(stakeAddedEvent)
-      assert.equal(stakeAddedEvent.args.staker, staker)
-      assert.equal(stakeAddedEvent.args.funder, funder)
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd)
+      await assert.emitWithArgs(txn, 'DepositIncreased', [
+        tokenID,
+        staker,
+        amountToAdd,
+        amountToAdd,
+      ])
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountToAdd).toString(10)
@@ -116,7 +111,10 @@ describe('Staking', function() {
       assert.equal(stakingBalance.toString(10), amountToAdd)
 
       // check correct stake in staking contract mapping
-      const actualStake = await contracts.TestStaking.instance.getStake(staker)
+      const actualStake = await contracts.TestStaking.instance.getStake(
+        tokenID,
+        staker,
+      )
       assert.equal(actualStake.toNumber(), amountToAdd)
     })
   })
@@ -124,6 +122,7 @@ describe('Staking', function() {
   describe('Staking._takeStake', () => {
     const staker = wallets.seller.signer.signingKey.address
     const recipient = wallets.numerai.signer.signingKey.address
+    const tokenID = TOKEN_TYPES.NMR
 
     // it("should fail when currentStake is wrong", async () => {
     //   const amountStaked = 10;
@@ -189,6 +188,7 @@ describe('Staking', function() {
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
+        tokenID,
         staker,
         recipient,
         amountStaked,
@@ -197,6 +197,7 @@ describe('Staking', function() {
       // amountToTake > amountStaked
       await assert.revertWith(
         contracts.TestStaking.instance.takeStake(
+          tokenID,
           staker,
           recipient,
           amountToTake,
@@ -218,31 +219,26 @@ describe('Staking', function() {
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
+        tokenID,
         staker,
         recipient,
         amountToAdd,
       )
 
       const txn = await contracts.TestStaking.instance.takeStake(
+        tokenID,
         staker,
         recipient,
         amountTaken,
       )
 
       // check receipt for correct event logs
-      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
-        txn,
-      )
-      const StakeTakenEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        'StakeTaken',
-      )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.recipient, recipient)
-      assert.equal(StakeTakenEvent.amount.toNumber(), amountTaken)
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountTaken,
+        amountToAdd - amountTaken,
+      ])
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountTaken).toString(10)
@@ -254,7 +250,10 @@ describe('Staking', function() {
       assert.equal(stakingBalance.toString(10), amountTaken)
 
       // check correct stake in staking contract mapping
-      const actualStake = await contracts.TestStaking.instance.getStake(staker)
+      const actualStake = await contracts.TestStaking.instance.getStake(
+        tokenID,
+        staker,
+      )
       assert.equal(actualStake.toNumber(), amountTaken)
     })
   })
@@ -263,6 +262,7 @@ describe('Staking', function() {
     // funder has funds to fund for the staker's stake
     const staker = wallets.seller.signer.signingKey.address
     const recipient = wallets.numerai.signer.signingKey.address
+    const tokenID = TOKEN_TYPES.NMR
 
     it('should takeFullStake successfully', async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress
@@ -276,30 +276,25 @@ describe('Staking', function() {
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
+        tokenID,
         staker,
         recipient,
         amountStaked,
       )
 
       const txn = await contracts.TestStaking.instance.takeFullStake(
+        tokenID,
         staker,
         recipient,
       )
 
       // check receipt for correct event logs
-      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
-        txn,
-      )
-      const StakeTakenEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        'StakeTaken',
-      )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.recipient, recipient)
-      assert.equal(StakeTakenEvent.amount.toNumber(), amountStaked)
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountStaked,
+        0,
+      ])
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()
@@ -314,7 +309,10 @@ describe('Staking', function() {
       assert.equal(stakingBalance.toString(10), 0)
 
       // check correct stake in staking contract mapping
-      const actualStake = await contracts.TestStaking.instance.getStake(staker)
+      const actualStake = await contracts.TestStaking.instance.getStake(
+        tokenID,
+        staker,
+      )
       assert.equal(actualStake.toNumber(), 0)
     })
   })
@@ -322,6 +320,7 @@ describe('Staking', function() {
   describe('Staking._burnStake', () => {
     const staker = wallets.seller.signer.signingKey.address
     const funder = wallets.numerai.signer.signingKey.address
+    const tokenID = TOKEN_TYPES.NMR
 
     // it("should fail when currentStake is wrong", async () => {
     //   const amountBurnt = 10;
@@ -378,6 +377,7 @@ describe('Staking', function() {
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
+        tokenID,
         staker,
         funder,
         amountStaked,
@@ -385,7 +385,7 @@ describe('Staking', function() {
 
       // require amountToBurn <= amountStaked
       await assert.revertWith(
-        contracts.TestStaking.instance.burnStake(staker, amountToBurn),
+        contracts.TestStaking.instance.burnStake(tokenID, staker, amountToBurn),
         'insufficient deposit to remove',
       )
     })
@@ -400,33 +400,41 @@ describe('Staking', function() {
       await this.MockNMR.from(funder).approve(stakingAddress, amountToAdd)
 
       // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(staker, funder, amountToAdd)
+      await contracts.TestStaking.instance.addStake(
+        tokenID,
+        staker,
+        funder,
+        amountToAdd,
+      )
 
       const txn = await contracts.TestStaking.instance.burnStake(
+        tokenID,
         staker,
         amountBurn,
       )
 
       // check receipt for correct event logs
-      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
-        txn,
-      )
-      const StakeTakenEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        'StakeBurned',
-      )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.amount.toNumber(), amountBurn)
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountBurn,
+        amountToAdd - amountBurn,
+      ])
+      await assert.emitWithArgs(txn, 'StakeBurned', [
+        tokenID,
+        staker,
+        amountBurn,
+      ])
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), amountBurn)
 
       // check correct stake in staking contract mapping
-      const actualStake = await contracts.TestStaking.instance.getStake(staker)
+      const actualStake = await contracts.TestStaking.instance.getStake(
+        tokenID,
+        staker,
+      )
       assert.equal(actualStake.toNumber(), amountBurn)
     })
   })
@@ -434,6 +442,7 @@ describe('Staking', function() {
   describe('Staking._burnFullStake', () => {
     const staker = wallets.seller.signer.signingKey.address
     const funder = wallets.numerai.signer.signingKey.address
+    const tokenID = TOKEN_TYPES.NMR
 
     it('should burnFullStake successfully', async () => {
       const stakingAddress = contracts.TestStaking.instance.contractAddress
@@ -444,23 +453,30 @@ describe('Staking', function() {
       await this.MockNMR.from(funder).approve(stakingAddress, amountToAdd)
 
       // add stake of 10 tokens
-      await contracts.TestStaking.instance.addStake(staker, funder, amountToAdd)
+      await contracts.TestStaking.instance.addStake(
+        tokenID,
+        staker,
+        funder,
+        amountToAdd,
+      )
 
-      const txn = await contracts.TestStaking.instance.burnFullStake(staker)
+      const txn = await contracts.TestStaking.instance.burnFullStake(
+        tokenID,
+        staker,
+      )
 
       // check receipt for correct event logs
-      const receipt = await contracts.TestStaking.instance.verboseWaitForTransaction(
-        txn,
-      )
-      const StakeTakenEventLogs = utils.parseLogs(
-        receipt,
-        contracts.TestStaking.instance,
-        'StakeBurned',
-      )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.amount.toNumber(), amountToAdd)
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        staker,
+        amountToAdd,
+        0,
+      ])
+      await assert.emitWithArgs(txn, 'StakeBurned', [
+        tokenID,
+        staker,
+        amountToAdd,
+      ])
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()
@@ -471,7 +487,10 @@ describe('Staking', function() {
       assert.equal(stakingBalance.toString(10), 0)
 
       // check correct stake in staking contract mapping
-      const actualStake = await contracts.TestStaking.instance.getStake(staker)
+      const actualStake = await contracts.TestStaking.instance.getStake(
+        tokenID,
+        staker,
+      )
       assert.equal(actualStake.toNumber(), 0)
     })
   })

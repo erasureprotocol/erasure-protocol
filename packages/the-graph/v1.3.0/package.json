@@ -1,0 +1,22 @@
+{
+  "name": "rinkeby-v120",
+  "license": "MIT",
+  "scripts": {
+    "rinkeby-codegen": "graph codegen rinkeby/subgraph.yaml",
+    "rinkeby-build": "graph build rinkeby/subgraph.yaml",
+    "rinkeby-deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/rinkeby-v130 rinkeby/subgraph.yaml",
+    "kovan-codegen": "graph codegen kovan/subgraph.yaml",
+    "kovan-build": "graph build kovan/subgraph.yaml",
+    "kovan-deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/kovan-v130 kovan/subgraph.yaml",
+    "mainnet-codegen": "graph codegen mainnet/subgraph.yaml",
+    "mainnet-build": "graph build mainnet/subgraph.yaml",
+    "mainnet-deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/v130 mainnet/subgraph.yaml",
+    "create-local": "graph create --node http://localhost:8020/ erasureprotocol/v130 kovan/subgraph.yaml",
+    "remove-local": "graph remove --node http://localhost:8020/ erasureprotocol/v130 kovan/subgraph.yaml",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 erasureprotocol/v130 kovan/subgraph.yaml"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.16.0",
+    "@graphprotocol/graph-ts": "^0.15.0"
+  }
+}
