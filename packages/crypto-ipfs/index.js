@@ -84,21 +84,21 @@ async function multihashTo(contentid, outputType) {
   }
 }
 
+const RATIO_TYPES = {
+  NaN: 0,
+  Inf: 1,
+  Dec: 2,
+}
+
+const TOKEN_TYPES = {
+  NaN: 0,
+  NMR: 1,
+  DAI: 2,
+}
+
 const ErasureHelper = {
   multihash: async ({ input, inputType, outputType }) =>
     multihashTo(await multihashFrom(input, inputType), outputType),
-  ipfs: {
-    hashToHex: async () => {
-      throw new Error(
-        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'b58', outputType:'hex'})`,
-      )
-    },
-    onlyHash: async () => {
-      throw new Error(
-        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'raw', outputType:'b58'})`,
-      )
-    },
-  },
   crypto: {
     symmetric: {
       generateKey: () => {
@@ -158,4 +158,8 @@ const ErasureHelper = {
   },
 }
 
-module.exports = ErasureHelper
+module.exports = {
+  ErasureHelper,
+  RATIO_TYPES,
+  TOKEN_TYPES,
+}
