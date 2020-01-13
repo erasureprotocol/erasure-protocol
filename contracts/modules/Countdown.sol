@@ -8,7 +8,7 @@ import "./Deadline.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Countdown.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.3.0/docs/state-machines/modules/Countdown.png
 /// @notice This module provides an arbitrary length countdown.
 ///         The countdown makes use of block timestamps to determine start time and end time.
 contract Countdown is Deadline {
