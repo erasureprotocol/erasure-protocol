@@ -9,7 +9,7 @@ import "./TokenManager.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.3.0/docs/state-machines/modules/Deposit.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/modules/Deposit.png
 /// @notice This module allows for tracking user deposits for fungible tokens.
 contract Deposit {
 

@@ -9,7 +9,7 @@ import "./Deposit.sol";
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.3.0/docs/state-machines/modules/Staking.png
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/modules/Staking.png
 /// @notice This module wraps the Deposit functions and the ERC20 functions to provide combined actions.
 contract Staking is Deposit, TokenManager {
 
