@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+      - name: Get Artifacts
+        run: yarn install
       - name: Install
         working-directory: ./packages/testenv/
         run: yarn install
