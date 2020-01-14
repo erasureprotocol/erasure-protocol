@@ -1,5 +1,4 @@
 const etherlime = require('etherlime-lib')
-const { setupDeployment, initDeployment } = require('../helpers/setup')
 const ErasureHelper = require('@erasure/crypto-ipfs')
 const {
   hexlify,
@@ -16,8 +15,6 @@ const ErasurePostsArtifact = require('../../build/Erasure_Posts.json')
 var g = {}
 
 describe('Feed', async () => {
-  let deployer
-
   // wallets and addresses
   const [creatorWallet, otherWallet, operatorWallet] = accounts
   const creator = creatorWallet.signer.signingKey.address
@@ -90,10 +87,7 @@ describe('Feed', async () => {
   }
 
   before(async () => {
-    // ;[g.deployer, g.MockNMR] = await setupDeployment()
-    ;[g.deployer, g.MockNMR] = await initDeployment()
-    deployer = g.deployer
-    g.Token = g.MockNMR
+    g.Token = NMR
 
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact)
 

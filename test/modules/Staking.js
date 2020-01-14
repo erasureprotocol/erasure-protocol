@@ -1,4 +1,3 @@
-const { initDeployment } = require('../helpers/setup')
 const { TOKEN_TYPES } = require('../helpers/variables')
 
 describe('Staking', function() {
@@ -16,12 +15,6 @@ describe('Staking', function() {
       artifact: require('../../build/MockNMR.json'),
     },
   }
-
-  let deployer
-  before(async () => {
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-  })
 
   beforeEach(async () => {
     contracts.TestStaking.instance = await deployer.deploy(
@@ -52,7 +45,7 @@ describe('Staking', function() {
     //   );
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR.from(funder).approve(stakingAddress, 10);
+    //   await NMR.from(funder).approve(stakingAddress, 10);
 
     //   await contracts.TestStaking.instance.addStake(staker, funder, 10);
 
@@ -67,7 +60,7 @@ describe('Staking', function() {
     //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR.from(funder).approve(stakingAddress, 10);
+    //   await NMR.from(funder).approve(stakingAddress, 10);
 
     //   await assert.revertWith(
     //     contracts.TestStaking.instance.addStake(staker, funder, 0),
@@ -81,9 +74,9 @@ describe('Staking', function() {
       const amountToAdd = 10
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, amountToAdd)
+      await NMR.from(funder).approve(stakingAddress, amountToAdd)
 
-      const originalBalance = await this.MockNMR.balanceOf(funder)
+      const originalBalance = await NMR.balanceOf(funder)
 
       // add stake of 10 tokens
       const txn = await contracts.TestStaking.instance.addStake(
@@ -103,11 +96,11 @@ describe('Staking', function() {
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountToAdd).toString(10)
-      const actualBalance = await this.MockNMR.balanceOf(funder)
+      const actualBalance = await NMR.balanceOf(funder)
       assert.equal(actualBalance.toString(10), expectedBalance)
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
+      const stakingBalance = await NMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), amountToAdd)
 
       // check correct stake in staking contract mapping
@@ -129,7 +122,7 @@ describe('Staking', function() {
     //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR
+    //   await NMR
     //     .from(recipient)
     //     .approve(stakingAddress, amountStaked);
 
@@ -156,7 +149,7 @@ describe('Staking', function() {
     //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR
+    //   await NMR
     //     .from(recipient)
     //     .approve(stakingAddress, amountStaked);
 
@@ -184,7 +177,7 @@ describe('Staking', function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(recipient).approve(stakingAddress, amountStaked)
+      await NMR.from(recipient).approve(stakingAddress, amountStaked)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -213,9 +206,9 @@ describe('Staking', function() {
       const amountTaken = 5
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(recipient).approve(stakingAddress, amountToAdd)
+      await NMR.from(recipient).approve(stakingAddress, amountToAdd)
 
-      const originalBalance = await this.MockNMR.balanceOf(recipient)
+      const originalBalance = await NMR.balanceOf(recipient)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -242,11 +235,11 @@ describe('Staking', function() {
 
       // check updated token balances, 10000 * 10**18 - 10
       const expectedBalance = originalBalance.sub(amountTaken).toString(10)
-      const actualBalance = await this.MockNMR.balanceOf(recipient)
+      const actualBalance = await NMR.balanceOf(recipient)
       assert.equal(actualBalance.toString(10), expectedBalance)
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
+      const stakingBalance = await NMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), amountTaken)
 
       // check correct stake in staking contract mapping
@@ -270,9 +263,9 @@ describe('Staking', function() {
       const amountStaked = 10
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(recipient).approve(stakingAddress, amountStaked)
+      await NMR.from(recipient).approve(stakingAddress, amountStaked)
 
-      const originalBalance = await this.MockNMR.balanceOf(recipient)
+      const originalBalance = await NMR.balanceOf(recipient)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -301,11 +294,11 @@ describe('Staking', function() {
       assert.equal(returnVal.toString(10), amountStaked)
 
       // check updated token balances, should be 10000 * 10**18
-      const actualBalance = await this.MockNMR.balanceOf(recipient)
+      const actualBalance = await NMR.balanceOf(recipient)
       assert.equal(actualBalance.toString(10), originalBalance)
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
+      const stakingBalance = await NMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), 0)
 
       // check correct stake in staking contract mapping
@@ -327,7 +320,7 @@ describe('Staking', function() {
     //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR
+    //   await NMR
     //     .from(funder)
     //     .approve(stakingAddress, amountBurnt);
 
@@ -350,7 +343,7 @@ describe('Staking', function() {
     //   const stakingAddress = contracts.TestStaking.instance.contractAddress;
 
     //   // approve staking contract to transferFrom
-    //   await this.MockNMR
+    //   await NMR
     //     .from(funder)
     //     .approve(stakingAddress, amountStaked);
 
@@ -373,7 +366,7 @@ describe('Staking', function() {
       const stakingAddress = contracts.TestStaking.instance.contractAddress
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, amountStaked)
+      await NMR.from(funder).approve(stakingAddress, amountStaked)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -397,7 +390,7 @@ describe('Staking', function() {
       const amountBurn = 5
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, amountToAdd)
+      await NMR.from(funder).approve(stakingAddress, amountToAdd)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -427,7 +420,7 @@ describe('Staking', function() {
       ])
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
+      const stakingBalance = await NMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), amountBurn)
 
       // check correct stake in staking contract mapping
@@ -450,7 +443,7 @@ describe('Staking', function() {
       const amountToAdd = 10
 
       // approve staking contract to transferFrom
-      await this.MockNMR.from(funder).approve(stakingAddress, amountToAdd)
+      await NMR.from(funder).approve(stakingAddress, amountToAdd)
 
       // add stake of 10 tokens
       await contracts.TestStaking.instance.addStake(
@@ -483,7 +476,7 @@ describe('Staking', function() {
       assert.equal(returnVal.toString(10), amountToAdd)
 
       // now check the updated token balance of the staking contract
-      const stakingBalance = await this.MockNMR.balanceOf(stakingAddress)
+      const stakingBalance = await NMR.balanceOf(stakingAddress)
       assert.equal(stakingBalance.toString(10), 0)
 
       // check correct stake in staking contract mapping

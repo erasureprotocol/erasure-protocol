@@ -1,5 +1,3 @@
-const { createDeployer } = require('../helpers/setup')
-
 describe('Countdown', function() {
   let wallets = {
     numerai: accounts[0],
@@ -12,11 +10,6 @@ describe('Countdown', function() {
       artifact: require('../../build/TestCountdown.json'),
     },
   }
-
-  let deployer
-  before(() => {
-    deployer = createDeployer()
-  })
 
   beforeEach(async () => {
     contracts.TestCountdown.instance = await deployer.deploy(

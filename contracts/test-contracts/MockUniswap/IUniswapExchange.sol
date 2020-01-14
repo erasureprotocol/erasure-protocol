@@ -1,6 +1,12 @@
 pragma solidity ^0.5.13;
 
-contract MockUniswap {
+
+contract IUniswapExchange {
+    // Events
+    event TokenPurchase(address indexed buyer, uint256 indexed eth_sold, uint256 indexed tokens_bought);
+    event EthPurchase(address indexed buyer, uint256 indexed tokens_sold, uint256 indexed eth_bought);
+    event AddLiquidity(address indexed provider, uint256 indexed eth_amount, uint256 indexed token_amount);
+    event RemoveLiquidity(address indexed provider, uint256 indexed eth_amount, uint256 indexed token_amount);
     // Address of ERC20 token sold on this exchange
     function tokenAddress() external view returns (address token);
     // Address of Uniswap Factory

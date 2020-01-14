@@ -1,7 +1,6 @@
 const etherlime = require('etherlime-lib')
 const ethers = require('ethers')
 
-const { setupDeployment, initDeployment } = require('../helpers/setup')
 const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 const {
   hexlify,
@@ -42,26 +41,22 @@ describe('CountdownGriefingEscrow', function() {
   const AbiCoder = new ethers.utils.AbiCoder()
 
   before(async function() {
-    // setup deployment
-    // [g.deployer, g.MockNMR] = await setupDeployment();
-    ;[g.deployer, g.MockNMR] = await initDeployment()
-
     // deploy registry contracts
-    g.Registry = await g.deployer.deploy(Registry_Artifact)
-    g.AgreementRegistry = await g.deployer.deploy(AgreementRegistry_Artifact)
+    g.Registry = await deployer.deploy(Registry_Artifact)
+    g.AgreementRegistry = await deployer.deploy(AgreementRegistry_Artifact)
 
     // deploy template contracts
-    g.Template = await g.deployer.deploy(Template_Artifact)
-    g.AgreementTemplate = await g.deployer.deploy(AgreementTemplate_Artifact)
+    g.Template = await deployer.deploy(Template_Artifact)
+    g.AgreementTemplate = await deployer.deploy(AgreementTemplate_Artifact)
 
     // deploy factory contracts
-    g.Factory = await g.deployer.deploy(
+    g.Factory = await deployer.deploy(
       Factory_Artifact,
       false,
       g.Registry.contractAddress,
       g.Template.contractAddress,
     )
-    g.AgreementFactory = await g.deployer.deploy(
+    g.AgreementFactory = await deployer.deploy(
       AgreementFactory_Artifact,
       false,
       g.AgreementRegistry.contractAddress,
@@ -73,17 +68,17 @@ describe('CountdownGriefingEscrow', function() {
       ['address'],
       [g.AgreementFactory.contractAddress],
     )
-    await g.Registry.from(g.deployer.signer).addFactory(
+    await g.Registry.from(deployer.signer).addFactory(
       g.Factory.contractAddress,
       abiCodedAddress,
     )
-    await g.AgreementRegistry.from(g.deployer.signer).addFactory(
+    await g.AgreementRegistry.from(deployer.signer).addFactory(
       g.AgreementFactory.contractAddress,
       '0x',
     )
 
     // snapshot state
-    g.initSnapshot = await utils.snapshot(g.deployer.provider)
+    g.initSnapshot = await utils.snapshot(deployer.provider)
   })
 
   async function createEscrow(_creator, _buyer, _seller, _operator) {
@@ -134,7 +129,7 @@ describe('CountdownGriefingEscrow', function() {
     )
     const instanceAddress = events.InstanceCreated.instance
 
-    g.Instance = g.deployer.wrapDeployedContract(
+    g.Instance = deployer.wrapDeployedContract(
       Template_Artifact,
       instanceAddress,
     )
@@ -176,11 +171,8 @@ describe('CountdownGriefingEscrow', function() {
   async function depositPayment(_buyer) {
     // mint tokens
 
-    await g.MockNMR.mintMockTokens(_buyer, paymentAmount)
-    await g.MockNMR.from(_buyer).approve(
-      g.Instance.contractAddress,
-      paymentAmount,
-    )
+    await NMR.mintMockTokens(_buyer, paymentAmount)
+    await NMR.from(_buyer).approve(g.Instance.contractAddress, paymentAmount)
 
     // deposit NMR in the escrow
 
@@ -208,7 +200,7 @@ describe('CountdownGriefingEscrow', function() {
       g.Instance,
       'DepositIncreased',
     )
-    ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+    ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
 
     assert.equal(events.PaymentDeposited.buyer, _buyer)
     assert.equal(
@@ -241,11 +233,8 @@ describe('CountdownGriefingEscrow', function() {
   async function depositStake(_seller) {
     // mint tokens
 
-    await g.MockNMR.mintMockTokens(_seller, stakeAmount)
-    await g.MockNMR.from(_seller).approve(
-      g.Instance.contractAddress,
-      stakeAmount,
-    )
+    await NMR.mintMockTokens(_seller, stakeAmount)
+    await NMR.from(_seller).approve(g.Instance.contractAddress, stakeAmount)
 
     // deposit NMR in the escrow
 
@@ -273,7 +262,7 @@ describe('CountdownGriefingEscrow', function() {
       g.Instance,
       'DepositIncreased',
     )
-    ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+    ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
 
     assert.equal(events.StakeDeposited.seller, _seller)
     assert.equal(
@@ -326,7 +315,7 @@ describe('CountdownGriefingEscrow', function() {
       it('requester should successfully create escrow', async function() {
         // revert contract state
 
-        await utils.revertState(g.deployer.provider, g.initSnapshot)
+        await utils.revertState(deployer.provider, g.initSnapshot)
 
         // create escrow
 
@@ -347,8 +336,8 @@ describe('CountdownGriefingEscrow', function() {
       it('fulfiller should successfully deposit stake and finalize', async function() {
         // mint tokens
 
-        await g.MockNMR.mintMockTokens(fulfiller, stakeAmount)
-        await g.MockNMR.from(fulfiller).approve(
+        await NMR.mintMockTokens(fulfiller, stakeAmount)
+        await NMR.from(fulfiller).approve(
           g.Instance.contractAddress,
           stakeAmount,
         )
@@ -378,7 +367,7 @@ describe('CountdownGriefingEscrow', function() {
         )
         const instanceAddress = events.InstanceCreated.instance
 
-        g.AgreementInstance = g.deployer.wrapDeployedContract(
+        g.AgreementInstance = deployer.wrapDeployedContract(
           AgreementTemplate_Artifact,
           instanceAddress,
         )
@@ -389,7 +378,7 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'StakeDeposited',
         )
-        events.Transfer = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        events.Transfer = utils.parseLogs(receipt, NMR, 'Transfer')
         events.DepositDecreased = utils.parseLogs(
           receipt,
           g.Instance,
@@ -462,7 +451,7 @@ describe('CountdownGriefingEscrow', function() {
       it('requester should successfully create escrow', async function() {
         // revert contract state
 
-        await utils.revertState(g.deployer.provider, g.initSnapshot)
+        await utils.revertState(deployer.provider, g.initSnapshot)
 
         // create escrow
 
@@ -490,7 +479,7 @@ describe('CountdownGriefingEscrow', function() {
         // validate events
 
         assert.equal(utils.hasEvent(receipt, g.Instance, 'Cancelled'), true)
-        ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
         ;[events.DepositDecreased] = utils.parseLogs(
           receipt,
           g.Instance,
@@ -520,7 +509,7 @@ describe('CountdownGriefingEscrow', function() {
       it('seller should successfully create escrow', async function() {
         // revert contract state
 
-        await utils.revertState(g.deployer.provider, g.initSnapshot)
+        await utils.revertState(deployer.provider, g.initSnapshot)
 
         // create escrow
 
@@ -541,11 +530,8 @@ describe('CountdownGriefingEscrow', function() {
       it('buyer should successfully fulfill request and trigger countdown', async function() {
         // mint tokens
 
-        await g.MockNMR.mintMockTokens(buyer, paymentAmount)
-        await g.MockNMR.from(buyer).approve(
-          g.Instance.contractAddress,
-          paymentAmount,
-        )
+        await NMR.mintMockTokens(buyer, paymentAmount)
+        await NMR.from(buyer).approve(g.Instance.contractAddress, paymentAmount)
 
         // deposit NMR in the escrow
 
@@ -573,7 +559,7 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'DepositIncreased',
         )
-        ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
 
         assert.equal(events.PaymentDeposited.buyer, buyer)
         assert.equal(
@@ -622,13 +608,13 @@ describe('CountdownGriefingEscrow', function() {
         )
         const instanceAddress = events.InstanceCreated.instance
 
-        g.AgreementInstance = g.deployer.wrapDeployedContract(
+        g.AgreementInstance = deployer.wrapDeployedContract(
           AgreementTemplate_Artifact,
           instanceAddress,
         )
 
         // validate events
-        ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
         events.DepositDecreased = utils.parseLogs(
           receipt,
           g.Instance,
@@ -689,7 +675,7 @@ describe('CountdownGriefingEscrow', function() {
       it('seller should successfully create escrow', async function() {
         // revert contract state
 
-        await utils.revertState(g.deployer.provider, g.initSnapshot)
+        await utils.revertState(deployer.provider, g.initSnapshot)
 
         // create escrow
 
@@ -717,7 +703,7 @@ describe('CountdownGriefingEscrow', function() {
         // validate events
 
         assert.equal(utils.hasEvent(receipt, g.Instance, 'Cancelled'), true)
-        ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
         ;[events.DepositDecreased] = utils.parseLogs(
           receipt,
           g.Instance,
@@ -745,7 +731,7 @@ describe('CountdownGriefingEscrow', function() {
       it('seller should successfully create escrow', async function() {
         // revert contract state
 
-        await utils.revertState(g.deployer.provider, g.initSnapshot)
+        await utils.revertState(deployer.provider, g.initSnapshot)
 
         // create escrow
 
@@ -766,11 +752,8 @@ describe('CountdownGriefingEscrow', function() {
       it('buyer should successfully fulfill request and trigger countdown', async function() {
         // mint tokens
 
-        await g.MockNMR.mintMockTokens(buyer, paymentAmount)
-        await g.MockNMR.from(buyer).approve(
-          g.Instance.contractAddress,
-          paymentAmount,
-        )
+        await NMR.mintMockTokens(buyer, paymentAmount)
+        await NMR.from(buyer).approve(g.Instance.contractAddress, paymentAmount)
 
         // deposit NMR in the escrow
 
@@ -798,7 +781,7 @@ describe('CountdownGriefingEscrow', function() {
           g.Instance,
           'DepositIncreased',
         )
-        ;[events.Transfer] = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        ;[events.Transfer] = utils.parseLogs(receipt, NMR, 'Transfer')
 
         assert.equal(events.PaymentDeposited.buyer, buyer)
         assert.equal(
@@ -833,7 +816,7 @@ describe('CountdownGriefingEscrow', function() {
       it('buyer should successfully timeout', async function() {
         // time travel
 
-        await utils.timeTravel(g.deployer.provider, escrowCountdown)
+        await utils.timeTravel(deployer.provider, escrowCountdown)
 
         // cancel escrow
 
@@ -844,7 +827,7 @@ describe('CountdownGriefingEscrow', function() {
         // validate events
 
         assert.equal(utils.hasEvent(receipt, g.Instance, 'Cancelled'), true)
-        events.Transfer = utils.parseLogs(receipt, g.MockNMR, 'Transfer')
+        events.Transfer = utils.parseLogs(receipt, NMR, 'Transfer')
         events.DepositDecreased = utils.parseLogs(
           receipt,
           g.Instance,

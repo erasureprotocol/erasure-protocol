@@ -1,4 +1,3 @@
-const { createDeployer, initDeployment } = require('../helpers/setup')
 const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 const { abiEncodeWithSelector } = require('../helpers/utils')
 
@@ -77,12 +76,7 @@ describe('SimpleGriefing', function() {
     return agreement
   }
 
-  let deployer
   before(async () => {
-    // [this.deployer, this.MockNMR] = await setupDeployment();
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-
     this.SimpleGriefing = await deployer.deploy(SimpleGriefingArtifact)
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact)
     this.Factory = await deployer.deploy(
@@ -100,11 +94,11 @@ describe('SimpleGriefing', function() {
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
     const startingBalance = '1000'
-    await this.MockNMR.from(counterparty).mintMockTokens(
+    await NMR.from(counterparty).mintMockTokens(
       counterparty,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(staker).mintMockTokens(
+    await NMR.from(staker).mintMockTokens(
       staker,
       ethers.utils.parseEther(startingBalance),
     )
@@ -196,7 +190,7 @@ describe('SimpleGriefing', function() {
     let amountToAdd = 500 // 500 token weis
 
     const increaseStake = async sender => {
-      await this.MockNMR.from(sender).approve(
+      await NMR.from(sender).approve(
         this.TestSimpleGriefing.contractAddress,
         amountToAdd,
       )
@@ -258,7 +252,7 @@ describe('SimpleGriefing', function() {
       // update currentStake
       currentStake = (await this.TestSimpleGriefing.getStake()).toNumber()
 
-      await this.MockNMR.from(sender).approve(
+      await NMR.from(sender).approve(
         this.TestSimpleGriefing.contractAddress,
         amountToAdd,
       )
@@ -321,7 +315,7 @@ describe('SimpleGriefing', function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
-      await this.MockNMR.from(staker).approve(
+      await NMR.from(staker).approve(
         this.TestSimpleGriefing.contractAddress,
         stakerStake,
       )
@@ -330,7 +324,7 @@ describe('SimpleGriefing', function() {
 
       const expectedCost = punishment.mul(ratio)
 
-      await this.MockNMR.from(counterparty).approve(
+      await NMR.from(counterparty).approve(
         this.TestSimpleGriefing.contractAddress,
         expectedCost,
       )
@@ -447,7 +441,7 @@ describe('SimpleGriefing', function() {
 
     it('should release stake when msg.sender is active operator', async () => {
       // have to re-increase stake to release
-      await this.MockNMR.from(staker).approve(
+      await NMR.from(staker).approve(
         this.TestSimpleGriefing.contractAddress,
         stakerStake,
       )
