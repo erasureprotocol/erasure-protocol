@@ -1,5 +1,3 @@
-const { createDeployer } = require('../helpers/setup')
-
 describe('Operated', function() {
   const [operatorWallet, newOperatorWallet] = accounts
   const operator = operatorWallet.signer.signingKey.address
@@ -10,11 +8,6 @@ describe('Operated', function() {
       artifact: require('../../build/TestOperated.json'),
     },
   }
-
-  let deployer
-  before(() => {
-    deployer = createDeployer()
-  })
 
   beforeEach(async () => {
     contracts.TestOperated.instance = await deployer.deploy(

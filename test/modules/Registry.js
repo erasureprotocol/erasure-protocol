@@ -1,5 +1,4 @@
 const ethers = require('ethers')
-const { createDeployer } = require('../helpers/setup')
 const { hexlify } = require('../helpers/utils')
 const RegistryArtifact = require('../../build/Registry.json')
 
@@ -14,10 +13,10 @@ describe('Registry', function() {
   }
 
   // wallets and addresses
-  let [ownerWallet, buyerWallet, sellerWallet] = accounts
-  let owner = ownerWallet.signer.signingKey.address // normalize address
-  const buyer = buyerWallet.signer.signingKey.address // normalize address
-  const seller = sellerWallet.signer.signingKey.address // normalize address
+  const [ownerWallet, buyerWallet, sellerWallet] = accounts
+  const owner = ownerWallet.signer.signingKey.address // normalize address
+  const account1 = buyerWallet.signer.signingKey.address // normalize address
+  const account2 = sellerWallet.signer.signingKey.address // normalize address
   // nonce used to generate random address
   let factoryNonce = 0
 
@@ -75,13 +74,6 @@ describe('Registry', function() {
     assert.equal(actualExtraData, hexlify(factoryExtraData))
   }
 
-  let deployer
-  before(async () => {
-    deployer = await createDeployer()
-    ownerWallet = deployer
-    owner = ownerWallet.signer.signingKey.address
-  })
-
   describe('Registry.constructor', () => {
     it('should deploy correctly', async () => {
       this.Registry = await deployer.deploy(
@@ -89,6 +81,8 @@ describe('Registry', function() {
         false,
         instanceType,
       )
+
+      this.Registry.transferOwnership(owner)
 
       const actualInstanceType = await this.Registry.getInstanceType()
 
@@ -109,7 +103,7 @@ describe('Registry', function() {
 
     it('should revert when not owner', async () => {
       await assert.revertWith(
-        this.Registry.from(seller).addFactory(
+        this.Registry.from(account2).addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData),
         ),
@@ -118,7 +112,7 @@ describe('Registry', function() {
     })
 
     it('should add factory correctly', async () => {
-      const txn = await this.Registry.addFactory(
+      const txn = await this.Registry.from(owner).addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData),
       )
@@ -137,18 +131,21 @@ describe('Registry', function() {
 
     it('should revert when factory already added', async () => {
       await assert.revertWith(
-        this.Registry.addFactory(factoryAddress, Buffer.from(factoryExtraData)),
+        this.Registry.from(owner).addFactory(
+          factoryAddress,
+          Buffer.from(factoryExtraData),
+        ),
         'factory already exists at the provided factory address',
       )
     })
 
     it('should revert when factory is retired', async () => {
       // retire the added factory
-      await this.Registry.retireFactory(factoryAddress)
+      await this.Registry.from(owner).retireFactory(factoryAddress)
       retireLocalFactory(factoryAddress)
 
       await assert.revertWith(
-        this.Registry.addFactory(
+        this.Registry.from(owner).addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData),
           { gasLimit: 30000 },
@@ -163,30 +160,30 @@ describe('Registry', function() {
 
     it('should revert when not owner', async () => {
       await assert.revertWith(
-        this.Registry.from(seller).retireFactory(factoryAddress),
+        this.Registry.from(account2).retireFactory(factoryAddress),
         'Ownable: caller is not the owner',
       )
     })
 
     it('should revert when factory is not added', async () => {
       await assert.revertWith(
-        this.Registry.retireFactory(factoryAddress),
+        this.Registry.from(owner).retireFactory(factoryAddress),
         'factory is not currently registered',
       )
     })
 
     it('should revert when factory is already retired', async () => {
-      await this.Registry.addFactory(
+      await this.Registry.from(owner).addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData),
       )
       addLocalFactory(factoryAddress)
 
-      await this.Registry.retireFactory(factoryAddress)
+      await this.Registry.from(owner).retireFactory(factoryAddress)
       retireLocalFactory(factoryAddress)
 
       await assert.revertWith(
-        this.Registry.retireFactory(factoryAddress),
+        this.Registry.from(owner).retireFactory(factoryAddress),
         'factory is not currently registered',
       )
     })
@@ -194,22 +191,24 @@ describe('Registry', function() {
     it('should retire factory correctly', async () => {
       const factoryAddress = generateRandomAddress()
 
-      await this.Registry.addFactory(
+      await this.Registry.from(owner).addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData),
       )
       const factoryId = addLocalFactory(factoryAddress)
 
-      const txn = await this.Registry.retireFactory(factoryAddress)
+      const txn = await this.Registry.from(owner).retireFactory(factoryAddress)
       retireLocalFactory(factoryAddress)
 
-      assert.emitWithArgs(txn, 'FactoryRetired', [
+      await assert.emitWithArgs(txn, 'FactoryRetired', [
         owner,
         factoryAddress,
         factoryId,
       ])
 
-      const actualStatus = await this.Registry.getFactoryStatus(factoryAddress)
+      const actualStatus = await this.Registry.from(owner).getFactoryStatus(
+        factoryAddress,
+      )
       assert.equal(actualStatus, FACTORY_STATUS.Retired)
     })
   })
@@ -222,7 +221,7 @@ describe('Registry', function() {
 
       for (let i = 0; i < populateCount; i++) {
         const factoryAddress = generateRandomAddress()
-        await this.Registry.addFactory(
+        await this.Registry.from(owner).addFactory(
           factoryAddress,
           Buffer.from(factoryExtraData),
         )
@@ -230,7 +229,7 @@ describe('Registry', function() {
         addLocalFactory(factoryAddress)
       }
 
-      const factoryCount = await this.Registry.getFactoryCount()
+      const factoryCount = await this.Registry.from(owner).getFactoryCount()
       assert.equal(factoryCount.toNumber(), factories.length)
     })
   })
@@ -249,9 +248,9 @@ describe('Registry', function() {
     it('gets factory address correctly', async () => {
       for (let factoryId = 0; factoryId < factories.length; factoryId++) {
         const factoryAddress = factories[factoryId]
-        const actualFactoryAddress = await this.Registry.getFactoryAddress(
-          factoryId,
-        )
+        const actualFactoryAddress = await this.Registry.from(
+          owner,
+        ).getFactoryAddress(factoryId)
         assert.equal(factoryAddress, actualFactoryAddress)
       }
     })
@@ -259,7 +258,7 @@ describe('Registry', function() {
 
   describe('Registry.getFactories', () => {
     it('should get factories correctly', async () => {
-      const actualFactories = await this.Registry.getFactories()
+      const actualFactories = await this.Registry.from(owner).getFactories()
       assert.deepEqual(actualFactories, factories)
     })
   })
@@ -267,14 +266,14 @@ describe('Registry', function() {
   describe('Registry.getPaginatedFactories', () => {
     it('should revert when startIndex >= endIndex', async () => {
       await assert.revertWith(
-        this.Registry.getPaginatedFactories(3, 2),
+        this.Registry.from(owner).getPaginatedFactories(3, 2),
         'startIndex must be less than endIndex',
       )
     })
 
     it('should revert when endIndex > instances.length', async () => {
       await assert.revertWith(
-        this.Registry.getPaginatedFactories(
+        this.Registry.from(owner).getPaginatedFactories(
           factories.length - 1,
           factories.length + 1,
         ),
@@ -285,15 +284,14 @@ describe('Registry', function() {
     it('should get paginated instances correctly', async () => {
       let startIndex = 0
       let endIndex = 3
-      let actualFactories = await this.Registry.getPaginatedFactories(
-        startIndex,
-        endIndex,
-      )
+      let actualFactories = await this.Registry.from(
+        owner,
+      ).getPaginatedFactories(startIndex, endIndex)
       assert.deepEqual(actualFactories, factories.slice(startIndex, endIndex)) // deepEqual because array comparison
 
       startIndex = 3
       endIndex = 5
-      actualFactories = await this.Registry.getPaginatedFactories(
+      actualFactories = await this.Registry.from(owner).getPaginatedFactories(
         startIndex,
         endIndex,
       )
@@ -314,7 +312,7 @@ describe('Registry', function() {
 
   describe('Registry.register', () => {
     // pretend that the buyer address is one of the factory
-    const factoryAddress = buyer
+    const factoryAddress = account1
 
     it('should revert when factory not added', async () => {
       const instanceAddress = generateRandomAddress()
@@ -322,7 +320,7 @@ describe('Registry', function() {
       await assert.revertWith(
         this.Registry.from(factoryAddress).register(
           instanceAddress,
-          buyer,
+          account1,
           instanceExtraData,
         ),
         'factory in wrong status',
@@ -330,10 +328,13 @@ describe('Registry', function() {
     })
 
     it('should revert when factory is retired', async () => {
-      const factoryAddress = seller
+      const factoryAddress = account2
 
-      await this.Registry.addFactory(seller, Buffer.from(factoryExtraData))
-      await this.Registry.retireFactory(seller)
+      await this.Registry.from(owner).addFactory(
+        account2,
+        Buffer.from(factoryExtraData),
+      )
+      await this.Registry.from(owner).retireFactory(account2)
 
       addLocalFactory(factoryAddress)
 
@@ -342,7 +343,7 @@ describe('Registry', function() {
       await assert.revertWith(
         this.Registry.from(factoryAddress).register(
           instanceAddress,
-          seller,
+          account2,
           instanceExtraData,
         ),
         'factory in wrong status',
@@ -350,7 +351,7 @@ describe('Registry', function() {
     })
 
     it('should register instance correctly', async () => {
-      await this.Registry.addFactory(
+      await this.Registry.from(owner).addFactory(
         factoryAddress,
         Buffer.from(factoryExtraData),
       )
@@ -360,7 +361,7 @@ describe('Registry', function() {
 
       const txn = await this.Registry.from(factoryAddress).register(
         instanceAddress,
-        seller,
+        account2,
         instanceExtraData,
       )
 
@@ -369,7 +370,7 @@ describe('Registry', function() {
       await assert.emitWithArgs(txn, 'InstanceRegistered', [
         instanceAddress,
         factoryAddress,
-        seller,
+        account2,
         instanceIndex,
         factoryId,
       ])
@@ -377,7 +378,7 @@ describe('Registry', function() {
   })
 
   describe('Registry.getInstanceCount', () => {
-    const factoryAddress = buyer
+    const factoryAddress = account1
 
     it('should get instance count correctly', async () => {
       const populateCount = 5
@@ -387,7 +388,7 @@ describe('Registry', function() {
 
         await this.Registry.from(factoryAddress).register(
           instanceAddress,
-          buyer,
+          account1,
           instanceExtraData,
         )
         addLocalInstance(instanceAddress)
@@ -415,7 +416,7 @@ describe('Registry', function() {
   })
 
   describe('Registry.getInstanceData', () => {
-    const factoryAddress = buyer
+    const factoryAddress = account1
 
     it('should revert when out of range', async () => {
       await assert.revertWith(

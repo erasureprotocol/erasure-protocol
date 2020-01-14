@@ -5,7 +5,6 @@ const ErasureAgreementsArtifact = require('../../build/Erasure_Agreements.json')
 const ErasurePostsArtifact = require('../../build/Erasure_Posts.json')
 
 // test helpers
-const { createDeployer } = require('../helpers/setup')
 const testFactory = require('../modules/Factory')
 const [, , creatorWallet] = accounts
 const creator = creatorWallet.signer.signingKey.address
@@ -20,10 +19,8 @@ const staticMetadata = ethers.utils.keccak256(
 const createTypes = ['address', 'bytes']
 
 let FeedTemplate
-let deployer
 
 before(async () => {
-  deployer = createDeployer()
   FeedTemplate = await deployer.deploy(FeedArtifact)
 })
 

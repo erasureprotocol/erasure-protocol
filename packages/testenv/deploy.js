@@ -10,7 +10,7 @@ let c = {
       artifact: require('./build/MockNMR.json'),
     },
     uniswap: {
-      artifact: require('./build/MockUniswap.json'),
+      artifact: require('./build/MockUniswapExchange.json'),
     },
   },
   DAI: {
@@ -18,8 +18,11 @@ let c = {
       artifact: require('./build/MockERC20.json'),
     },
     uniswap: {
-      artifact: require('./build/MockUniswap.json'),
+      artifact: require('./build/MockUniswapExchange.json'),
     },
+  },
+  UniswapFactory: {
+    artifact: require('./build/MockUniswapFactory.json'),
   },
   Authereum: {
     artifact: require('./build/MockAuthereum.json'),
@@ -373,17 +376,31 @@ async function deployMocks() {
   console.log(`Distribute ETH to deployment wallets`)
   await sendEthToUnlockedAccounts()
 
+  console.log(`Deploy UniswapFactory`)
+  UniswapFactory = await deployUniswapFactory()
+
   console.log(`Deploy NMR`)
-  await deployNMR()
+  await deployNMR(UniswapFactory)
 
   console.log(`Deploy DAI`)
-  await deployDAI()
+  await deployDAI(UniswapFactory)
 
   console.log(`Deploy Authereum`)
   // await deployAuthereum()
 }
 
-async function deployNMR() {
+async function deployUniswapFactory() {
+  const deploySigner = provider.getSigner(0)
+  const [UniswapFactory] = await deployContract(
+    'UniswapFactory',
+    c.UniswapFactory.artifact,
+    [],
+    deploySigner,
+  )
+  return UniswapFactory
+}
+
+async function deployNMR(UniswapFactory) {
   let nmrSigner = provider.getSigner(nmrDeployAddress)
   // console.log(await nmrSigner.getAddress())
 
@@ -415,13 +432,13 @@ async function deployNMR() {
   ;[c.NMR.uniswap.wrap, _] = await deployContract(
     'NMR',
     c.NMR.uniswap.artifact,
-    [],
+    [nmrTokenAddress, UniswapFactory.address],
     uniswapSigner,
   )
   assert.equal(c.NMR.uniswap.wrap.address, nmrUniswapAddress)
 }
 
-async function deployDAI() {
+async function deployDAI(UniswapFactory) {
   let daiSigner = provider.getSigner(daiDeployAddress)
   // console.log(await daiSigner.getAddress())
 
@@ -453,7 +470,7 @@ async function deployDAI() {
   ;[c.DAI.uniswap.wrap, _] = await deployContract(
     'DAI',
     c.DAI.uniswap.artifact,
-    [],
+    [daiTokenAddress, UniswapFactory.address],
     uniswapSigner,
   )
   assert.equal(c.DAI.uniswap.wrap.address, daiUniswapAddress)
