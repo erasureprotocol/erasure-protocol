@@ -100,7 +100,7 @@ describe('BurnDAI', async () => {
     })
   })
 
-  describe('BurnDAI._burn', function() {
+  describe('BurnDAI._burn', async () => {
     it('should fail if not enough tokens', async () => {
       // check for revert
       assert.revertWith(
@@ -149,6 +149,25 @@ describe('BurnDAI', async () => {
         eth_sold: expectedETH,
         tokens_bought: expectedNMR,
       })
+    })
+  })
+  describe('BurnDAI.getters', async () => {
+    it('should get correct token address', async () => {
+      assert.equal(await TestBurnDAI._getTokenAddress(), DAI.contractAddress)
+    })
+    it('should get correct exchange address', async () => {
+      assert.equal(
+        await TestBurnDAI._getExchangeAddress(),
+        UniswapDAI.contractAddress,
+      )
+    })
+    it('should get correct swap amount', async () => {
+      const amounts = await TestBurnDAI._getExpectedSwapAmount(amountToBurn)
+      const expectedETH = await UniswapDAI.getTokenToEthInputPrice(amountToBurn)
+      const expectedNMR = await UniswapNMR.getEthToTokenInputPrice(expectedETH)
+
+      assert.equal(amounts.amountETH.toString(), expectedETH.toString())
+      assert.equal(amounts.amountNMR.toString(), expectedNMR.toString())
     })
   })
 })
