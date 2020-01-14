@@ -163,6 +163,20 @@ async function assertEvent(contract, txn, eventName, expectedArgs) {
   )
 }
 
+async function assertEvent2(
+  receipt,
+  contract,
+  eventName,
+  eventID,
+  expectedArgs,
+) {
+  const eventLogs = utils.parseLogs(receipt, contract, eventName)
+  const eventArgs = eventLogs[eventID]
+  for (const [key, value] of Object.entries(expectedArgs)) {
+    assert.equal(eventArgs[key].toString(), value.toString())
+  }
+}
+
 module.exports = {
   hexlify,
   createInstanceAddress,
@@ -173,4 +187,5 @@ module.exports = {
   getLatestContractAddressFrom,
   abiEncodeWithSelector,
   assertEvent,
+  assertEvent2,
 }
