@@ -1,4 +1,3 @@
-const { setupDeployment, initDeployment } = require('../helpers/setup')
 const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 const { abiEncodeWithSelector } = require('../helpers/utils')
 
@@ -78,12 +77,7 @@ describe('CountdownGriefing', function() {
     return agreement
   }
 
-  let deployer
   before(async () => {
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-
-    // this.MockNMR = await deployer.deploy(MockNMRArtifact);
     this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact)
     this.Factory = await deployer.deploy(
@@ -102,15 +96,15 @@ describe('CountdownGriefing', function() {
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
     const startingBalance = '1000'
-    await this.MockNMR.from(counterparty).mintMockTokens(
+    await NMR.from(counterparty).mintMockTokens(
       counterparty,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(staker).mintMockTokens(
+    await NMR.from(staker).mintMockTokens(
       staker,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(operator).mintMockTokens(
+    await NMR.from(operator).mintMockTokens(
       operator,
       ethers.utils.parseEther(startingBalance),
     )
@@ -277,12 +271,9 @@ describe('CountdownGriefing', function() {
     let amountToAdd = 500 // 500 token weis
 
     const increaseStake = async sender => {
-      await this.MockNMR.from(sender).changeApproval(
+      await NMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          sender,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd,
       )
 
@@ -367,12 +358,9 @@ describe('CountdownGriefing', function() {
       // update currentStake
       currentStake = (await this.TestCountdownGriefing.getStake()).toNumber()
 
-      await this.MockNMR.from(sender).changeApproval(
+      await NMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          sender,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd,
       )
 
@@ -459,12 +447,9 @@ describe('CountdownGriefing', function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
-      await this.MockNMR.from(staker).changeApproval(
+      await NMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          staker,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake,
       )
 
@@ -473,9 +458,9 @@ describe('CountdownGriefing', function() {
 
       const expectedCost = punishment.mul(ratio)
 
-      await this.MockNMR.from(counterparty).changeApproval(
+      await NMR.from(counterparty).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
+        await NMR.allowance(
           counterparty,
           this.TestCountdownGriefing.contractAddress,
         ),
@@ -633,7 +618,7 @@ describe('CountdownGriefing', function() {
 
     it('should release stake when msg.sender is active operator', async () => {
       // have to re-increase stake to release
-      await this.MockNMR.from(staker).approve(
+      await NMR.from(staker).approve(
         this.TestCountdownGriefing.contractAddress,
         stakerStake,
       )
@@ -689,12 +674,9 @@ describe('CountdownGriefing', function() {
 
       // staker increase stake
 
-      await this.MockNMR.from(staker).changeApproval(
+      await NMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          staker,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake,
       )
 

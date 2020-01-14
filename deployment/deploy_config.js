@@ -1,9 +1,11 @@
-const c = {
+const contracts = {
   NMR: {
     token: {
       artifact: require('../build/MockNMR.json'),
       mainnet: {
         address: '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671',
+        deployer: '0x9608010323ed882a38ede9211d7691102b4f0ba0',
+        nonce: 1,
       },
       rinkeby: {
         address: '0x1A758E75d1082BAab0A934AFC7ED27Dbf6282373',
@@ -13,9 +15,11 @@ const c = {
       },
     },
     uniswap: {
-      artifact: require('../build/MockUniswap.json'),
+      artifact: require('../build/MockUniswapExchange.json'),
       mainnet: {
         address: '0x2Bf5A5bA29E60682fC56B2Fcf9cE07Bef4F6196f',
+        deployer: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95',
+        nonce: 41,
       },
       rinkeby: {
         address: '0xd6Bb4d352C56Fdd6D2817732821aFDF94204cDF6',
@@ -30,6 +34,8 @@ const c = {
       artifact: require('../build/MockERC20.json'),
       mainnet: {
         address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        deployer: '0xb5b06a16621616875A6C2637948bF98eA57c58fa',
+        nonce: 1,
       },
       rinkeby: {
         address: '0x2448eE2641d78CC42D7AD76498917359D961A783',
@@ -39,9 +45,11 @@ const c = {
       },
     },
     uniswap: {
-      artifact: require('../build/MockUniswap.json'),
+      artifact: require('../build/MockUniswapExchange.json'),
       mainnet: {
         address: '0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667',
+        deployer: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95',
+        nonce: 1225,
       },
       rinkeby: {
         address: '0x77dB9C915809e7BE439D2AB21032B1b8B58F6891',
@@ -50,6 +58,9 @@ const c = {
         address: '0x47D4Af3BBaEC0dE4dba5F44ae8Ed2761977D32d6',
       },
     },
+  },
+  UniswapFactory: {
+    artifact: require('../build/MockUniswapFactory.json'),
   },
   Authereum: {
     artifact: require('../build/MockAuthereum.json'),
@@ -273,4 +284,4 @@ const c = {
   },
 }
 
-module.exports = { c }
+module.exports = contracts

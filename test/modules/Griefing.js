@@ -1,5 +1,4 @@
 const ethers = require('ethers')
-const { initDeployment } = require('../helpers/setup')
 
 const { hexlify } = require('../helpers/utils')
 const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
@@ -17,22 +16,18 @@ describe('Griefing', function() {
     },
   }
 
-  let deployer
   before(async () => {
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-
     const buyer = wallets.buyer.signer.signingKey.address
     const seller = wallets.seller.signer.signingKey.address
 
     // fill the token balances of the buyer and seller
     // buyer & seller has 1,000 tokens each
     const startingBalance = '1000'
-    await this.MockNMR.from(buyer).mintMockTokens(
+    await NMR.from(buyer).mintMockTokens(
       buyer,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(seller).mintMockTokens(
+    await NMR.from(seller).mintMockTokens(
       seller,
       ethers.utils.parseEther(startingBalance),
     )
@@ -314,10 +309,7 @@ describe('Griefing', function() {
         .setRatio(seller, tokenID, ratio, ratioType)
 
       const wrongApproveAmount = punishment.sub(1)
-      await this.MockNMR.from(buyer).approve(
-        contractAddress,
-        wrongApproveAmount,
-      )
+      await NMR.from(buyer).approve(contractAddress, wrongApproveAmount)
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -334,7 +326,7 @@ describe('Griefing', function() {
       await contracts.TestGriefing.instance
         .from(seller)
         .setRatio(seller, tokenID, ratio, ratioType)
-      await this.MockNMR.from(buyer).approve(contractAddress, punishment)
+      await NMR.from(buyer).approve(contractAddress, punishment)
 
       await assert.revert(
         contracts.TestGriefing.instance
@@ -353,7 +345,7 @@ describe('Griefing', function() {
         .from(seller)
         .setRatio(seller, tokenID, ratio, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, wrongStakeAmount)
+      await NMR.from(seller).approve(contractAddress, wrongStakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -362,10 +354,7 @@ describe('Griefing', function() {
       currentStake = wrongStakeAmount
 
       // buyer process
-      await this.MockNMR.from(buyer).approve(
-        contractAddress,
-        punishment.mul(ratio),
-      )
+      await NMR.from(buyer).approve(contractAddress, punishment.mul(ratio))
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -386,7 +375,7 @@ describe('Griefing', function() {
         .from(seller)
         .setRatio(seller, tokenID, ratio, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, stakeAmount)
+      await NMR.from(seller).approve(contractAddress, stakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -397,7 +386,7 @@ describe('Griefing', function() {
       // buyer process
       const expectedCost = 0 // punishment at no cost
 
-      await this.MockNMR.from(buyer).approve(contractAddress, expectedCost)
+      await NMR.from(buyer).approve(contractAddress, expectedCost)
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
@@ -437,7 +426,7 @@ describe('Griefing', function() {
         .from(seller)
         .setRatio(seller, tokenID, ratioE18, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, stakeAmount)
+      await NMR.from(seller).approve(contractAddress, stakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -448,7 +437,7 @@ describe('Griefing', function() {
       // buyer process
       const expectedCost = punishment.mul(ratio)
 
-      await this.MockNMR.from(buyer).approve(contractAddress, expectedCost)
+      await NMR.from(buyer).approve(contractAddress, expectedCost)
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
