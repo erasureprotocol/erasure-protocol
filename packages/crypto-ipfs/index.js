@@ -4,6 +4,7 @@ const pbkdf2 = require('pbkdf2')
 const getRandomValues = require('get-random-values')
 const multihash = require('multihashes')
 const sha256_cid = require('ipfs-only-hash')
+const ethers = require('ethers')
 
 const MAX_UINT32 = Math.pow(2, 32) - 1
 const MAX_UINT8 = Math.pow(2, 8) - 1
@@ -98,6 +99,11 @@ const ErasureHelper = {
       NMR: 1,
       DAI: 2,
     },
+  },
+  encodeCreateCall: (templateABI, abiValues) => {
+    const interface = new ethers.utils.Interface(templateABI)
+    const calldata = interface.functions.initialize.encode(abiValues)
+    return calldata
   },
   crypto: {
     symmetric: {

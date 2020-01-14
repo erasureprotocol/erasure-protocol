@@ -129,6 +129,44 @@ describe('multihash', () => {
   })
 })
 
+describe('encodeCreateCall', () => {
+  it('should encode initialize function call', () => {
+    const abi = [
+      {
+        constant: false,
+        inputs: [
+          {
+            internalType: 'address',
+            name: 'operator',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes',
+            name: 'metadata',
+            type: 'bytes',
+          },
+        ],
+        name: 'initialize',
+        outputs: [],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'function',
+      },
+    ]
+    const values = [
+      '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      '0x1220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f',
+    ]
+
+    const call = ErasureHelper.encodeCreateCall(abi, values)
+
+    assert.equal(
+      call,
+      '0xd1f578940000000000000000000000006b175474e89094c44da98b954eedeac495271d0f000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000221220227e75ab3fb8ba90fbb7addb3d30bd20c676f873e0216a767084b2073e0b7d9f000000000000000000000000000000000000000000000000000000000000',
+    )
+  })
+})
+
 describe('crypto', () => {
   describe('symmetric', () => {
     describe('generateKey', () => {
