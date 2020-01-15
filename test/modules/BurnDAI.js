@@ -32,7 +32,7 @@ describe('BurnDAI', async () => {
   describe('BurnDAI._burnFrom', async () => {
     it('should fail if not enough tokens', async () => {
       // check for revert
-      assert.revertWith(
+      await assert.revertWith(
         TestBurnDAI.from(spender).burnFrom(owner, amountToBurn),
         'ERC20: transfer amount exceeds balance',
       )
@@ -43,7 +43,7 @@ describe('BurnDAI', async () => {
       await DAI.mintMockTokens(owner, amountToBurn)
 
       // check for revert
-      assert.revertWith(
+      await assert.revertWith(
         TestBurnDAI.from(spender).burnFrom(owner, amountToBurn),
         'ERC20: transfer amount exceeds allowance',
       )
@@ -103,7 +103,7 @@ describe('BurnDAI', async () => {
   describe('BurnDAI._burn', async () => {
     it('should fail if not enough tokens', async () => {
       // check for revert
-      assert.revertWith(
+      await assert.revertWith(
         TestBurnDAI.from(owner).burn(amountToBurn),
         'ERC20: transfer amount exceeds balance',
       )
