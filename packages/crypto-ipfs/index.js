@@ -4,6 +4,7 @@ const pbkdf2 = require('pbkdf2')
 const getRandomValues = require('get-random-values')
 const multihash = require('multihashes')
 const sha256_cid = require('ipfs-only-hash')
+const ethers = require('ethers')
 
 const MAX_UINT32 = Math.pow(2, 32) - 1
 const MAX_UINT8 = Math.pow(2, 8) - 1
@@ -87,17 +88,22 @@ async function multihashTo(contentid, outputType) {
 const ErasureHelper = {
   multihash: async ({ input, inputType, outputType }) =>
     multihashTo(await multihashFrom(input, inputType), outputType),
-  ipfs: {
-    hashToHex: async () => {
-      throw new Error(
-        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'b58', outputType:'hex'})`,
-      )
+  constants: {
+    RATIO_TYPES: {
+      NaN: 0,
+      Inf: 1,
+      Dec: 2,
     },
-    onlyHash: async () => {
-      throw new Error(
-        `Deprecated ErasureHelper.ipfs.hashToHex : use ErasureHelper.multihash({input:data, inputType:'raw', outputType:'b58'})`,
-      )
+    TOKEN_TYPES: {
+      NaN: 0,
+      NMR: 1,
+      DAI: 2,
     },
+  },
+  encodeCreateCall: (templateABI, abiValues) => {
+    const interface = new ethers.utils.Interface(templateABI)
+    const calldata = interface.functions.initialize.encode(abiValues)
+    return calldata
   },
   crypto: {
     symmetric: {

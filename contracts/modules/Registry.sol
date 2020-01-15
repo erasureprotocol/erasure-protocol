@@ -1,12 +1,13 @@
 pragma solidity ^0.5.13;
 
-import "../helpers/openzeppelin-solidity/ownership/Ownable.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 
 
 /// @title Registry
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
+/// @notice This module provides a standard instance registry functionality.
 contract Registry is Ownable {
 
     enum FactoryStatus { Unregistered, Registered, Retired }
@@ -39,6 +40,9 @@ contract Registry is Ownable {
 
     // factory state functions
 
+    /// @notice Add an instance factory to the registry. A factory must be added to the registry before it can create instances.
+    /// @param factory address of the factory to be added.
+    /// @param extraData bytes extra factory specific data that can be accessed publicly.
     function addFactory(
         address factory,
         bytes calldata extraData
@@ -66,6 +70,8 @@ contract Registry is Ownable {
         emit FactoryAdded(msg.sender, factory, factoryID, extraData);
     }
 
+    /// @notice Remove an instance factory from the registry. Once retired, a factory can no longer produce instances.
+    /// @param factory address of the factory to be removed.
     function retireFactory(address factory) external onlyOwner() {
         // get the factory object from storage.
         Factory storage factoryData = _factoryData[factory];

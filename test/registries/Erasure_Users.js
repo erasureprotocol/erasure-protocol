@@ -1,10 +1,8 @@
 const ethers = require('ethers')
-const { createDeployer } = require('../helpers/setup')
 const { hexlify } = require('../helpers/utils')
 const ErasureUsersArtifact = require('../../build/Erasure_Users.json')
 
 describe('Erasure_Users', function() {
-  let deployer
   const users = []
   const userDatas = {}
 
@@ -29,7 +27,6 @@ describe('Erasure_Users', function() {
   }
 
   before(async () => {
-    deployer = await createDeployer()
     this.ErasureUsers = await deployer.deploy(ErasureUsersArtifact)
   })
 
@@ -38,8 +35,7 @@ describe('Erasure_Users', function() {
       const { user, userData } = addNewUser()
 
       const txn = await this.ErasureUsers.from(user).registerUser(userData)
-      await assert.emit(txn, 'UserRegistered')
-      await assert.emitWithArgs(txn, [user, userData])
+      await assert.emitWithArgs(txn, 'UserRegistered', [user, userData])
 
       const actualUserData = await this.ErasureUsers.getUserData(user)
       assert.equal(actualUserData, userData)
@@ -124,8 +120,7 @@ describe('Erasure_Users', function() {
 
       const user = removeUser()
       const txn = await this.ErasureUsers.from(user).removeUser()
-      await assert.emit(txn, 'UserRemoved')
-      await assert.emitWithArgs(txn, [user])
+      await assert.emitWithArgs(txn, 'UserRemoved', [user])
 
       // ensure user data is deleted
       const actualUserData = await this.ErasureUsers.getUserData(user)

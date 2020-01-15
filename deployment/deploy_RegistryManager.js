@@ -4,7 +4,7 @@ require('dotenv').config()
 
 const deploy = async (network, secret) => {
   let contracts = {
-    MockNMR: { artifact: require('../build/MockNMR.json') },
+    RegistryManager: { artifact: require('../build/RegistryManager.json') },
   }
 
   let deployer
@@ -19,8 +19,12 @@ const deploy = async (network, secret) => {
   )
   deployer.setVerifierApiKey(process.env.ETHERSCAN_API_KEY)
 
-  contracts.MockNMR.instance = await deployer.deployAndVerify(
-    contracts.MockNMR.artifact,
+  contracts.RegistryManager.instance = await deployer.deployAndVerify(
+    contracts.RegistryManager.artifact,
+  )
+
+  console.log(
+    `RegistryManager: ${contracts.RegistryManager.instance.contractAddress}`,
   )
 }
 

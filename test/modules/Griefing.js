@@ -1,8 +1,7 @@
 const ethers = require('ethers')
-const { initDeployment } = require('../helpers/setup')
 
 const { hexlify } = require('../helpers/utils')
-const { RATIO_TYPES } = require('../helpers/variables')
+const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 
 describe('Griefing', function() {
   let wallets = {
@@ -17,22 +16,18 @@ describe('Griefing', function() {
     },
   }
 
-  let deployer
   before(async () => {
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-
     const buyer = wallets.buyer.signer.signingKey.address
     const seller = wallets.seller.signer.signingKey.address
 
     // fill the token balances of the buyer and seller
     // buyer & seller has 1,000 tokens each
     const startingBalance = '1000'
-    await this.MockNMR.from(buyer).mintMockTokens(
+    await NMR.from(buyer).mintMockTokens(
       buyer,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(seller).mintMockTokens(
+    await NMR.from(seller).mintMockTokens(
       seller,
       ethers.utils.parseEther(startingBalance),
     )
@@ -147,6 +142,7 @@ describe('Griefing', function() {
 
     it('should revert on wrong ratioType', async () => {
       const ratio = 2
+      const tokenID = TOKEN_TYPES.NMR
       const invalidRatioTypeEnumVal = 5
       const block = await deployer.provider.getBlock('latest')
 
@@ -155,6 +151,7 @@ describe('Griefing', function() {
       await assert.revert(
         contracts.TestGriefing.instance.setRatio(
           seller,
+          tokenID,
           ethers.utils.parseEther(ratio + ''),
           invalidRatioTypeEnumVal,
           { gasLimit: 30000 },
@@ -164,31 +161,49 @@ describe('Griefing', function() {
 
     it('should revert when ratio != 0 when ratioType is NaN', async () => {
       const ratioType = RATIO_TYPES.NaN
+      const tokenID = TOKEN_TYPES.NMR
       const ratio = ethers.utils.parseEther('2')
       await assert.revertWith(
-        contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType),
+        contracts.TestGriefing.instance.setRatio(
+          seller,
+          tokenID,
+          ratio,
+          ratioType,
+        ),
         'ratio must be 0 when ratioType is NaN or Inf',
       )
     })
 
     it('should revert when ratio != 0 when ratioType is Inf', async () => {
       const ratioType = RATIO_TYPES.Inf
+      const tokenID = TOKEN_TYPES.NMR
       const ratio = ethers.utils.parseEther('2')
       await assert.revertWith(
-        contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType),
+        contracts.TestGriefing.instance.setRatio(
+          seller,
+          tokenID,
+          ratio,
+          ratioType,
+        ),
         'ratio must be 0 when ratioType is NaN or Inf',
       )
     })
 
     it('should set ratio of 2 correctly', async () => {
       const ratio = ethers.utils.parseEther('2')
+      const tokenID = TOKEN_TYPES.NMR
       const txn = await contracts.TestGriefing.instance.setRatio(
         seller,
+        tokenID,
         ratio.toHexString(),
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,
@@ -200,13 +215,19 @@ describe('Griefing', function() {
 
     it('should set ratio of 0.5 correctly', async () => {
       const ratio = ethers.utils.parseEther('0.5')
+      const tokenID = TOKEN_TYPES.NMR
       const txn = await contracts.TestGriefing.instance.setRatio(
         seller,
+        tokenID,
         ratio,
         ratioType,
       )
-      await assert.emit(txn, 'RatioSet')
-      await assert.emitWithArgs(txn, [seller, ratio, ratioType])
+      await assert.emitWithArgs(txn, 'RatioSet', [
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      ])
 
       const [
         actualRatio,
@@ -224,6 +245,7 @@ describe('Griefing', function() {
     const stakeAmount = ethers.utils.parseEther('100')
     const punishment = ethers.utils.parseEther('10')
     const ratioType = RATIO_TYPES.Dec
+
     const message = "I don't like you"
     let currentStake = ethers.utils.bigNumberify('0')
 
@@ -240,7 +262,14 @@ describe('Griefing', function() {
     })
 
     it('should revert when grief ratio is NaN', async () => {
-      await contracts.TestGriefing.instance.setRatio(seller, 0, RATIO_TYPES.NaN)
+      const tokenID = TOKEN_TYPES.NMR
+
+      await contracts.TestGriefing.instance.setRatio(
+        seller,
+        tokenID,
+        0,
+        RATIO_TYPES.NaN,
+      )
 
       await assert.revertWith(
         contracts.TestGriefing.instance.grief(
@@ -254,7 +283,14 @@ describe('Griefing', function() {
     })
 
     it('should revert when not approved to burn', async () => {
-      await contracts.TestGriefing.instance.setRatio(seller, ratio, ratioType)
+      const tokenID = TOKEN_TYPES.NMR
+
+      await contracts.TestGriefing.instance.setRatio(
+        seller,
+        tokenID,
+        ratio,
+        ratioType,
+      )
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -266,16 +302,14 @@ describe('Griefing', function() {
 
     it('should revert when buyer approve lesser than punishment', async () => {
       const contractAddress = contracts.TestGriefing.instance.contractAddress
+      const tokenID = TOKEN_TYPES.NMR
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ratio, ratioType)
+        .setRatio(seller, tokenID, ratio, ratioType)
 
       const wrongApproveAmount = punishment.sub(1)
-      await this.MockNMR.from(buyer).approve(
-        contractAddress,
-        wrongApproveAmount,
-      )
+      await NMR.from(buyer).approve(contractAddress, wrongApproveAmount)
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -287,11 +321,12 @@ describe('Griefing', function() {
 
     it('should revert when seller has not staked anything', async () => {
       const contractAddress = contracts.TestGriefing.instance.contractAddress
+      const tokenID = TOKEN_TYPES.NMR
 
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ratio, ratioType)
-      await this.MockNMR.from(buyer).approve(contractAddress, punishment)
+        .setRatio(seller, tokenID, ratio, ratioType)
+      await NMR.from(buyer).approve(contractAddress, punishment)
 
       await assert.revert(
         contracts.TestGriefing.instance
@@ -303,13 +338,14 @@ describe('Griefing', function() {
     it('should revert when seller has too little stake', async () => {
       const contractAddress = contracts.TestGriefing.instance.contractAddress
       const wrongStakeAmount = punishment.sub(1)
+      const tokenID = TOKEN_TYPES.NMR
 
       // seller process
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ratio, ratioType)
+        .setRatio(seller, tokenID, ratio, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, wrongStakeAmount)
+      await NMR.from(seller).approve(contractAddress, wrongStakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -318,10 +354,7 @@ describe('Griefing', function() {
       currentStake = wrongStakeAmount
 
       // buyer process
-      await this.MockNMR.from(buyer).approve(
-        contractAddress,
-        punishment.mul(ratio),
-      )
+      await NMR.from(buyer).approve(contractAddress, punishment.mul(ratio))
 
       await assert.revertWith(
         contracts.TestGriefing.instance
@@ -334,14 +367,15 @@ describe('Griefing', function() {
     it('should grief correctly for no cost', async () => {
       const ratio = 0
       const ratioType = RATIO_TYPES.Inf
+      const tokenID = TOKEN_TYPES.NMR
       const contractAddress = contracts.TestGriefing.instance.contractAddress
 
       // seller process
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ratio, ratioType)
+        .setRatio(seller, tokenID, ratio, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, stakeAmount)
+      await NMR.from(seller).approve(contractAddress, stakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -352,7 +386,7 @@ describe('Griefing', function() {
       // buyer process
       const expectedCost = 0 // punishment at no cost
 
-      await this.MockNMR.from(buyer).approve(contractAddress, expectedCost)
+      await NMR.from(buyer).approve(contractAddress, expectedCost)
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
@@ -384,14 +418,15 @@ describe('Griefing', function() {
       const ratio = 2
       const ratioE18 = ethers.utils.parseEther(ratio.toString())
       const ratioType = RATIO_TYPES.Dec
+      const tokenID = TOKEN_TYPES.NMR
       const contractAddress = contracts.TestGriefing.instance.contractAddress
 
       // seller process
       await contracts.TestGriefing.instance
         .from(seller)
-        .setRatio(seller, ratioE18, ratioType)
+        .setRatio(seller, tokenID, ratioE18, ratioType)
 
-      await this.MockNMR.from(seller).approve(contractAddress, stakeAmount)
+      await NMR.from(seller).approve(contractAddress, stakeAmount)
 
       await contracts.TestGriefing.instance
         .from(seller)
@@ -402,7 +437,7 @@ describe('Griefing', function() {
       // buyer process
       const expectedCost = punishment.mul(ratio)
 
-      await this.MockNMR.from(buyer).approve(contractAddress, expectedCost)
+      await NMR.from(buyer).approve(contractAddress, expectedCost)
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)

@@ -1,13 +1,13 @@
 pragma solidity ^0.5.13;
 
-import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 
 /// @title Deadline
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/modules/Deadline.png
+/// @dev Version: 1.3.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/modules/Deadline.png
 /// @notice This module allows for setting and validating a deadline.
 ///         The deadline makes use of block timestamps to determine end time.
 contract Deadline {

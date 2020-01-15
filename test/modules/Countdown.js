@@ -1,5 +1,3 @@
-const { createDeployer } = require('../helpers/setup')
-
 describe('Countdown', function() {
   let wallets = {
     numerai: accounts[0],
@@ -13,11 +11,6 @@ describe('Countdown', function() {
     },
   }
 
-  let deployer
-  before(() => {
-    deployer = createDeployer()
-  })
-
   beforeEach(async () => {
     contracts.TestCountdown.instance = await deployer.deploy(
       contracts.TestCountdown.artifact,
@@ -30,8 +23,7 @@ describe('Countdown', function() {
       const timestamp = Math.round(date.getTime() / 1000)
 
       const txn = await contracts.TestCountdown.instance.setDeadline(timestamp)
-      await assert.emit(txn, 'DeadlineSet')
-      await assert.emitWithArgs(txn, [timestamp])
+      await assert.emitWithArgs(txn, 'DeadlineSet', [timestamp])
 
       const actualDeadline = await contracts.TestCountdown.instance.getDeadline()
       assert.equal(actualDeadline, timestamp)
@@ -87,8 +79,7 @@ describe('Countdown', function() {
     it('sets length correctly', async () => {
       const length = 1000
       const txn = await contracts.TestCountdown.instance.setLength(length)
-      await assert.emit(txn, 'LengthSet')
-      await assert.emitWithArgs(txn, [length])
+      await assert.emitWithArgs(txn, 'LengthSet', [length])
 
       const actualLength = await contracts.TestCountdown.instance.getLength()
       assert.equal(actualLength, length)

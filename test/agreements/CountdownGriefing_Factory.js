@@ -6,11 +6,11 @@ const ErasureAgreementsRegistryArtifact = require('../../build/Erasure_Agreement
 const ErasurePostsRegistryArtifact = require('../../build/Erasure_Posts.json')
 
 // test helpers
-const { initDeployment } = require('../helpers/setup')
 const testFactory = require('../modules/Factory')
-const { RATIO_TYPES } = require('../helpers/variables')
+const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 
 // variables used in initialize()
+const tokenID = TOKEN_TYPES.NMR
 const factoryName = 'CountdownGriefing_Factory'
 const instanceType = 'Agreement'
 const ratio = ethers.utils.parseEther('2')
@@ -22,6 +22,7 @@ const createTypes = [
   'address',
   'address',
   'address',
+  'uint8',
   'uint256',
   'uint8',
   'uint256',
@@ -29,10 +30,8 @@ const createTypes = [
 ]
 
 let CountdownGriefing
-let deployer, MockNMR
 
-before(async () => {
-  ;[deployer, MockNMR] = await initDeployment()
+before(async function() {
   CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
 })
 
@@ -42,12 +41,13 @@ function runFactoryTest() {
   const staker = stakerWallet.signer.signingKey.address
   const counterparty = counterpartyWallet.signer.signingKey.address
 
-  describe(factoryName, () => {
-    it('setups test', () => {
+  describe(factoryName, function() {
+    it('setups test', function() {
       const createArgs = [
         owner,
         staker,
         counterparty,
+        tokenID,
         ratio,
         ratioType,
         countdownLength,
