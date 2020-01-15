@@ -6,8 +6,10 @@ The semantic versioning follows versioning of the protocol. As such, an applicat
 
 This subgraph only works with a full archive node with tracing, so the best way to develop and test is by deploying to the hosted service. Follow The Graph's [docs](https://thegraph.com/docs/deploy-a-subgraph#deploy-the-subgraph) to find out how to deploy a subgraph to their hosted service.
 
+### Erasure Graph Explorers :
 
-### Erasure Graph Explorers : 
-- [Rinkeby v1.2.0](https://thegraph.com/explorer/subgraph/erasureprotocol/rinkeby-v120)
-- [Mainnet v1.2.0](https://thegraph.com/explorer/subgraph/erasureprotocol/v120)
-
+- [Rinkeby V1.2.0](https://thegraph.com/explorer/subgraph/erasureprotocol/rinkeby-v120)
+- [Mainnet V1.2.0](https://thegraph.com/explorer/subgraph/erasureprotocol/v120)
+- [Rinkeby V1.3.0](https://thegraph.com/explorer/subgraph/erasureprotocol/rinkeby-v130)
+- [Kovan V1.3.0](https://thegraph.com/explorer/subgraph/erasureprotocol/kovan-v130)
+- [Mainnet V1.3.0](https://thegraph.com/explorer/subgraph/erasureprotocol/v130)

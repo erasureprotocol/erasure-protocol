@@ -1,15 +1,16 @@
-# Countdown Griefing Escrow
 type CountdownGriefingEscrow @entity {
   id: ID!
   creator: Bytes
   operator: Bytes
   buyer: Bytes
   seller: Bytes
+  tokenID: Int
   paymentAmount: BigInt
   stakeAmount: BigInt
   countdownLength: BigInt
   agreementParams: Bytes
   deadline: BigInt
+  length: BigInt
   data: Bytes
   dataB58: String
   dataSubmitted: Boolean
@@ -82,12 +83,22 @@ type InitializedCountdownGriefingEscrow @entity {
   operator: Bytes!
   buyer: Bytes!
   seller: Bytes!
+  tokenID: Int!
   paymentAmount: BigInt!
   stakeAmount: BigInt!
   countdownLength: BigInt!
   metadata: Bytes!
   metadataB58: String!
   agreementParams: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+type LengthSetCountdownGriefingEscrow @entity{
+  id: ID!
+  contract: Bytes!
+  length: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -137,11 +148,49 @@ type StakeDepositedCountdownGriefingEscrow @entity {
   logIndex: BigInt!
 }
 
+type StakeBurnedCountdownGriefingEscrow @entity {
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  staker: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositDecreasedCountdownGriefingEscrow @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositIncreasedCountdownGriefingEscrow @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
 # Countdown Griefing
 type CountdownGriefing @entity {
   id: ID!
   creator: Bytes
   operator: Bytes
+  tokenID: Int
   staker: Bytes
   currentStake: BigInt
   totalBurned: BigInt
@@ -151,6 +200,7 @@ type CountdownGriefing @entity {
   ratioType: Int
   countdownLength: BigInt
   deadline: BigInt
+  length: BigInt
   metadata: Bytes
   metadataB58: String
   initMetadata: Bytes
@@ -176,6 +226,7 @@ type InitializedCountdownGriefing @entity {
   operator: Bytes!
   staker: Bytes!
   counterparty: Bytes!
+  tokenID: Int!
   ratio: BigInt!
   ratioType: Int!
   countdownLength: BigInt!
@@ -187,12 +238,59 @@ type InitializedCountdownGriefing @entity {
   logIndex: BigInt!
 }
 
+type DeadlineSetCountdownGriefing @entity {
+  id: ID!
+  contract: Bytes!
+  deadline: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type LengthSetCountdownGriefing @entity {
+  id: ID!
+  contract: Bytes!
+  length: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
 type RatioSetCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
   staker: Bytes!
+  tokenID: Int!
   ratio: BigInt!
   ratioType: Int!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositDecreasedCountdownGriefing @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositIncreasedCountdownGriefing @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -212,17 +310,6 @@ type GriefedCountdownGriefing @entity {
   txHash: Bytes!
   logIndex: BigInt!
 }
-
-type LengthSetCountdownGriefing @entity {
-  id: ID!
-  contract: Bytes!
-  length: BigInt!
-  blockNumber: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  logIndex: BigInt!
-}
-
 type OperatorUpdatedCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
@@ -244,18 +331,6 @@ type MetadataSetCountdownGriefing @entity {
   logIndex: BigInt!
 }
 
-type StakeAddedCountdownGriefing @entity {
-  id: ID!
-  contract: Bytes!
-  staker: Bytes!
-  funder: Bytes!
-  amount: BigInt!
-  blockNumber: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  logIndex: BigInt!
-}
-
 type StakeTakenCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
@@ -271,18 +346,9 @@ type StakeTakenCountdownGriefing @entity {
 type StakeBurnedCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
+  tokenID: Int!
   staker: Bytes!
   amount: BigInt!
-  blockNumber: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  logIndex: BigInt!
-}
-
-type DeadlineSetCountdownGriefing @entity {
-  id: ID!
-  contract: Bytes!
-  deadline: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -295,6 +361,7 @@ type SimpleGriefing @entity {
   creator: Bytes
   operator: Bytes
   staker: Bytes
+  tokenID: Int
   currentStake: BigInt
   totalBurned: BigInt
   totalTaken: BigInt
@@ -314,6 +381,32 @@ type InstanceCreatedSimpleGriefingFactory @entity {
   instance: Bytes!
   creator: Bytes!
   callData: Bytes!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositDecreasedSimpleGriefing @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositIncreasedSimpleGriefing @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -340,6 +433,7 @@ type InitializedSimpleGriefing @entity {
   operator: Bytes!
   staker: Bytes!
   counterparty: Bytes!
+  tokenID: Int!
   ratio: BigInt!
   ratioType: Int!
   metadata: Bytes!
@@ -375,20 +469,9 @@ type RatioSetSimpleGriefing @entity {
   id: ID!
   contract: Bytes!
   staker: Bytes!
+  tokenID: Int!
   ratio: BigInt!
   ratioType: Int!
-  blockNumber: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  logIndex: BigInt!
-}
-
-type StakeAddedSimpleGriefing @entity {
-  id: ID!
-  contract: Bytes!
-  staker: Bytes!
-  funder: Bytes!
-  amount: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
@@ -398,6 +481,7 @@ type StakeAddedSimpleGriefing @entity {
 type StakeBurnedSimpleGriefing @entity {
   id: ID!
   contract: Bytes!
+  tokenID: Int!
   staker: Bytes!
   amount: BigInt!
   blockNumber: BigInt!
@@ -406,17 +490,6 @@ type StakeBurnedSimpleGriefing @entity {
   logIndex: BigInt!
 }
 
-type StakeTakenSimpleGriefing @entity {
-  id: ID!
-  contract: Bytes!
-  staker: Bytes!
-  recipient: Bytes!
-  amount: BigInt!
-  blockNumber: BigInt!
-  timestamp: BigInt!
-  txHash: Bytes!
-  logIndex: BigInt!
-}
 
 # Feed
 type Feed @entity {
@@ -447,9 +520,34 @@ type InitializedFeed @entity {
   id: ID!
   contract: Bytes!
   operator: Bytes!
-  proofHash: Bytes!
   metadata: Bytes!
   metadataB58: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositDecreasedFeed @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+  logIndex: BigInt!
+}
+
+type DepositIncreasedFeed @entity{
+  id: ID!
+  contract: Bytes!
+  tokenID: Int!
+  user: Bytes!
+  amount: BigInt!
+  newDeposit: BigInt!
   blockNumber: BigInt!
   timestamp: BigInt!
   txHash: Bytes!
