@@ -2,7 +2,7 @@ pragma solidity ^0.5.13;
 
 import "./BurnDAI.sol";
 
-/// @title Deposit
+/// @title TokenManager
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.3.0
@@ -15,11 +15,16 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @return tokenAddress address of the ERC20 token.
     function getTokenAddress(Tokens tokenID) public pure returns (address tokenAddress) {
-        require(isValidTokenID(tokenID), 'invalid token');
         if (tokenID == Tokens.DAI)
             return BurnDAI.getTokenAddress();
         if (tokenID == Tokens.NMR)
             return BurnNMR.getTokenAddress();
+        return address(0);
+    }
+
+    modifier onlyValidTokenID(Tokens tokenID) {
+        require(isValidTokenID(tokenID), 'invalid tokenID');
+        _;
     }
 
     /// @notice Validate the token ID is a supported token.
@@ -33,7 +38,7 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
-    function _transfer(Tokens tokenID, address to, uint256 value) internal {
+    function _transfer(Tokens tokenID, address to, uint256 value) internal onlyValidTokenID(tokenID) {
         require(IERC20(getTokenAddress(tokenID)).transfer(to, value), 'token transfer failed');
     }
 
@@ -42,20 +47,18 @@ contract TokenManager is BurnDAI {
     /// @param from address to spend from.
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
-    function _transferFrom(Tokens tokenID, address from, address to, uint256 value) internal {
+    function _transferFrom(Tokens tokenID, address from, address to, uint256 value) internal onlyValidTokenID(tokenID) {
         require(IERC20(getTokenAddress(tokenID)).transferFrom(from, to, value), 'token transfer failed');
     }
 
     /// @notice ERC20 Burn
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param value uint256 amount of tokens.
-    function _burn(Tokens tokenID, uint256 value) internal {
+    function _burn(Tokens tokenID, uint256 value) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
             BurnDAI._burn(value);
         } else if (tokenID == Tokens.NMR) {
             BurnNMR._burn(value);
-        } else {
-            revert('invalid tokenID');
         }
     }
 
@@ -63,13 +66,11 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param from address to burn from.
     /// @param value uint256 amount of tokens.
-    function _burnFrom(Tokens tokenID, address from, uint256 value) internal {
+    function _burnFrom(Tokens tokenID, address from, uint256 value) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
             BurnDAI._burnFrom(from, value);
         } else if (tokenID == Tokens.NMR) {
             BurnNMR._burnFrom(from, value);
-        } else {
-            revert('invalid tokenID');
         }
     }
 
@@ -77,22 +78,20 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param spender address of the spender.
     /// @param value uint256 amount of tokens.
-    function _approve(Tokens tokenID, address spender, uint256 value) internal {
+    function _approve(Tokens tokenID, address spender, uint256 value) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
             require(IERC20(BurnDAI.getTokenAddress()).approve(spender, value), 'token approval failed');
         } else if (tokenID == Tokens.NMR) {
             address nmr = BurnNMR.getTokenAddress();
             uint256 currentAllowance = IERC20(nmr).allowance(msg.sender, spender);
             require(iNMR(nmr).changeApproval(spender, currentAllowance, value), 'token approval failed');
-        } else {
-            revert('invalid tokenID');
         }
     }
 
     /// @notice ERC20 TotalSupply
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @return value uint256 amount of tokens.
-    function totalSupply(Tokens tokenID) internal view returns (uint256 value) {
+    function totalSupply(Tokens tokenID) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
         return IERC20(getTokenAddress(tokenID)).totalSupply();
     }
 
@@ -100,7 +99,7 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param who address of the owner.
     /// @return value uint256 amount of tokens.
-    function balanceOf(Tokens tokenID, address who) internal view returns (uint256 value) {
+    function balanceOf(Tokens tokenID, address who) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
         return IERC20(getTokenAddress(tokenID)).balanceOf(who);
     }
 
@@ -109,7 +108,7 @@ contract TokenManager is BurnDAI {
     /// @param owner address of the owner.
     /// @param spender address of the spender.
     /// @return value uint256 amount of tokens.
-    function allowance(Tokens tokenID, address owner, address spender) internal view returns (uint256 value) {
+    function allowance(Tokens tokenID, address owner, address spender) internal view onlyValidTokenID(tokenID) returns (uint256 value) {
         return IERC20(getTokenAddress(tokenID)).allowance(owner, spender);
     }
 }
