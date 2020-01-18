@@ -2,6 +2,7 @@
   "name": "@erasure/abis",
   "version": "1.3.0",
   "description": "Erasure contracts and abis",
+  "repository": "https://github.com/erasureprotocol/erasure-protocol.git",
   "main": "index.js",
   "author": "propulsor.ichimoku@gmail.com",
   "license": "MIT",
