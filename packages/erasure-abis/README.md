@@ -2,7 +2,6 @@
 - Contains abis and addresses for Erasure protocol contracts
 ```yarn add @erasure/abis```
 ### USAGE
-#### V1.1.0
 ```
 const {ErasureV1,ErasureV2} = require("@erasure/abis")
 
