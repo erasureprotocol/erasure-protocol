@@ -1,15 +1,15 @@
 # ERASURE ABIS
 - Contains abis and addresses for Erasure protocol contracts
-```yarn add @erasure/abis```
-## USAGE
-### V1.1.0
+### ```yarn add @erasure/abis```
+### USAGE
 ```
-const {ErasureV1} = require("@erasure/abis")
+const {ErasureV1,ErasureV2} = require("@erasure/abis")
+
 const artifact = ErasureV1.{contractName}.artifact
-const mainnetAddress = ErasureV1.{contractName}.mainnetAddress
-const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
+const mainnetAddress = ErasureV1.{contractName}.mainnetAdd
+const rinkebyAddress = ErasureV1.{contractName}.rinkebyAdd
 ```
-#### Contracts:
+#### V1.1.0 Contracts:
 - NMR
 - Erasure_Agreements
 - Erasure_Posts
@@ -23,4 +23,17 @@ const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
 - CountdownGriefingFactory
 - CountdownGriefing
 
+#### V1.2.0 Contracts:
+- NMR
+- Erasure_Agreements
+- Erasure_Posts
+- Erasure_Users
+- FeedFactory
+- Feed
+- SimpleGriefingFactory
+- SimpleGriefing
+- CountdownGriefingFactory
+- CountdownGriefing
+- CountdownGriefingEscrowFactory
+- CountdownGriefingEscrow
 
