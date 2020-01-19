@@ -9,7 +9,7 @@
 ```
 const {ErasureV1, ErasureV2, ErasureV3} = require("@erasure/abis")
 
-const artifact = ErasureV1.{contractName}.artifact
+const abi = ErasureV1.{contractName}.artifact
 const mainnetAddress = ErasureV1.{contractName}.mainnetAdd
 const rinkebyAddress = ErasureV1.{contractName}.rinkebyAdd
 ```
@@ -58,3 +58,10 @@ const rinkebyAddress = ErasureV1.{contractName}.rinkebyAdd
 - CountdownGriefing
 - CountdownGriefingEscrowFactory
 - CountdownGriefingEscrow
+
+
+##### V3 bytecode : 
+
+```aidl
+const bytecode = ErasureV3.bytecode
+```
