@@ -10,8 +10,8 @@
 const {ErasureV1, ErasureV2, ErasureV3} = require("@erasure/abis")
 
 const abi = ErasureV1.{contractName}.artifact
-const mainnetAddress = ErasureV1.{contractName}.mainnetAdd
-const rinkebyAddress = ErasureV1.{contractName}.rinkebyAdd
+const mainnetAddress = ErasureV1.{contractName}.mainnetAddress
+const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
 ```
 
 #### V1.1.0 Contracts:
@@ -63,5 +63,6 @@ const rinkebyAddress = ErasureV1.{contractName}.rinkebyAdd
 ##### V3 bytecode : 
 
 ```aidl
-const bytecode = ErasureV3.bytecode
+const bytecode = ErasureV3.{contractName}.bytecode
+const contractObj = ErasureV3.{contractName}.contractObj (for testenv)
 ```
