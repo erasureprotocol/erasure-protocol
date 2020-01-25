@@ -11,9 +11,6 @@ const MAX_UINT8 = Math.pow(2, 8) - 1
 const FERNET_SECRET_LENGTH = 32
 const NONCE_LENGTH = 24
 
-const encoder = new TextEncoder()
-const decoder = new TextDecoder()
-
 const randomNumber = () => {
   if (typeof window === 'undefined') {
     return getRandomValues(new Uint8Array(1))[0] / MAX_UINT8
@@ -138,10 +135,12 @@ const ErasureHelper = {
         ),
       generateNonce: () => tweetnacl.randomBytes(NONCE_LENGTH),
       encryptMessage: (msg, nonce, publicKey, secretKey) => {
+        const encoder = new TextEncoder()
         const encodedMessage = encoder.encode(msg)
         return tweetnacl.box(encodedMessage, nonce, publicKey, secretKey)
       },
       decryptMessage: (box, nonce, publicKey, secretKey) => {
+        const decoder = new TextDecoder()
         const encodedMessage = tweetnacl.box.open(
           box,
           nonce,
@@ -152,10 +151,12 @@ const ErasureHelper = {
       },
       secretBox: {
         encryptMessage: (msg, nonce, secretKey) => {
+          const encoder = new TextEncoder()
           const encodedMessage = encoder.encode(msg)
           return tweetnacl.secretbox(encodedMessage, nonce, secretKey)
         },
         decryptMessage: (box, nonce, secretKey) => {
+          const decoder = new TextDecoder()
           const encodedMessage = tweetnacl.secretbox.open(box, nonce, secretKey)
           return decoder.decode(encodedMessage)
         },
