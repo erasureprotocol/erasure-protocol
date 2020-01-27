@@ -31,7 +31,7 @@ contract Griefing is Staking {
     /// @notice Set the grief ratio and type for a given staker
     /// @param staker Address of the staker
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
-    /// @param ratio Uint256 number (18 decimals)
+    /// @param ratio Uint256 number (18 decimals) multiplied by punishment to get cost. The number of tokens it cost to punish 1 token.
     ///              NOTE: ratio must be 0 if ratioType is Inf or NaN
     /// @param ratioType Griefing.RatioType number. Ratio Type must be one of the following three values:
     ///                   - Dec: Ratio is a decimal number with 18 decimals
