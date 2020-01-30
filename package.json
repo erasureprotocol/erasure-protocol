@@ -5,7 +5,7 @@
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
-    "compile": "yarn etherlime compile --deleteCompiledFiles=true",
+    "compile": "yarn etherlime compile --deleteCompiledFiles=true --buildDirectory=packages/erasure-abis/src/v1.3.0/abis",
     "flatten": "yarn etherlime flatten",
     "test_setup": "bash setup-etherlime-tests.sh",
     "test": "yarn etherlime test --timeout=500000",
