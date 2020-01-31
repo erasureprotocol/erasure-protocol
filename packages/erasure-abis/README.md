@@ -9,9 +9,10 @@
 ```
 const {ErasureV1, ErasureV2, ErasureV3} = require("@erasure/abis")
 
-const abi = ErasureV1.{contractName}.artifact
-const mainnetAddress = ErasureV1.{contractName}.mainnetAddress
-const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
+const artifact = ErasureV3.{contractName}.artifact
+const mainnetAddress = ErasureV3.{contractName}.mainnet
+const rinkebyAddress = ErasureV3.{contractName}.rinkeby
+const kovanAddress = ErasureV3.{contractName}.kovan
 ```
 
 #### V1.1.0 Contracts:
@@ -47,6 +48,11 @@ const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
 #### V1.3.0 Contracts:
 
 - NMR
+- NMR_Uniswap
+- DAI
+- DAI_Uniswap
+- UniswapFactory
+- Authereum
 - Erasure_Agreements
 - Erasure_Posts
 - Erasure_Users
@@ -58,11 +64,4 @@ const rinkebyAddress = ErasureV1.{contractName}.rinkebyAddress
 - CountdownGriefing
 - CountdownGriefingEscrowFactory
 - CountdownGriefingEscrow
-
-
-##### V3 bytecode : 
-
-```aidl
-const bytecode = ErasureV3.{contractName}.bytecode
-const contractObj = ErasureV3.{contractName}.contractObj (for testenv)
-```
+- 
