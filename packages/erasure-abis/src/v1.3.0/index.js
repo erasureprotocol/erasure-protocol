@@ -15,7 +15,7 @@ const Contracts = {
         artifact: require('./abis/MockERC20.json'),
         mainnet: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
         rinkeby: '0x2448eE2641d78CC42D7AD76498917359D961A783',
-        kovan: '0xC4375B7De8af5a38a93548eb8453a498222C4fF2',
+        kovan: '0x7d669A64deb8a4A51eEa755bb0E19FD39CE25Ae9',
     },
     DAI_Uniswap: {
         artifact: require('./abis/MockUniswapExchange.json'),
@@ -27,13 +27,13 @@ const Contracts = {
         artifact: require('./abis/MockUniswapFactory.json'),
         mainnet: '',
         rinkeby: '',
-        kovan: ''
+        kovan: '',
     },
     Authereum: {
         artifact: require('./abis/MockAuthereum.json'),
         mainnet: '',
         rinkeby: '',
-        kovan: ''
+        kovan: '',
     },
     RegistryManager: {
         artifact: require('./abis/RegistryManager.json'),
@@ -45,13 +45,13 @@ const Contracts = {
         artifact: require('./abis/Erasure_Agreements.json'),
         mainnet: '0xa6cf4Bf00feF8866e9F3f61C972bA7C687C6eDbF',
         rinkeby: '0xf46D714e39b742E22eB0363FE5D727E3C0a8BEcC',
-        kovan: '0x09f83e08CC9F41CE8bd901a214F36B2ba958D7eD'
+        kovan: '0x09f83e08CC9F41CE8bd901a214F36B2ba958D7eD',
     },
     Erasure_Posts: {
         artifact: require('./abis/Erasure_Posts.json'),
         mainnet: '0x348FA9DcFf507B81C7A1d7981244eA92E8c6Af29',
         rinkeby: '0x57EB544cCA126D356FFe19D732A79Db494ba09b1',
-        kovan: '0xB88336e7D856b55eCB1e7561d90e025386E8b3e3'
+        kovan: '0xB88336e7D856b55eCB1e7561d90e025386E8b3e3',
     },
     Erasure_Users: {
         artifact: require('./abis/Erasure_Users.json'),
@@ -112,6 +112,6 @@ const Contracts = {
         mainnet: '',
         rinkeby: '0xCc10AEB2a364f9873Ecb83Ed6DB7f6D7284d1446',
         kovan: '0xc586D68F661C59320da5014A12Fde888b7696883',
-    }
+    },
 }
 module.exports = Contracts
