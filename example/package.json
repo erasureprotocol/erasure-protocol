@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "This is the default package.json generated for your project",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --require esm --exit --bail -t 1200000 test/*"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@erasure/crypto-ipfs": "^1.2.5",
+    "@robinthomas/erasure-sdk": "^1.0.8",
+    "axios": "^0.19.2",
+    "bs58": "^4.0.1",
+    "crypto": "^1.0.1",
+    "etherlime-lib": "^1.1.5",
+    "ethers": "^4.0.44",
+    "ipfs-http-client": "^39.0.2",
+    "mocha": "^6.2.2",
+    "multihashes": "^0.4.15",
+    "multihashing": "^0.3.3",
+    "tweetnacl": "^1.0.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/node": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "cli-table": "^0.3.1"
+  }
+}
