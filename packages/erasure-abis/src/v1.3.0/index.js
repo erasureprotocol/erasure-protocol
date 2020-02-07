@@ -114,4 +114,9 @@ const Contracts = {
         kovan: '0xc586D68F661C59320da5014A12Fde888b7696883',
     },
 }
+Contracts.Feed_Factory = Contracts.FeedFactory
+Contracts.CountdownGriefingEscrow_Factory = Contracts.CountdownGriefingEscrowFactory
+Contracts.Uniswap_Factory = Contracts.UniswapFactory
+Contracts.CountdownGriefing_Factory = Contracts.CountdownGriefingFactory
+Contracts.SimpleGriefing_Factory = Contracts.SimpleGriefingFactory
 module.exports = Contracts
