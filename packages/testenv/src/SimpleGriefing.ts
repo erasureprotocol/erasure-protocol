@@ -6,9 +6,9 @@ import {
   MetadataSet,
   OperatorUpdated,
   RatioSet,
-  StakeAdded,
   StakeBurned,
-  StakeTaken,
+    DepositDecreased,
+    DepositIncreased
 } from '../generated/templates/SimpleGriefing/SimpleGriefing'
 import { SimpleGriefing as SimpleGriefingDataSource } from '../generated/templates'
 import {
@@ -18,10 +18,10 @@ import {
   MetadataSetSimpleGriefing,
   OperatorUpdatedSimpleGriefing,
   RatioSetSimpleGriefing,
-  StakeAddedSimpleGriefing,
   StakeBurnedSimpleGriefing,
-  StakeTakenSimpleGriefing,
   InstanceCreatedSimpleGriefingFactory,
+  DepositDecreasedSimpleGriefing,
+  DepositIncreasedSimpleGriefing
 } from '../generated/schema'
 
 export function handleInstanceCreated(event: InstanceCreated): void {
@@ -69,6 +69,7 @@ export function handleInitialized(event: Initialized): void {
   )
   entity.contract = event.address
   entity.operator = event.params.operator
+  entity.tokenID = event.params.tokenID
   entity.staker = event.params.staker
   entity.counterparty = event.params.counterparty
   entity.ratio = event.params.ratio
@@ -135,6 +136,7 @@ export function handleRatioSet(event: RatioSet): void {
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
   entity.contract = event.address
+  entity.tokenID = event.params.tokenID
   entity.staker = event.params.staker
   entity.ratio = event.params.ratio
   entity.ratioType = event.params.ratioType
@@ -145,25 +147,32 @@ export function handleRatioSet(event: RatioSet): void {
   entity.save()
 }
 
-export function handleStakeAdded(event: StakeAdded): void {
-  let entity = new StakeAddedSimpleGriefing(
-    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
-  )
+export function handleDepositDecreased(event: DepositDecreased):void{
+  let entity = new DepositDecreasedSimpleGriefing(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
   entity.contract = event.address
-  entity.staker = event.params.staker
-  entity.funder = event.params.funder
+  entity.tokenID = event.params.tokenID
+  entity.user = event.params.user
   entity.amount = event.params.amount
-  entity.blockNumber = event.block.number
-  entity.timestamp = event.block.timestamp
-  entity.txHash = event.transaction.hash
-  entity.logIndex = event.logIndex
-  entity.save()
+  entity.newDeposit = event.params.newDeposit
+   entity.blockNumber = event.block.number
+    entity.timestamp = event.block.timestamp
+    entity.txHash = event.transaction.hash
+    entity.logIndex = event.logIndex
+   entity.save()
+}
 
-  let countdownGriefing = new SimpleGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.plus(
-    entity.amount,
-  )
-  countdownGriefing.save()
+export function handleDepositIncreased(event: DepositDecreased):void{
+  let entity = new DepositIncreasedSimpleGriefing(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+  entity.contract = event.address
+  entity.tokenID = event.params.tokenID
+  entity.user = event.params.user
+  entity.amount = event.params.amount
+  entity.newDeposit = event.params.newDeposit
+   entity.blockNumber = event.block.number
+    entity.timestamp = event.block.timestamp
+    entity.txHash = event.transaction.hash
+    entity.logIndex = event.logIndex
+   entity.save()
 }
 
 export function handleStakeBurned(event: StakeBurned): void {
@@ -171,6 +180,7 @@ export function handleStakeBurned(event: StakeBurned): void {
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
   entity.contract = event.address
+  entity.tokenID = event.params.tokenID
   entity.staker = event.params.staker
   entity.amount = event.params.amount
   entity.blockNumber = event.block.number
@@ -189,26 +199,3 @@ export function handleStakeBurned(event: StakeBurned): void {
   countdownGriefing.save()
 }
 
-export function handleStakeTaken(event: StakeTaken): void {
-  let entity = new StakeTakenSimpleGriefing(
-    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
-  )
-  entity.contract = event.address
-  entity.staker = event.params.staker
-  entity.recipient = event.params.recipient
-  entity.amount = event.params.amount
-  entity.blockNumber = event.block.number
-  entity.timestamp = event.block.timestamp
-  entity.txHash = event.transaction.hash
-  entity.logIndex = event.logIndex
-  entity.save()
-
-  let countdownGriefing = new SimpleGriefing(event.address.toHex())
-  countdownGriefing.currentStake = countdownGriefing.currentStake.minus(
-    entity.amount,
-  )
-  countdownGriefing.totalTaken = countdownGriefing.totalTaken.plus(
-    entity.amount,
-  )
-  countdownGriefing.save()
-}

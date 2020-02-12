@@ -3,8 +3,12 @@ import { InstanceCreated } from '../generated/FeedFactory/FeedFactory'
 import {
   Initialized,
   HashSubmitted,
+  DepositDecreased,
+  DepositIncreased,
   OperatorUpdated,
   MetadataSet,
+    DepositDecreased,
+    DepositIncreased
 } from '../generated/templates/Feed/Feed'
 import { Feed as FeedDataSource } from '../generated/templates'
 import {
@@ -14,6 +18,8 @@ import {
   HashSubmittedFeed,
   OperatorUpdatedFeed,
   MetadataSetFeed,
+  DepositDecreasedFeed,
+  DepositIncreasedFeed
 } from '../generated/schema'
 
 function addQm(a: ByteArray): ByteArray {
@@ -54,7 +60,6 @@ export function handleInitialized(event: Initialized): void {
   )
   entity.contract = event.address
   entity.operator = event.params.operator
-  entity.proofHash = event.params.proofHash
   entity.metadata = event.params.metadata
   entity.metadataB58 = event.params.metadata.toBase58()
   entity.blockNumber = event.block.number
@@ -66,7 +71,6 @@ export function handleInitialized(event: Initialized): void {
   let feed = new Feed(event.address.toHex())
   feed.initMetadata = entity.metadata
   feed.initMetadataB58 = entity.metadataB58
-  feed.hashes = []
   feed.save()
 }
 
@@ -84,7 +88,8 @@ export function handleHashSubmitted(event: HashSubmitted): void {
   let feed = Feed.load(event.address.toHex())
   if(feed==null){
     feed = new Feed(event.address.toHex())
-    feed.hashes=[addQm(event.params.hash) as Bytes]
+    feed.hashes=[]
+    feed.hashes.push(addQm(event.params.hash) as Bytes)
   }
   else{
     let hashes = feed.hashes
@@ -92,6 +97,34 @@ export function handleHashSubmitted(event: HashSubmitted): void {
     feed.hashes = hashes
   }
   feed.save()
+}
+
+export function handleDepositDecreased(event: DepositDecreased):void{
+  let entity = new DepositDecreasedFeed(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+  entity.contract = event.address
+  entity.tokenID = event.params.tokenID
+  entity.user = event.params.user
+  entity.amount = event.params.amount
+  entity.newDeposit = event.params.newDeposit
+   entity.blockNumber = event.block.number
+    entity.timestamp = event.block.timestamp
+    entity.txHash = event.transaction.hash
+    entity.logIndex = event.logIndex
+   entity.save()
+}
+
+export function handleDepositIncreased(event: DepositDecreased):void{
+  let entity = new DepositDecreasedFeed(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+  entity.contract = event.address
+  entity.tokenID = event.params.tokenID
+  entity.user = event.params.user
+  entity.amount = event.params.amount
+  entity.newDeposit = event.params.newDeposit
+   entity.blockNumber = event.block.number
+    entity.timestamp = event.block.timestamp
+    entity.txHash = event.transaction.hash
+    entity.logIndex = event.logIndex
+   entity.save()
 }
 
 export function handleOperatorUpdated(event: OperatorUpdated): void {
