@@ -93,18 +93,16 @@ templates:
         - CancelledCountdownGriefingEscrow
         - DataSubmittedCountdownGriefingEscrow
         - DeadlineSetCountdownGriefingEscrow
-        # - DepositDecreasedCountdownGriefingEscrow
-        # - DepositIncreasedCountdownGriefingEscrow
+        - DepositDecreasedCountdownGriefingEscrow
+        - DepositIncreasedCountdownGriefingEscrow
         - FinalizedCountdownGriefingEscrow
         - InitializedCountdownGriefingEscrow
-        # - LengthSetCountdownGriefingEscrow
+        - LengthSetCountdownGriefingEscrow
         - MetadataSetCountdownGriefingEscrow
         - OperatorUpdatedCountdownGriefingEscrow
         - PaymentDepositedCountdownGriefingEscrow
-        # - StakeAddedCountdownGriefingEscrow
-        # - StakeBurnedCountdownGriefingEscrow
+        - StakeBurnedCountdownGriefingEscrow
         - StakeDepositedCountdownGriefingEscrow
-        # - StakeTakenCountdownGriefingEscrow
       file: ./src/CountdownGriefingEscrow.ts
       abis:
         - name: CountdownGriefingEscrow
@@ -116,10 +114,16 @@ templates:
           handler: handleDataSubmitted
         - event: DeadlineSet(uint256)
           handler: handleDeadlineSet
+        - event: DepositDecreased(uint8,address,uint256,uint256)
+          handler: handleDepositDecreased
+        - event: DepositIncreased(uint8,address,uint256,uint256)
+          handler: handleDepositIncreased
         - event: Finalized(address)
           handler: handleFinalized
-        - event: Initialized(address,address,address,uint256,uint256,uint256,bytes,bytes)
+        - event: Initialized(address,address,address,uint8,uint256,uint256,uint256,bytes,bytes)
           handler: handleInitialized
+        - event: LengthSet(uint256)
+          handler: handleLengthSet
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
         - event: OperatorUpdated(address)
@@ -128,6 +132,9 @@ templates:
           handler: handlePaymentDeposited
         - event: StakeDeposited(address,uint256)
           handler: handleStakeDeposited
+        - event: StakeBurned(uint8,address,uint256)
+          handler: handleStakeBurned
+
   - name: CountdownGriefing
     kind: ethereum/contract
     network: mainnet
@@ -138,42 +145,43 @@ templates:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - CountdownGriefing
-        - DeadlineSetCountdownGriefing
-        # - DepositDecreasedCountdownGriefing
-        # - DepositIncreasedCountdownGriefing
-        - GriefedCountdownGriefing
+        - CountDownGriefing
         - InitializedCountdownGriefing
-        # - LengthSetCountdownGriefing
+        - DeadlineSetCountdownGriefing
+        - LengthSetCountdownGriefing
+        - RatioSetCountdownGriefing
+        #        - DepositDecreasedCountdownGriefing
+        #        - DepositIncreasedCountdownGriefing
+        - GriefCountdownGriefing
         - MetadataSetCountdownGriefing
         - OperatorUpdatedCountdownGriefing
-        - RatioSetCountdownGriefing
-        - StakeAddedCountdownGriefing
         - StakeBurnedCountdownGriefing
-        - StakeTakenCountdownGriefing
       file: ./src/CountdownGriefing.ts
       abis:
         - name: CountdownGriefing
           file: ./build/CountdownGriefing.json
       eventHandlers:
+        - event: Initialized(address,address,address,uint8,uint256,uint8,uint256,bytes)
+          handler: handleInitialized
         - event: DeadlineSet(uint256)
           handler: handleDeadlineSet
+        - event: LengthSet(uint256)
+          handler: handleLengthSet
+        #        - event: DepositDecreased(uint8,address,uint256,uint256)
+        #          handler: handleDepositDecreased
+        #        - event: DepositIncreased(uint8,address,uint256,uint256)
+        #          handler: handleDepositIncreased
         - event: Griefed(address,address,uint256,uint256,bytes)
           handler: handleGriefed
-        - event: Initialized(address,address,address,uint256,uint8,uint256,bytes)
-          handler: handleInitialized
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
         - event: OperatorUpdated(address)
           handler: handleOperatorUpdated
-        - event: RatioSet(address,uint256,uint8)
+        - event: RatioSet(address,uint8,uint256,uint8)
           handler: handleRatioSet
-        - event: StakeAdded(address,address,uint256)
-          handler: handleStakeAdded
-        - event: StakeBurned(address,uint256)
+        - event: StakeBurned(uint8,address,uint256)
           handler: handleStakeBurned
-        - event: StakeTaken(address,address,uint256)
-          handler: handleStakeTaken
+
   - name: SimpleGriefing
     kind: ethereum/contract
     network: mainnet
@@ -185,37 +193,36 @@ templates:
       language: wasm/assemblyscript
       entities:
         - SimpleGriefing
-        # - DepositDecreasedSimpleGriefing
-        # - DepositIncreasedSimpleGriefing
+        - DepositDecreasedSimpleGriefing
+        - DepositIncreasedSimpleGriefing
         - GriefedSimpleGriefing
         - InitializedSimpleGriefing
         - MetadataSetSimpleGriefing
         - OperatorUpdatedSimpleGriefing
         - RatioSetSimpleGriefing
-        - StakeAddedSimpleGriefing
         - StakeBurnedSimpleGriefing
-        - StakeTakenSimpleGriefing
       file: ./src/SimpleGriefing.ts
       abis:
         - name: SimpleGriefing
           file: ./build/SimpleGriefing.json
       eventHandlers:
+        - event: DepositDecreased(uint8,address,uint256,uint256)
+          handler: handleDepositDecreased
+        - event: DepositIncreased(uint8,address,uint256,uint256)
+          handler: handleDepositIncreased
         - event: Griefed(address,address,uint256,uint256,bytes)
           handler: handleGriefed
-        - event: Initialized(address,address,address,uint256,uint8,bytes)
+        - event: Initialized(address,address,address,uint8,uint256,uint8,bytes)
           handler: handleInitialized
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
         - event: OperatorUpdated(address)
           handler: handleOperatorUpdated
-        - event: RatioSet(address,uint256,uint8)
+        - event: RatioSet(address,uint8,uint256,uint8)
           handler: handleRatioSet
-        - event: StakeAdded(address,address,uint256)
-          handler: handleStakeAdded
-        - event: StakeBurned(address,uint256)
+        - event: StakeBurned(uint8,address,uint256)
           handler: handleStakeBurned
-        - event: StakeTaken(address,address,uint256)
-          handler: handleStakeTaken
+
   - name: Feed
     kind: ethereum/contract
     network: mainnet
@@ -227,8 +234,10 @@ templates:
       language: wasm/assemblyscript
       entities:
         - Feed
-        - HashSubmittedFeed
+        - DepositDecreasedFeed
+        - DepositIncreasedFeed
         - InitializedFeed
+        - HashSubmittedFeed
         - MetadataSetFeed
         - OperatorUpdatedFeed
       file: ./src/Feed.ts
@@ -236,11 +245,17 @@ templates:
         - name: Feed
           file: ./build/Feed.json
       eventHandlers:
+        - event: Initialized(address,bytes)
+          handler: handleInitialized
+        - event: DepositDecreased(uint8,address,uint256,uint256)
+          handler: handleDepositDecreased
+        - event: DepositIncreased(uint8,address,uint256,uint256)
+          handler: handleDepositIncreased
         - event: HashSubmitted(bytes32)
           handler: handleHashSubmitted
-        - event: Initialized(address,bytes32,bytes)
-          handler: handleInitialized
-        - event: OperatorUpdated(address)
-          handler: handleOperatorUpdated
         - event: MetadataSet(bytes)
           handler: handleMetadataSet
+        - event: OperatorUpdated(address)
+          handler: handleOperatorUpdated
+        - event: StakeBurned(uint8,address,uint256)
+          handler: handleStakeBurned
