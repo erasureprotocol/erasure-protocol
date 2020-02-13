@@ -21,63 +21,79 @@ const kovanAddress = ErasureV130[contractName].kovan
 
 #### ErasureV130 Contracts
 
-- NMR
-- NMR_Uniswap
-- DAI
-- DAI_Uniswap
-- UniswapFactory
-- Authereum
-- Erasure_Agreements
-- Erasure_Posts
-- Erasure_Users
-- FeedFactory
-- Feed
-- SimpleGriefingFactory
-- SimpleGriefing
-- CountdownGriefingFactory
-- CountdownGriefing
-- CountdownGriefingEscrowFactory
-- CountdownGriefingEscrow
+- `iNMR`
+- `iRegistry`
+- `iFactory`
+- `iUniswapFactory`
+- `iUniswapExchange`
+- `iAuthereumAccount`
+- `NMR`
+- `NMR_Uniswap`
+- `DAI`
+- `DAI_Uniswap`
+- `RegistryManager`
+- `Erasure_Posts`
+- `Erasure_Agreements`
+- `Erasure_Escrows`
+- `Erasure_Users`
+- `Feed_Factory`
+- `Feed`
+- `SimpleGriefing_Factory`
+- `SimpleGriefing`
+- `CountdownGriefing_Factory`
+- `CountdownGriefing`
+- `CountdownGriefingEscrow_Factory`
+- `CountdownGriefingEscrow`
 
 #### ErasureV120 Contracts
 
-- NMR
-- Erasure_Agreements
-- Erasure_Posts
-- Erasure_Users
-- FeedFactory
-- Feed
-- SimpleGriefingFactory
-- SimpleGriefing
-- CountdownGriefingFactory
-- CountdownGriefing
-- CountdownGriefingEscrowFactory
-- CountdownGriefingEscrow
+- `iNMR`
+- `iRegistry`
+- `iFactory`
+- `NMR`
+- `Erasure_Posts`
+- `Erasure_Agreements`
+- `Erasure_Escrows`
+- `Erasure_Users`
+- `Feed_Factory`
+- `Feed`
+- `SimpleGriefing_Factory`
+- `SimpleGriefing`
+- `CountdownGriefing_Factory`
+- `CountdownGriefing`
+- `CountdownGriefingEscrow_Factory`
+- `CountdownGriefingEscrow`
 
 #### ErasureV110 Contracts
 
-- NMR
-- Erasure_Agreements
-- Erasure_Posts
-- Erasure_Users
-- PostFactory
-- Post
-- FeedFactory
-- Feed
-- SimpleGriefingFactory
-- SimpleGriefing
-- CountdownGriefingFactory
-- CountdownGriefing
+- `iNMR`
+- `iRegistry`
+- `iFactory`
+- `NMR`
+- `Erasure_Posts`
+- `Erasure_Agreements`
+- `Erasure_Users`
+- `Post_Factory`
+- `Post`
+- `Feed_Factory`
+- `Feed`
+- `SimpleGriefing_Factory`
+- `SimpleGriefing`
+- `CountdownGriefing_Factory`
+- `CountdownGriefing`
 
 #### ErasureV100 Contracts
 
-- NMR
-- Erasure_Agreements
-- Erasure_Posts
-- Erasure_Users
-- PostFactory
-- Post
-- FeedFactory
-- Feed
-- OneWayGriefingFactory
-- OneWayGriefing
+- `iNMR`
+- `iRegistry`
+- `iFactory`
+- `NMR`
+- `Erasure_Posts`
+- `Erasure_Agreements`
+- `Erasure_Users`
+- `Post_Factory`
+- `Post`
+- `Feed_Factory`
+- `Feed`
+- `OneWayGriefing_Factory`
+- `OneWayGriefing`

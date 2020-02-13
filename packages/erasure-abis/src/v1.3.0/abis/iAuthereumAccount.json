@@ -1,0 +1,394 @@
+{
+  "contractName": "iAuthereumAccount",
+  "abi": [
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidSignature",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "magicValue",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_ids",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_values",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "authereumVersion",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getChainId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_authKey",
+          "type": "address"
+        }
+      ],
+      "name": "addAuthKey",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_authKey",
+          "type": "address"
+        }
+      ],
+      "name": "removeAuthKey",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidAuthKeySignature",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidLoginKeySignature",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "_transactions",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "executeMultipleMetaTransactions",
+      "outputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "",
+          "type": "bytes[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "_transactions",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasOverhead",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_feeTokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feeTokenRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_transactionMessageHashSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeMultipleAuthKeyMetaTransactions",
+      "outputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "",
+          "type": "bytes[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "_transactions",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_gasOverhead",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_loginKeyRestrictionsData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "_feeTokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feeTokenRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_transactionMessageHashSignature",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_loginKeyAttestationSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeMultipleLoginKeyMetaTransactions",
+      "outputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "",
+          "type": "bytes[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.13;\npragma experimental ABIEncoderV2;\n\n// prettier-ignore\ninterface iERC721Receiver {\n    /**\n     * @notice Handle the receipt of an NFT\n     * @dev The ERC721 smart contract calls this function on the recipient\n     * after a {IERC721-safeTransferFrom}. This function MUST return the function selector,\n     * otherwise the caller will revert the transaction. The selector to be\n     * returned can be obtained as `this.onERC721Received.selector`. This\n     * function MAY throw to revert and reject the transfer.\n     * Note: the ERC721 contract address is always the message sender.\n     * @param operator The address which called `safeTransferFrom` function\n     * @param from The address which previously owned the token\n     * @param tokenId The NFT identifier which is being transferred\n     * @param data Additional data with no specified format\n     * @return bytes4 `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`\n     */\n    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);\n}\n\n// prettier-ignore\ninterface iERC1271 {\n    function isValidSignature(\n        bytes calldata _data,\n        bytes calldata _signature\n    ) external view returns (bytes4 magicValue);\n}\n\n// prettier-ignore\ninterface iERC1155TokenReceiver {\n    /**\n        @notice Handle the receipt of a single ERC1155 token type.\n        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeTransferFrom` after the balance has been updated.\n        This function MUST return `bytes4(keccak256(\"onERC1155Received(address,address,uint256,uint256,bytes)\"))` (i.e. 0xf23a6e61) if it accepts the transfer.\n        This function MUST revert if it rejects the transfer.\n        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\n        @param _operator  The address which initiated the transfer (i.e. msg.sender)\n        @param _from      The address which previously owned the token\n        @param _id        The ID of the token being transferred\n        @param _value     The amount of tokens being transferred\n        @param _data      Additional data with no specified format\n        @return           `bytes4(keccak256(\"onERC1155Received(address,address,uint256,uint256,bytes)\"))`\n    */\n    function onERC1155Received(address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data) external returns(bytes4);\n\n    /**\n        @notice Handle the receipt of multiple ERC1155 token types.\n        @dev An ERC1155-compliant smart contract MUST call this function on the token recipient contract, at the end of a `safeBatchTransferFrom` after the balances have been updated.\n        This function MUST return `bytes4(keccak256(\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\"))` (i.e. 0xbc197c81) if it accepts the transfer(s).\n        This function MUST revert if it rejects the transfer(s).\n        Return of any other value than the prescribed keccak256 generated value MUST result in the transaction being reverted by the caller.\n        @param _operator  The address which initiated the batch transfer (i.e. msg.sender)\n        @param _from      The address which previously owned the token\n        @param _ids       An array containing ids of each token being transferred (order and length must match _values array)\n        @param _values    An array containing amounts of each token being transferred (order and length must match _ids array)\n        @param _data      Additional data with no specified format\n        @return           `bytes4(keccak256(\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\"))`\n    */\n    function onERC1155BatchReceived(address _operator, address _from, uint256[] calldata _ids, uint256[] calldata _values, bytes calldata _data) external returns(bytes4);\n}\n\n// prettier-ignore\ncontract iAuthereumAccount is iERC1271, iERC721Receiver, iERC1155TokenReceiver {\n\n    function () external payable;\n    function authereumVersion() external view returns(string memory);\n    function getChainId() external pure returns (uint256);\n    function addAuthKey(address _authKey) external;\n    function removeAuthKey(address _authKey) external;\n    function isValidAuthKeySignature(bytes calldata _data, bytes calldata _signature) external view returns (bytes4);\n    function isValidLoginKeySignature(bytes calldata _data, bytes calldata _signature) external view returns (bytes4);\n    function executeMultipleMetaTransactions(bytes[] calldata _transactions) external returns (bytes[] memory);\n\n    function executeMultipleAuthKeyMetaTransactions(\n        bytes[] calldata _transactions,\n        uint256 _gasPrice,\n        uint256 _gasOverhead,\n        address _feeTokenAddress,\n        uint256 _feeTokenRate,\n        bytes calldata _transactionMessageHashSignature\n    ) external returns (bytes[] memory);\n\n    function executeMultipleLoginKeyMetaTransactions(\n        bytes[] calldata _transactions,\n        uint256 _gasPrice,\n        uint256 _gasOverhead,\n        bytes calldata _loginKeyRestrictionsData,\n        address _feeTokenAddress,\n        uint256 _feeTokenRate,\n        bytes calldata _transactionMessageHashSignature,\n        bytes calldata _loginKeyAttestationSignature\n    ) external returns (bytes[] memory);\n}\n"
+}
