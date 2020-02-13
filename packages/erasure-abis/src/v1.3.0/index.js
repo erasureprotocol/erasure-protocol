@@ -1,4 +1,22 @@
 const Contracts = {
+    iNMR: {
+        artifact: require('./abis/iNMR.json'),
+    },
+    iUniswapFactory: {
+        artifact: require('./abis/iUniswapFactory.json'),
+    },
+    iUniswapExchange: {
+        artifact: require('./abis/iUniswapFactory.json'),
+    },
+    iAuthereumAccount: {
+        artifact: require('./abis/iAuthereumAccount.json'),
+    },
+    iRegistry: {
+        artifact: require('./abis/iRegistry.json'),
+    },
+    iFactory: {
+        artifact: require('./abis/iFactory.json'),
+    },
     NMR: {
         artifact: require('./abis/MockNMR.json'),
         mainnet: '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671',
@@ -23,29 +41,11 @@ const Contracts = {
         rinkeby: '0x77dB9C915809e7BE439D2AB21032B1b8B58F6891',
         kovan: '0x47D4Af3BBaEC0dE4dba5F44ae8Ed2761977D32d6',
     },
-    UniswapFactory: {
-        artifact: require('./abis/MockUniswapFactory.json'),
-        mainnet: '',
-        rinkeby: '',
-        kovan: '',
-    },
-    Authereum: {
-        artifact: require('./abis/MockAuthereum.json'),
-        mainnet: '',
-        rinkeby: '',
-        kovan: '',
-    },
     RegistryManager: {
         artifact: require('./abis/RegistryManager.json'),
         mainnet: '',
         rinkeby: '0x92D89D5909fCf50d46c30EaD7fF0B5707F59Fe9c',
         kovan: '0x4Fe2e04498ad1c8c0F386073C3324e75b830af97',
-    },
-    Erasure_Agreements: {
-        artifact: require('./abis/Erasure_Agreements.json'),
-        mainnet: '0xa6cf4Bf00feF8866e9F3f61C972bA7C687C6eDbF',
-        rinkeby: '0xf46D714e39b742E22eB0363FE5D727E3C0a8BEcC',
-        kovan: '0x09f83e08CC9F41CE8bd901a214F36B2ba958D7eD',
     },
     Erasure_Posts: {
         artifact: require('./abis/Erasure_Posts.json'),
@@ -53,11 +53,11 @@ const Contracts = {
         rinkeby: '0x57EB544cCA126D356FFe19D732A79Db494ba09b1',
         kovan: '0xB88336e7D856b55eCB1e7561d90e025386E8b3e3',
     },
-    Erasure_Users: {
-        artifact: require('./abis/Erasure_Users.json'),
-        mainnet: '0x789D0082B20A929D6fB64EB4c10c68e827AAB7aB',
-        rinkeby: '0xbF7339e68b81a1261FDF46FDBe916cd88f3609c0',
-        kovan: '0xf63ca73e164884793165EE908f216500e49Ad080',
+    Erasure_Agreements: {
+        artifact: require('./abis/Erasure_Agreements.json'),
+        mainnet: '0xa6cf4Bf00feF8866e9F3f61C972bA7C687C6eDbF',
+        rinkeby: '0xf46D714e39b742E22eB0363FE5D727E3C0a8BEcC',
+        kovan: '0x09f83e08CC9F41CE8bd901a214F36B2ba958D7eD',
     },
     Erasure_Escrows: {
         artifact: require('./abis/Erasure_Escrows.json'),
@@ -65,7 +65,13 @@ const Contracts = {
         rinkeby: '0xFD6a8b50B7D97133B03f48a08E9BEF5f664e092c',
         kovan: '0x0a726cD79a6E6c0eBeCeEAC8938C5922dc5dDd2B',
     },
-    FeedFactory: {
+    Erasure_Users: {
+        artifact: require('./abis/Erasure_Users.json'),
+        mainnet: '0x789D0082B20A929D6fB64EB4c10c68e827AAB7aB',
+        rinkeby: '0xbF7339e68b81a1261FDF46FDBe916cd88f3609c0',
+        kovan: '0xf63ca73e164884793165EE908f216500e49Ad080',
+    },
+    Feed_Factory: {
         artifact: require('./abis/Feed_Factory.json'),
         mainnet: '',
         rinkeby: '0x4b81D52e3c196B1D6D445bd99d356A86Eb98e86E',
@@ -77,7 +83,7 @@ const Contracts = {
         rinkeby: '0x53EcA61358Bb949F1A70E92142eb1974Fb3cB298',
         kovan: '0x276e1fdB65951B8c1d1c16C5B69a72bE3060E7AA',
     },
-    SimpleGriefingFactory: {
+    SimpleGriefing_Factory: {
         artifact: require('./abis/SimpleGriefing_Factory.json'),
         mainnet: '',
         rinkeby: '0xD4817F7Ba9A518bB2abA008f0754f440529E6219',
@@ -89,7 +95,7 @@ const Contracts = {
         rinkeby: '0xA262EDBb8E74025BAD1D80ACF603D688d14e98b8',
         kovan: '0x783E162F8597a0bdBC88af97Da14a4957Cc3a616',
     },
-    CountdownGriefingFactory: {
+    CountdownGriefing_Factory: {
         artifact: require('./abis/CountdownGriefing_Factory.json'),
         mainnet: '',
         rinkeby: '0xe7862De73fF5678251a6183e757AAbbe4F5AfA2C',
@@ -101,7 +107,7 @@ const Contracts = {
         rinkeby: '0xafD67e6B6e29db30D59BE1dC31aa42cF531aC29F',
         kovan: '0xc110156B813a122F5F4766937d8D54035A04fEB5',
     },
-    CountdownGriefingEscrowFactory: {
+    CountdownGriefingEscrow_Factory: {
         artifact: require('./abis/CountdownGriefingEscrow_Factory.json'),
         mainnet: '',
         rinkeby: '0x912FF45B8B3dad13E2E2EFD1414bFF811a87b548',
