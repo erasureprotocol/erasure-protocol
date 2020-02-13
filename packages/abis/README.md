@@ -22,6 +22,7 @@ const kovanAddress = ErasureV130[contractName].kovan
 #### ErasureV130 Contracts
 
 - `iNMR`
+- `iERC20`
 - `iRegistry`
 - `iFactory`
 - `iUniswapFactory`

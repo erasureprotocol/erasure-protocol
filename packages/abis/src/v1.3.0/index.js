@@ -2,6 +2,9 @@ const Contracts = {
     iNMR: {
         artifact: require('./abis/iNMR.json'),
     },
+    iERC20: {
+        artifact: require('./abis/iERC20.json'),
+    },
     iUniswapFactory: {
         artifact: require('./abis/iUniswapFactory.json'),
     },
