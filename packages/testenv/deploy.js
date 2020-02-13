@@ -26,9 +26,6 @@ let c = {
   UniswapFactory: {
     artifact: require('./build/MockUniswapFactory.json'),
   },
-  Authereum: {
-    artifact: require('./build/MockAuthereum.json'),
-  },
   RegistryManager: {
     artifact: require('./build/RegistryManager.json'),
   },
