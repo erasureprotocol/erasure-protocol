@@ -32,6 +32,7 @@ const kovanAddress = ErasureV130[contractName].kovan
 - `NMR_Uniswap`
 - `DAI`
 - `DAI_Uniswap`
+- `UniswapFactory`
 - `RegistryManager`
 - `Erasure_Posts`
 - `Erasure_Agreements`

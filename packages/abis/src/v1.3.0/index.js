@@ -42,7 +42,13 @@ const Contracts = {
         artifact: require('./abis/MockUniswapExchange.json'),
         mainnet: '0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667',
         rinkeby: '0x77dB9C915809e7BE439D2AB21032B1b8B58F6891',
-        kovan: '0x47D4Af3BBaEC0dE4dba5F44ae8Ed2761977D32d6',
+        kovan: '0xC9883D347C200d9CBA014389220C4df45648F03a',
+    },
+    UniswapFactory: {
+        artifact: require('./abis/MockUniswapFactory.json'),
+        mainnet: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95',
+        rinkeby: '0xf5D915570BC477f9B8D6C0E980aA81757A3AaC36',
+        kovan: '0xD3E51Ef092B2845f10401a0159B2B96e8B6c3D30',
     },
     RegistryManager: {
         artifact: require('./abis/RegistryManager.json'),
