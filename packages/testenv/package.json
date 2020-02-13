@@ -28,6 +28,7 @@
     "@openzeppelin/contracts": "^2.4.0",
     "argparse": "^1.0.10",
     "ethers": "^4.0.37",
-    "ganache-cli": "^6.7.0"
+    "ganache-cli": "^6.7.0",
+    "handlebars": "^4.7.3"
   }
 }

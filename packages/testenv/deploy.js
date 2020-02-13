@@ -3,6 +3,8 @@ const assert = require('assert')
 const ganache = require('ganache-cli')
 const { hexlify, createIPFShash, abiEncodeWithSelector } = require('./utils')
 const { RATIO_TYPES, TOKEN_TYPES } = require('./variables')
+const Handlebars = require('handlebars')
+const fs = require('fs')
 
 let c = {
   NMR: {
@@ -74,6 +76,20 @@ let c = {
       artifact: require('./build/Feed.json'),
     },
   },
+}
+
+// const templateArgs = {
+//   CountdownGriefingEscrowFactory:
+//     ErasureV130.CountdownGriefingEscrowFactory.mainnet,
+//   CountdownGriefingFactory: ErasureV130.CountdownGriefingFactory.mainnet,
+//   SimpleGriefingFactory: ErasureV130.SimpleGriefingFactory.mainnet,
+//   FeedFactory: ErasureV130.FeedFactory.mainnet,
+// }
+const writeSubgraphConfig = async templateArgs => {
+  const templateFile = fs.readFileSync('./subgraph.yaml.handlebars', 'utf8')
+  var template = Handlebars.compile(templateFile)
+
+  fs.writeFileSync('./subgraph.yaml', template(templateArgs))
 }
 
 var ArgumentParser = require('argparse').ArgumentParser
@@ -244,6 +260,17 @@ const main = async () => {
     deploySigner,
     agreementFactory,
   )
+
+  console.log(``)
+  console.log(`Writing new subgraph config`)
+  console.log(``)
+  writeSubgraphConfig({
+    CountdownGriefingEscrowFactory:
+      c.CountdownGriefingEscrow.factory.wrap.address,
+    CountdownGriefingFactory: c.CountdownGriefing.factory.wrap.address,
+    SimpleGriefingFactory: c.SimpleGriefing.factory.wrap.address,
+    FeedFactory: c.Feed.factory.wrap.address,
+  })
 
   console.log(``)
   console.log(`Create test instance from factories`)
