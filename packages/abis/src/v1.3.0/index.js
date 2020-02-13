@@ -31,6 +31,7 @@ const Contracts = {
     NMR_Uniswap: {
         artifact: require('./abis/MockUniswapExchange.json'),
         mainnet_nonce: 41,
+        mainnet_deployer: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95',
         mainnet: '0x2Bf5A5bA29E60682fC56B2Fcf9cE07Bef4F6196f',
         rinkeby: '0xd6Bb4d352C56Fdd6D2817732821aFDF94204cDF6',
         kovan: '0xbFAAdabFab5e3Ff17f06dc15b128bfCc9fCCA7Ee',
@@ -46,6 +47,7 @@ const Contracts = {
     DAI_Uniswap: {
         artifact: require('./abis/MockUniswapExchange.json'),
         mainnet_nonce: 1225,
+        mainnet_deployer: '0xc0a47dFe034B400B47bDaD5FecDa2621de6c4d95',
         mainnet: '0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667',
         rinkeby: '0x77dB9C915809e7BE439D2AB21032B1b8B58F6891',
         kovan: '0xC9883D347C200d9CBA014389220C4df45648F03a',
