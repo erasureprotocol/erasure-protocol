@@ -16,7 +16,7 @@ dataSources:
         - InstanceCreatedCountdownGriefingEscrowFactory
       abis:
         - name: CountdownGriefingEscrowFactory
-          file: ./build/CountdownGriefingEscrow_Factory.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/CountdownGriefingEscrow_Factory.json
       eventHandlers:
         - event: InstanceCreated(indexed address,indexed address,bytes)
           handler: handleInstanceCreated
@@ -35,7 +35,7 @@ dataSources:
         - InstanceCreatedCountdownGriefingFactory
       abis:
         - name: CountdownGriefingFactory
-          file: ./build/CountdownGriefing_Factory.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/CountdownGriefing_Factory.json
       eventHandlers:
         - event: InstanceCreated(indexed address,indexed address,bytes)
           handler: handleInstanceCreated
@@ -54,7 +54,7 @@ dataSources:
         - InstanceCreatedSimpleGriefingFactory
       abis:
         - name: SimpleGriefingFactory
-          file: ./build/SimpleGriefing_Factory.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/SimpleGriefing_Factory.json
       eventHandlers:
         - event: InstanceCreated(indexed address,indexed address,bytes)
           handler: handleInstanceCreated
@@ -73,7 +73,7 @@ dataSources:
         - InstanceCreatedFeedFactory
       abis:
         - name: FeedFactory
-          file: ./build/Feed_Factory.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/Feed_Factory.json
       eventHandlers:
         - event: InstanceCreated(indexed address,indexed address,bytes)
           handler: handleInstanceCreated
@@ -106,7 +106,7 @@ templates:
       file: ./src/CountdownGriefingEscrow.ts
       abis:
         - name: CountdownGriefingEscrow
-          file: ./build/CountdownGriefingEscrow.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/CountdownGriefingEscrow.json
       eventHandlers:
         - event: Cancelled()
           handler: handleCancelled
@@ -159,7 +159,7 @@ templates:
       file: ./src/CountdownGriefing.ts
       abis:
         - name: CountdownGriefing
-          file: ./build/CountdownGriefing.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/CountdownGriefing.json
       eventHandlers:
         - event: Initialized(address,address,address,uint8,uint256,uint8,uint256,bytes)
           handler: handleInitialized
@@ -204,7 +204,7 @@ templates:
       file: ./src/SimpleGriefing.ts
       abis:
         - name: SimpleGriefing
-          file: ./build/SimpleGriefing.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/SimpleGriefing.json
       eventHandlers:
         - event: DepositDecreased(uint8,address,uint256,uint256)
           handler: handleDepositDecreased
@@ -243,7 +243,7 @@ templates:
       file: ./src/Feed.ts
       abis:
         - name: Feed
-          file: ./build/Feed.json
+          file: ./node_modules/@erasure/abis/src/v1.3.0/abis/Feed.json
       eventHandlers:
         - event: Initialized(address,bytes)
           handler: handleInitialized

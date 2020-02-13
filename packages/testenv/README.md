@@ -8,7 +8,6 @@ Instantiate a ganache instance with NMR and erasure protocol.
 
 ```
 yarn
-yarn compile
 yarn deploy
 ```
 
