@@ -2,21 +2,15 @@
   "name": "rinkeby-v120",
   "license": "MIT",
   "scripts": {
-    "rinkeby-codegen": "cd rinkeby && graph codegen ",
-    "rinkeby-build": "cd rinkeby && graph build rinkeby/subgraph.yaml",
-    "rinkeby-deploy": "cd rinkeby && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/rinkeby-v130",
-    "kovan-codegen": "cd kovan && graph codegen",
-    "kovan-build": "cd kovan && graph build ",
-    "kovan-deploy": "cd kovan && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/kovan-v130",
-    "mainnet-codegen": "cd mainnet && graph codegen",
-    "mainnet-build": "cd mainnet && graph build",
-    "mainnet-deploy": "cd mainnet graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/v13",
-    "create-local": "graph create --node http://localhost:8020/ erasureprotocol/v130 kovan/subgraph.yaml",
-    "remove-local": "graph remove --node http://localhost:8020/ erasureprotocol/v130 kovan/subgraph.yaml",
+    "rinkeby-deploy": "node gen-subgraph.js rinkeby && graph codegen && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/rinkeby-v130",
+    "kovan-deploy": "node gen-subgraph.js kovan && graph codegen && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/kovan-v130",
+    "mainnet-deploy": "node gen-subgraph.js mainnet && graph codegen && graph build && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ erasureprotocol/mainnet-v130",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 erasureprotocol/v130 kovan/subgraph.yaml"
   },
   "dependencies": {
+    "@erasure/abis": "^1.3.23",
     "@graphprotocol/graph-cli": "^0.16.0",
-    "@graphprotocol/graph-ts": "^0.15.0"
+    "@graphprotocol/graph-ts": "^0.15.0",
+    "handlebars": "^4.7.3"
   }
 }

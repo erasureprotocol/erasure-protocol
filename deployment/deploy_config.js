@@ -62,18 +62,6 @@ const contracts = {
   UniswapFactory: {
     artifact: require('../build/MockUniswapFactory.json'),
   },
-  Authereum: {
-    artifact: require('../build/MockAuthereum.json'),
-    mainnet: {
-      address: '',
-    },
-    rinkeby: {
-      address: '',
-    },
-    kovan: {
-      address: '',
-    },
-  },
   RegistryManager: {
     artifact: require('../build/RegistryManager.json'),
     mainnet: {

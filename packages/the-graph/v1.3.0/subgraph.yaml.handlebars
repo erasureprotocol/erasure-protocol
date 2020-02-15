@@ -4,9 +4,9 @@ schema:
 dataSources:
   - name: CountdownGriefingEscrowFactory
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0x6eD79Aa1c71FD7BdBC515EfdA3Bd4e26394435cC'
+      address: '{{CountdownGriefingEscrowFactory}}'
       abi: CountdownGriefingEscrowFactory
     mapping:
       kind: ethereum/events
@@ -23,9 +23,9 @@ dataSources:
       file: ./src/CountdownGriefingEscrow.ts
   - name: CountdownGriefingFactory
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0xA57B8a5584442B467b4689F1144D269d096A3daF'
+      address: '{{CountdownGriefingFactory}}'
       abi: CountdownGriefingFactory
     mapping:
       kind: ethereum/events
@@ -42,9 +42,9 @@ dataSources:
       file: ./src/CountdownGriefing.ts
   - name: SimpleGriefingFactory
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0x9b1f7F645351AF3631a656421eD2e40f2802E6c0'
+      address: '{{SimpleGriefingFactory}}'
       abi: SimpleGriefingFactory
     mapping:
       kind: ethereum/events
@@ -61,9 +61,9 @@ dataSources:
       file: ./src/SimpleGriefing.ts
   - name: FeedFactory
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
-      address: '0x0E696947A06550DEf604e82C26fd9E493e576337'
+      address: '{{FeedFactory}}'
       abi: FeedFactory
     mapping:
       kind: ethereum/events
@@ -81,7 +81,7 @@ dataSources:
 templates:
   - name: CountdownGriefingEscrow
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
       abi: CountdownGriefingEscrow
     mapping:
@@ -137,7 +137,7 @@ templates:
 
   - name: CountdownGriefing
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
       abi: CountdownGriefing
     mapping:
@@ -184,7 +184,7 @@ templates:
 
   - name: SimpleGriefing
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
       abi: SimpleGriefing
     mapping:
@@ -225,7 +225,7 @@ templates:
 
   - name: Feed
     kind: ethereum/contract
-    network: mainnet
+    network: {{network}}
     source:
       abi: Feed
     mapping:
