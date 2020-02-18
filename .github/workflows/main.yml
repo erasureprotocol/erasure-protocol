@@ -71,7 +71,6 @@ jobs:
       - name: Test Deployment
         working-directory: ./packages/testenv/
         run: |
-          yarn run compile
           yarn run deploy -e
 
   crypto-ipfs:
