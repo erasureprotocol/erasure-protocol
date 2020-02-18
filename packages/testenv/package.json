@@ -13,7 +13,6 @@
     "ganache"
   ],
   "scripts": {
-    "compile": "yarn sol-compiler",
     "deploy": "node testenv-deploy.js",
     "deploy_subgraph": "bash run-deploy-subgraph.sh",
     "graph-codegen": "graph codegen",
