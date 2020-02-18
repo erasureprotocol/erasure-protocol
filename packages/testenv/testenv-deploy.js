@@ -42,7 +42,10 @@ const deployContract = async (contractName, signer, params = []) => {
 }
 
 const writeSubgraphConfig = async templateArgs => {
-  const templateFile = fs.readFileSync('./subgraph.yaml.handlebars', 'utf8')
+  const templateFile = fs.readFileSync(
+    '../the-graph/v1.3.0/subgraph.yaml.handlebars',
+    'utf8',
+  )
   const template = Handlebars.compile(templateFile)
 
   fs.writeFileSync('./subgraph.yaml', template(templateArgs))
@@ -186,11 +189,19 @@ const main = async () => {
       inputType: 'raw',
       outputType: 'digest',
     }),
-    metadata: await multihash({
-      input: 'metadata',
-      inputType: 'raw',
-      outputType: 'hex',
-    }),
+    metadata: ethers.utils.toUtf8Bytes(
+      JSON.stringify({
+        metadata_version: 'v1.0.0',
+        application: 'deployment-test',
+        app_version: 'v0.0.1',
+        app_storage: { this_is: 'an example metadata for the app' },
+        ipld_cid: await multihash({
+          input: 'metadata',
+          inputType: 'raw',
+          outputType: 'hex',
+        }),
+      }),
+    ),
   }
   console.log('mockData', mockData)
 

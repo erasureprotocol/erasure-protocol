@@ -61,9 +61,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Get Artifacts
-        run: yarn install
-
       - name: Install
         working-directory: ./packages/testenv/
         run: yarn install
@@ -71,7 +68,6 @@ jobs:
       - name: Test Deployment
         working-directory: ./packages/testenv/
         run: |
-          yarn run compile
           yarn run deploy -e
 
   crypto-ipfs:

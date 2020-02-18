@@ -12,7 +12,7 @@ import {
   StakeDeposited,
   DepositDecreased,
   DepositIncreased,
-  LengthSet
+  LengthSet,
 } from '../generated/templates/CountdownGriefingEscrow/CountdownGriefingEscrow'
 import { CountdownGriefingEscrow as CountdownGriefingEscrowDataSource } from '../generated/templates'
 import {
@@ -30,7 +30,7 @@ import {
   StakeBurnedCountdownGriefingEscrow,
   DepositDecreasedCountdownGriefingEscrow,
   DepositIncreasedCountdownGriefingEscrow,
-  LengthSetCountdownGriefingEscrow
+  LengthSetCountdownGriefingEscrow,
 } from '../generated/schema'
 
 export function handleInstanceCreated(event: InstanceCreated): void {
@@ -116,32 +116,36 @@ export function handleDeadlineSet(event: DeadlineSet): void {
   countdownGriefing.save()
 }
 
-export function handleDepositDecreased(event: DepositDecreased):void{
-  let entity = new DepositDecreasedCountdownGriefingEscrow(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+export function handleDepositDecreased(event: DepositDecreased): void {
+  let entity = new DepositDecreasedCountdownGriefingEscrow(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
   entity.contract = event.address
   entity.tokenID = event.params.tokenID
   entity.user = event.params.user
   entity.amount = event.params.amount
   entity.newDeposit = event.params.newDeposit
-   entity.blockNumber = event.block.number
-    entity.timestamp = event.block.timestamp
-    entity.txHash = event.transaction.hash
-    entity.logIndex = event.logIndex
-   entity.save()
+  entity.blockNumber = event.block.number
+  entity.timestamp = event.block.timestamp
+  entity.txHash = event.transaction.hash
+  entity.logIndex = event.logIndex
+  entity.save()
 }
 
-export function handleDepositIncreased(event: DepositDecreased):void{
-  let entity = new DepositIncreasedCountdownGriefingEscrow(event.transaction.hash.toHex() + '-' + event.logIndex.toString())
+export function handleDepositIncreased(event: DepositDecreased): void {
+  let entity = new DepositIncreasedCountdownGriefingEscrow(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
   entity.contract = event.address
   entity.tokenID = event.params.tokenID
   entity.user = event.params.user
   entity.amount = event.params.amount
   entity.newDeposit = event.params.newDeposit
-   entity.blockNumber = event.block.number
-    entity.timestamp = event.block.timestamp
-    entity.txHash = event.transaction.hash
-    entity.logIndex = event.logIndex
-   entity.save()
+  entity.blockNumber = event.block.number
+  entity.timestamp = event.block.timestamp
+  entity.txHash = event.transaction.hash
+  entity.logIndex = event.logIndex
+  entity.save()
 }
 export function handleFinalized(event: Finalized): void {
   let entity = new FinalizedCountdownGriefingEscrow(
@@ -199,18 +203,20 @@ export function handleInitialized(event: Initialized): void {
   countdownGriefingEscrow.save()
 }
 
-export function handleLengthSet(event:LengthSet):void{
-  let entity = new LengthSetCountdownGriefingEscrow(event.transaction.hash.toHex() + '-' + event.logIndex.toString(),)
-   entity.contract = event.address
-    entity.length = event.params.length
-    entity.blockNumber = event.block.number
-    entity.timestamp = event.block.timestamp
-    entity.txHash = event.transaction.hash
-    entity.logIndex = event.logIndex
-    entity.save()
-     let countdownGriefing = new CountdownGriefingEscrow(event.address.toHex())
-      countdownGriefing.length = entity.length
-      countdownGriefing.save()
+export function handleLengthSet(event: LengthSet): void {
+  let entity = new LengthSetCountdownGriefingEscrow(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
+  entity.length = event.params.length
+  entity.blockNumber = event.block.number
+  entity.timestamp = event.block.timestamp
+  entity.txHash = event.transaction.hash
+  entity.logIndex = event.logIndex
+  entity.save()
+  let countdownGriefing = new CountdownGriefingEscrow(event.address.toHex())
+  countdownGriefing.length = entity.length
+  countdownGriefing.save()
 }
 export function handleMetadataSet(event: MetadataSet): void {
   let entity = new MetadataSetCountdownGriefingEscrow(
@@ -269,8 +275,21 @@ export function handlePaymentDeposited(event: PaymentDeposited): void {
   countdownGriefingEscrow.save()
 }
 
+export function handleStakeDeposited(event: StakeDeposited): void {
+  let entity = new StakeDepositedCountdownGriefingEscrow(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
+  entity.seller = event.params.seller
+  entity.amount = event.params.amount
+  entity.blockNumber = event.block.number
+  entity.timestamp = event.block.timestamp
+  entity.txHash = event.transaction.hash
+  entity.logIndex = event.logIndex
+  entity.save()
+}
 
-export function handleStakeBurned(event: StakeBurned):void{
+export function handleStakeBurned(event: StakeBurned): void {
   let entity = new StakeBurnedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
