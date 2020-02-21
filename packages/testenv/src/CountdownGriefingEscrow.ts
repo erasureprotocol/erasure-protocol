@@ -80,9 +80,12 @@ export function handleCancelled(event: Cancelled): void {
 }
 
 export function handleDataSubmitted(event: DataSubmitted): void {
-  let countdownGriefingEscrow = new CountdownGriefingEscrow(
+  let countdownGriefingEscrow = CountdownGriefingEscrow.load(
     event.address.toHex(),
   )
+  if (countdownGriefingEscrow == null) {
+    countdownGriefingEscrow = new CountdownGriefingEscrow(event.address.toHex())
+  }
 
   let entity = new DataSubmittedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
