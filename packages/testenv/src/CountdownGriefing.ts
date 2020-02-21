@@ -9,7 +9,7 @@ import {
   MetadataSet,
   StakeBurned,
   DeadlineSet,
-  LengthSet
+  LengthSet,
 } from '../generated/templates/CountdownGriefing/CountdownGriefing'
 import { CountdownGriefing as CountdownGriefingDataSource } from '../generated/templates'
 import {
@@ -81,18 +81,20 @@ export function handleInitialized(event: Initialized): void {
   countdownGriefing.totalTaken = BigInt.fromI32(0)
   countdownGriefing.save()
 }
-export function handleLengthSet(event:LengthSet):void{
-  let entity = new LengthSetCountdownGriefing(event.transaction.hash.toHex() + '-' + event.logIndex.toString(),)
-   entity.contract = event.address
-    entity.length = event.params.length
-    entity.blockNumber = event.block.number
-    entity.timestamp = event.block.timestamp
-    entity.txHash = event.transaction.hash
-    entity.logIndex = event.logIndex
-    entity.save()
-     let countdownGriefing = new CountdownGriefing(event.address.toHex())
-      countdownGriefing.length = entity.length
-      countdownGriefing.save()
+export function handleLengthSet(event: LengthSet): void {
+  let entity = new LengthSetCountdownGriefing(
+    event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+  )
+  entity.contract = event.address
+  entity.length = event.params.length
+  entity.blockNumber = event.block.number
+  entity.timestamp = event.block.timestamp
+  entity.txHash = event.transaction.hash
+  entity.logIndex = event.logIndex
+  entity.save()
+  let countdownGriefing = new CountdownGriefing(event.address.toHex())
+  countdownGriefing.length = entity.length
+  countdownGriefing.save()
 }
 export function handleRatioSet(event: RatioSet): void {
   let entity = new RatioSetCountdownGriefing(
@@ -124,9 +126,11 @@ export function handleGriefed(event: Griefed): void {
   entity.timestamp = event.block.timestamp
   entity.txHash = event.transaction.hash
   entity.logIndex = event.logIndex
+
+  let countdownGriefing = new CountdownGriefing(event.address.toHex())
+  entity.parentEscrow = countdownGriefing.parentEscrow
   entity.save()
 }
-
 
 export function handleOperatorUpdated(event: OperatorUpdated): void {
   let entity = new OperatorUpdatedCountdownGriefing(

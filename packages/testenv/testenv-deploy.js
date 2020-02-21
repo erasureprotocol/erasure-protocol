@@ -48,6 +48,7 @@ const writeSubgraphConfig = async templateArgs => {
   )
   const template = Handlebars.compile(templateFile)
 
+  templateArgs.network = 'mainnet'
   fs.writeFileSync('./subgraph.yaml', template(templateArgs))
 }
 

@@ -55,6 +55,12 @@ type DataSubmittedCountdownGriefingEscrow @entity {
   timestamp: BigInt!
   txHash: Bytes!
   logIndex: BigInt!
+
+  metadata: Bytes
+  buyer: Bytes
+  seller: Bytes
+  paymentAmount: BigInt
+  stakeAmount: BigInt
 }
 
 type DeadlineSetCountdownGriefingEscrow @entity {
@@ -95,7 +101,7 @@ type InitializedCountdownGriefingEscrow @entity {
   txHash: Bytes!
   logIndex: BigInt!
 }
-type LengthSetCountdownGriefingEscrow @entity{
+type LengthSetCountdownGriefingEscrow @entity {
   id: ID!
   contract: Bytes!
   length: BigInt!
@@ -160,7 +166,7 @@ type StakeBurnedCountdownGriefingEscrow @entity {
   logIndex: BigInt!
 }
 
-type DepositDecreasedCountdownGriefingEscrow @entity{
+type DepositDecreasedCountdownGriefingEscrow @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -173,7 +179,7 @@ type DepositDecreasedCountdownGriefingEscrow @entity{
   logIndex: BigInt!
 }
 
-type DepositIncreasedCountdownGriefingEscrow @entity{
+type DepositIncreasedCountdownGriefingEscrow @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -207,6 +213,8 @@ type CountdownGriefing @entity {
   initMetadataB58: String
   initCallData: Bytes
   createdTimestamp: BigInt
+
+  parentEscrow: CountdownGriefingEscrow
 }
 
 type InstanceCreatedCountdownGriefingFactory @entity {
@@ -271,7 +279,7 @@ type RatioSetCountdownGriefing @entity {
   logIndex: BigInt!
 }
 
-type DepositDecreasedCountdownGriefing @entity{
+type DepositDecreasedCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -284,7 +292,7 @@ type DepositDecreasedCountdownGriefing @entity{
   logIndex: BigInt!
 }
 
-type DepositIncreasedCountdownGriefing @entity{
+type DepositIncreasedCountdownGriefing @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -309,6 +317,8 @@ type GriefedCountdownGriefing @entity {
   timestamp: BigInt!
   txHash: Bytes!
   logIndex: BigInt!
+
+  parentEscrow: CountdownGriefingEscrow
 }
 type OperatorUpdatedCountdownGriefing @entity {
   id: ID!
@@ -387,7 +397,7 @@ type InstanceCreatedSimpleGriefingFactory @entity {
   logIndex: BigInt!
 }
 
-type DepositDecreasedSimpleGriefing @entity{
+type DepositDecreasedSimpleGriefing @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -400,7 +410,7 @@ type DepositDecreasedSimpleGriefing @entity{
   logIndex: BigInt!
 }
 
-type DepositIncreasedSimpleGriefing @entity{
+type DepositIncreasedSimpleGriefing @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -490,7 +500,6 @@ type StakeBurnedSimpleGriefing @entity {
   logIndex: BigInt!
 }
 
-
 # Feed
 type Feed @entity {
   id: ID!
@@ -528,7 +537,7 @@ type InitializedFeed @entity {
   logIndex: BigInt!
 }
 
-type DepositDecreasedFeed @entity{
+type DepositDecreasedFeed @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!
@@ -541,7 +550,7 @@ type DepositDecreasedFeed @entity{
   logIndex: BigInt!
 }
 
-type DepositIncreasedFeed @entity{
+type DepositIncreasedFeed @entity {
   id: ID!
   contract: Bytes!
   tokenID: Int!

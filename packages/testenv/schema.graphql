@@ -55,6 +55,12 @@ type DataSubmittedCountdownGriefingEscrow @entity {
   timestamp: BigInt!
   txHash: Bytes!
   logIndex: BigInt!
+
+  metadata: Bytes
+  buyer: Bytes
+  seller: Bytes
+  paymentAmount: BigInt
+  stakeAmount: BigInt
 }
 
 type DeadlineSetCountdownGriefingEscrow @entity {
@@ -207,6 +213,8 @@ type CountdownGriefing @entity {
   initMetadataB58: String
   initCallData: Bytes
   createdTimestamp: BigInt
+
+  parentEscrow: CountdownGriefingEscrow
 }
 
 type InstanceCreatedCountdownGriefingFactory @entity {
@@ -309,6 +317,8 @@ type GriefedCountdownGriefing @entity {
   timestamp: BigInt!
   txHash: Bytes!
   logIndex: BigInt!
+
+  parentEscrow: CountdownGriefingEscrow
 }
 type OperatorUpdatedCountdownGriefing @entity {
   id: ID!
