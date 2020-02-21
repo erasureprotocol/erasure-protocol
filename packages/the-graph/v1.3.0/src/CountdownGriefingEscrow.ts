@@ -16,6 +16,7 @@ import {
 } from '../generated/templates/CountdownGriefingEscrow/CountdownGriefingEscrow'
 import { CountdownGriefingEscrow as CountdownGriefingEscrowDataSource } from '../generated/templates'
 import {
+  CountdownGriefing,
   CountdownGriefingEscrow,
   InstanceCreatedCountdownGriefingEscrowFactory,
   CancelledCountdownGriefingEscrow,
@@ -79,6 +80,10 @@ export function handleCancelled(event: Cancelled): void {
 }
 
 export function handleDataSubmitted(event: DataSubmitted): void {
+  let countdownGriefingEscrow = new CountdownGriefingEscrow(
+    event.address.toHex(),
+  )
+
   let entity = new DataSubmittedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
@@ -88,11 +93,14 @@ export function handleDataSubmitted(event: DataSubmitted): void {
   entity.timestamp = event.block.timestamp
   entity.txHash = event.transaction.hash
   entity.logIndex = event.logIndex
+
+  entity.metadata = countdownGriefingEscrow.metadata
+  entity.buyer = countdownGriefingEscrow.buyer
+  entity.seller = countdownGriefingEscrow.seller
+  entity.paymentAmount = countdownGriefingEscrow.paymentAmount
+  entity.stakeAmount = countdownGriefingEscrow.stakeAmount
   entity.save()
 
-  let countdownGriefingEscrow = new CountdownGriefingEscrow(
-    event.address.toHex(),
-  )
   countdownGriefingEscrow.dataSubmitted = true
   countdownGriefingEscrow.data = entity.data
   countdownGriefingEscrow.dataB58 = entity.data.toBase58()
@@ -132,7 +140,7 @@ export function handleDepositDecreased(event: DepositDecreased): void {
   entity.save()
 }
 
-export function handleDepositIncreased(event: DepositIncreased): void {
+export function handleDepositIncreased(event: DepositDecreased): void {
   let entity = new DepositIncreasedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
@@ -148,6 +156,10 @@ export function handleDepositIncreased(event: DepositIncreased): void {
   entity.save()
 }
 export function handleFinalized(event: Finalized): void {
+  let countdownGriefingEscrow = new CountdownGriefingEscrow(
+    event.address.toHex(),
+  )
+
   let entity = new FinalizedCountdownGriefingEscrow(
     event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
   )
@@ -159,12 +171,13 @@ export function handleFinalized(event: Finalized): void {
   entity.logIndex = event.logIndex
   entity.save()
 
-  let countdownGriefingEscrow = new CountdownGriefingEscrow(
-    event.address.toHex(),
-  )
   countdownGriefingEscrow.countdownGriefingAgreement = entity.agreement.toHex()
   countdownGriefingEscrow.finalized = true
   countdownGriefingEscrow.save()
+
+  let countdownGriefing = new CountdownGriefing(entity.agreement.toHex())
+  countdownGriefing.parentEscrow = event.address.toHex()
+  countdownGriefing.save()
 }
 
 export function handleInitialized(event: Initialized): void {
