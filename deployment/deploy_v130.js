@@ -1,46 +1,49 @@
 const etherlime = require('etherlime-lib')
 const ethers = require('ethers')
-const {
-  hexlify,
-  createIPFShash,
-  abiEncodeWithSelector,
-} = require('../test/helpers/utils')
-const { RATIO_TYPES, TOKEN_TYPES } = require('../test/helpers/variables')
 const assert = require('assert')
+const fs = require('fs')
 
-let { c } = require('./deploy_config')
+const {
+  multihash,
+  constants,
+  encodeCreateCall,
+} = require('@erasure/crypto-ipfs')
+const { RATIO_TYPES, TOKEN_TYPES } = constants
+const { ErasureV130 } = require('@erasure/abis')
 
 require('dotenv').config()
 
-const deploy = async (network, secret) => {
+const deploy = async (network, version) => {
   let deployer
   let multisig
 
   let defaultGas = ethers.utils.parseUnits('15', 'gwei')
   let gasUsed = ethers.constants.Zero
 
-  console.log(``)
-  console.log(`Initialize Deployer`)
-  console.log(``)
+  console.log(`\nInitialize Deployer`)
+
+  // prepare artifacts
+  version = 'v1.3.0'
+  const artifacts = await getArtifacts([
+    'Feed',
+    'SimpleGriefing',
+    'CountdownGriefing',
+    'CountdownGriefingEscrow',
+    'Feed_Factory',
+    'SimpleGriefing_Factory',
+    'CountdownGriefing_Factory',
+    'CountdownGriefingEscrow_Factory',
+    'RegistryManager',
+  ])
 
   // set owner address
-
-  if (network == 'rinkeby') {
-    ///////////////////////////////////////////////
-    /* NOTE: Must update hardcoded token address */
-    ///////////////////////////////////////////////
-    multisig = '0x6087555A70E2F96B7838806e7743041E035a37e5'
-  } else if (network == 'kovan') {
-    ///////////////////////////////////////////////
-    /* NOTE: Must update hardcoded token address */
-    ///////////////////////////////////////////////
+  if (network === 'rinkeby' || network === 'kovan') {
     multisig = '0x6087555A70E2F96B7838806e7743041E035a37e5'
   } else if (network == 'mainnet') {
     multisig = '0x0000000000377D181A0ebd08590c6B399b272000'
   }
 
   // initialize deployer
-
   deployer = await new etherlime.InfuraPrivateKeyDeployer(
     process.env.DEPLOYMENT_PRIV_KEY,
     network,
@@ -50,356 +53,319 @@ const deploy = async (network, secret) => {
 
   console.log(`Deployment Wallet: ${deployer.signer.address}`)
 
-  console.log(``)
-  console.log(`Get Deployed Registries`)
-  console.log(``)
+  if (!ErasureV130.RegistryManager[network]) {
+    // Erasure_Posts
+    const Erasure_Posts = await getRegistry('Erasure_Posts')
+    assert(
+      await Erasure_Posts.owner(),
+      deployer.signer.address,
+      'Erasure_Posts owner is not deployer.',
+    )
+    // Erasure_Agreements
+    const Erasure_Agreements = await getRegistry('Erasure_Agreements')
+    assert(
+      await Erasure_Posts.owner(),
+      deployer.signer.address,
+      'Erasure_Agreements owner is not deployer.',
+    )
+    // Erasure_Escrows
+    const Erasure_Escrows = await getRegistry('Erasure_Escrows')
+    assert(
+      await Erasure_Posts.owner(),
+      deployer.signer.address,
+      'Erasure_Escrows owner is not deployer.',
+    )
 
-  // Erasure_Users
-  await getUserRegistry('Erasure_Users')
+    console.log(`\nDeploy RegistryManager`)
 
-  // Erasure_Posts
-  await getRegistry('Erasure_Posts')
+    const RegistryManager = await deployer.deployAndVerify(
+      artifacts.RegistryManager,
+    )
+    ErasureV130.RegistryManager[network] = RegistryManager.contractAddress
 
-  // Erasure_Agreements
-  await getRegistry('Erasure_Agreements')
+    console.log(`\nTransfer RegistryManager ownership to Multisig`)
 
-  // Erasure_Escrows
-  await getRegistry('Erasure_Escrows')
+    await RegistryManager.transferOwnership(multisig)
 
-  console.log(``)
-  console.log(`Deploy Factories`)
-  console.log(``)
+    console.log(`\nTransfer all registry ownership to RegistryManager`)
+
+    // Erasure_Posts
+    await Erasure_Posts.transferOwnership(RegistryManager.address)
+    // Erasure_Agreements
+    await Erasure_Agreements.transferOwnership(RegistryManager.address)
+    // Erasure_Escrows
+    await Erasure_Escrows.transferOwnership(RegistryManager.address)
+  }
+
+  console.log(`\nDeploy Factories`)
 
   // Feed
-  await deployFactory('Feed', 'Erasure_Posts')
-
+  const Feed_Factory = await deployFactory('Feed', 'Erasure_Posts')
   // SimpleGriefing
-  await deployFactory('SimpleGriefing', 'Erasure_Agreements')
-
-  // CountdownGriefing
-  await deployFactory('CountdownGriefing', 'Erasure_Agreements')
-
-  // CountdownGriefingEscrow
-  const abiEncoder = new ethers.utils.AbiCoder()
-  const agreementFactory = abiEncoder.encode(
-    ['address'],
-    [c.CountdownGriefing.factory[network].address],
+  const SimpleGriefing_Factory = await deployFactory(
+    'SimpleGriefing',
+    'Erasure_Agreements',
   )
-  await deployFactory(
+  // CountdownGriefing
+  const CountdownGriefing_Factory = await deployFactory(
+    'CountdownGriefing',
+    'Erasure_Agreements',
+  )
+  // CountdownGriefingEscrow
+  const CountdownGriefingEscrow_Factory = await deployFactory(
     'CountdownGriefingEscrow',
     'Erasure_Escrows',
-    agreementFactory,
+    ethers.utils.defaultAbiCoder.encode(
+      ['address'],
+      [CountdownGriefing_Factory.contractAddress],
+    ),
   )
 
-  // console.log(``)
-  // console.log(`Transfer Registry Ownership`)
-  // console.log(``)
+  console.log(`\nCreate test instance from factories`)
 
-  // // Erasure_Posts
-  // await transferRegistry('Erasure_Posts')
-
-  // // Erasure_Agreements
-  // await transferRegistry('Erasure_Agreements')
-
-  // // Erasure_Escrows
-  // await transferRegistry('Erasure_Escrows')
-
-  console.log(``)
-  console.log(`Create test instance from factories`)
-  console.log(``)
-
-  const userAddress = '0x6087555A70E2F96B7838806e7743041E035a37e5'
-  const proofhash = ethers.utils.sha256(ethers.utils.toUtf8Bytes('proofhash'))
-  const IPFShash = createIPFShash('multihash')
-  console.log(`userAddress: ${userAddress}`)
-  console.log(`proofhash: ${proofhash}`)
-  console.log(`IPFShash: ${IPFShash}`)
-  console.log(``)
+  const mockData = {
+    userAddress: '0x6087555A70E2F96B7838806e7743041E035a37e5',
+    proofhash: await multihash({
+      input: 'proof',
+      inputType: 'raw',
+      outputType: 'digest',
+    }),
+    metadata: ethers.utils.toUtf8Bytes(
+      JSON.stringify({
+        metadata_version: 'v1.0.0',
+        application: 'deployment-test',
+        app_version: 'v0.0.1',
+        app_storage: { this_is: 'an example metadata for the app' },
+        ipld_cid: await multihash({
+          input: 'metadata',
+          inputType: 'raw',
+          outputType: 'hex',
+        }),
+      }),
+    ),
+  }
 
   // Feed
-  await createInstance(
-    'Feed',
-    abiEncodeWithSelector(
-      'initialize',
-      ['address', 'bytes'],
-      [userAddress, IPFShash],
-    ),
-  )
-
+  await createInstance('Feed', Feed_Factory, [
+    mockData.userAddress, // operator
+    mockData.metadata, // metadata
+  ])
   // SimpleGriefing
-  await createInstance(
-    'SimpleGriefing',
-    abiEncodeWithSelector(
-      'initialize',
-      ['address', 'address', 'address', 'uint8', 'uint256', 'uint8', 'bytes'],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        TOKEN_TYPES.NMR,
-        ethers.utils.parseEther('1'),
-        RATIO_TYPES.Dec,
-        IPFShash,
-      ],
-    ),
-  )
-
+  await createInstance('SimpleGriefing', SimpleGriefing_Factory, [
+    mockData.userAddress, // operator
+    mockData.userAddress, // staker
+    mockData.userAddress, // counterparty
+    constants.TOKEN_TYPES.NMR, // tokenID
+    ethers.utils.parseEther('1'), // griefRatio
+    constants.RATIO_TYPES.Dec, // ratioType
+    mockData.metadata, // metadata
+  ])
   // CountdownGriefing
-  await createInstance(
-    'CountdownGriefing',
-    abiEncodeWithSelector(
-      'initialize',
-      [
-        'address',
-        'address',
-        'address',
-        'uint8',
-        'uint256',
-        'uint8',
-        'uint256',
-        'bytes',
-      ],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        TOKEN_TYPES.NMR,
-        ethers.utils.parseEther('1'),
-        RATIO_TYPES.Dec,
-        100000000,
-        IPFShash,
-      ],
-    ),
-  )
-
+  await createInstance('CountdownGriefing', CountdownGriefing_Factory, [
+    mockData.userAddress, // operator
+    mockData.userAddress, // staker
+    mockData.userAddress, // counterparty
+    constants.TOKEN_TYPES.NMR, // tokenID
+    ethers.utils.parseEther('1'), // griefRatio
+    constants.RATIO_TYPES.Dec, // ratioType
+    100000000, // agreementLength
+    mockData.metadata, // metadata
+  ])
   // CountdownGriefingEscrow
   await createInstance(
     'CountdownGriefingEscrow',
-    abiEncodeWithSelector(
-      'initialize',
-      [
-        'address',
-        'address',
-        'address',
-        'uint8',
-        'uint256',
-        'uint256',
-        'uint256',
-        'bytes',
-        'bytes',
-      ],
-      [
-        userAddress,
-        userAddress,
-        userAddress,
-        TOKEN_TYPES.NMR,
-        ethers.utils.parseEther('1'),
-        ethers.utils.parseEther('1'),
-        100000000,
-        IPFShash,
-        abiEncoder.encode(
-          ['uint256', 'uint8', 'uint256'],
-          [ethers.utils.parseEther('1'), RATIO_TYPES.Dec, 100000000],
-        ),
-      ],
-    ),
+    CountdownGriefingEscrow_Factory,
+    [
+      mockData.userAddress, // operator
+      mockData.userAddress, // staker
+      mockData.userAddress, // counterparty
+      constants.TOKEN_TYPES.NMR, // tokenID
+      ethers.utils.parseEther('1'), // paymentAmount
+      ethers.utils.parseEther('1'), // stakeAmount
+      100000000, // escrowLength
+      mockData.metadata, // metadata
+      ethers.utils.defaultAbiCoder.encode(
+        ['uint256', 'uint8', 'uint256'],
+        [
+          ethers.utils.parseEther('1'), // griefRatio
+          constants.RATIO_TYPES.Dec, // ratioType
+          100000000, // agreementLength
+        ],
+      ), // agreementParams
+    ],
   )
 
+  // save artifacts
+  // TODO: save addresses to abi package
+  await saveArtifacts(version)
+
   console.log(`
-total gas used: ${gasUsed.toString()}
+Deployment Addresses
+------------------------------------------------------------------
+
+Multisig:        ${multisig}
+RegistryManager: ${ErasureV130.RegistryManager[network]}
+
+NMR:
+  Token          ${ErasureV130.NMR[network]}
+  Uniswap        ${ErasureV130.NMR_Uniswap[network]}
+DAI:
+  Token          ${ErasureV130.DAI[network]}
+  Uniswap        ${ErasureV130.DAI_Uniswap[network]}
 
 Registries:
-  Erasure_Users           ${c.Erasure_Users[network].address}
-  Erasure_Posts           ${c.Erasure_Posts[network].address}
-  Erasure_Agreements      ${c.Erasure_Agreements[network].address}
-  Erasure_Escrows         ${c.Erasure_Escrows[network].address}
+  Erasure_Users           ${ErasureV130.Erasure_Users[network]}
+  Erasure_Posts           ${ErasureV130.Erasure_Posts[network]}
+  Erasure_Agreements      ${ErasureV130.Erasure_Agreements[network]}
+  Erasure_Escrows         ${ErasureV130.Erasure_Escrows[network]}
 
 Templates:
-  Feed                    ${c.Feed.template[network].address}     
-  SimpleGriefing          ${c.SimpleGriefing.template[network].address}
-  CountdownGriefing       ${c.CountdownGriefing.template[network].address}
-  CountdownGriefingEscrow ${c.CountdownGriefingEscrow.template[network].address}
+  Feed                    ${ErasureV130.Feed[network]}
+  SimpleGriefing          ${ErasureV130.SimpleGriefing[network]}
+  CountdownGriefing       ${ErasureV130.CountdownGriefing[network]}
+  CountdownGriefingEscrow ${ErasureV130.CountdownGriefingEscrow[network]}
 
 Factories:
-  Feed                    ${c.Feed.factory[network].address}
-  SimpleGriefing          ${c.SimpleGriefing.factory[network].address}
-  CountdownGriefing       ${c.CountdownGriefing.factory[network].address}
-  CountdownGriefingEscrow ${c.CountdownGriefingEscrow.factory[network].address}
-`)
+  Feed                    ${ErasureV130.Feed_Factory[network]}
+  SimpleGriefing          ${ErasureV130.SimpleGriefing_Factory[network]}
+  CountdownGriefing       ${ErasureV130.CountdownGriefing_Factory[network]}
+  CountdownGriefingEscrow ${ErasureV130.CountdownGriefingEscrow_Factory[network]}
+  `)
 
-  async function deployRegistry(registry) {
-    // deploy registry
-    await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
-      c[registry][network] = {
-        wrap: wrap,
-        address: wrap.contractAddress,
-      }
-    })
-
-    // transfer registry ownership
-    await c[registry][network].wrap.transferOwnership(
-      c.RegistryManager[network].address,
-    )
-
-    return c[registry][network].wrap
-  }
-
-  async function getUserRegistry(registry) {
+  async function getRegistry(registryName) {
     // deploy registry if not deployed yet
-    // const code = await deployer.provider.getCode(c[registry][network].address)
-    if (c[registry][network].address.length === 0) {
-      await deployer.deployAndVerify(c[registry].artifact).then(wrap => {
-        c[registry][network] = {
-          wrap: wrap,
-          address: wrap.contractAddress,
-        }
-      })
+    let registry
+    if (!ErasureV130[registryName][network]) {
+      // deploy registry
+      registry = await deployer.deployAndVerify(
+        ErasureV130[registryName].artifact,
+      )
     } else {
       // get registry at cached address
-      c[registry][network].wrap = deployer.wrapDeployedContract(
-        c[registry].artifact,
-        c[registry][network].address,
+      registry = deployer.wrapDeployedContract(
+        ErasureV130[registryName].artifact,
+        ErasureV130[registryName][network],
       )
     }
   }
 
-  async function getRegistry(registry) {
-    c.RegistryManager[network].wrap = deployer.wrapDeployedContract(
-      c.RegistryManager.artifact,
-      c.RegistryManager[network].address,
-    )
+  async function deployFactory(
+    templateName,
+    registryName,
+    factoryData = ethers.utils.hexlify(0x0),
+  ) {
+    // deploy template
+    const template = await deployer.deployAndVerify(artifacts[templateName])
+    ErasureV130[templateName][network] = template.contractAddress
 
-    // deploy registry if not deployed yet
-    // const code = await deployer.provider.getCode(c[registry][network].address)
-    if (c[registry][network].address.length === 0) {
-      c[registry][network].wrap = await deployRegistry(registry)
-    } else {
-      // get registry at cached address
-      c[registry][network].wrap = deployer.wrapDeployedContract(
-        c[registry].artifact,
-        c[registry][network].address,
-      )
-    }
-
-    // validate ownership by RegistryManager
+    // validate token and exchange addresses
     assert.equal(
-      await c[registry][network].wrap.owner(),
-      c.RegistryManager[network].address,
+      await template.getTokenAddress(TOKEN_TYPES.NMR),
+      ErasureV130.NMR[network],
+      'Wrong NMR address',
+    )
+    assert.equal(
+      await template.getTokenAddress(TOKEN_TYPES.DAI),
+      ErasureV130.DAI[network],
+      'Wrong DAI address',
+    )
+    assert.equal(
+      await template.getExchangeAddress(TOKEN_TYPES.NMR),
+      ErasureV130.NMR_Uniswap[network],
+      'Wrong NMR_Uniswap address',
+    )
+    assert.equal(
+      await template.getExchangeAddress(TOKEN_TYPES.DAI),
+      ErasureV130.DAI_Uniswap[network],
+      'Wrong DAI_Uniswap address',
+    )
+
+    // deploy factory
+    const factoryName = templateName.concat('_Factory')
+    const factory = await deployer.deployAndVerify(
+      artifacts[factoryName],
+      false,
+      ErasureV130[registryName][network],
+      template.contractAddress,
+    )
+    ErasureV130[factoryName][network] = factory.contractAddress
+
+    // register factory
+    console.log(``)
+    const RegistryManager = deployer.wrapDeployedContract(
+      artifacts.RegistryManager,
+      ErasureV130.RegistryManager[network],
     )
 
     // validate deployer is manager of RegistryManager
     assert.equal(
-      await c.RegistryManager[network].wrap.manager(),
+      await RegistryManager.manager(),
       deployer.signer.address,
+      `Deployer is not registry manager. Expected ${await RegistryManager.manager()} got ${
+        deployer.signer.address
+      }`,
     )
 
-    console.log(`${registry} has valid manager: ${deployer.signer.address}`)
+    const tx = await RegistryManager.addFactory(
+      ErasureV130[registryName][network],
+      factory.contractAddress,
+      factoryData,
+      {
+        gasPrice: defaultGas,
+      },
+    )
+    await RegistryManager.verboseWaitForTransaction(tx)
+
+    return factory
   }
 
-  async function deployFactory(
-    name,
-    registry,
-    factoryData = ethers.utils.hexlify(0x0),
-  ) {
-    await deployer.deployAndVerify(c[name].template.artifact).then(wrap => {
-      c[name].template[network].address = wrap.contractAddress
+  async function getArtifacts(contracts) {
+    let artifacts = {}
+    contracts.forEach(element => {
+      const artifact = require(`../build/${element}.json`)
+      artifacts[artifact.contractName] = artifact
     })
-
-    c[name].template[network].wrap = await deployer.wrapDeployedContract(
-      c[name].template.artifact,
-      c[name].template[network].address,
-    )
-
-    assert.equal(
-      await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.NMR),
-      c.NMR.token[network].address,
-    )
-    assert.equal(
-      await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.DAI),
-      c.DAI.token[network].address,
-    )
-    // assert.equal(
-    //   await c[name].template[network].wrap.getTokenAddress(TOKEN_TYPES.NMR),
-    //   c.NMR.token[network].address,
-    // )
-    // assert.equal(
-    //   await c[name].template.wrap.getTokenAddress(TOKEN_TYPES.DAI),
-    //   c.DAI.token[network].address,
-    // )
-
-    await deployer
-      .deployAndVerify(
-        c[name].factory.artifact,
-        false,
-        c[registry][network].address,
-        c[name].template[network].address,
-      )
-      .then(wrap => {
-        c[name].factory[network].address = wrap.contractAddress
-      })
-
-    c[name].factory[network].wrap = await deployer.wrapDeployedContract(
-      c[name].factory.artifact,
-      c[name].factory[network].address,
-    )
-
-    await c.RegistryManager[network].wrap
-      .addFactory(
-        c[registry][network].address,
-        c[name].factory[network].address,
-        factoryData,
-        {
-          gasPrice: defaultGas,
-        },
-      )
-      .then(async txn => {
-        console.log(`addFactory() | ${name}_Factory => ${registry}`)
-        const receipt = await c.RegistryManager[
-          network
-        ].wrap.verboseWaitForTransaction(txn)
-        console.log(`gasUsed: ${receipt.gasUsed}`)
-        console.log(``)
-        gasUsed = gasUsed.add(receipt.gasUsed)
-      })
+    return artifacts
   }
 
-  async function transferRegistry(registry) {
-    await c[registry][network].wrap
-      .transferOwnership(multisig, { gasPrice: defaultGas })
-      .then(async txn => {
-        console.log(`transferOwnership() | ${registry} => ${multisig}`)
-        const receipt = await c[registry][
-          network
-        ].wrap.verboseWaitForTransaction(txn)
-        console.log(`gasUsed: ${receipt.gasUsed}`)
-        console.log(``)
-        gasUsed = gasUsed.add(receipt.gasUsed)
-      })
+  async function saveArtifacts(version) {
+    for (const [contractName, artifact] of Object.entries(artifacts)) {
+      // drop unwanted fields
+      const abi = {
+        contractName: artifact.contractName,
+        abi: artifact.abi,
+        bytecode: artifact.bytecode,
+        deployedBytecode: artifact.deployedBytecode,
+        sourceMap: artifact.sourceMap,
+        deployedSourceMap: artifact.deployedSourceMap,
+        source: artifact.source,
+        compiler: artifact.compiler,
+      }
+      // write to destinaton
+      fs.writeFileSync(
+        `./packages/abis/src/${version}/abis/${artifact.contractName}.json`,
+        JSON.stringify(abi),
+        'utf8',
+      )
+    }
   }
 
-  async function createInstance(name, calldata) {
-    await c[name].factory[network].wrap
-      .create(calldata, { gasPrice: defaultGas })
-      .then(async txn => {
-        const receipt = await c[name].factory[
-          network
-        ].wrap.verboseWaitForTransaction(txn)
-        const eventFound = receipt.events.find(
-          emittedEvent => emittedEvent.event === 'InstanceCreated',
-          'There is no such event',
-        )
-
-        c[name].instance[network].wrap = deployer.wrapDeployedContract(
-          c[name].template.artifact,
-          eventFound.args.instance,
-        )
-
-        console.log(
-          `create() | ${receipt.gasUsed} gas | ${name}_Factory => ${eventFound.args.instance}`,
-        )
-        console.log(``)
-        gasUsed = gasUsed.add(receipt.gasUsed)
-      })
+  async function createInstance(templateName, factory, params = []) {
+    // get calldata
+    const calldata = encodeCreateCall(artifacts[templateName].abi, params)
+    // create
+    const createReceipt = await (await factory.create(calldata)).wait()
+    console.log(
+      `create()      | ${createReceipt.gasUsed.toString()} gas | ${templateName}`,
+    )
+    // createSalty
+    const testSalt = ethers.utils.id('testSalt')
+    const createSaltyReceipt = await (
+      await factory.createSalty(calldata, testSalt)
+    ).wait()
+    console.log(
+      `createSalty() | ${createSaltyReceipt.gasUsed.toString()} gas | ${templateName}`,
+    )
   }
 }
 

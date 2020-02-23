@@ -55,6 +55,14 @@ async function increaseNonce(signer, increaseTo) {
 async function setupDeployment() {
   const deployer = createDeployer()
 
+  if (
+    deployer.signer.address !== '0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e'
+  ) {
+    throw new Error(
+      `Default deployer must be set. Try running 'yarn run test_setup'. Expected 0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e and got ${deployer.signer.address}.`,
+    )
+  }
+
   const UniswapFactory = await deployUniswapFactory(deployer)
   console.log(`UniswapFactory Deployed at ${UniswapFactory.contractAddress}`)
 
