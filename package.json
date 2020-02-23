@@ -19,7 +19,6 @@
     "etherlime": "^2.2.6",
     "etherlime-lib": "^1.1.7",
     "ethers": "^4.0.32",
-    "ganache-cli": "6.5.1",
     "prettier": "^1.19.1",
     "solc": "0.5.16"
   }
