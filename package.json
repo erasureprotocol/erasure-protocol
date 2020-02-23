@@ -1,29 +1,26 @@
 {
   "name": "erasure-protocol",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "repository": "https://github.com/erasureprotocol/erasure-protocol.git",
   "author": "stephane@numer.ai",
   "license": "MIT",
   "scripts": {
     "compile": "yarn etherlime compile --deleteCompiledFiles=true",
     "flatten": "yarn etherlime flatten",
-    "test_setup": "bash setup-etherlime-tests.sh",
-    "test": "yarn etherlime test --timeout=500000",
-    "coverage": "yarn etherlime coverage",
+    "test": "bash setup-etherlime-tests.sh && yarn etherlime test --timeout=500000",
     "deploy": "yarn etherlime deploy ./deployment/deploy_v130.js --compile=true",
     "format": "yarn prettier -c 'test/**/*.js' -c 'deployment/**/*.js' --config .prettierrc"
   },
   "dependencies": {
-    "@0x/sol-compiler": "^3.1.15",
+    "@erasure/abis": "^1.3.25",
     "@erasure/crypto-ipfs": "^1.2.5",
     "@openzeppelin/contracts": "^2.4.0",
-    "coveralls": "^3.0.5",
     "dotenv": "^8.0.0",
-    "etherlime": "^2.2.4",
-    "etherlime-lib": "^1.1.3",
+    "etherlime": "^2.2.6",
+    "etherlime-lib": "^1.1.7",
     "ethers": "^4.0.32",
     "ganache-cli": "6.5.1",
     "prettier": "^1.19.1",
-    "solc": "0.5.13"
+    "solc": "0.5.16"
   }
 }
