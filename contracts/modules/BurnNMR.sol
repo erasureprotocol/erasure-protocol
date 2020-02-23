@@ -11,9 +11,9 @@ import "./iNMR.sol";
 contract BurnNMR {
 
     // address of the token
-    address private constant _NMRToken = address(0xe9E2dF04e6d699986A5E0f131Eb37aAAd4BA2bdC);
+    address private constant _NMRToken = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);
     // uniswap exchange of the token
-    address private constant _NMRExchange = address(0xbFAAdabFab5e3Ff17f06dc15b128bfCc9fCCA7Ee);
+    address private constant _NMRExchange = address(0x2Bf5A5bA29E60682fC56B2Fcf9cE07Bef4F6196f);
 
     /// @notice Burns a specific amount of NMR from this contract.
     /// @param value uint256 The amount of NMR (18 decimals) to be burned.
