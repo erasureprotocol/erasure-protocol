@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";

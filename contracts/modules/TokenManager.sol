@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "./BurnDAI.sol";
 
@@ -19,6 +19,17 @@ contract TokenManager is BurnDAI {
             return BurnDAI.getTokenAddress();
         if (tokenID == Tokens.NMR)
             return BurnNMR.getTokenAddress();
+        return address(0);
+    }
+
+    /// @notice Get the address of the uniswap exchange for given token ID.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
+    /// @return exchangeAddress address of the uniswap exchange.
+    function getExchangeAddress(Tokens tokenID) public pure returns (address exchangeAddress) {
+        if (tokenID == Tokens.DAI)
+            return BurnDAI.getExchangeAddress();
+        if (tokenID == Tokens.NMR)
+            return BurnNMR.getExchangeAddress();
         return address(0);
     }
 

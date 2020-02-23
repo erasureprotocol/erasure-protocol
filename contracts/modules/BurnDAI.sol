@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "./BurnNMR.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -12,9 +12,9 @@ import "../helpers/UniswapExchangeInterface.sol";
 contract BurnDAI is BurnNMR {
 
     // address of the token
-    address private constant _DAIToken = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address private constant _DAIToken = address(0x7d669A64deb8a4A51eEa755bb0E19FD39CE25Ae9);
     // uniswap exchange of the token
-    address private constant _DAIExchange = address(0x2a1530C4C41db0B0b2bB646CB5Eb1A67b7158667);
+    address private constant _DAIExchange = address(0xC9883D347C200d9CBA014389220C4df45648F03a);
 
     /// @notice Burns a specific amount of DAI from the target address and decrements allowance.
     /// @dev This implementation has no frontrunning protection.
