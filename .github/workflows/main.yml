@@ -35,9 +35,7 @@ jobs:
         run: yarn run compile
 
       - name: Test Contracts
-        run: |
-          yarn run test_setup
-          yarn run test
+        run: yarn run test
 
   testenv:
     name: Testenv Deployment
