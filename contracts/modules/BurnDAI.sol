@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "./BurnNMR.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../modules/Countdown.sol";

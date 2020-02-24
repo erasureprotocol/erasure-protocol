@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "./UniswapERC20.sol";
 import "./IUniswapFactory.sol";
@@ -17,6 +17,7 @@ contract MockUniswapExchange is UniswapERC20 {
   uint256 public decimals;     // 18
   IERC20 token;                // address of the ERC20 token traded on this contract
   IUniswapFactory factory;     // interface for the factory that created this contract
+  uint256 private _ethBalance;
   
   // Events
   event TokenPurchase(address indexed buyer, uint256 indexed eth_sold, uint256 indexed tokens_bought);
@@ -57,6 +58,7 @@ contract MockUniswapExchange is UniswapERC20 {
    * @dev User cannot specify minimum output or deadline.
    */
   function () external payable {
+    _ethBalance = _ethBalance.add(msg.value);
     ethToTokenInput(msg.value, 1, block.timestamp, msg.sender, msg.sender);
   }
 
@@ -92,7 +94,7 @@ contract MockUniswapExchange is UniswapERC20 {
   function ethToTokenInput(uint256 eth_sold, uint256 min_tokens, uint256 deadline, address buyer, address recipient) private returns (uint256) {
     require(deadline >= block.timestamp && eth_sold > 0 && min_tokens > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 tokens_bought = getInputPrice(eth_sold, address(this).balance.sub(eth_sold), token_reserve);
+    uint256 tokens_bought = getInputPrice(eth_sold, _ethBalance.sub(eth_sold), token_reserve);
     require(tokens_bought >= min_tokens);
     require(token.transfer(recipient, tokens_bought));
     emit TokenPurchase(buyer, eth_sold, tokens_bought);
@@ -107,6 +109,7 @@ contract MockUniswapExchange is UniswapERC20 {
    * @return Amount of Tokens bought.
    */ 
   function ethToTokenSwapInput(uint256 min_tokens, uint256 deadline) public payable returns (uint256) {
+    _ethBalance = _ethBalance.add(msg.value);
     return ethToTokenInput(msg.value, min_tokens, deadline, msg.sender, msg.sender);
   }
 
@@ -120,16 +123,18 @@ contract MockUniswapExchange is UniswapERC20 {
    */
   function ethToTokenTransferInput(uint256 min_tokens, uint256 deadline, address recipient) public payable returns(uint256) {
     require(recipient != address(this) && recipient != address(0));
+    _ethBalance = _ethBalance.add(msg.value);
     return ethToTokenInput(msg.value, min_tokens, deadline, msg.sender, recipient);
   }
 
   function ethToTokenOutput(uint256 tokens_bought, uint256 max_eth, uint256 deadline, address payable buyer, address recipient) private returns (uint256) {
     require(deadline >= block.timestamp && tokens_bought > 0 && max_eth > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_sold = getOutputPrice(tokens_bought, address(this).balance.sub(max_eth), token_reserve);
+    uint256 eth_sold = getOutputPrice(tokens_bought, _ethBalance.sub(max_eth), token_reserve);
     // Throws if eth_sold > max_eth
     uint256 eth_refund = max_eth.sub(eth_sold);
     if (eth_refund > 0) {
+      _ethBalance = _ethBalance.sub(eth_refund);
       buyer.transfer(eth_refund);
     }
     require(token.transfer(recipient, tokens_bought));
@@ -145,6 +150,7 @@ contract MockUniswapExchange is UniswapERC20 {
    * @return Amount of ETH sold.
    */
   function ethToTokenSwapOutput(uint256 tokens_bought, uint256 deadline) public payable returns(uint256) {
+    _ethBalance = _ethBalance.add(msg.value);
     return ethToTokenOutput(tokens_bought, msg.value, deadline, msg.sender, msg.sender);
   }
 
@@ -158,15 +164,17 @@ contract MockUniswapExchange is UniswapERC20 {
    */
   function ethToTokenTransferOutput(uint256 tokens_bought, uint256 deadline, address recipient) public payable returns (uint256) {
     require(recipient != address(this) && recipient != address(0));
+    _ethBalance = _ethBalance.add(msg.value);
     return ethToTokenOutput(tokens_bought, msg.value, deadline, msg.sender, recipient);
   }
 
   function tokenToEthInput(uint256 tokens_sold, uint256 min_eth, uint256 deadline, address buyer, address payable recipient) private returns (uint256) {
     require(deadline >= block.timestamp && tokens_sold > 0 && min_eth > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, address(this).balance);
+    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, _ethBalance);
     uint256 wei_bought = eth_bought;
     require(wei_bought >= min_eth);
+    _ethBalance = _ethBalance.sub(wei_bought);
     recipient.transfer(wei_bought);
     require(token.transferFrom(buyer, address(this), tokens_sold));
     emit EthPurchase(buyer, tokens_sold, wei_bought);
@@ -203,9 +211,10 @@ contract MockUniswapExchange is UniswapERC20 {
   function tokenToEthOutput(uint256 eth_bought, uint256 max_tokens, uint256 deadline, address buyer, address payable recipient) private returns (uint256) {
     require(deadline >= block.timestamp && eth_bought > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 tokens_sold = getOutputPrice(eth_bought, token_reserve, address(this).balance);
+    uint256 tokens_sold = getOutputPrice(eth_bought, token_reserve, _ethBalance);
     // tokens sold is always > 0
     require(max_tokens >= tokens_sold);
+    _ethBalance = _ethBalance.sub(eth_bought);
     recipient.transfer(eth_bought);
     require(token.transferFrom(buyer, address(this), tokens_sold));
     emit EthPurchase(buyer, tokens_sold, eth_bought);
@@ -251,10 +260,11 @@ contract MockUniswapExchange is UniswapERC20 {
     require(deadline >= block.timestamp && tokens_sold > 0 && min_tokens_bought > 0 && min_eth_bought > 0);
     require(exchange_addr != address(this) && exchange_addr != address(0));
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, address(this).balance);
+    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, _ethBalance);
     uint256 wei_bought = eth_bought;
     require(wei_bought >= min_eth_bought);
     require(token.transferFrom(buyer, address(this), tokens_sold));
+    _ethBalance = _ethBalance.sub(wei_bought);
     uint256 tokens_bought = IUniswapExchange(exchange_addr).ethToTokenTransferInput.value(wei_bought)(min_tokens_bought, deadline, recipient);
     emit EthPurchase(buyer, tokens_sold, wei_bought);
     return tokens_bought;
@@ -321,10 +331,11 @@ contract MockUniswapExchange is UniswapERC20 {
     require(exchange_addr != address(this) && exchange_addr != address(0));
     uint256 eth_bought = IUniswapExchange(exchange_addr).getEthToTokenOutputPrice(tokens_bought);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 tokens_sold = getOutputPrice(eth_bought, token_reserve, address(this).balance);
+    uint256 tokens_sold = getOutputPrice(eth_bought, token_reserve, _ethBalance);
     // tokens sold is always > 0
     require(max_tokens_sold >= tokens_sold && max_eth_sold >= eth_bought);
     require(token.transferFrom(buyer, address(this), tokens_sold));
+    _ethBalance = _ethBalance.sub(eth_bought);
     IUniswapExchange(exchange_addr).ethToTokenTransferOutput.value(eth_bought)(tokens_bought, deadline, recipient);
     emit EthPurchase(buyer, tokens_sold, eth_bought);
     return tokens_sold;
@@ -486,7 +497,7 @@ contract MockUniswapExchange is UniswapERC20 {
   function getEthToTokenInputPrice(uint256 eth_sold) public view returns (uint256) {
     require(eth_sold > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    return getInputPrice(eth_sold, address(this).balance, token_reserve);
+    return getInputPrice(eth_sold, _ethBalance, token_reserve);
   }
 
   /**
@@ -497,7 +508,7 @@ contract MockUniswapExchange is UniswapERC20 {
   function getEthToTokenOutputPrice(uint256 tokens_bought) public view returns (uint256) {
     require(tokens_bought > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_sold = getOutputPrice(tokens_bought, address(this).balance, token_reserve);
+    uint256 eth_sold = getOutputPrice(tokens_bought, _ethBalance, token_reserve);
     return eth_sold;
   }
 
@@ -509,7 +520,7 @@ contract MockUniswapExchange is UniswapERC20 {
   function getTokenToEthInputPrice(uint256 tokens_sold) public view returns (uint256) {
     require(tokens_sold > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, address(this).balance);
+    uint256 eth_bought = getInputPrice(tokens_sold, token_reserve, _ethBalance);
     return eth_bought;
   }
 
@@ -521,7 +532,7 @@ contract MockUniswapExchange is UniswapERC20 {
   function getTokenToEthOutputPrice(uint256 eth_bought) public view returns (uint256) {
     require(eth_bought > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    return getOutputPrice(eth_bought, token_reserve, address(this).balance);
+    return getOutputPrice(eth_bought, token_reserve, _ethBalance);
   }
 
   /** 
@@ -555,9 +566,11 @@ contract MockUniswapExchange is UniswapERC20 {
     require(deadline > block.timestamp && max_tokens > 0 && msg.value > 0, 'UniswapExchange#addLiquidity: INVALID_ARGUMENT');
     uint256 total_liquidity = _totalSupply;
 
+    _ethBalance = _ethBalance.add(msg.value);
+
     if (total_liquidity > 0) {
       require(min_liquidity > 0);
-      uint256 eth_reserve = address(this).balance.sub(msg.value);
+      uint256 eth_reserve = _ethBalance.sub(msg.value);
       uint256 token_reserve = token.balanceOf(address(this));
       uint256 token_amount = (msg.value.mul(token_reserve) / eth_reserve).add(1);
       uint256 liquidity_minted = msg.value.mul(total_liquidity) / eth_reserve;
@@ -573,7 +586,7 @@ contract MockUniswapExchange is UniswapERC20 {
       require(address(factory) != address(0) && address(token) != address(0) && msg.value >= 1000000000, "INVALID_VALUE");
       require(factory.getExchange(address(token)) == address(this));
       uint256 token_amount = max_tokens;
-      uint256 initial_liquidity = address(this).balance;
+      uint256 initial_liquidity = _ethBalance;
       _totalSupply = initial_liquidity;
       _balances[msg.sender] = initial_liquidity;
       require(token.transferFrom(msg.sender, address(this), token_amount));
@@ -596,12 +609,13 @@ contract MockUniswapExchange is UniswapERC20 {
     uint256 total_liquidity = _totalSupply;
     require(total_liquidity > 0);
     uint256 token_reserve = token.balanceOf(address(this));
-    uint256 eth_amount = amount.mul(address(this).balance) / total_liquidity;
+    uint256 eth_amount = amount.mul(_ethBalance) / total_liquidity;
     uint256 token_amount = amount.mul(token_reserve) / total_liquidity;
     require(eth_amount >= min_eth && token_amount >= min_tokens);
 
     _balances[msg.sender] = _balances[msg.sender].sub(amount);
     _totalSupply = total_liquidity.sub(amount);
+    _ethBalance = _ethBalance.sub(eth_amount);
     msg.sender.transfer(eth_amount);
     require(token.transfer(msg.sender, token_amount));
     emit RemoveLiquidity(msg.sender, eth_amount, token_amount);
