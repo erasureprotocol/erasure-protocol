@@ -1,6 +1,6 @@
 {
   "name": "@erasure/testenv",
-  "version": "1.2.2",
+  "version": "1.3.1",
   "description": "Deploy local version of the erasure protocol for testing purposes.",
   "license": "MIT",
   "repository": {
@@ -13,8 +13,7 @@
     "ganache"
   ],
   "scripts": {
-    "compile": "yarn sol-compiler",
-    "deploy": "node deploy.js",
+    "deploy": "node testenv-deploy.js",
     "deploy_subgraph": "bash run-deploy-subgraph.sh",
     "graph-codegen": "graph codegen",
     "graph-create-local": "graph create erasureprotocol/testenv --node http://127.0.0.1:8020",
@@ -22,11 +21,13 @@
     "graph-remove-local": "graph remove erasureprotocol/testenv --node http://127.0.0.1:8020"
   },
   "dependencies": {
-    "@0x/sol-compiler": "^3.1.15",
+    "@erasure/abis": "^1.3.23",
+    "@erasure/crypto-ipfs": "^1.2.5",
     "@graphprotocol/graph-cli": "^0.16.0",
     "@graphprotocol/graph-ts": "^0.16.0",
     "argparse": "^1.0.10",
     "ethers": "^4.0.37",
-    "ganache-cli": "^6.7.0"
+    "ganache-cli": "^6.7.0",
+    "handlebars": "^4.7.3"
   }
 }

@@ -1,10 +1,10 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 
 /// @title EventMetadata
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 /// @notice This module emits metadata blob as an event.
 contract EventMetadata {
 

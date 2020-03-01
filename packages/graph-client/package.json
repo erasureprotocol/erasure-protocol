@@ -1,0 +1,22 @@
+{
+  "name": "@erasure/graph",
+  "version": "1.0.0",
+  "description": "erasure graph wrapper",
+  "main": "index.js",
+  "author": "propulsor.ichimoku@gmnail.com",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
+    "apollo-link-http": "^1.5.16",
+    "graphql": "^14.6.0",
+    "graphql-tag": "^2.10.1",
+    "ipfs-mini": "^1.1.5",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "mocha": "^7.0.1"
+  }
+}

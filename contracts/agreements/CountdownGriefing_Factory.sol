@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "../modules/Factory.sol";
 import "./CountdownGriefing.sol";
@@ -7,7 +7,7 @@ import "./CountdownGriefing.sol";
 /// @title CountdownGriefing_Factory
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 /// @notice This factory is used to deploy instances of the template contract.
 ///         New instances can be created with the following functions:
 ///             `function create(bytes calldata initData) external returns (address instance);`

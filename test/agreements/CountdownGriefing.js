@@ -1,5 +1,4 @@
-const { setupDeployment, initDeployment } = require('../helpers/setup')
-const { RATIO_TYPES } = require('../helpers/variables')
+const { RATIO_TYPES, TOKEN_TYPES } = require('../helpers/variables')
 const { abiEncodeWithSelector } = require('../helpers/utils')
 
 const CountdownGriefingArtifact = require('../../build/CountdownGriefing.json')
@@ -21,6 +20,7 @@ describe('CountdownGriefing', function() {
   const newOperator = newOperatorWallet.signer.signingKey.address
 
   // variables used in initialize()
+  const tokenID = TOKEN_TYPES.NMR
   const stakerStake = ethers.utils.parseEther('200')
   const punishment = ethers.utils.parseEther('100')
   const ratio = 2
@@ -33,6 +33,7 @@ describe('CountdownGriefing', function() {
     'address',
     'address',
     'address',
+    'uint8',
     'uint256',
     'uint8',
     'uint256',
@@ -42,6 +43,7 @@ describe('CountdownGriefing', function() {
     operator,
     staker,
     counterparty,
+    tokenID,
     ratioE18,
     ratioType,
     countdownLength,
@@ -75,12 +77,7 @@ describe('CountdownGriefing', function() {
     return agreement
   }
 
-  let deployer
   before(async () => {
-    ;[this.deployer, this.MockNMR] = await initDeployment()
-    deployer = this.deployer
-
-    // this.MockNMR = await deployer.deploy(MockNMRArtifact);
     this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact)
     this.Factory = await deployer.deploy(
@@ -99,15 +96,15 @@ describe('CountdownGriefing', function() {
     // fill the token balances of the counterparty and staker
     // counterparty & staker has 1,000 * 10^18 each
     const startingBalance = '1000'
-    await this.MockNMR.from(counterparty).mintMockTokens(
+    await NMR.from(counterparty).mintMockTokens(
       counterparty,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(staker).mintMockTokens(
+    await NMR.from(staker).mintMockTokens(
       staker,
       ethers.utils.parseEther(startingBalance),
     )
-    await this.MockNMR.from(operator).mintMockTokens(
+    await NMR.from(operator).mintMockTokens(
       operator,
       ethers.utils.parseEther(startingBalance),
     )
@@ -128,6 +125,7 @@ describe('CountdownGriefing', function() {
         operator,
         staker,
         counterparty,
+        tokenID,
         ratioE18,
         ratioType,
         countdownLength,
@@ -148,8 +146,8 @@ describe('CountdownGriefing', function() {
       // check all the state changes
 
       // Staking._setToken
-      const token = await this.TestCountdownGriefing.getToken()
-      assert.equal(token, this.MockNMR.contractAddress)
+      const [token] = await this.TestCountdownGriefing.getToken()
+      assert.equal(token, tokenID)
 
       // _data.staker
       const getStaker = await this.TestCountdownGriefing.getStaker()
@@ -211,9 +209,9 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(operator).setMetadata(
         Buffer.from(operatorMetadata),
       )
-      await assert.emit(txn, 'MetadataSet')
       await assert.emitWithArgs(
         txn,
+        'MetadataSet',
         ethers.utils.hexlify(ethers.utils.toUtf8Bytes(operatorMetadata)),
       )
     })
@@ -229,8 +227,7 @@ describe('CountdownGriefing', function() {
       const blockTimestamp = block.timestamp
       const deadline = blockTimestamp + countdownLength
 
-      await assert.emit(txn, 'DeadlineSet')
-      await assert.emitWithArgs(txn, deadline)
+      await assert.emitWithArgs(txn, 'DeadlineSet', deadline)
     }
 
     it('should revert when msg.sender is not staker or active operator', async () => {
@@ -274,12 +271,9 @@ describe('CountdownGriefing', function() {
     let amountToAdd = 500 // 500 token weis
 
     const increaseStake = async sender => {
-      await this.MockNMR.from(sender).changeApproval(
+      await NMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          sender,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd,
       )
 
@@ -292,24 +286,20 @@ describe('CountdownGriefing', function() {
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn,
       )
-      const expectedEvent = 'StakeAdded'
-
-      const stakeAddedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
+      const depositIncreasedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === 'DepositIncreased',
         'There is no such event',
       )
 
-      assert.isDefined(stakeAddedEvent)
-      assert.equal(stakeAddedEvent.args.staker, staker)
-      assert.equal(stakeAddedEvent.args.funder, sender)
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd)
+      assert.isDefined(depositIncreasedEvent)
+      assert.equal(depositIncreasedEvent.args.tokenID, tokenID)
+      assert.equal(depositIncreasedEvent.args.user, staker)
+      assert.equal(depositIncreasedEvent.args.amount.toNumber(), amountToAdd)
     }
 
     it('should revert when msg.sender is counterparty', async () => {
       // update currentStake
-      currentStake = (
-        await this.TestCountdownGriefing.getStake(staker)
-      ).toNumber()
+      currentStake = (await this.TestCountdownGriefing.getStake()).toNumber()
 
       // use the counterparty to be the msg.sender
       await assert.revertWith(
@@ -366,16 +356,11 @@ describe('CountdownGriefing', function() {
 
     const reward = async sender => {
       // update currentStake
-      currentStake = (
-        await this.TestCountdownGriefing.getStake(staker)
-      ).toNumber()
+      currentStake = (await this.TestCountdownGriefing.getStake()).toNumber()
 
-      await this.MockNMR.from(sender).changeApproval(
+      await NMR.from(sender).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          sender,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(sender, this.TestCountdownGriefing.contractAddress),
         amountToAdd,
       )
 
@@ -386,31 +371,27 @@ describe('CountdownGriefing', function() {
       currentStake += amountToAdd
 
       assert.equal(
-        (await this.TestCountdownGriefing.getStake(staker)).toNumber(),
+        (await this.TestCountdownGriefing.getStake()).toNumber(),
         currentStake,
       )
 
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn,
       )
-      const expectedEvent = 'StakeAdded'
-
-      const stakeAddedEvent = receipt.events.find(
-        emittedEvent => emittedEvent.event === expectedEvent,
+      const depositIncreasedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === 'DepositIncreased',
         'There is no such event',
       )
 
-      assert.isDefined(stakeAddedEvent)
-      assert.equal(stakeAddedEvent.args.staker, staker)
-      assert.equal(stakeAddedEvent.args.funder, sender)
-      assert.equal(stakeAddedEvent.args.amount.toNumber(), amountToAdd)
+      assert.isDefined(depositIncreasedEvent)
+      assert.equal(depositIncreasedEvent.args.tokenID, tokenID)
+      assert.equal(depositIncreasedEvent.args.user, staker)
+      assert.equal(depositIncreasedEvent.args.amount.toNumber(), amountToAdd)
     }
 
     it('should revert when msg.sender is staker', async () => {
       // update currentStake
-      currentStake = (
-        await this.TestCountdownGriefing.getStake(staker)
-      ).toNumber()
+      currentStake = (await this.TestCountdownGriefing.getStake()).toNumber()
 
       // use the staker to be the msg.sender
       await assert.revertWith(
@@ -466,12 +447,9 @@ describe('CountdownGriefing', function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
-      await this.MockNMR.from(staker).changeApproval(
+      await NMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          staker,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake,
       )
 
@@ -480,9 +458,9 @@ describe('CountdownGriefing', function() {
 
       const expectedCost = punishment.mul(ratio)
 
-      await this.MockNMR.from(counterparty).changeApproval(
+      await NMR.from(counterparty).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
+        await NMR.allowance(
           counterparty,
           this.TestCountdownGriefing.contractAddress,
         ),
@@ -523,7 +501,7 @@ describe('CountdownGriefing', function() {
 
     it('should revert when msg.sender is not counterparty or active operator', async () => {
       // update currentStake
-      currentStake = await this.TestCountdownGriefing.getStake(staker)
+      currentStake = await this.TestCountdownGriefing.getStake()
 
       // staker is not counterparty or operator
       await assert.revertWith(
@@ -567,7 +545,7 @@ describe('CountdownGriefing', function() {
     })
 
     it('should revert when no approval to burn tokens', async () => {
-      currentStake = await this.TestCountdownGriefing.getStake(staker)
+      currentStake = await this.TestCountdownGriefing.getStake()
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(counterparty).punish(
@@ -592,7 +570,7 @@ describe('CountdownGriefing', function() {
     const releaseAmount = ethers.utils.parseEther('100')
 
     const releaseStake = async (sender, staker, releaseAmount) => {
-      const currentStake = await this.TestCountdownGriefing.getStake(staker)
+      const currentStake = await this.TestCountdownGriefing.getStake()
 
       const txn = await this.TestCountdownGriefing.from(sender).releaseStake(
         releaseAmount,
@@ -600,20 +578,22 @@ describe('CountdownGriefing', function() {
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn,
       )
-      const StakeTakenEventLogs = utils.parseLogs(
-        receipt,
-        this.TestCountdownGriefing,
-        'StakeTaken',
+      const depositDecreasedEvent = receipt.events.find(
+        emittedEvent => emittedEvent.event === 'DepositDecreased',
+        'There is no such event',
       )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.recipient, staker) // staker's stake is released to staker address
-      assert.equal(StakeTakenEvent.amount.toString(), releaseAmount.toString()) // amount released is the full stake amount
+
+      assert.isDefined(depositDecreasedEvent)
+      assert.equal(depositDecreasedEvent.args.tokenID, tokenID)
+      assert.equal(depositDecreasedEvent.args.user, staker)
+      assert.equal(
+        depositDecreasedEvent.args.amount.toString(),
+        releaseAmount.toString(),
+      )
     }
 
     it('should revert when msg.sender is not counterparty or active operator', async () => {
-      currentStake = await this.TestCountdownGriefing.getStake(staker)
+      currentStake = await this.TestCountdownGriefing.getStake()
 
       await assert.revertWith(
         this.TestCountdownGriefing.from(staker).releaseStake(releaseAmount),
@@ -632,18 +612,18 @@ describe('CountdownGriefing', function() {
       await releaseStake(counterparty, staker, releaseAmount))
 
     it('should release full stake', async () => {
-      const currentStake = await this.TestCountdownGriefing.getStake(staker)
+      const currentStake = await this.TestCountdownGriefing.getStake()
       await releaseStake(counterparty, staker, currentStake)
     })
 
     it('should release stake when msg.sender is active operator', async () => {
       // have to re-increase stake to release
-      await this.MockNMR.from(staker).approve(
+      await NMR.from(staker).approve(
         this.TestCountdownGriefing.contractAddress,
         stakerStake,
       )
 
-      const currentStake = await this.TestCountdownGriefing.getStake(staker)
+      const currentStake = await this.TestCountdownGriefing.getStake()
 
       await this.TestCountdownGriefing.from(staker).increaseStake(stakerStake)
 
@@ -694,12 +674,9 @@ describe('CountdownGriefing', function() {
 
       // staker increase stake
 
-      await this.MockNMR.from(staker).changeApproval(
+      await NMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
-        await this.MockNMR.allowance(
-          staker,
-          this.TestCountdownGriefing.contractAddress,
-        ),
+        await NMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
         stakerStake,
       )
 
@@ -730,16 +707,18 @@ describe('CountdownGriefing', function() {
       const receipt = await this.TestCountdownGriefing.verboseWaitForTransaction(
         txn,
       )
-      const StakeTakenEventLogs = utils.parseLogs(
+      const [DepositDecreasedEvent] = utils.parseLogs(
         receipt,
         this.TestCountdownGriefing,
-        'StakeTaken',
+        'DepositDecreased',
       )
-      assert.equal(StakeTakenEventLogs.length, 1)
-      const [StakeTakenEvent] = StakeTakenEventLogs
-      assert.equal(StakeTakenEvent.staker, staker)
-      assert.equal(StakeTakenEvent.recipient, staker)
-      assert.equal(StakeTakenEvent.amount.toString(), stakerStake.toString())
+
+      assert.equal(DepositDecreasedEvent.tokenID, tokenID)
+      assert.equal(DepositDecreasedEvent.user, staker)
+      assert.equal(
+        DepositDecreasedEvent.amount.toString(),
+        stakerStake.toString(),
+      )
     })
   })
 
@@ -764,8 +743,7 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(
         operator,
       ).transferOperator(newOperator)
-      await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [newOperator])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [newOperator])
 
       const actualOperator = await this.TestCountdownGriefing.getOperator()
       assert.equal(actualOperator, newOperator)
@@ -793,8 +771,9 @@ describe('CountdownGriefing', function() {
       const txn = await this.TestCountdownGriefing.from(
         operator,
       ).renounceOperator()
-      await assert.emit(txn, 'OperatorUpdated')
-      await assert.emitWithArgs(txn, [ethers.constants.AddressZero])
+      await assert.emitWithArgs(txn, 'OperatorUpdated', [
+        ethers.constants.AddressZero,
+      ])
 
       const actualOperator = await this.TestCountdownGriefing.getOperator()
       assert.equal(actualOperator, ethers.constants.AddressZero)

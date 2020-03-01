@@ -1,13 +1,35 @@
 const etherlime = require('etherlime-lib')
 const ethers = require('ethers')
+const ganache = require('ganache-cli')
 
-const nmrAddress = '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671'
-const nmrDeployAddress = '0x9608010323ed882a38ede9211d7691102b4f0ba0'
+const contracts = require('../../deployment/deploy_config')
 
 function createDeployer() {
-  return new etherlime.EtherlimeGanacheDeployer(
-    accounts[accounts.length - 1].secretKey,
+  const unlocked_accounts = [
+    contracts.NMR.token.mainnet.deployer,
+    contracts.DAI.token.mainnet.deployer,
+    contracts.NMR.uniswap.mainnet.deployer,
+  ]
+
+  const ganache_config = {
+    port: 8545,
+    host: '0.0.0.0',
+    unlocked_accounts: unlocked_accounts,
+    default_balance_ether: 10000,
+    total_accounts: 10,
+    hardfork: 'constantinople',
+    mnemonic:
+      'myth like bonus scare over problem client lizard pioneer submit female collect',
+  }
+
+  const provider = new etherlime.EtherlimeGanacheDeployer()
+
+  provider.setPrivateKey(accounts[accounts.length - 1].secretKey)
+  provider.setProvider(
+    new ethers.providers.Web3Provider(ganache.provider(ganache_config)),
   )
+
+  return provider
 }
 
 async function increaseNonce(signer, increaseTo) {
@@ -31,36 +53,134 @@ async function increaseNonce(signer, increaseTo) {
 }
 
 async function setupDeployment() {
-  const MockNMR_artifact = require('../../build/MockNMR.json')
-
   const deployer = createDeployer()
 
+  if (
+    deployer.signer.address !== '0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e'
+  ) {
+    throw new Error(
+      `Default deployer must be set. Try running 'yarn run test_setup'. Expected 0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e and got ${deployer.signer.address}.`,
+    )
+  }
+
+  const UniswapFactory = await deployUniswapFactory(deployer)
+  console.log(`UniswapFactory Deployed at ${UniswapFactory.contractAddress}`)
+
+  const NMR = await deployToken(deployer, contracts.NMR.token)
+  console.log(`NMR Deployed at ${NMR.contractAddress}`)
+
+  const DAI = await deployToken(deployer, contracts.DAI.token)
+  console.log(`DAI Deployed at ${DAI.contractAddress}`)
+
+  const UniswapNMR = await deployUniswap(
+    deployer,
+    contracts.NMR.uniswap,
+    NMR,
+    UniswapFactory,
+  )
+  console.log(`UniswapNMR Deployed at ${UniswapNMR.contractAddress}`)
+
+  const UniswapDAI = await deployUniswap(
+    deployer,
+    contracts.DAI.uniswap,
+    DAI,
+    UniswapFactory,
+  )
+  console.log(`UniswapDAI Deployed at ${UniswapDAI.contractAddress}`)
+
+  deployer.setPrivateKey(accounts[accounts.length - 1].secretKey)
+
+  console.log(`Deployment Completed`)
+
+  return [deployer, contracts, NMR, DAI, UniswapNMR, UniswapDAI]
+}
+
+async function deployUniswapFactory(deployer) {
+  const UniswapFactory = await deployer.deploy(
+    contracts.UniswapFactory.artifact,
+  )
+
+  return UniswapFactory
+}
+
+async function deployToken(deployer, contractObj) {
+  // fund with eth
+  deployer.setPrivateKey(accounts[accounts.length - 1].secretKey)
   await deployer.signer.sendTransaction({
-    to: nmrDeployAddress,
+    to: contractObj.mainnet.deployer,
     value: ethers.utils.parseEther('1'),
   })
 
-  const nmr_deployer = createDeployer()
-  nmr_deployer.signer = nmr_deployer.provider.getSigner(nmrDeployAddress)
+  // update signer
+  deployer.signer = deployer.provider.getSigner(contractObj.mainnet.deployer)
+  // increment nonce
+  await increaseNonce(deployer.signer, contractObj.mainnet.nonce)
 
-  await increaseNonce(nmr_deployer.signer, 1)
+  // deploy contract
+  const contract = await deployer.deploy(contractObj.artifact)
+  assert.equal(contract.contractAddress, contractObj.mainnet.address)
 
-  const contract = await nmr_deployer.deploy(MockNMR_artifact)
-
-  assert.equal(contract.contractAddress, nmrAddress)
-
-  return [deployer, contract]
+  // return contract
+  return contract
 }
 
-async function initDeployment() {
-  const MockNMR_artifact = require('../../build/MockNMR.json')
-  const deployer = createDeployer()
-  const MockNMR = deployer.wrapDeployedContract(MockNMR_artifact, nmrAddress)
-  return [deployer, MockNMR]
+async function deployUniswap(deployer, contractObj, token, UniswapFactory) {
+  // fund with eth
+  deployer.setPrivateKey(accounts[accounts.length - 1].secretKey)
+  await deployer.signer.sendTransaction({
+    to: contractObj.mainnet.deployer,
+    value: ethers.utils.parseEther('1'),
+  })
+
+  // update signer
+  deployer.signer = deployer.provider.getSigner(contractObj.mainnet.deployer)
+  // increment nonce
+  await increaseNonce(deployer.signer, contractObj.mainnet.nonce)
+
+  // deploy exchange
+  const contract = await deployer.deploy(
+    contractObj.artifact,
+    false,
+    token.contractAddress,
+    UniswapFactory.contractAddress,
+  )
+  assert.equal(contract.contractAddress, contractObj.mainnet.address)
+
+  // add exchange to factory
+
+  await UniswapFactory.createExchange(
+    token.contractAddress,
+    contract.contractAddress,
+  )
+
+  // add liquidity
+
+  const account = accounts[accounts.length - 1]
+  const signer = deployer.provider.getSigner(account.signer.address)
+
+  const tokenAmount = ethers.utils.parseEther('1000')
+  const ethAmount = ethers.utils.parseEther('100')
+  const deadline =
+    (await deployer.provider.getBlock(await deployer.provider.getBlockNumber()))
+      .timestamp + 6000
+
+  await token
+    .from(await signer.getAddress())
+    .mintMockTokens(await signer.getAddress(), tokenAmount)
+  await token
+    .from(await signer.getAddress())
+    .approve(contract.contractAddress, tokenAmount)
+
+  await contract
+    .from(await signer.getAddress())
+    .addLiquidity(0, tokenAmount, deadline, {
+      value: ethAmount,
+    })
+
+  // return contract
+  return contract
 }
 
 module.exports = {
   setupDeployment,
-  initDeployment,
-  createDeployer,
 }

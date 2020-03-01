@@ -1,0 +1,12 @@
+{
+  "name": "@erasure/abis",
+  "description": "A package to import Erasure Protocol contract abis and addresses",
+  "version": "1.3.26",
+  "repository": "github:erasureprotocol/erasure-protocol",
+  "main": "src/index.js",
+  "author": "@thegostep <stephane@numer.ai>",
+  "contributors": [
+    "@propulsor <propulsor.ichimoku@gmail.com>"
+  ],
+  "license": "MIT"
+}

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "../modules/Griefing.sol";
 
@@ -13,11 +13,11 @@ contract TestGriefing is Griefing {
     }
 
     function addStake(address staker, address funder, uint256 amountToAdd) public {
-        Staking._addStake(staker, funder, amountToAdd);
+        Staking._addStake(Griefing.getTokenID(staker), staker, funder, amountToAdd);
     }
 
-    function setRatio(address staker, uint256 ratio, RatioType ratioType) public {
-        Griefing._setRatio(staker, ratio, ratioType);
+    function setRatio(address staker, TokenManager.Tokens tokenID, uint256 ratio, RatioType ratioType) public {
+        Griefing._setRatio(staker, tokenID, ratio, ratioType);
     }
 
     function grief(

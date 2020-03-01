@@ -1,10 +1,10 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 
 /// @title Operated
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 contract Operated {
 
     address private _operator;

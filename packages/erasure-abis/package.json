@@ -1,9 +1,0 @@
-{
-  "name": "@erasure/abis",
-  "version": "1.2.0",
-  "description": "Erasure contracts and abis",
-  "main": "index.js",
-  "author": "propulsor.ichimoku@gmail.com",
-  "license": "MIT",
-  "private": false
-}

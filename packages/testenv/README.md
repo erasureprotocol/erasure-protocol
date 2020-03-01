@@ -8,7 +8,6 @@ Instantiate a ganache instance with NMR and erasure protocol.
 
 ```
 yarn
-yarn compile
 yarn deploy
 ```
 
@@ -19,6 +18,8 @@ In a new terminal
 ```
 git clone https://github.com/graphprotocol/graph-node/
 cd graph-node/docker
+docker pull graphprotocol/graph-node
+docker pull ipfs/go-ipfs
 docker-compose up
 ```
 

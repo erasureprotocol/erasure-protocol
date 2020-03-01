@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
 import "./Spawner.sol";
 import "./iRegistry.sol";
@@ -8,7 +8,7 @@ import "./iFactory.sol";
 /// @title Factory
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
+/// @dev Version: 1.3.0
 /// @notice The factory contract implements a standard interface for creating EIP-1167 clones of a given template contract.
 ///         The create functions accept abi-encoded calldata used to initialize the spawned templates.
 contract Factory is Spawner, iFactory {

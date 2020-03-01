@@ -1,6 +1,6 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
-import "./openzeppelin-solidity/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /* @title DecimalMath
  * @dev taken from https://github.com/PolymathNetwork/polymath-core

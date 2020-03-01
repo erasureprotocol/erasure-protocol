@@ -1,7 +1,7 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
-import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
-import "../helpers/openzeppelin-solidity/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../agreements/CountdownGriefing.sol";
 import "../modules/iFactory.sol";
 import "../modules/iRegistry.sol";
@@ -14,8 +14,8 @@ import "../modules/Template.sol";
 /// @title CountdownGriefingEscrow
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/escrows/CountdownGriefingEscrow.png
+/// @dev Version: 1.3.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/escrows/CountdownGriefingEscrow.png
 /// @notice This escrow allows for a buyer and a seller to deposit their stake and payment before sending it to a CountdownGriefing agreement.
 ///         A new instance is initialized by the factory using the `initData` received. See the `initialize()` function for details.
 ///         Notable features:
@@ -38,6 +38,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     struct Data {
         address buyer;
         address seller;
+        TokenManager.Tokens tokenID;
         uint128 paymentAmount;
         uint128 stakeAmount;
         EscrowStatus status;
@@ -54,6 +55,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator,
         address buyer,
         address seller,
+        TokenManager.Tokens tokenID,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 countdownLength,
@@ -72,8 +74,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
     /// @param buyer address of the buyer. Optional parameter. This address is the only one able to deposit the payment. If not set, the first to deposit the payment becomes the buyer.
     /// @param seller address of the seller. Optional parameter. This address is the only one able to deposit the stake. If not set, the first to deposit the stake becomes the seller.
-    /// @param paymentAmount uint256 amount of NMR (18 decimals) to be deposited by buyer as payment. Required parameter. This number must fit in a uint128 for optimization reasons.
-    /// @param stakeAmount uint256 amount of NMR (18 decimals) to be deposited by seller as stake. Required parameter. This number must fit in a uint128 for optimization reasons.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
+    /// @param paymentAmount uint256 amount of tokens (18 decimals) to be deposited by buyer as payment. Required parameter. This number must fit in a uint128 for optimization reasons.
+    /// @param stakeAmount uint256 amount of tokens (18 decimals) to be deposited by seller as stake. Required parameter. This number must fit in a uint128 for optimization reasons.
     /// @param escrowCountdown uint256 amount of time (in seconds) the seller has to finalize the escrow after the payment and stake is deposited. Required parameter.
     /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
     /// @param agreementParams bytes ABI-encoded parameters used by CountdownGriefing agreement on initialization. Required parameter.
@@ -83,6 +86,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         address operator,
         address buyer,
         address seller,
+        TokenManager.Tokens tokenID,
         uint256 paymentAmount,
         uint256 stakeAmount,
         uint256 escrowCountdown,
@@ -101,6 +105,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         if (operator != address(0)) {
             Operated._setOperator(operator);
         }
+
+        // set token
+        require(TokenManager.isValidTokenID(tokenID), 'invalid token');
+        _data.tokenID = tokenID;
 
         // set amounts if defined
         if (paymentAmount != uint256(0)) {
@@ -133,10 +141,10 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
 
         // emit event
-        emit Initialized(operator, buyer, seller, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
+        emit Initialized(operator, buyer, seller, tokenID, paymentAmount, stakeAmount, escrowCountdown, metadata, agreementParams);
     }
 
-    /// @notice Emit metadata event
+    /// @notice Emit metadata event.
     /// @dev Access Control: operator
     ///      State Machine: always
     /// @param metadata Data (any format) to emit as event
@@ -148,9 +156,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         EventMetadata._setMetadata(metadata);
     }
 
-    /// @notice Deposit Stake in NMR and set seller address
-    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if buyer already deposited the payment, finalize the escrow
+    /// @notice Deposit Stake and set seller address.
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount.
+    ///          - if buyer already deposited the payment, finalize the escrow.
     /// @dev Access Control: anyone
     ///      State Machine: before finalize() OR before cancel()
     /// @param seller address of the seller
@@ -165,9 +173,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         _depositStake();
     }
 
-    /// @notice Deposit Stake in NMR
-    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if buyer already deposited the payment, finalize the escrow
+    /// @notice Deposit Stake.
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount.
+    ///          - if buyer already deposited the payment, finalize the escrow.
     /// @dev Access Control: buyer OR operator
     ///      State Machine: before finalize() OR before cancel()
     function depositStake() public {
@@ -191,7 +199,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // Add the stake amount
         if (stakeAmount != uint256(0)) {
-            Staking._addStake(seller, msg.sender, stakeAmount);
+            Staking._addStake(_data.tokenID, seller, msg.sender, stakeAmount);
         }
 
         // emit event
@@ -206,9 +214,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         }
     }
 
-    /// @notice Deposit Payment in NMR and set buyer address
-    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if seller already deposited the stake, start the finalization countdown
+    /// @notice Deposit Payment and set buyer address.
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount.
+    ///          - if seller already deposited the stake, start the finalization countdown.
     /// @dev Access Control: anyone
     ///      State Machine: before finalize() OR before cancel()
     /// @param buyer address of the buyer
@@ -223,9 +231,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         _depositPayment();
     }
 
-    /// @notice Deposit Payment in NMR
-    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
-    ///          - if seller already deposited the stake, start the finalization countdown
+    /// @notice Deposit Payment.
+    ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount.
+    ///          - if seller already deposited the stake, start the finalization countdown.
     /// @dev Access Control: buyer OR operator
     ///      State Machine: before finalize() OR before cancel()
     function depositPayment() public {
@@ -249,7 +257,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         // Add the payment as a stake
         if (paymentAmount != uint256(0)) {
-            Staking._addStake(buyer, msg.sender, paymentAmount);
+            Staking._addStake(_data.tokenID, buyer, msg.sender, paymentAmount);
         }
 
         // emit event
@@ -292,6 +300,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
                 address(this), // operator
                 _data.seller,  // staker
                 _data.buyer,   // counterparty
+                _data.tokenID, // tokenID
                 uint256(_data.agreementParams.ratio),           // griefRatio
                 _data.agreementParams.ratioType,                // ratioType
                 uint256(_data.agreementParams.countdownLength), // countdownLength
@@ -306,13 +315,13 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         uint256 totalStake;
         {
-            uint256 paymentAmount = Deposit._clearDeposit(_data.buyer);
-            uint256 stakeAmount = Deposit._clearDeposit(_data.seller);
+            uint256 paymentAmount = Deposit._clearDeposit(_data.tokenID, _data.buyer);
+            uint256 stakeAmount = Deposit._clearDeposit(_data.tokenID, _data.seller);
             totalStake = paymentAmount.add(stakeAmount);
         }
 
         if (totalStake > 0) {
-            require(IERC20(BurnNMR.getToken()).approve(agreement, totalStake), "token approval failed");
+            TokenManager._approve(_data.tokenID, agreement, totalStake);
             CountdownGriefing(agreement).increaseStake(totalStake);
         }
 
@@ -332,6 +341,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         _data.status = EscrowStatus.isFinalized;
 
         // delete storage
+        delete _data.tokenID;
         delete _data.paymentAmount;
         delete _data.stakeAmount;
         delete _data.agreementParams;
@@ -389,21 +399,23 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         // declare storage variables in memory
         address seller = _data.seller;
         address buyer = _data.buyer;
+        TokenManager.Tokens tokenID = _data.tokenID;
 
         // return stake to seller
-        if (Staking.getStake(seller) != 0) {
-            Staking._takeFullStake(seller, seller);
+        if (Deposit.getDeposit(tokenID, seller) != 0) {
+            Staking._takeFullStake(tokenID, seller, seller);
         }
 
         // return payment to buyer
-        if (Staking.getStake(buyer) != 0) {
-            Staking._takeFullStake(buyer, buyer);
+        if (Deposit.getDeposit(tokenID, buyer) != 0) {
+            Staking._takeFullStake(tokenID, buyer, buyer);
         }
 
         // update status
         _data.status = EscrowStatus.isCancelled;
 
         // delete storage
+        delete _data.tokenID;
         delete _data.paymentAmount;
         delete _data.stakeAmount;
         delete _data.agreementParams;
@@ -463,13 +475,22 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         return caller == getSeller();
     }
 
-    /// @notice Get the data in storage
-    /// @return uint128 paymentAmount set in initialization
-    /// @return uint128 stakeAmount set in initialization
-    /// @return uint120 ratio used for initialization of agreement on completion
-    /// @return Griefing.RatioType ratioType used for initialization of agreement on completion
-    /// @return uint128 countdownLength used for initialization of agreement on completion
+    /// @notice Return the amount of tokens deposited by the user
+    /// @param user address of the user to query the deposit
+    /// @return amount uint256 amount of tokens deposited
+    function getDeposit(address user) public view returns (uint256 amount) {
+        return Deposit.getDeposit(_data.tokenID, user);
+    }
+
+    /// @notice Get the data from storage.
+    /// @return tokenID TokenManager.Tokens ID of the ERC20 token.
+    /// @return uint128 paymentAmount set in initialization.
+    /// @return uint128 stakeAmount set in initialization.
+    /// @return uint120 ratio used for initialization of agreement on completion.
+    /// @return Griefing.RatioType ratioType used for initialization of agreement on completion.
+    /// @return uint128 countdownLength used for initialization of agreement on completion.
     function getData() public view returns (
+        TokenManager.Tokens tokenID,
         uint128 paymentAmount,
         uint128 stakeAmount,
         uint120 ratio,
@@ -477,6 +498,7 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
         uint128 countdownLength
     ) {
         return (
+            _data.tokenID,
             _data.paymentAmount,
             _data.stakeAmount,
             _data.agreementParams.ratio,

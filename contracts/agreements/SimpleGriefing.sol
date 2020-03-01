@@ -1,6 +1,6 @@
-pragma solidity ^0.5.13;
+pragma solidity 0.5.16;
 
-import "../helpers/openzeppelin-solidity/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "../modules/Griefing.sol";
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
@@ -9,8 +9,8 @@ import "../modules/Template.sol";
 /// @title SimpleGriefing
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.2.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/v1.2.0/docs/state-machines/agreements/SimpleGriefing.png
+/// @dev Version: 1.3.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/agreements/SimpleGriefing.png
 /// @notice This agreement template allows a staker to grant permission to a counterparty to punish, reward, or release their stake.
 ///         A new instance is initialized by the factory using the `initData` received. See the `initialize()` function for details on initialization parameters.
 ///         Notable features:
@@ -29,7 +29,15 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         address counterparty;
     }
 
-    event Initialized(address operator, address staker, address counterparty, uint256 ratio, Griefing.RatioType ratioType, bytes metadata);
+    event Initialized(
+        address operator,
+        address staker,
+        address counterparty,
+        TokenManager.Tokens tokenID,
+        uint256 ratio,
+        Griefing.RatioType ratioType,
+        bytes metadata
+    );
 
     /// @notice Constructor used to initialize the agreement parameters.
     ///         All parameters are passed as ABI-encoded calldata to the factory. This calldata must include the function selector.
@@ -38,6 +46,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
     /// @param staker address of the staker who owns the stake. Required parameter. This address is the only one able to retrieve the stake and cannot be changed.
     /// @param counterparty address of the counterparty who has the right to reward, release, and punish the stake. Required parameter. This address cannot be changed.
+    /// @param tokenID TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
     /// @param ratio uint256 number (18 decimals) used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param ratioType Griefing.RatioType number used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
@@ -45,6 +54,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         address operator,
         address staker,
         address counterparty,
+        TokenManager.Tokens tokenID,
         uint256 ratio,
         Griefing.RatioType ratioType,
         bytes memory metadata
@@ -59,7 +69,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         }
 
         // set griefing ratio
-        Griefing._setRatio(staker, ratio, ratioType);
+        Griefing._setRatio(staker, tokenID, ratio, ratioType);
 
         // set metadata
         if (metadata.length != 0) {
@@ -67,7 +77,7 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         }
 
         // log initialization params
-        emit Initialized(operator, staker, counterparty, ratio, ratioType, metadata);
+        emit Initialized(operator, staker, counterparty, tokenID, ratio, ratioType, metadata);
     }
 
     // state functions
@@ -88,26 +98,32 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: staker OR operator
     ///      State Machine: anytime
-    /// @param amountToAdd uint256 amount of NMR (18 decimals) to be added to the stake
+    /// @param amountToAdd uint256 amount of tokens (18 decimals) to be added to the stake
     function increaseStake(uint256 amountToAdd) public {
         // restrict access
         require(isStaker(msg.sender) || Operated.isOperator(msg.sender), "only staker or operator");
 
+        // declare variable in memory
+        address staker = _data.staker;
+
         // add stake
-        Staking._addStake(_data.staker, msg.sender, amountToAdd);
+        Staking._addStake(Griefing.getTokenID(staker), staker, msg.sender, amountToAdd);
     }
 
     /// @notice Called by the counterparty to increase the stake
     ///          - tokens (ERC-20) are transfered from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: anytime
-    /// @param amountToAdd uint256 amount of NMR (18 decimals) to be added to the stake
+    /// @param amountToAdd uint256 amount of tokens (18 decimals) to be added to the stake
     function reward(uint256 amountToAdd) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
 
+        // declare variable in memory
+        address staker = _data.staker;
+
         // add stake
-        Staking._addStake(_data.staker, msg.sender, amountToAdd);
+        Staking._addStake(Griefing.getTokenID(staker), staker, msg.sender, amountToAdd);
     }
 
     /// @notice Called by the counterparty to punish the stake
@@ -116,9 +132,9 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     ///          - tokens (ERC-20) are burned from the caller and requires approval of this contract for appropriate amount
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: anytime
-    /// @param punishment uint256 amount of NMR (18 decimals) to be burned from the stake
+    /// @param punishment uint256 amount of tokens (18 decimals) to be burned from the stake
     /// @param message bytes data (any format) to emit as event giving reason for the punishment
-    /// @return cost uint256 amount of NMR (18 decimals) it cost to perform punishment
+    /// @return cost uint256 amount of tokens (18 decimals) it cost to perform punishment
     function punish(uint256 punishment, bytes memory message) public returns (uint256 cost) {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
@@ -130,13 +146,16 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     /// @notice Called by the counterparty to release the stake to the staker
     /// @dev Access Control: counterparty OR operator
     ///      State Machine: anytime
-    /// @param amountToRelease uint256 amount of NMR (18 decimals) to be released from the stake
+    /// @param amountToRelease uint256 amount of tokens (18 decimals) to be released from the stake
     function releaseStake(uint256 amountToRelease) public {
         // restrict access
         require(isCounterparty(msg.sender) || Operated.isOperator(msg.sender), "only counterparty or operator");
 
+        // declare variable in memory
+        address staker = _data.staker;
+
         // release stake back to the staker
-        Staking._takeStake(_data.staker, _data.staker, amountToRelease);
+        Staking._takeStake(Griefing.getTokenID(staker), staker, staker, amountToRelease);
     }
 
     /// @notice Called by the operator to transfer control to new operator
@@ -190,10 +209,18 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
         return caller == getCounterparty();
     }
 
+    /// @notice Get the token ID and address used by the agreement
+    /// @return tokenID TokenManager.Tokens ID of the ERC20 token.
+    /// @return token address of the ERC20 token.
+    function getToken() public view returns (TokenManager.Tokens tokenID, address token) {
+        tokenID = Griefing.getTokenID(_data.staker);
+        return (tokenID, TokenManager.getTokenAddress(tokenID));
+    }
+
     /// @notice Get the current stake of the agreement
-    /// @return stake uint256 amount of NMR (18 decimals) staked
-    function getCurrentStake() public view returns (uint256 stake) {
-        return Staking.getStake(_data.staker);
+    /// @return stake uint256 amount of tokens (18 decimals) staked.
+    function getStake() public view returns (uint256 stake) {
+        return Deposit.getDeposit(Griefing.getTokenID(_data.staker), _data.staker);
     }
 
     enum AgreementStatus { isInitialized, isStaked }
@@ -202,7 +229,8 @@ contract SimpleGriefing is Griefing, EventMetadata, Operated, Template {
     ///          - isInitialized: initialized but no deposits made
     ///          - isStaked: stake is deposited
     function getAgreementStatus() public view returns (AgreementStatus status) {
-        if (getCurrentStake() > 0) {
+        uint256 currentStake = getStake();
+        if (currentStake > 0) {
             return AgreementStatus.isStaked;
         } else {
             return AgreementStatus.isInitialized;

@@ -14,7 +14,7 @@ const deploy = async (network, secret) => {
 
   deployer = await new etherlime.InfuraPrivateKeyDeployer(
     wallet.privateKey,
-    'rinkeby',
+    network,
     process.env.INFURA_API_KEY,
   )
   deployer.setVerifierApiKey(process.env.ETHERSCAN_API_KEY)

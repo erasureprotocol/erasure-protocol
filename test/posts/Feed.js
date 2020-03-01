@@ -1,6 +1,5 @@
 const etherlime = require('etherlime-lib')
-
-const { createDeployer } = require('../helpers/setup')
+const ErasureHelper = require('@erasure/crypto-ipfs')
 const {
   hexlify,
   abiEncodeWithSelector,
@@ -12,9 +11,10 @@ const TestFeedArtifact = require('../../build/Feed.json')
 const FeedFactoryArtifact = require('../../build/Feed_Factory.json')
 const ErasurePostsArtifact = require('../../build/Erasure_Posts.json')
 
-describe('Feed', function() {
-  let deployer
+// global
+var g = {}
 
+describe('Feed', async () => {
   // wallets and addresses
   const [creatorWallet, otherWallet, operatorWallet] = accounts
   const creator = creatorWallet.signer.signingKey.address
@@ -29,26 +29,31 @@ describe('Feed', function() {
   }
 
   // post variables
-  const feedMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes('feedMetadata'),
-  )
-  const newFeedMetadata = ethers.utils.keccak256(
-    ethers.utils.toUtf8Bytes('newFeedMetadata'),
-  )
-  const proofHash = ethers.utils.sha256(hexlify('proofHash'))
+  const feedMetadata = await ErasureHelper.multihash({
+    input: 'feedMetadata',
+    inputType: 'raw',
+    outputType: 'hex',
+  })
+  const newFeedMetadata = await ErasureHelper.multihash({
+    input: 'newFeedMetadata',
+    inputType: 'raw',
+    outputType: 'hex',
+  })
+  const proofHash = await ErasureHelper.multihash({
+    input: 'proofHash',
+    inputType: 'raw',
+    outputType: 'digest',
+  })
+  const tokenID = ErasureHelper.constants.TOKEN_TYPES.NMR
 
   const deployTestFeed = async (
     validInit = true,
-    args = [operator, proofHash, feedMetadata],
+    args = [operator, feedMetadata],
   ) => {
     let callData
 
     if (validInit) {
-      callData = abiEncodeWithSelector(
-        'initialize',
-        ['address', 'bytes32', 'bytes'],
-        args,
-      )
+      callData = abiEncodeWithSelector('initialize', ['address', 'bytes'], args)
       const postID = addPost(proofHash)
     } else {
       // invalid callData is missing first address
@@ -82,7 +87,7 @@ describe('Feed', function() {
   }
 
   before(async () => {
-    deployer = await createDeployer()
+    g.Token = NMR
 
     this.PostRegistry = await deployer.deploy(ErasurePostsArtifact)
 
@@ -152,6 +157,162 @@ describe('Feed', function() {
     })
   })
 
+  describe('Feed.depositStake', async () => {
+    const amount = ethers.utils.parseEther('10')
+
+    it('should mint mock tokens', async () => {
+      // mint tokens
+      await g.Token.mintMockTokens(other, amount)
+      await g.Token.from(other).approve(this.TestFeed.contractAddress, amount)
+      await g.Token.mintMockTokens(operator, amount)
+      await g.Token.from(operator).approve(
+        this.TestFeed.contractAddress,
+        amount,
+      )
+      await g.Token.mintMockTokens(creator, amount)
+      await g.Token.from(creator).approve(this.TestFeed.contractAddress, amount)
+    })
+
+    it('should revert when msg.sender is not operator or creator', async () => {
+      // check operator access control
+      await assert.revertWith(
+        this.TestFeed.from(other).depositStake(tokenID, amount),
+        'only operator or creator',
+      )
+    })
+
+    it('should revert when msg.sender is operator but not active', async () => {
+      // check deactivated operator
+      await assert.revertWith(
+        this.DeactivatedFeed.from(operator).depositStake(tokenID, amount),
+        'only operator or creator',
+      )
+    })
+
+    it('should deposit successfully from creator', async () => {
+      // success case
+      const txn = await this.TestFeed.from(creator).depositStake(
+        tokenID,
+        amount,
+      )
+      await assert.emitWithArgs(txn, 'DepositIncreased', [
+        tokenID,
+        creator,
+        amount,
+        amount,
+      ])
+      assert.equal(
+        (await g.Token.balanceOf(this.TestFeed.contractAddress)).toString(),
+        amount.toString(),
+      )
+      assert.equal(
+        (await this.TestFeed.getStake(tokenID)).toString(),
+        amount.toString(),
+      )
+      // await assert.emitWithArgs(txn, 'Transfer', [
+      //   this.TestFeed.contractAddress,
+      //   creator,
+      //   amount,
+      // ])
+    })
+
+    it('should deposit successfully from operator', async () => {
+      const txn = await this.TestFeed.from(operator).depositStake(
+        tokenID,
+        amount,
+      )
+      await assert.emitWithArgs(txn, 'DepositIncreased', [
+        tokenID,
+        creator,
+        amount,
+        amount * 2,
+      ])
+      assert.equal(
+        (await g.Token.balanceOf(this.TestFeed.contractAddress)).toString(),
+        (amount * 2).toString(),
+      )
+      assert.equal(
+        (await this.TestFeed.getStake(tokenID)).toString(),
+        (amount * 2).toString(),
+      )
+      // assertEvent(g.Token, txn, 'Transfer', [
+      //   this.TestFeed.contractAddress,
+      //   operator,
+      //   amount,
+      // ])
+    })
+  })
+
+  describe('Feed.withdrawStake', async () => {
+    const amount = ethers.utils.parseEther('10')
+
+    it('should revert when msg.sender is not operator or creator', async () => {
+      // check operator access control
+      await assert.revertWith(
+        this.TestFeed.from(other).withdrawStake(tokenID, amount),
+        'only operator or creator',
+      )
+    })
+
+    it('should revert when msg.sender is operator but not active', async () => {
+      // check deactivated operator
+      await assert.revertWith(
+        this.DeactivatedFeed.from(operator).withdrawStake(tokenID, amount),
+        'only operator or creator',
+      )
+    })
+
+    it('should withdraw successfully from creator', async () => {
+      // success case
+      const txn = await this.TestFeed.from(creator).withdrawStake(
+        tokenID,
+        amount,
+      )
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        creator,
+        amount,
+        amount,
+      ])
+      assert.equal(
+        (await g.Token.balanceOf(this.TestFeed.contractAddress)).toString(),
+        amount.toString(),
+      )
+      assert.equal(
+        (await this.TestFeed.getStake(tokenID)).toString(),
+        amount.toString(),
+      )
+      // await assert.emitWithArgs(txn, 'Transfer', [
+      //   this.TestFeed.contractAddress,
+      //   creator,
+      //   amount,
+      // ])
+    })
+
+    it('should withdraw successfully from operator', async () => {
+      const txn = await this.TestFeed.from(operator).withdrawStake(
+        tokenID,
+        amount,
+      )
+      await assert.emitWithArgs(txn, 'DepositDecreased', [
+        tokenID,
+        creator,
+        amount,
+        0,
+      ])
+      assert.equal(
+        (await g.Token.balanceOf(this.TestFeed.contractAddress)).toNumber(),
+        0,
+      )
+      assert.equal((await this.TestFeed.getStake(tokenID)).toNumber(), 0)
+      // assertEvent(g.Token, txn, 'Transfer', [
+      //   this.TestFeed.contractAddress,
+      //   operator,
+      //   amount,
+      // ])
+    })
+  })
+
   describe('Feed.setMetadata', () => {
     it('should revert when msg.sender not operator or creator', async () => {
       await assert.revertWith(
@@ -171,14 +332,12 @@ describe('Feed', function() {
       const txn = await this.TestFeed.from(operator).setMetadata(
         newFeedMetadata,
       )
-      await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
 
     it('should set feed metadata from creator', async () => {
       const txn = await this.TestFeed.from(creator).setMetadata(newFeedMetadata)
-      await assert.emit(txn, 'MetadataSet')
-      await assert.emitWithArgs(txn, [newFeedMetadata])
+      await assert.emitWithArgs(txn, 'MetadataSet', [newFeedMetadata])
     })
   })
 })
