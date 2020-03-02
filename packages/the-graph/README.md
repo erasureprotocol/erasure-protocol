@@ -11,7 +11,7 @@ This subgraph only works with a full archive node with tracing, so the best way 
 In order to deploy, you must have an access token setup. Go to https://thegraph.com/explorer/dashboard?account=erasureprotocol and copy the Access Token from there, then run:
 
 ```
-graph auth https://api.thegraph.com/deploy/ $TOKEN
+export GRAPH_ACCESS_TOKEN=...
 ```
 
 ### Erasure Graph Explorers :
