@@ -8,7 +8,7 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 erasureprotocol/v130 kovan/subgraph.yaml"
   },
   "dependencies": {
-    "@erasure/abis": "^1.3.26",
+    "@erasure/abis": "^1.3.27",
     "@graphprotocol/graph-cli": "^0.16.0",
     "@graphprotocol/graph-ts": "^0.15.0",
     "handlebars": "^4.7.3"
