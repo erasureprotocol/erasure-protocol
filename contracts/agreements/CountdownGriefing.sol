@@ -189,6 +189,21 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         return Countdown._start();
     }
 
+    /// @notice Called by anyone to return the remaining stake once the agreement has ended
+    /// @dev Access Control: anyone
+    ///      State Machine: after Countdown.isOver()
+    /// @return amount uint256 amount of tokens (18 decimals) returned
+    function returnStake() public returns (uint256 amount) {
+        // require deadline is passed
+        require(isTerminated(), "deadline not passed");
+
+        // declare variable in memory
+        address staker = _data.staker;
+
+        // retrieve stake
+        return Staking._takeFullStake(Griefing.getTokenID(staker), staker, staker);
+    }
+
     /// @notice Called by the staker to retrieve the remaining stake once the agreement has ended
     /// @dev Access Control: staker OR operator
     ///      State Machine: after Countdown.isOver()
