@@ -17,7 +17,7 @@ const deploy = async (network, version) => {
   let deployer
   let multisig
 
-  let defaultGas = ethers.utils.parseUnits('10', 'gwei')
+  let defaultGas = ethers.utils.parseUnits('20', 'gwei')
 
   console.log(`\nInitialize Deployer`)
 
@@ -100,6 +100,29 @@ const deploy = async (network, version) => {
   }
 
   console.log(`\nDeploy Factories`)
+
+  // const RegistryManager = deployer.wrapDeployedContract(
+  //   artifacts.RegistryManager,
+  //   ErasureV130.RegistryManager[network],
+  // )
+  // await (
+  //   await RegistryManager.retireFactory(
+  //     ErasureV130.Erasure_Agreements[network],
+  //     ErasureV130.CountdownGriefing_Factory[network],
+  //     {
+  //       gasPrice: defaultGas,
+  //     },
+  //   )
+  // ).wait()
+  // await (
+  //   await RegistryManager.retireFactory(
+  //     ErasureV130.Erasure_Escrows[network],
+  //     ErasureV130.CountdownGriefingEscrow_Factory[network],
+  //     {
+  //       gasPrice: defaultGas,
+  //     },
+  //   )
+  // ).wait()
 
   // Feed
   const Feed_Factory = await deployFactory('Feed', 'Erasure_Posts')
@@ -286,33 +309,35 @@ Factories:
       ErasureV130[registryName][network],
       template.contractAddress,
     )
+
+    // register factory
+    console.log(``)
+    const RegistryManager = deployer.wrapDeployedContract(
+      artifacts.RegistryManager,
+      ErasureV130.RegistryManager[network],
+    )
+
+    // validate deployer is manager of RegistryManager
+    assert.equal(
+      await RegistryManager.manager(),
+      deployer.signer.address,
+      `Deployer is not registry manager. Expected ${await RegistryManager.manager()} got ${
+        deployer.signer.address
+      }`,
+    )
+
+    await (
+      await RegistryManager.addFactory(
+        ErasureV130[registryName][network],
+        factory.contractAddress,
+        factoryData,
+        {
+          gasPrice: defaultGas,
+        },
+      )
+    ).wait()
+
     ErasureV130[factoryName][network] = factory.contractAddress
-
-    // // register factory
-    // console.log(``)
-    // const RegistryManager = deployer.wrapDeployedContract(
-    //   artifacts.RegistryManager,
-    //   ErasureV130.RegistryManager[network],
-    // )
-
-    // // validate deployer is manager of RegistryManager
-    // assert.equal(
-    //   await RegistryManager.manager(),
-    //   deployer.signer.address,
-    //   `Deployer is not registry manager. Expected ${await RegistryManager.manager()} got ${
-    //     deployer.signer.address
-    //   }`,
-    // )
-
-    // const tx = await RegistryManager.addFactory(
-    //   ErasureV130[registryName][network],
-    //   factory.contractAddress,
-    //   factoryData,
-    //   {
-    //     gasPrice: defaultGas,
-    //   },
-    // )
-    // await RegistryManager.verboseWaitForTransaction(tx)
 
     return factory
   }
