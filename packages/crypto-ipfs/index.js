@@ -39,7 +39,7 @@ async function multihashFrom(input, inputType) {
   const inputTypes = ['raw', 'sha2-256', 'hex', 'b58']
   let contentid
   if (inputType === 'raw') {
-    contentid = multihash.fromB58String(await sha256_cid.of(input))
+    contentid = multihash.fromB58String(await sha256_cid.of(Buffer.from(input)))
   } else if (inputType === 'sha2-256') {
     input = input.slice(0, 2) === '0x' ? input.slice(2) : input
     contentid = multihash.fromHexString('1220' + input)
@@ -147,6 +147,9 @@ const ErasureHelper = {
           publicKey,
           secretKey,
         )
+        if (!encodedMessage) {
+          throw new Error('Asymmetric decryption failed. Make sure the public key belongs to the sender and the private key belongs to the receiver')
+        }
         return decoder.decode(encodedMessage)
       },
       secretBox: {
