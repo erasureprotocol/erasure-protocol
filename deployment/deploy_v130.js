@@ -170,55 +170,55 @@ const deploy = async (network, version) => {
     ),
   }
 
-  // // Feed
-  // await createInstance('Feed', Feed_Factory, [
-  //   mockData.userAddress, // operator
-  //   mockData.metadata, // metadata
-  // ])
-  // // SimpleGriefing
-  // await createInstance('SimpleGriefing', SimpleGriefing_Factory, [
-  //   mockData.userAddress, // operator
-  //   mockData.userAddress, // staker
-  //   mockData.userAddress, // counterparty
-  //   constants.TOKEN_TYPES.NMR, // tokenID
-  //   ethers.utils.parseEther('1'), // griefRatio
-  //   constants.RATIO_TYPES.Dec, // ratioType
-  //   mockData.metadata, // metadata
-  // ])
-  // // CountdownGriefing
-  // await createInstance('CountdownGriefing', CountdownGriefing_Factory, [
-  //   mockData.userAddress, // operator
-  //   mockData.userAddress, // staker
-  //   mockData.userAddress, // counterparty
-  //   constants.TOKEN_TYPES.NMR, // tokenID
-  //   ethers.utils.parseEther('1'), // griefRatio
-  //   constants.RATIO_TYPES.Dec, // ratioType
-  //   100000000, // agreementLength
-  //   mockData.metadata, // metadata
-  // ])
-  // // CountdownGriefingEscrow
-  // await createInstance(
-  //   'CountdownGriefingEscrow',
-  //   CountdownGriefingEscrow_Factory,
-  //   [
-  //     mockData.userAddress, // operator
-  //     mockData.userAddress, // staker
-  //     mockData.userAddress, // counterparty
-  //     constants.TOKEN_TYPES.NMR, // tokenID
-  //     ethers.utils.parseEther('1'), // paymentAmount
-  //     ethers.utils.parseEther('1'), // stakeAmount
-  //     100000000, // escrowLength
-  //     mockData.metadata, // metadata
-  //     ethers.utils.defaultAbiCoder.encode(
-  //       ['uint256', 'uint8', 'uint256'],
-  //       [
-  //         ethers.utils.parseEther('1'), // griefRatio
-  //         constants.RATIO_TYPES.Dec, // ratioType
-  //         100000000, // agreementLength
-  //       ],
-  //     ), // agreementParams
-  //   ],
-  // )
+  // Feed
+  await createInstance('Feed', Feed_Factory, [
+    mockData.userAddress, // operator
+    mockData.metadata, // metadata
+  ])
+  // SimpleGriefing
+  await createInstance('SimpleGriefing', SimpleGriefing_Factory, [
+    mockData.userAddress, // operator
+    mockData.userAddress, // staker
+    mockData.userAddress, // counterparty
+    constants.TOKEN_TYPES.NMR, // tokenID
+    ethers.utils.parseEther('1'), // griefRatio
+    constants.RATIO_TYPES.Dec, // ratioType
+    mockData.metadata, // metadata
+  ])
+  // CountdownGriefing
+  await createInstance('CountdownGriefing', CountdownGriefing_Factory, [
+    mockData.userAddress, // operator
+    mockData.userAddress, // staker
+    mockData.userAddress, // counterparty
+    constants.TOKEN_TYPES.NMR, // tokenID
+    ethers.utils.parseEther('1'), // griefRatio
+    constants.RATIO_TYPES.Dec, // ratioType
+    100000000, // agreementLength
+    mockData.metadata, // metadata
+  ])
+  // CountdownGriefingEscrow
+  await createInstance(
+    'CountdownGriefingEscrow',
+    CountdownGriefingEscrow_Factory,
+    [
+      mockData.userAddress, // operator
+      mockData.userAddress, // staker
+      mockData.userAddress, // counterparty
+      constants.TOKEN_TYPES.NMR, // tokenID
+      ethers.utils.parseEther('1'), // paymentAmount
+      ethers.utils.parseEther('1'), // stakeAmount
+      100000000, // escrowLength
+      mockData.metadata, // metadata
+      ethers.utils.defaultAbiCoder.encode(
+        ['uint256', 'uint8', 'uint256'],
+        [
+          ethers.utils.parseEther('1'), // griefRatio
+          constants.RATIO_TYPES.Dec, // ratioType
+          100000000, // agreementLength
+        ],
+      ), // agreementParams
+    ],
+  )
 
   // save artifacts
   // TODO: save addresses to abi package

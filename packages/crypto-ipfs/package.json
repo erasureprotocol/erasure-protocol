@@ -1,6 +1,6 @@
 {
   "name": "@erasure/crypto-ipfs",
-  "version": "1.2.5",
+  "version": "1.3.2",
   "description": "asymmetric and symmetric crypto for use with erasure, ipfs and private backend. warning: unaudited.",
   "main": "index.js",
   "scripts": {
