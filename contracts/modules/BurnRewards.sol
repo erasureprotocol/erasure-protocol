@@ -36,7 +36,7 @@ contract BurnRewards is BurnNMR {
 
         require(iNMR(BurnNMR.getTokenAddress()).transfer(rewardRecipient, reward), "BurnRewards/claim: nmr.transfer call failed");
 
-        emit RewardClaimed(msg.sender, rewardRecipient, value, reward);
+        emit RewardClaimed(from, rewardRecipient, value, reward);
 
         return reward;
     }
