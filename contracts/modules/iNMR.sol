@@ -8,9 +8,9 @@ pragma solidity 0.5.16;
 contract iNMR {
 
     // ERC20
-    function totalSupply() external returns (uint256);
-    function balanceOf(address _owner) external returns (uint256);
-    function allowance(address _owner, address _spender) external returns (uint256);
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address _owner) external view returns (uint256);
+    function allowance(address _owner, address _spender) external view returns (uint256);
 
     function transfer(address _to, uint256 _value) external returns (bool ok);
     function transferFrom(address _from, address _to, uint256 _value) external returns (bool ok);
