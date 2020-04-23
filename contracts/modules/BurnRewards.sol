@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "../modules/iNMR.sol";
+import "./BurnNMR.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /// @title BurnRewards
@@ -9,15 +9,14 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 /// @dev Version: 1.4.0
 /// @notice This contract stores and distributes burn rewards.
 // TODO: should it use curve instead of ratio?
-// TODO: should it be possible to reverse? --> would open us up to censorship
-contract BurnRewards {
+// TODO: should it be possible to stop?
+// TODO: should it burn the reward if no recipient set?
+contract BurnRewards is BurnNMR {
 
     using SafeMath for uint256;
 
     // Reward ratio of 10 means that the contract needs to be funded with 1,000,000 in order to suport burning of 10,000,000 supply
     uint256 private _rewardRatio;
-    // address of the token
-    address private constant _NMRToken = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);
 
     event RewardClaimed(address indexed source, address indexed recipient, uint256 burnAmount, uint256 rewardAmount);
 
@@ -33,8 +32,9 @@ contract BurnRewards {
     function claim(address from, uint256 value, address rewardRecipient) public returns (uint256 reward) {
         reward = value.div(_rewardRatio);
         
-        require(iNMR(_NMRToken).numeraiTransfer(from, value), "BurnRewards/claim: nmr.numeraiTransfer call failed");
-        require(iNMR(_NMRToken).transfer(rewardRecipient, reward), "BurnRewards/claim: nmr.transfer call failed");
+        BurnNMR._burnFrom(from, value);
+
+        require(iNMR(BurnNMR.getTokenAddress()).transfer(rewardRecipient, reward), "BurnRewards/claim: nmr.transfer call failed");
 
         emit RewardClaimed(msg.sender, rewardRecipient, value, reward);
 
@@ -44,6 +44,6 @@ contract BurnRewards {
     /// @notice Returns the NMR balance remaining in this burn reward pool.
     /// @return amount uint256 The amount of NMR (18 decimals) remaining.
     function getPoolBalance() public view returns (uint256 amount) {
-        return iNMR(_NMRToken).balanceOf(address(this));
+        return iNMR(BurnNMR.getTokenAddress()).balanceOf(address(this));
     }
 }
