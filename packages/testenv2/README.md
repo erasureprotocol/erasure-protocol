@@ -9,3 +9,7 @@ Instantiate a ganache instance with NMR and erasure protocol.
 ```
 docker-compose up
 ```
+
+TODO:
+
+- create docker image for subgraph and accept environment variable for network - add to docker-compose as erasureprotocol/graphql
