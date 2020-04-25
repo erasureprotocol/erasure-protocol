@@ -4,15 +4,8 @@
 
 Instantiate a ganache instance with NMR and erasure protocol.
 
-### Deploy contracts to local ganache server using node
+### Deploy erasure protocol to local ganache server and boot graphql node
 
 ```
-yarn
-yarn deploy
-```
-
-### Deploy contracts to local ganache server using docker
-
-```
-docker run --publish 8545:8545 --name erasure thegostep/testenv:1.0
+docker-compose up
 ```
