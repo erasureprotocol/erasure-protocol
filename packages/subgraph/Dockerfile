@@ -4,6 +4,13 @@ WORKDIR /usr/src/app
 COPY package.json .
 RUN yarn install
 
-CMD [ "yarn", "deploy-local" ]
+# ENV GRAPH_ACCESS_TOKEN
+# ENV FeedFactory
+# ENV SimpleGriefingFactory
+# ENV CountdownGriefingFactory
+# ENV CountdownGriefingEscrowFactory
+ENV network local
+CMD ["sh", "-c", "yarn deploy-${network}"]
+# CMD ["sh", "-c", "yarn deploy-${network}", "&&", ]
 
 COPY . .
