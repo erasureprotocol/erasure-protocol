@@ -1,5 +1,9 @@
 FROM node:12-slim
 
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update
+RUN apt-get install -y git
+
 WORKDIR /usr/src/app
 COPY package.json .
 RUN yarn install
