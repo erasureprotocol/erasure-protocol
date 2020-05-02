@@ -8,6 +8,3 @@ EXPOSE 8080
 CMD [ "npm", "deploy" ]
 
 COPY . .
-
-# FROM graphprotocol/graph-node
-# FROM ipfs/go-ipfs

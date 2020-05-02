@@ -4,8 +4,19 @@ services:
     build: .
     ports:
       - '8545:8545'
-  # erasure-graphql:
-  # image: erasureprotocol/graphql
+    volumes:
+      - ./data
+  erasure-subgraph:
+    image: erasureprotocol/subgraph
+    environment:
+      graph_node: graph-node:8020
+      ipfs: ipfs:5001
+      version: v130
+      network: local
+    depends_on:
+      - graph-node
+    volumes:
+      - ./data
   graph-node:
     image: graphprotocol/graph-node
     ports:
@@ -29,8 +40,8 @@ services:
     image: ipfs/go-ipfs:v0.4.23
     ports:
       - '5001:5001'
-    volumes:
-      - ./data/ipfs:/data/ipfs
+    # volumes:
+    #   - ./data/ipfs:/data/ipfs
   postgres:
     image: postgres
     ports:
@@ -40,5 +51,5 @@ services:
       POSTGRES_USER: graph-node
       POSTGRES_PASSWORD: let-me-in
       POSTGRES_DB: graph-node
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+    # volumes:
+    #   - ./data/postgres:/var/lib/postgresql/data

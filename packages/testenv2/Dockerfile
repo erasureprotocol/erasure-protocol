@@ -1,7 +1,8 @@
 FROM node:12-slim
 
-WORKDIR /usr/src/app
+WORKDIR /testenv
 COPY package.json .
+COPY yarn.lock .
 RUN yarn install
 
 EXPOSE 8545

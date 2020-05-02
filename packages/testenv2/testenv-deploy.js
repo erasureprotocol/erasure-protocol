@@ -1,7 +1,6 @@
 const ethers = require('ethers')
 const ganache = require('ganache-cli')
 const assert = require('assert')
-// const Handlebars = require('handlebars')
 const fs = require('fs')
 
 const { ErasureV130 } = require('@erasure/abis')
@@ -41,14 +40,9 @@ const deployContract = async (contractName, signer, params = []) => {
   return { contract, receipt }
 }
 
-const writeSubgraphConfig = async templateArgs => {
-  // const templateFile = fs.readFileSync(
-  //   '../the-graph/v1.3.0/subgraph.yaml.handlebars',
-  //   'utf8',
-  // )
-  // const template = Handlebars.compile(templateFile)
-  // templateArgs.network = 'mainnet'
-  // fs.writeFileSync('./subgraph.yaml', template(templateArgs))
+const writeSubgraphConfig = args => {
+  args.network = 'mainnet'
+  fs.writeFileSync('./data/config.json', JSON.stringify(args))
 }
 
 const ArgumentParser = require('argparse').ArgumentParser

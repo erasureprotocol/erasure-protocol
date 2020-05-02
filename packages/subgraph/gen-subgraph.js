@@ -11,19 +11,22 @@ const writeSubgraphConfig = async templateArgs => {
 
 async function main() {
   const network = process.argv[2]
+  let args
   if (!network) {
     console.error('expected cli param for network')
     process.exit(1)
-  }
-
-  const args = {
-    network: network,
-
-    FeedFactory: ErasureV130.Feed_Factory[network],
-    SimpleGriefingFactory: ErasureV130.SimpleGriefing_Factory[network],
-    CountdownGriefingFactory: ErasureV130.CountdownGriefing_Factory[network],
-    CountdownGriefingEscrowFactory:
-      ErasureV130.CountdownGriefingEscrow_Factory[network],
+  } else if (network === 'local') {
+    args = JSON.parse(fs.readFileSync('./data/config.json', 'utf8'))
+    console.log('args', args)
+  } else {
+    args = {
+      network,
+      FeedFactory: ErasureV130.Feed_Factory[network],
+      SimpleGriefingFactory: ErasureV130.SimpleGriefing_Factory[network],
+      CountdownGriefingFactory: ErasureV130.CountdownGriefing_Factory[network],
+      CountdownGriefingEscrowFactory:
+        ErasureV130.CountdownGriefingEscrow_Factory[network],
+    }
   }
 
   await writeSubgraphConfig(args)
