@@ -1,7 +1,7 @@
 pragma solidity 0.5.16;
 
 import "./BurnRewards.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../NMRUtils.sol";
 import "../../helpers/UniswapExchangeInterface.sol";
 import "../../helpers/UniswapFactoryInterface.sol";
 
@@ -10,7 +10,7 @@ import "../../helpers/UniswapFactoryInterface.sol";
 /// @dev Security contact: security@numer.ai
 /// @notice This contract swaps any ERC20 tokens with Uniswap to claim and distribute burn rewards.
 /// TODO: check appropriate behaviour if no uniswap pool or pool with no liquidity
-contract MultiTokenRewards {
+contract MultiTokenRewards is NMRUtils {
 
     address private _burnRewards;
     address private constant _factory = _mainnet;
@@ -41,16 +41,15 @@ contract MultiTokenRewards {
         uint256 minNMRBurned,
         address rewardRecipient
     ) public returns (uint256 reward) {
-        // transfer tokens to this contract
-        require(IERC20(token).transferFrom(from, address(this), value), "MultiTokenRewards/swapAndClaim: token.transferFrom failed");
+        // forward token approval
+        ERC20Utils._forwardApproval(token, from, getUniswapAddress(token), value);
 
-        // swap tokens for NMR
-        require(IERC20(token).approve(getUniswapAddress(token), value), "MultiTokenRewards/swapAndClaim: token.approve failed");
-
+        // get expected swap amount
         (uint256 expectedNMR, uint256 expectedETH) = getExpectedSwapAmount(token, value);
         require(expectedNMR >= minNMRBurned, "MultiTokenRewards/swapAndClaim: less NMR than expected");
 
-        uint256 nmrBurned = UniswapExchangeInterface(getUniswapAddress(token)).tokenToTokenSwapInput(
+        // swap tokens
+        uint256 amountNMR = UniswapExchangeInterface(getUniswapAddress(token)).tokenToTokenSwapInput(
             value,
             expectedNMR,
             expectedETH,
@@ -59,11 +58,11 @@ contract MultiTokenRewards {
         );
 
         // claim BurnRewards
-        IERC20(getNMRAddress()).approve(_burnRewards, nmrBurned);
-        reward = BurnRewards(_burnRewards).burnAndClaim(address(this), nmrBurned, rewardRecipient);
+        NMRUtils._changeApproval(_burnRewards, amountNMR);
+        reward = BurnRewards(_burnRewards).burnAndClaim(address(this), amountNMR, rewardRecipient);
 
         // emit event
-        emit SwapAndClaimed(token, from, value, nmrBurned, reward);
+        emit SwapAndClaimed(token, from, value, amountNMR, reward);
 
         // return reward amount
         return reward;
@@ -101,8 +100,8 @@ contract MultiTokenRewards {
 
     /// @notice Get the NMR token address.
     /// @return token address The NMR token address.
-    function getNMRAddress() public view returns (address nmrAddress) {
-        return BurnRewards(_burnRewards).getNMRAddress();
+    function getNMRAddress() public pure returns (address nmrAddress) {
+        return NMRUtils.getTokenAddress();
     }
 
 }

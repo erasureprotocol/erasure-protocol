@@ -1,7 +1,6 @@
 pragma solidity 0.5.16;
 
 import "./BurnNMR.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../helpers/UniswapExchangeInterface.sol";
 
 /// @title BurnDAI
@@ -23,7 +22,7 @@ contract BurnDAI is BurnNMR {
     /// @param rewardRecipient address The account to receive the burn reward.
     function _burnFrom(address from, uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // transfer dai to this contract
-        IERC20(_DAIToken).transferFrom(from, address(this), value);
+        ERC20Utils._transferFrom(_DAIToken, from, address(this), value);
 
         // burn nmr
         reward = _burn(value, rewardRecipient, burnRewards);
@@ -38,7 +37,7 @@ contract BurnDAI is BurnNMR {
     /// @param rewardRecipient address The account to receive the burn reward.
     function _burn(uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // approve uniswap for token transfer
-        IERC20(_DAIToken).approve(_DAIExchange, value);
+        ERC20Utils._approve(_DAIToken, _DAIExchange, value);
 
         // swap dai for nmr
         (uint256 amountNMR, uint256 amountETH) = getExpectedSwapAmount(value);

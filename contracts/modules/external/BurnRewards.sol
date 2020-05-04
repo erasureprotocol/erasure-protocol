@@ -1,7 +1,6 @@
 pragma solidity 0.5.16;
 
 import "../NMRUtils.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 
 /// @title BurnRewards
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
@@ -9,14 +8,13 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 /// @notice This contract stores and distributes burn rewards.
 contract BurnRewards is NMRUtils {
 
-    using SafeMath for uint256;
-
     uint256 private _rewardRatio;
 
     event RewardClaimed(address indexed source, address indexed recipient, uint256 burnAmount, uint256 rewardAmount);
 
     // Reward ratio of 10 means that the contract needs to be funded with 1,000,000 in order to suport burning of 10,000,000 supply
     constructor (uint256 rewardRatio) public {
+        require(rewardRatio > 0, "ratio cannot be zero");
         _rewardRatio = rewardRatio;
     }
 
@@ -27,7 +25,7 @@ contract BurnRewards is NMRUtils {
     /// @return reward uint256 The amount of NMR (18 decimals) rewarded.
     function burnAndClaim(address from, uint256 value, address rewardRecipient) public returns (uint256 reward) {
         // calculate reward amount
-        reward = value.div(_rewardRatio);
+        reward = value / _rewardRatio;
 
         // perform NMR burn
         NMRUtils._burnFrom(from, value);
@@ -51,7 +49,7 @@ contract BurnRewards is NMRUtils {
     /// @notice Returns the NMR balance remaining in this burn reward pool.
     /// @return amount uint256 The amount of NMR (18 decimals) remaining.
     function getPoolBalance() public view returns (uint256 amount) {
-        return iNMR(NMRUtils.getTokenAddress()).balanceOf(address(this));
+        return IERC20(NMRUtils.getTokenAddress()).balanceOf(address(this));
     }
 
     /// @notice Returns the NMR token address.

@@ -1,14 +1,15 @@
 pragma solidity 0.5.16;
 
 import "./iNMR.sol";
+import "./ERC20Utils.sol";
 
 /// @title NMRUtils
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
 /// @dev Version: 1.4.0
-/// @notice This module simplifies calling NMR burn functions using regular openzeppelin ERC20Burnable interface and revert on failure.
+/// @notice This module simplifies calling NMR functions using regular openzeppelin interface and revert on failure.
 ///         This helper is required given the non-standard implementation of the NMR burn functions: https://github.com/numerai/contract
-contract NMRUtils {
+contract NMRUtils is ERC20Utils {
 
     // address of the token
     address private constant _NMRToken = address(0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671);
@@ -32,7 +33,7 @@ contract NMRUtils {
     /// @param value uint256 The amount of NMR (18 decimals).
     function _forwardApproval(address from, address to, uint256 value) internal {
         // pull tokens
-        require(iNMR(_NMRToken).transferFrom(from, address(this), value), "NMRUtils/_forwardApproval: nmr.transferFrom failed");
+        _transferFrom(from, address(this), value);
         // make approval
         _changeApproval(to, value);
     }
@@ -42,7 +43,7 @@ contract NMRUtils {
     /// @param value uint256 The amount of NMR (18 decimals).
     function _changeApproval(address spender, uint256 value) internal {
         // get current approval
-        uint256 currentApproval = iNMR(_NMRToken).allowance(address(this), spender);
+        uint256 currentApproval = IERC20(_NMRToken).allowance(address(this), spender);
         // set new approval
         require(iNMR(_NMRToken).changeApproval(spender, currentApproval, value), "NMRUtils/_changeApproval: nmr.changeApproval failed");
     }
@@ -51,7 +52,7 @@ contract NMRUtils {
     /// @param to address The recipient account.
     /// @param value uint256 The amount of NMR (18 decimals).
     function _transfer(address to, uint256 value) internal {
-        require(iNMR(_NMRToken).transfer(to, value), "NMRUtils/_transfer: nmr.transfer failed");
+        ERC20Utils._transfer(_NMRToken, to, value);
     }
 
     /// @notice Transfers NMR from one account to an other.
@@ -59,14 +60,14 @@ contract NMRUtils {
     /// @param to address The recipient account.
     /// @param value uint256 The amount of NMR (18 decimals).
     function _transferFrom(address from, address to, uint256 value) internal {
-        require(iNMR(_NMRToken).transferFrom(from, to, value), "NMRUtils/_transferFrom: nmr.transferFrom failed");
+        ERC20Utils._transferFrom(_NMRToken, from, to, value);
     }
 
     /// @notice Creates an NMR approval.
     /// @param spender address The spender account.
     /// @param value uint256 The amount of NMR (18 decimals).
     function _approve(address spender, uint256 value) internal {
-        require(iNMR(_NMRToken).approve(spender, value), "NMRUtils/_approve: nmr.approve failed");
+        _changeApproval(spender, value);
     }
 
     /// @notice Get the NMR token address.

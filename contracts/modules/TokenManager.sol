@@ -53,7 +53,7 @@ contract TokenManager is BurnDAI {
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
     function _transfer(Tokens tokenID, address to, uint256 value) internal onlyValidTokenID(tokenID) {
-        require(IERC20(getTokenAddress(tokenID)).transfer(to, value), 'token transfer failed');
+        ERC20Utils._transfer(getTokenAddress(tokenID), to, value);
     }
 
     /// @notice ERC20 TransferFrom
@@ -62,7 +62,7 @@ contract TokenManager is BurnDAI {
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
     function _transferFrom(Tokens tokenID, address from, address to, uint256 value) internal onlyValidTokenID(tokenID) {
-        require(IERC20(getTokenAddress(tokenID)).transferFrom(from, to, value), 'token transfer failed');
+        ERC20Utils._transferFrom(getTokenAddress(tokenID), from, to, value);
     }
 
     /// @notice ERC20 Burn
@@ -96,7 +96,7 @@ contract TokenManager is BurnDAI {
     /// @param value uint256 amount of tokens.
     function _approve(Tokens tokenID, address spender, uint256 value) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
-            require(IERC20(BurnDAI.getTokenAddress()).approve(spender, value), 'token approval failed');
+            ERC20Utils._approve(BurnDAI.getTokenAddress(), spender, value);
         } else if (tokenID == Tokens.NMR) {
             NMRUtils._changeApproval(spender, value);
         }

@@ -1,6 +1,5 @@
 pragma solidity 0.5.16;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./TokenManager.sol";
 import "./Deposit.sol";
 
