@@ -17,12 +17,12 @@ contract TestTokenManager is TokenManager {
         TokenManager._transferFrom(tokenID, from, to, value);
     }
 
-    function burn(Tokens tokenID, uint256 value) public {
-        TokenManager._burn(tokenID, value);
+    function burn(Tokens tokenID, uint256 value, address rewardRecipient) public {
+        TokenManager._burn(tokenID, value, rewardRecipient);
     }
 
-    function burnFrom(Tokens tokenID, address from, uint256 value) public {
-        TokenManager._burnFrom(tokenID, from, value);
+    function burnFrom(Tokens tokenID, address from, uint256 value, address rewardRecipient) public {
+        TokenManager._burnFrom(tokenID, from, value, rewardRecipient);
     }
 
     function approve(Tokens tokenID, address spender, uint256 value) public {

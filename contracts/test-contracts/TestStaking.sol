@@ -25,11 +25,11 @@ contract TestStaking is Staking {
         _fullStake = Staking._takeFullStake(tokenID, staker, recipient);
     }
 
-    function burnStake(TokenManager.Tokens tokenID, address staker, uint256 amountToBurn) public {
-        Staking._burnStake(tokenID, staker, amountToBurn);
+    function burnStake(TokenManager.Tokens tokenID, address staker, address rewardRecipient, uint256 amountToBurn) public {
+        Staking._burnStake(tokenID, staker, rewardRecipient, amountToBurn);
     }
 
-    function burnFullStake(TokenManager.Tokens tokenID, address staker) public {
-        _fullStake = Staking._burnFullStake(tokenID, staker);
+    function burnFullStake(TokenManager.Tokens tokenID, address staker, address rewardRecipient) public {
+        _fullStake = Staking._burnFullStake(tokenID, staker, rewardRecipient);
     }
 }

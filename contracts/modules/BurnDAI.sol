@@ -20,37 +20,41 @@ contract BurnDAI is BurnNMR {
     /// @dev This implementation has no frontrunning protection.
     /// @param from address The account whose tokens will be burned.
     /// @param value uint256 The amount of DAI (18 decimals) to be burned.
-    function _burnFrom(address from, uint256 value) internal {
-
+    /// @param rewardRecipient address The account to receive the burn reward.
+    function _burnFrom(address from, uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // transfer dai to this contract
         IERC20(_DAIToken).transferFrom(from, address(this), value);
 
-        // butn nmr
-        _burn(value);
+        // burn nmr
+        reward = _burn(value, rewardRecipient, burnRewards);
+
+        // return reward amount
+        return reward;
     }
 
     /// @notice Burns a specific amount of DAI from this contract.
     /// @dev This implementation has no frontrunning protection.
     /// @param value uint256 The amount of DAI (18 decimals) to be burned.
-    function _burn(uint256 value) internal {
-
+    /// @param rewardRecipient address The account to receive the burn reward.
+    function _burn(uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // approve uniswap for token transfer
         IERC20(_DAIToken).approve(_DAIExchange, value);
 
         // swap dai for nmr
-        uint256 tokens_sold = value;
-        (uint256 min_tokens_bought, uint256 min_eth_bought) = getExpectedSwapAmount(tokens_sold);
-        uint256 deadline = now;
+        (uint256 amountNMR, uint256 amountETH) = getExpectedSwapAmount(value);
         uint256 tokens_bought = UniswapExchangeInterface(_DAIExchange).tokenToTokenSwapInput(
-            tokens_sold,
-            min_tokens_bought,
-            min_eth_bought,
-            deadline,
-            BurnNMR.getTokenAddress()
+            value,
+            amountNMR,
+            amountETH,
+            now,
+            NMRUtils.getTokenAddress()
         );
 
         // burn nmr
-        BurnNMR._burn(tokens_bought);
+        reward = BurnNMR._burn(tokens_bought, rewardRecipient, burnRewards);
+
+        // return reward amount
+        return reward;
     }
 
     /// @notice Get the amount of NMR and ETH required to sell a given amount of DAI.

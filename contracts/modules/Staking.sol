@@ -70,14 +70,20 @@ contract Staking is Deposit, TokenManager {
     /// @notice Burn some deposited stake.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
+    /// @param rewardRecipient address The account to receive the burn reward.
     /// @param amountToBurn uint256 amount of tokens (18 decimals) to be burn from the stake.
     /// @return newStake uint256 amount of tokens (18 decimals) remaining in the stake.
-    function _burnStake(TokenManager.Tokens tokenID, address staker, uint256 amountToBurn) internal returns (uint256 newStake) {
+    function _burnStake(
+        TokenManager.Tokens tokenID,
+        address staker,
+        address rewardRecipient,
+        uint256 amountToBurn
+    ) internal returns (uint256 newStake) {
         // update deposit
         uint256 newDeposit = Deposit._decreaseDeposit(tokenID, staker, amountToBurn);
 
         // burn the stake amount
-        TokenManager._burn(tokenID, amountToBurn);
+        TokenManager._burn(tokenID, amountToBurn, rewardRecipient);
 
         // emit event
         emit StakeBurned(tokenID, staker, amountToBurn);
@@ -89,13 +95,14 @@ contract Staking is Deposit, TokenManager {
     /// @notice Burn all deposited stake.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token. This ID must be one of the IDs supported by TokenManager.
     /// @param staker Address of the staker who owns the stake.
+    /// @param rewardRecipient address The account to receive the burn reward.
     /// @return amountBurned uint256 amount of tokens (18 decimals) taken from the stake.
-    function _burnFullStake(TokenManager.Tokens tokenID, address staker) internal returns (uint256 amountBurned) {
+    function _burnFullStake(TokenManager.Tokens tokenID, address staker, address rewardRecipient) internal returns (uint256 amountBurned) {
         // get deposit
         uint256 currentDeposit = Deposit.getDeposit(tokenID, staker);
 
         // burn full stake
-        _burnStake(tokenID, staker, currentDeposit);
+        _burnStake(tokenID, staker, rewardRecipient, currentDeposit);
 
         // return
         return currentDeposit;
