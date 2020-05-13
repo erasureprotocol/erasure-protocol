@@ -5,12 +5,12 @@ import "../modules/BurnDAI.sol";
 
 contract TestBurnDAI is BurnDAI {
 
-    function burnFrom(address from, uint256 value) external {
-        BurnDAI._burnFrom(from, value);
+    function burnFrom(address from, uint256 value, address rewardRecipient, address burnRewards) external {
+        BurnDAI._burnFrom(from, value, rewardRecipient, burnRewards);
     }
 
-    function burn(uint256 value) external {
-        BurnDAI._burn(value);
+    function burn(uint256 value, address rewardRecipient, address burnRewards) external {
+        BurnDAI._burn(value, rewardRecipient, burnRewards);
     }
 
     function _getExpectedSwapAmount(uint256 amountDAI) external view returns (uint256 amountNMR, uint256 amountETH) {

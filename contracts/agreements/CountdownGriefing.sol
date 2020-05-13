@@ -28,12 +28,14 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     struct Data {
         address staker;
         address counterparty;
+        address rewardRecipient;
     }
 
     event Initialized(
         address operator,
         address staker,
         address counterparty,
+        address rewardRecipient,
         TokenManager.Tokens tokenID,
         uint256 ratio,
         Griefing.RatioType ratioType,
@@ -48,6 +50,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
     /// @param operator address of the operator that overrides access control. Optional parameter. Passing the address(0) will disable operator functionality.
     /// @param staker address of the staker who owns the stake. Required parameter. This address is the only one able to retrieve the stake and cannot be changed.
     /// @param counterparty address of the counterparty who has the right to reward, release, and punish the stake. Required parameter. This address cannot be changed.
+    /// @param rewardRecipient address The account to receive the burn reward.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token. Required parameter. This ID must be one of the IDs supported by TokenManager.
     /// @param ratio uint256 number (18 decimals) used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
     /// @param ratioType Griefing.RatioType number used to determine punishment cost. Required parameter. See Griefing module for details on valid input.
@@ -57,6 +60,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         address operator,
         address staker,
         address counterparty,
+        address rewardRecipient,
         TokenManager.Tokens tokenID,
         uint256 ratio,
         Griefing.RatioType ratioType,
@@ -66,6 +70,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         // set storage values
         _data.staker = staker;
         _data.counterparty = counterparty;
+        _data.rewardRecipient = rewardRecipient;
 
         // set operator
         if (operator != address(0)) {
@@ -84,7 +89,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         }
 
         // log initialization params
-        emit Initialized(operator, staker, counterparty, tokenID, ratio, ratioType, countdownLength, metadata);
+        emit Initialized(operator, staker, counterparty, rewardRecipient, tokenID, ratio, ratioType, countdownLength, metadata);
     }
 
     // state functions
@@ -156,7 +161,7 @@ contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Temp
         require(!isTerminated(), "agreement ended");
 
         // execute griefing
-        return Griefing._grief(msg.sender, _data.staker, punishment, message);
+        return Griefing._grief(msg.sender, _data.staker, _data.rewardRecipient, punishment, message);
     }
 
     /// @notice Called by the counterparty to release the stake to the staker

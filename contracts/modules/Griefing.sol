@@ -59,12 +59,14 @@ contract Griefing is Staking {
     ///         NOTE: the punishment will use the token from the ratio settings.
     /// @param punisher Address of the punisher
     /// @param staker Address of the staker
+    /// @param rewardRecipient address The account to receive the burn reward.
     /// @param punishment Amount of tokens (18 decimals) to punish
     /// @param message Bytes reason string for the punishment
     /// @return cost Amount of tokens (18 decimals) to pay
     function _grief(
         address punisher,
         address staker,
+        address rewardRecipient,
         uint256 punishment,
         bytes memory message
     ) internal returns (uint256 cost) {
@@ -80,10 +82,10 @@ contract Griefing is Staking {
         cost = getCost(ratio, punishment, ratioType);
 
         // burn the cost from the punisher's balance
-        TokenManager._burnFrom(tokenID, punisher, cost);
+        TokenManager._burnFrom(tokenID, punisher, cost, rewardRecipient);
 
         // burn the punishment from the target's stake
-        Staking._burnStake(tokenID, staker, punishment);
+        Staking._burnStake(tokenID, staker, rewardRecipient, punishment);
 
         // emit event
         emit Griefed(punisher, staker, punishment, cost, message);

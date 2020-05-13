@@ -5,11 +5,14 @@ import "./BurnDAI.sol";
 /// @title TokenManager
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice This module provides a standard interface for interacting with supported ERC20 tokens.
+/// TODO: update _burnRewards address
 contract TokenManager is BurnDAI {
 
     enum Tokens { NaN, NMR, DAI }
+
+    address private constant _burnRewards = address(0);
 
     /// @notice Get the address of the given token ID.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
@@ -18,7 +21,7 @@ contract TokenManager is BurnDAI {
         if (tokenID == Tokens.DAI)
             return BurnDAI.getTokenAddress();
         if (tokenID == Tokens.NMR)
-            return BurnNMR.getTokenAddress();
+            return NMRUtils.getTokenAddress();
         return address(0);
     }
 
@@ -50,7 +53,7 @@ contract TokenManager is BurnDAI {
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
     function _transfer(Tokens tokenID, address to, uint256 value) internal onlyValidTokenID(tokenID) {
-        require(IERC20(getTokenAddress(tokenID)).transfer(to, value), 'token transfer failed');
+        ERC20Utils._transfer(getTokenAddress(tokenID), to, value);
     }
 
     /// @notice ERC20 TransferFrom
@@ -59,17 +62,18 @@ contract TokenManager is BurnDAI {
     /// @param to address of the recipient.
     /// @param value uint256 amount of tokens.
     function _transferFrom(Tokens tokenID, address from, address to, uint256 value) internal onlyValidTokenID(tokenID) {
-        require(IERC20(getTokenAddress(tokenID)).transferFrom(from, to, value), 'token transfer failed');
+        ERC20Utils._transferFrom(getTokenAddress(tokenID), from, to, value);
     }
 
     /// @notice ERC20 Burn
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param value uint256 amount of tokens.
-    function _burn(Tokens tokenID, uint256 value) internal onlyValidTokenID(tokenID) {
+    /// @param rewardRecipient address The account to receive the burn reward.
+    function _burn(Tokens tokenID, uint256 value, address rewardRecipient) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
-            BurnDAI._burn(value);
+            BurnDAI._burn(value, rewardRecipient, _burnRewards);
         } else if (tokenID == Tokens.NMR) {
-            BurnNMR._burn(value);
+            BurnNMR._burn(value, rewardRecipient, _burnRewards);
         }
     }
 
@@ -77,11 +81,12 @@ contract TokenManager is BurnDAI {
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
     /// @param from address to burn from.
     /// @param value uint256 amount of tokens.
-    function _burnFrom(Tokens tokenID, address from, uint256 value) internal onlyValidTokenID(tokenID) {
+    /// @param rewardRecipient address The account to receive the burn reward.
+    function _burnFrom(Tokens tokenID, address from, uint256 value, address rewardRecipient) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
-            BurnDAI._burnFrom(from, value);
+            BurnDAI._burnFrom(from, value, rewardRecipient, _burnRewards);
         } else if (tokenID == Tokens.NMR) {
-            BurnNMR._burnFrom(from, value);
+            BurnNMR._burnFrom(from, value, rewardRecipient, _burnRewards);
         }
     }
 
@@ -91,11 +96,9 @@ contract TokenManager is BurnDAI {
     /// @param value uint256 amount of tokens.
     function _approve(Tokens tokenID, address spender, uint256 value) internal onlyValidTokenID(tokenID) {
         if (tokenID == Tokens.DAI) {
-            require(IERC20(BurnDAI.getTokenAddress()).approve(spender, value), 'token approval failed');
+            ERC20Utils._approve(BurnDAI.getTokenAddress(), spender, value);
         } else if (tokenID == Tokens.NMR) {
-            address nmr = BurnNMR.getTokenAddress();
-            uint256 currentAllowance = IERC20(nmr).allowance(msg.sender, spender);
-            require(iNMR(nmr).changeApproval(spender, currentAllowance, value), 'token approval failed');
+            NMRUtils._changeApproval(spender, value);
         }
     }
 
