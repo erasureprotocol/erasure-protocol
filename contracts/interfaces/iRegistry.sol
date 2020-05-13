@@ -4,7 +4,7 @@ pragma solidity 0.5.16;
 /// @title iRegistry
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 interface iRegistry {
 
     enum FactoryStatus { Unregistered, Registered, Retired }

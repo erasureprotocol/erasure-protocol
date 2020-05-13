@@ -1,12 +1,12 @@
 pragma solidity 0.5.16;
 
 import "./BurnNMR.sol";
-import "../helpers/UniswapExchangeInterface.sol";
+import "../../helpers/UniswapExchangeInterface.sol";
 
 /// @title BurnDAI
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice This module allows for burning DAI tokens by exchanging them for NMR on uniswap and burning the NMR.
 contract BurnDAI is BurnNMR {
 

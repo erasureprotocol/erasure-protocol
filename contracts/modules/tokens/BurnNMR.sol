@@ -1,7 +1,7 @@
 pragma solidity 0.5.16;
 
 import "./NMRUtils.sol";
-import "./external/BurnRewards.sol";
+import "../../burnrewards/BurnRewards.sol";
 
 /// @title BurnNMR
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc

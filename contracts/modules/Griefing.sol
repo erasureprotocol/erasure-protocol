@@ -7,8 +7,8 @@ import "./Staking.sol";
 /// @title Griefing
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/modules/Griefing.png
+/// @dev Version: 1.4.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.4.x/docs/state-machines/modules/Griefing.png
 /// @notice This module uses the griefing mechanism to punish the stake.
 contract Griefing is Staking {
 

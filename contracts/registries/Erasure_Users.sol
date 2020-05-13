@@ -6,7 +6,7 @@ import "../helpers/HitchensUnorderedAddressSetLib.sol";
 /// @title Erasure_Users
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 contract Erasure_Users {
 
     using HitchensUnorderedAddressSetLib for HitchensUnorderedAddressSetLib.Set;

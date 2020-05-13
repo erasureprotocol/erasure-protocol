@@ -10,7 +10,7 @@ import "../modules/ProofHashes.sol";
 /// @title Feed
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice A Feed allows for the creator to build a track record of timestamped submissions and deposit a stake to signal legitimacy.
 contract Feed is Staking, ProofHashes, Operated, EventMetadata, Template {
 
