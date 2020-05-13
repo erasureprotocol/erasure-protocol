@@ -5,7 +5,7 @@ services:
     ports:
       - '8545:8545'
     volumes:
-      - ./data
+      - ./data:/data
   erasure-subgraph:
     image: erasureprotocol/subgraph
     environment:
@@ -16,7 +16,7 @@ services:
     depends_on:
       - graph-node
     volumes:
-      - ./data
+      - ./data:/data
   graph-node:
     image: graphprotocol/graph-node
     ports:

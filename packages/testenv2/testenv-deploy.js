@@ -40,11 +40,6 @@ const deployContract = async (contractName, signer, params = []) => {
   return { contract, receipt }
 }
 
-const writeSubgraphConfig = args => {
-  args.network = 'mainnet'
-  fs.writeFileSync('./data/config.json', JSON.stringify(args))
-}
-
 const ArgumentParser = require('argparse').ArgumentParser
 const parser = new ArgumentParser({
   version: '0.0.1',
@@ -167,12 +162,16 @@ const main = async () => {
   ).factory
 
   console.log(`\nWriting new subgraph config`)
-  writeSubgraphConfig({
-    FeedFactory: Feed_Factory.address,
-    SimpleGriefingFactory: SimpleGriefing_Factory.address,
-    CountdownGriefingFactory: CountdownGriefing_Factory.address,
-    CountdownGriefingEscrowFactory: CountdownGriefingEscrow_Factory.address,
-  })
+  fs.writeFileSync(
+    '/data/config.json',
+    JSON.stringify({
+      network: 'mainnet',
+      FeedFactory: Feed_Factory.address,
+      SimpleGriefingFactory: SimpleGriefing_Factory.address,
+      CountdownGriefingFactory: CountdownGriefing_Factory.address,
+      CountdownGriefingEscrowFactory: CountdownGriefingEscrow_Factory.address,
+    }),
+  )
 
   console.log(`\nCreate test instance from factories`)
 

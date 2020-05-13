@@ -20,7 +20,7 @@ ENV ipfs ipfs:5001
 ENV version v130
 ENV network local
 
-CMD wait-for-file.sh ./data/config.json \
+CMD wait-for-file.sh /data/config.json \
       node gen-subgraph.js ${network} \
     && graph codegen \
     && graph create --node http://${graph_node} erasureprotocol/${version} \ 

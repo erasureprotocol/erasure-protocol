@@ -6,6 +6,6 @@ COPY yarn.lock .
 RUN yarn install
 
 EXPOSE 8545
-CMD [ "yarn", "deploy" ]
+CMD [ "node", "testenv-deploy.js" ]
 
 COPY . .

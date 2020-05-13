@@ -16,7 +16,7 @@ async function main() {
     console.error('expected cli param for network')
     process.exit(1)
   } else if (network === 'local') {
-    args = JSON.parse(fs.readFileSync('./data/config.json', 'utf8'))
+    args = JSON.parse(fs.readFileSync('/data/config.json', 'utf8'))
     console.log('args', args)
   } else {
     args = {
