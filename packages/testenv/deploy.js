@@ -64,7 +64,7 @@ const unlockedAccounts = [
 const ganacheConfig = {
   port: 8545,
   host: '0.0.0.0',
-  db_path: '/data/ganache',
+  // db_path: '/data/ganache',
   unlocked_accounts: unlockedAccounts,
   default_balance_ether: 1000,
   total_accounts: 10,
