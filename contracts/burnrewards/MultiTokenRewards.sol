@@ -1,9 +1,9 @@
 pragma solidity 0.5.16;
 
 import "./BurnRewards.sol";
-import "../NMRUtils.sol";
-import "../../helpers/UniswapExchangeInterface.sol";
-import "../../helpers/UniswapFactoryInterface.sol";
+import "../modules/tokens/NMRUtils.sol";
+import "../helpers/UniswapExchangeInterface.sol";
+import "../helpers/UniswapFactoryInterface.sol";
 
 /// @title MultiTokenRewards
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc

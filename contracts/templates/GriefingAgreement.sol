@@ -7,11 +7,11 @@ import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
-/// @title CountdownGriefing
+/// @title GriefingAgreement
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/agreements/CountdownGriefing.png
+/// @dev Version: 1.4.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.4.x/docs/state-machines/templates/GriefingAgreement.png
 /// @notice This agreement template allows a staker to grant permission to a counterparty to punish, reward, or release their stake until the countdown is completed.
 ///         A new instance is initialized by the factory using the `initData` received. See the `initialize()` function for details on initialization parameters.
 ///         Notable features:
@@ -20,7 +20,7 @@ import "../modules/Template.sol";
 ///             - The agreement can be terminated by the staker by starting the countdown. Once the countdown completes the staker can retrieve their remaining stake.
 ///             - Punishments use griefing which requires the counterparty to pay an appropriate amount based on the desired punishment and a predetermined ratio.
 ///             - An operator can optionally be defined to grant full permissions to a trusted external address or contract.
-contract CountdownGriefing is Countdown, Griefing, EventMetadata, Operated, Template {
+contract GriefingAgreement is Countdown, Griefing, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
 

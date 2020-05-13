@@ -1,17 +1,25 @@
 pragma solidity 0.5.16;
 
-import "./Spawner.sol";
-import "./iRegistry.sol";
-import "./iFactory.sol";
+import "../modules/Spawner.sol";
+import "../interfaces/iRegistry.sol";
+import "../interfaces/iFactory.sol";
 
 
 /// @title Factory
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice The factory contract implements a standard interface for creating EIP-1167 clones of a given template contract.
+///         New instances can be created with the following functions:
+///             `function create(bytes calldata initData) external returns (address instance);`
+///             `function createSalty(bytes calldata initData, bytes32 salt) external returns (address instance);`
 ///         The create functions accept abi-encoded calldata used to initialize the spawned templates.
-contract Factory is Spawner, iFactory {
+///         The `initData` parameter is ABI encoded calldata to use on the initialize function of the instance after creation.
+///         The optional `salt` parameter can be used to deterministically generate the instance address instead of using a nonce.
+///         See documentation of the template for additional details on initialization parameters.
+///         The template contract address can be optained with the following function:
+///             `function getTemplate() external view returns (address template);`
+contract ErasureFactory is Spawner, iFactory {
 
     address[] private _instances;
     mapping (address => address) private _instanceCreator;
@@ -27,19 +35,19 @@ contract Factory is Spawner, iFactory {
     /// @notice Constructior
     /// @param instanceRegistry address of the registry where all clones are registered.
     /// @param templateContract address of the template used for making clones.
-    /// @param instanceType bytes4 identifier for the type of the factory. This must match the type of the registry.
+    /// @param instanceType string identifier for the type of the factory. This must match the type of the registry.
     /// @param initSelector bytes4 selector for the template initialize function.
-    function _initialize(address instanceRegistry, address templateContract, bytes4 instanceType, bytes4 initSelector) internal {
+    constructor(address instanceRegistry, address templateContract, string memory instanceType, bytes4 initSelector) public {
         // set instance registry
         _instanceRegistry = instanceRegistry;
         // set logic contract
         _templateContract = templateContract;
         // set initSelector
         _initSelector = initSelector;
-        // validate correct instance registry
-        require(instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
         // set instanceType
-        _instanceType = instanceType;
+        _instanceType = bytes4(keccak256(bytes(instanceType)));
+        // validate correct instance registry
+        require(_instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
     }
 
     // IFactory methods

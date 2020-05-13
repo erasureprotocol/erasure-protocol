@@ -4,7 +4,7 @@ pragma solidity 0.5.16;
 /// @title Spawn
 /// @author 0age (@0age) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice This contract provides creation code that is used by Spawner in order
 /// to initialize and deploy eip-1167 minimal proxies for a given logic contract.
 contract Spawn {
@@ -39,7 +39,7 @@ contract Spawn {
 /// @title Spawner
 /// @author 0age (@0age) and Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
+/// @dev Version: 1.4.0
 /// @notice This contract spawns and initializes eip-1167 minimal proxies that
 /// point to existing logic contracts. The logic contracts need to have an
 /// initializer function that should only callable when no contract exists at

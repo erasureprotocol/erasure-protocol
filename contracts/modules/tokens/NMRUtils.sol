@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "./iNMR.sol";
+import "../../interfaces/iNMR.sol";
 import "./ERC20Utils.sol";
 
 /// @title NMRUtils

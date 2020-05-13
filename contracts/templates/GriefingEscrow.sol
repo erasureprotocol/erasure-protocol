@@ -1,21 +1,21 @@
 pragma solidity 0.5.16;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "../agreements/CountdownGriefing.sol";
-import "../modules/iFactory.sol";
-import "../modules/iRegistry.sol";
+import "../templates/GriefingAgreement.sol";
+import "../interfaces/iFactory.sol";
+import "../interfaces/iRegistry.sol";
 import "../modules/Countdown.sol";
 import "../modules/Staking.sol";
 import "../modules/EventMetadata.sol";
 import "../modules/Operated.sol";
 import "../modules/Template.sol";
 
-/// @title CountdownGriefingEscrow
+/// @title GriefingEscrow
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
 /// @dev Security contact: security@numer.ai
-/// @dev Version: 1.3.0
-/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.3.x/docs/state-machines/escrows/CountdownGriefingEscrow.png
-/// @notice This escrow allows for a buyer and a seller to deposit their stake and payment before sending it to a CountdownGriefing agreement.
+/// @dev Version: 1.4.0
+/// @dev State Machine: https://github.com/erasureprotocol/erasure-protocol/blob/release/v1.4.x/docs/state-machines/templates/GriefingEscrow.png
+/// @notice This escrow allows for a buyer and a seller to deposit their stake and payment before sending it to a GriefingAgreement.
 ///         A new instance is initialized by the factory using the `initData` received. See the `initialize()` function for details.
 ///         Notable features:
 ///             - The deposited payment and stake become the stake of the agreement once the escrow is finalized.
@@ -29,7 +29,7 @@ import "../modules/Template.sol";
 ///             Given the nature of ethereum, it is possible that while a cancel request is pending, the counterparty finalizes the escrow and the deposits are transfered to the agreement.
 ///             This contract is designed such that there is only two end states: deposits are returned to the buyer and the seller OR the agreement is successfully created.
 ///             This is why a user CANNOT rely on the cancellation feature to always work.
-contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
+contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template {
 
     using SafeMath for uint256;
 
@@ -78,9 +78,9 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
     /// @param stakeAmount uint256 amount of tokens (18 decimals) to be deposited by seller as stake. Required parameter. This number must fit in a uint128 for optimization reasons.
     /// @param escrowCountdown uint256 amount of time (in seconds) the seller has to finalize the escrow after the payment and stake is deposited. Required parameter.
     /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
-    /// @param agreementParams bytes ABI-encoded parameters used by CountdownGriefing agreement on initialization. Required parameter.
+    /// @param agreementParams bytes ABI-encoded parameters used by GriefingAgreement on initialization. Required parameter.
     ///                        This encoded data blob must contain the uint120 ratio, Griefing.RatioType ratioType, and uint128 agreementCountdown encoded as `abi.encode(ratio, ratioType, agreementCountdown)`.
-    ///                        See CountdownGriefing initialize function for additional details.
+    ///                        See GriefingAgreement initialize function for additional details.
     function initialize(
         address operator,
         address buyer,
@@ -321,19 +321,19 @@ contract CountdownGriefingEscrow is Countdown, Staking, EventMetadata, Operated,
 
         if (totalStake > 0) {
             TokenManager._approve(_data.tokenID, agreement, totalStake);
-            CountdownGriefing(agreement).increaseStake(totalStake);
+            GriefingAgreement(agreement).increaseStake(totalStake);
         }
 
         // start agreement countdown
 
-        CountdownGriefing(agreement).startCountdown();
+        GriefingAgreement(agreement).startCountdown();
 
         // transfer operator
         address operator = Operated.getOperator();
         if (operator != address(0)) {
-            CountdownGriefing(agreement).transferOperator(operator);
+            GriefingAgreement(agreement).transferOperator(operator);
         } else {
-            CountdownGriefing(agreement).renounceOperator();
+            GriefingAgreement(agreement).renounceOperator();
         }
 
         // update status
