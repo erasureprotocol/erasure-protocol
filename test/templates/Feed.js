@@ -8,7 +8,7 @@ const {
 
 // artifacts
 const TestFeedArtifact = require('../../build/Feed.json')
-const FeedFactoryArtifact = require('../../build/Feed_Factory.json')
+const FeedFactoryArtifact = require('../../build/ErasureFactory.json')
 const ErasurePostsArtifact = require('../../build/Erasure_Posts.json')
 
 // global

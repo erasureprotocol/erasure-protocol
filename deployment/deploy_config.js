@@ -124,7 +124,7 @@ const contracts = {
   },
   Feed: {
     factory: {
-      artifact: require('../build/Feed_Factory.json'),
+      artifact: require('../build/ErasureFactory.json'),
       mainnet: {
         address: '0xEF078E8330f99186079BE1d2ee6b4a5d6f23E8F1',
       },
@@ -159,29 +159,29 @@ const contracts = {
       },
     },
   },
-  SimpleGriefing: {
+  GriefingAgreement: {
     factory: {
-      artifact: require('../build/SimpleGriefing_Factory.json'),
+      artifact: require('../build/ErasureFactory.json'),
       mainnet: {
-        address: '0x474C80E1e6Bfd3283c9F31979AAc920A0F89a7AA',
+        address: '',
       },
       rinkeby: {
-        address: '0xD4817F7Ba9A518bB2abA008f0754f440529E6219',
+        address: '',
       },
       kovan: {
-        address: '0xe1fE447275B02Cec4c36654E33D245Eb4a95fBE3',
+        address: '',
       },
     },
     template: {
-      artifact: require('../build/SimpleGriefing.json'),
+      artifact: require('../build/GriefingAgreement.json'),
       mainnet: {
-        address: '0x210fF9Ced719E9bf2444DbC3670BAC99342126fA',
+        address: '',
       },
       rinkeby: {
-        address: '0xA262EDBb8E74025BAD1D80ACF603D688d14e98b8',
+        address: '',
       },
       kovan: {
-        address: '0x783E162F8597a0bdBC88af97Da14a4957Cc3a616',
+        address: '',
       },
     },
     instance: {
@@ -196,32 +196,21 @@ const contracts = {
       },
     },
   },
-  CountdownGriefing: {
+  GriefingEscrow: {
     factory: {
-      artifact: require('../build/CountdownGriefing_Factory.json'),
+      artifact: require('../build/ErasureFactory.json'),
       mainnet: {
-        address: '0x053624bd3BA5a3F5b2246A44d2794b5152a6032B',
+        address: '',
       },
       rinkeby: {
-        address: '0xe7862De73fF5678251a6183e757AAbbe4F5AfA2C',
+        address: '',
       },
       kovan: {
-        address: '0x10034DcE3D78168dc76c905EB3B3481E823DA48a',
+        address: '',
       },
     },
     template: {
-      artifact: require('../build/CountdownGriefing.json'),
-      mainnet: {
-        address: '0xCA276Ef1810E6d40c3A8B6cd02bd10fE2f098936',
-      },
-      rinkeby: {
-        address: '0xafD67e6B6e29db30D59BE1dC31aa42cF531aC29F',
-      },
-      kovan: {
-        address: '0xc110156B813a122F5F4766937d8D54035A04fEB5',
-      },
-    },
-    instance: {
+      artifact: require('../build/GriefingEscrow.json'),
       mainnet: {
         address: '',
       },
@@ -230,32 +219,6 @@ const contracts = {
       },
       kovan: {
         address: '',
-      },
-    },
-  },
-  CountdownGriefingEscrow: {
-    factory: {
-      artifact: require('../build/CountdownGriefingEscrow_Factory.json'),
-      mainnet: {
-        address: '0xC5E1169F69D744F6CECEA47a50A66bE7E41e0460',
-      },
-      rinkeby: {
-        address: '0x912FF45B8B3dad13E2E2EFD1414bFF811a87b548',
-      },
-      kovan: {
-        address: '0x2D1a2e0bB4a770d2257D02eCd60D730268F3dad6',
-      },
-    },
-    template: {
-      artifact: require('../build/CountdownGriefingEscrow.json'),
-      mainnet: {
-        address: '0x8AF5db2d758071A3c48AC12eC4F081857Fd0cef4',
-      },
-      rinkeby: {
-        address: '0xCc10AEB2a364f9873Ecb83Ed6DB7f6D7284d1446',
-      },
-      kovan: {
-        address: '0xc586D68F661C59320da5014A12Fde888b7696883',
       },
     },
     instance: {

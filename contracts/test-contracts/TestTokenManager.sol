@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "../modules/TokenManager.sol";
+import "../modules/tokens/TokenManager.sol";
 
 
 contract TestTokenManager is TokenManager {

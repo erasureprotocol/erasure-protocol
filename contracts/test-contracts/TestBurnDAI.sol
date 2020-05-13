@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "../modules/BurnDAI.sol";
+import "../modules/tokens/BurnDAI.sol";
 
 
 contract TestBurnDAI is BurnDAI {

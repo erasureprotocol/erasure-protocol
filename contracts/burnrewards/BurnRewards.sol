@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "../NMRUtils.sol";
+import "../modules/tokens/NMRUtils.sol";
 
 /// @title BurnRewards
 /// @author Stephane Gosselin (@thegostep) for Numerai Inc
