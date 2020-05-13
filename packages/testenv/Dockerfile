@@ -1,10 +1,9 @@
-FROM node:14-slim
+FROM node:12-slim
 
-WORKDIR /usr/src/app
+WORKDIR /testenv
 COPY package.json .
-RUN npm install
+RUN yarn install
 
-EXPOSE 8080
-CMD [ "npm", "deploy" ]
+CMD node deploy.js
 
 COPY . .

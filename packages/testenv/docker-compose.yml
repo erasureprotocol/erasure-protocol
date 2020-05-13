@@ -1,11 +1,12 @@
 version: '3'
 services:
-  erasure-protocol:
+  test:
     build: .
     ports:
       - '8545:8545'
     volumes:
       - ./data:/data
+      - ./data/ganache:/data/ganache
   erasure-subgraph:
     image: erasureprotocol/subgraph
     environment:
@@ -40,8 +41,8 @@ services:
     image: ipfs/go-ipfs:v0.4.23
     ports:
       - '5001:5001'
-    # volumes:
-    #   - ./data/ipfs:/data/ipfs
+    volumes:
+      - ./data/ipfs:/data/ipfs
   postgres:
     image: postgres
     ports:
@@ -51,5 +52,5 @@ services:
       POSTGRES_USER: graph-node
       POSTGRES_PASSWORD: let-me-in
       POSTGRES_DB: graph-node
-    # volumes:
-    #   - ./data/postgres:/var/lib/postgresql/data
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data

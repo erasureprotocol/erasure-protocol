@@ -1,7 +1,6 @@
 const ethers = require('ethers')
 const ganache = require('ganache-cli')
 const assert = require('assert')
-const Handlebars = require('handlebars')
 const fs = require('fs')
 
 const { ErasureV130 } = require('@erasure/abis')
@@ -41,17 +40,6 @@ const deployContract = async (contractName, signer, params = []) => {
   return { contract, receipt }
 }
 
-const writeSubgraphConfig = async templateArgs => {
-  const templateFile = fs.readFileSync(
-    '../the-graph/v1.3.0/subgraph.yaml.handlebars',
-    'utf8',
-  )
-  const template = Handlebars.compile(templateFile)
-
-  templateArgs.network = 'mainnet'
-  fs.writeFileSync('./subgraph.yaml', template(templateArgs))
-}
-
 const ArgumentParser = require('argparse').ArgumentParser
 const parser = new ArgumentParser({
   version: '0.0.1',
@@ -76,6 +64,7 @@ const unlockedAccounts = [
 const ganacheConfig = {
   port: 8545,
   host: '0.0.0.0',
+  db_path: '/data/ganache',
   unlocked_accounts: unlockedAccounts,
   default_balance_ether: 1000,
   total_accounts: 10,
@@ -174,12 +163,16 @@ const main = async () => {
   ).factory
 
   console.log(`\nWriting new subgraph config`)
-  writeSubgraphConfig({
-    FeedFactory: Feed_Factory.address,
-    SimpleGriefingFactory: SimpleGriefing_Factory.address,
-    CountdownGriefingFactory: CountdownGriefing_Factory.address,
-    CountdownGriefingEscrowFactory: CountdownGriefingEscrow_Factory.address,
-  })
+  fs.writeFileSync(
+    '/data/config.json',
+    JSON.stringify({
+      network: 'mainnet',
+      FeedFactory: Feed_Factory.address,
+      SimpleGriefingFactory: SimpleGriefing_Factory.address,
+      CountdownGriefingFactory: CountdownGriefing_Factory.address,
+      CountdownGriefingEscrowFactory: CountdownGriefingEscrow_Factory.address,
+    }),
+  )
 
   console.log(`\nCreate test instance from factories`)
 

@@ -4,35 +4,12 @@
 
 Instantiate a ganache instance with NMR and erasure protocol.
 
-### Deploy contracts to local ganache server
+### Deploy erasure protocol to local ganache server and boot graphql node
 
 ```
-yarn
-yarn deploy
+rm -rf data/ && docker-compose up --force-recreate --renew-anon-volume
 ```
 
-### Deploy graphQL subgraph to local graph-node
+TODO
 
-In a new terminal
-
-```
-git clone https://github.com/graphprotocol/graph-node/
-cd graph-node/docker
-docker pull graphprotocol/graph-node
-docker pull ipfs/go-ipfs
-docker-compose up
-```
-
-In a new terminal
-
-```
-yarn deploy_subgraph
-```
-
-See this [graph protocol article](https://thegraph.com/docs/quick-start) for more info. A common troubleshooting step is to clear and resart the graph-node db by deleting the content of `graph-node/docker/data`.
-
-To reset subgraph
-
-```
-yarn graph-remove-local
-```
+- test subgraph deployment in CI

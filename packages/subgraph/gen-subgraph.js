@@ -17,7 +17,6 @@ async function main() {
     process.exit(1)
   } else if (network === 'local') {
     args = JSON.parse(fs.readFileSync('/data/config.json', 'utf8'))
-    console.log('args', args)
   } else {
     args = {
       network,

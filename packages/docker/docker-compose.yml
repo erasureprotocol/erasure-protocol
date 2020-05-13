@@ -1,6 +1,0 @@
-version: '3'
-services:
-  erasure-protocol:
-    build: .
-    volumes:
-      - ./data:/data

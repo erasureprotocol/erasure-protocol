@@ -22,8 +22,8 @@ ENV network local
 
 CMD wait-for-file.sh /data/config.json \
       node gen-subgraph.js ${network} \
-    && graph codegen \
-    && graph create --node http://${graph_node} erasureprotocol/${version} \ 
-    && graph deploy --node http://${graph_node} --ipfs http://${ipfs} erasureprotocol/${version}
+    && yarn graph codegen \
+    && yarn graph create --node http://${graph_node} erasureprotocol/${version} \ 
+    && yarn graph deploy --node http://${graph_node} --ipfs http://${ipfs} erasureprotocol/${version}
 
 COPY . .
