@@ -32,14 +32,3 @@ python-packages/*/build
 python-packages/*/dist
 __pycache__
 python-packages/*/*.egg-info
-
-#Graph
-generated
-buil
-.idea
-yarn.lock
-packages/the-graph/v1.3.0/kovan/schema.graphql
-packages/the-graph/v1.3.0rinkeby/schema.graphql
-packages/the-graph/v1.3.0/mainnet/schema.graphql
-build
-generated
