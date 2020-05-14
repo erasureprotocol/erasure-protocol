@@ -1,0 +1,10 @@
+{
+    "app": {
+        "name": "erasure-client"
+    },
+    "ipfs": {
+        "protocol": "https",
+        "host": "ipfs.infura.io",
+        "port": "5001"
+    }
+}
