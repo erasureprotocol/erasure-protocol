@@ -8,19 +8,19 @@ const {
   assertEvent,
 } = require('../helpers/utils')
 
-const Template_Artifact = require('../../build/CountdownGriefingEscrow.json')
-const Factory_Artifact = require('../../build/CountdownGriefingEscrow_Factory.json')
+const Template_Artifact = require('../../build/GriefingEscrow.json')
+const Factory_Artifact = require('../../build/ErasureFactory.json')
 const Registry_Artifact = require('../../build/Erasure_Escrows.json')
 
-const AgreementTemplate_Artifact = require('../../build/CountdownGriefing.json')
-const AgreementFactory_Artifact = require('../../build/CountdownGriefing_Factory.json')
+const AgreementTemplate_Artifact = require('../../build/GriefingEscrow.json')
+const AgreementFactory_Artifact = require('../../build/ErasureFactory.json')
 const AgreementRegistry_Artifact = require('../../build/Erasure_Agreements.json')
 
 // global
 
 var g = {}
 
-describe('CountdownGriefingEscrow', function() {
+describe('GriefingEscrow', function() {
   // wallets and addresses
   const seller = accounts[0].signer.signingKey.address
   const buyer = accounts[1].signer.signingKey.address
