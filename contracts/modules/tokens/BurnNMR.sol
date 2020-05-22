@@ -21,7 +21,7 @@ contract BurnNMR is NMRUtils {
             NMRUtils._burn(value);
         } else {
             NMRUtils._changeApproval(burnRewards, value);
-            reward = BurnRewards(burnRewards).burnAndClaim(address(this), value, rewardRecipient);
+            reward = BurnRewards(burnRewards).burnAndClaim(value, rewardRecipient);
         }
         return reward;
     }
@@ -35,7 +35,7 @@ contract BurnNMR is NMRUtils {
             NMRUtils._burnFrom(from, value);
         } else {
             NMRUtils._forwardApproval(from, burnRewards, value);
-            reward = BurnRewards(burnRewards).burnAndClaim(address(this), value, rewardRecipient);
+            reward = BurnRewards(burnRewards).burnAndClaim(value, rewardRecipient);
         }
         return reward;
     }

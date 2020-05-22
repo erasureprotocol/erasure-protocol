@@ -12,7 +12,7 @@ contract TokenManager is BurnDAI {
 
     enum Tokens { NaN, NMR, DAI }
 
-    address private constant _burnRewards = address(0);
+    address private constant _burnRewards = address(0x0741fB496E58A1Fbc8cb9Ef9E096393e62582613);
 
     /// @notice Get the address of the given token ID.
     /// @param tokenID TokenManager.Tokens ID of the ERC20 token.
@@ -37,7 +37,7 @@ contract TokenManager is BurnDAI {
     }
 
     modifier onlyValidTokenID(Tokens tokenID) {
-        require(isValidTokenID(tokenID), 'invalid tokenID');
+        require(isValidTokenID(tokenID), 'TokenManager: invalid tokenID');
         _;
     }
 

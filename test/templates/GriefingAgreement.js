@@ -13,11 +13,13 @@ describe('GriefingAgreement', function() {
     counterpartyWallet,
     stakerWallet,
     newOperatorWallet,
+    otherWallet,
   ] = accounts
   const operator = operatorWallet.signer.signingKey.address
   const counterparty = counterpartyWallet.signer.signingKey.address
   const staker = stakerWallet.signer.signingKey.address
   const newOperator = newOperatorWallet.signer.signingKey.address
+  const other = otherWallet.signer.signingKey.address
 
   // variables used in initialize()
   const tokenID = TOKEN_TYPES.NMR
@@ -33,6 +35,7 @@ describe('GriefingAgreement', function() {
     'address',
     'address',
     'address',
+    'address',
     'uint8',
     'uint256',
     'uint8',
@@ -43,6 +46,7 @@ describe('GriefingAgreement', function() {
     operator,
     staker,
     counterparty,
+    other,
     tokenID,
     ratioE18,
     ratioType,
@@ -78,8 +82,8 @@ describe('GriefingAgreement', function() {
   }
 
   before(async () => {
-    this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
     this.Registry = await deployer.deploy(AgreementsRegistryArtifact)
+    this.CountdownGriefing = await deployer.deploy(CountdownGriefingArtifact)
     this.Factory = await deployer.deploy(
       CountdownGriefingFactoryArtifact,
       false,
@@ -125,6 +129,7 @@ describe('GriefingAgreement', function() {
         operator,
         staker,
         counterparty,
+        other,
         tokenID,
         ratioE18,
         ratioType,
@@ -447,6 +452,8 @@ describe('GriefingAgreement', function() {
 
     const punishStaker = async () => {
       // increase staker's stake to 500
+      await NMR.mintMockTokens(staker, stakerStake)
+
       await NMR.from(staker).changeApproval(
         this.TestCountdownGriefing.contractAddress,
         await NMR.allowance(staker, this.TestCountdownGriefing.contractAddress),
@@ -552,7 +559,7 @@ describe('GriefingAgreement', function() {
           punishment,
           Buffer.from(message),
         ),
-        'nmr burnFrom failed',
+        'insufficient allowance',
       )
     })
 

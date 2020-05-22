@@ -171,6 +171,7 @@ async function assertEvent2(
   expectedArgs,
 ) {
   const eventLogs = utils.parseLogs(receipt, contract, eventName)
+  assert(eventLogs.length > 0, `event ${eventName} not found`)
   const eventArgs = eventLogs[eventID]
   for (const [key, value] of Object.entries(expectedArgs)) {
     assert.equal(eventArgs[key].toString(), value.toString())

@@ -12,7 +12,7 @@ const Template_Artifact = require('../../build/GriefingEscrow.json')
 const Factory_Artifact = require('../../build/ErasureFactory.json')
 const Registry_Artifact = require('../../build/Erasure_Escrows.json')
 
-const AgreementTemplate_Artifact = require('../../build/GriefingEscrow.json')
+const AgreementTemplate_Artifact = require('../../build/GriefingAgreement.json')
 const AgreementFactory_Artifact = require('../../build/ErasureFactory.json')
 const AgreementRegistry_Artifact = require('../../build/Erasure_Agreements.json')
 
@@ -26,6 +26,7 @@ describe('GriefingEscrow', function() {
   const buyer = accounts[1].signer.signingKey.address
   const requester = accounts[2].signer.signingKey.address
   const fulfiller = accounts[3].signer.signingKey.address
+  const rewardRecipient = accounts[4].signer.signingKey.address
 
   // shared params
   const tokenID = TOKEN_TYPES.NMR
@@ -84,8 +85,13 @@ describe('GriefingEscrow', function() {
   async function createEscrow(_creator, _buyer, _seller, _operator) {
     // encode initialization variables into calldata
 
-    const agreementTypes = ['uint120', 'uint8', 'uint128']
-    const agreementParams = [griefRatio, ratioType, agreementCountdown]
+    const agreementTypes = ['address', 'uint120', 'uint8', 'uint128']
+    const agreementParams = [
+      rewardRecipient,
+      griefRatio,
+      ratioType,
+      agreementCountdown,
+    ]
     const encodedParams = AbiCoder.encode(agreementTypes, agreementParams)
 
     let initTypes = [

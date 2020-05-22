@@ -11,6 +11,17 @@ import "../interfaces/iFactory.sol";
 contract Template {
 
     address private _factory;
+    bytes4 private _initSelector;
+    bytes4 private _instanceType;
+
+    // constructor
+
+    constructor(string memory instanceType, bytes4 initSelector) public {
+        // set init selector
+        _initSelector = initSelector;
+        // set instance type
+        _instanceType = bytes4(keccak256(bytes(instanceType)));
+    }
 
     // modifiers
 
@@ -18,7 +29,6 @@ contract Template {
     modifier initializeTemplate() {
         // set factory
         _factory = msg.sender;
-
         // only allow function to be `DELEGATECALL`ed from within a constructor.
         uint32 codeSize;
         assembly { codeSize := extcodesize(address) }
@@ -47,6 +57,18 @@ contract Template {
     /// @return factory address of the factory.
     function getFactory() public view returns (address factory) {
         return _factory;
+    }
+
+    /// @notice Get the selector of the initialization function for this clone.
+    /// @return selector bytes4 initialization function selector.
+    function getInitSelector() public view returns (bytes4 selector) {
+        return _initSelector;
+    }
+
+    /// @notice Get the selector of the instance type for this clone.
+    /// @return instanceType bytes4 instance type selector.
+    function getInstanceType() public view returns (bytes4 instanceType) {
+        return _instanceType;
     }
 
 }
