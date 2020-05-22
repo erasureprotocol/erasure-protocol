@@ -43,6 +43,8 @@ contract GriefingAgreement is Countdown, Griefing, EventMetadata, Operated, Temp
         bytes metadata
     );
 
+    constructor() Template('Agreement', GriefingAgreement(this).initialize.selector) public { }
+
     /// @notice Constructor used to initialize the agreement parameters.
     ///         All parameters are passed as ABI-encoded calldata to the factory. This calldata must include the function selector.
     /// @dev Access Control: only factory

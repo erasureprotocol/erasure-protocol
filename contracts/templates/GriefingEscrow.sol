@@ -45,6 +45,7 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
     }
 
     struct AgreementParams {
+        address rewardRecipient;
         uint120 ratio;
         Griefing.RatioType ratioType;
         uint128 countdownLength;
@@ -67,6 +68,8 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
     event DataSubmitted(bytes data);
     event Cancelled();
 
+    constructor() Template('Escrow', GriefingEscrow(this).initialize.selector) public { }
+
     /// @notice Constructor used to initialize the escrow parameters.
     /// @dev Access Control: only factory
     ///      State Machine: before all
@@ -79,7 +82,7 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
     /// @param escrowCountdown uint256 amount of time (in seconds) the seller has to finalize the escrow after the payment and stake is deposited. Required parameter.
     /// @param metadata bytes data (any format) to emit as event on initialization. Optional parameter.
     /// @param agreementParams bytes ABI-encoded parameters used by GriefingAgreement on initialization. Required parameter.
-    ///                        This encoded data blob must contain the uint120 ratio, Griefing.RatioType ratioType, and uint128 agreementCountdown encoded as `abi.encode(ratio, ratioType, agreementCountdown)`.
+    ///                        This encoded data blob must contain the address rewardRecipient, uint120 ratio, Griefing.RatioType ratioType, and uint128 agreementCountdown encoded as `abi.encode(ratio, ratioType, agreementCountdown)`.
     ///                        See GriefingAgreement initialize function for additional details.
     function initialize(
         address operator,
@@ -130,13 +133,14 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
         // set agreementParams if defined
         if (agreementParams.length != 0) {
             (
+                address rewardRecipient,
                 uint256 ratio,
                 Griefing.RatioType ratioType,
                 uint256 agreementCountdown
-            ) = abi.decode(agreementParams, (uint256, Griefing.RatioType, uint256));
+            ) = abi.decode(agreementParams, (address, uint256, Griefing.RatioType, uint256));
             require(ratio == uint256(uint120(ratio)), "ratio out of bounds");
             require(agreementCountdown == uint256(uint128(agreementCountdown)), "agreementCountdown out of bounds");
-            _data.agreementParams = AgreementParams(uint120(ratio), ratioType, uint128(agreementCountdown));
+            _data.agreementParams = AgreementParams(rewardRecipient, uint120(ratio), ratioType, uint128(agreementCountdown));
         }
 
         // emit event
@@ -299,6 +303,7 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
                 address(this), // operator
                 _data.seller,  // staker
                 _data.buyer,   // counterparty
+                _data.agreementParams.rewardRecipient, // rewardRecipient
                 _data.tokenID, // tokenID
                 uint256(_data.agreementParams.ratio),           // griefRatio
                 _data.agreementParams.ratioType,                // ratioType

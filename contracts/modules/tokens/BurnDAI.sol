@@ -20,6 +20,7 @@ contract BurnDAI is BurnNMR {
     /// @param from address The account whose tokens will be burned.
     /// @param value uint256 The amount of DAI (18 decimals) to be burned.
     /// @param rewardRecipient address The account to receive the burn reward.
+    /// @param burnRewards address The address of the burn rewards contract.
     function _burnFrom(address from, uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // transfer dai to this contract
         ERC20Utils._transferFrom(_DAIToken, from, address(this), value);
@@ -35,6 +36,7 @@ contract BurnDAI is BurnNMR {
     /// @dev This implementation has no frontrunning protection.
     /// @param value uint256 The amount of DAI (18 decimals) to be burned.
     /// @param rewardRecipient address The account to receive the burn reward.
+    /// @param burnRewards address The address of the burn rewards contract.
     function _burn(uint256 value, address rewardRecipient, address burnRewards) internal returns (uint256 reward) {
         // approve uniswap for token transfer
         ERC20Utils._approve(_DAIToken, _DAIExchange, value);

@@ -3,6 +3,7 @@ pragma solidity 0.5.16;
 import "../modules/Spawner.sol";
 import "../interfaces/iRegistry.sol";
 import "../interfaces/iFactory.sol";
+import "../interfaces/iTemplate.sol";
 
 
 /// @title Factory
@@ -26,28 +27,20 @@ contract ErasureFactory is Spawner, iFactory {
 
     /* NOTE: The following items can be hardcoded as constant to save ~200 gas/create */
     address private _templateContract;
-    bytes4 private _initSelector;
     address private _instanceRegistry;
-    bytes4 private _instanceType;
 
     event InstanceCreated(address indexed instance, address indexed creator, bytes callData);
 
-    /// @notice Constructior
+    /// @notice Constructor
     /// @param instanceRegistry address of the registry where all clones are registered.
     /// @param templateContract address of the template used for making clones.
-    /// @param instanceType string identifier for the type of the factory. This must match the type of the registry.
-    /// @param initSelector bytes4 selector for the template initialize function.
-    constructor(address instanceRegistry, address templateContract, string memory instanceType, bytes4 initSelector) public {
+    constructor(address instanceRegistry, address templateContract) public {
+        // validate correct instance registry
+        require(iTemplate(templateContract).getInstanceType() == iRegistry(instanceRegistry).getInstanceType(), 'ErasureFactory/constructor: incorrect instance type');
         // set instance registry
         _instanceRegistry = instanceRegistry;
         // set logic contract
         _templateContract = templateContract;
-        // set initSelector
-        _initSelector = initSelector;
-        // set instanceType
-        _instanceType = bytes4(keccak256(bytes(instanceType)));
-        // validate correct instance registry
-        require(_instanceType == iRegistry(instanceRegistry).getInstanceType(), 'incorrect instance type');
     }
 
     // IFactory methods
@@ -121,11 +114,11 @@ contract ErasureFactory is Spawner, iFactory {
     }
 
     function getInstanceType() public view returns (bytes4 instanceType) {
-        return _instanceType;
+        return iTemplate(_templateContract).getInstanceType();
     }
 
     function getInitSelector() public view returns (bytes4 initSelector) {
-        return _initSelector;
+        return iTemplate(_templateContract).getInitSelector();
     }
 
     function getInstanceRegistry() public view returns (address instanceRegistry) {

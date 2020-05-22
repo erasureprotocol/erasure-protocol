@@ -1,10 +1,12 @@
 const { TOKEN_TYPES } = require('../helpers/variables')
+const { assertEvent2 } = require('../helpers/utils')
 
 describe('Staking', function() {
   let wallets = {
     numerai: accounts[0],
     seller: accounts[1],
     buyer: accounts[2],
+    rewardRecipient: accounts[2],
   }
 
   let contracts = {
@@ -29,8 +31,11 @@ describe('Staking', function() {
     const tokenID = TOKEN_TYPES.NMR
 
     it('should fail when no allowance', async () => {
+      await NMR.mintMockTokens(staker, 10)
       await assert.revertWith(
-        contracts.TestStaking.instance.addStake(tokenID, staker, funder, 10),
+        contracts.TestStaking.instance
+          .from(staker)
+          .addStake(tokenID, staker, funder, 10),
         'insufficient allowance',
       )
     })
@@ -313,6 +318,7 @@ describe('Staking', function() {
   describe('Staking._burnStake', () => {
     const staker = wallets.seller.signer.signingKey.address
     const funder = wallets.numerai.signer.signingKey.address
+    const rewardRecipient = wallets.rewardRecipient.signer.signingKey.address
     const tokenID = TOKEN_TYPES.NMR
 
     // it("should fail when currentStake is wrong", async () => {
@@ -378,7 +384,12 @@ describe('Staking', function() {
 
       // require amountToBurn <= amountStaked
       await assert.revertWith(
-        contracts.TestStaking.instance.burnStake(tokenID, staker, amountToBurn),
+        contracts.TestStaking.instance.burnStake(
+          tokenID,
+          staker,
+          rewardRecipient,
+          amountToBurn,
+        ),
         'insufficient deposit to remove',
       )
     })
@@ -390,6 +401,7 @@ describe('Staking', function() {
       const amountBurn = 5
 
       // approve staking contract to transferFrom
+      await NMR.from(funder).approve(stakingAddress, 0)
       await NMR.from(funder).approve(stakingAddress, amountToAdd)
 
       // add stake of 10 tokens
@@ -403,7 +415,12 @@ describe('Staking', function() {
       const txn = await contracts.TestStaking.instance.burnStake(
         tokenID,
         staker,
+        rewardRecipient,
         amountBurn,
+      )
+      const result = await contracts.TestStaking.instance.verboseWaitForTransaction(
+        txn,
+        '_burnStake()',
       )
 
       // check receipt for correct event logs
@@ -418,6 +435,12 @@ describe('Staking', function() {
         staker,
         amountBurn,
       ])
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: contracts.TestStaking.instance.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: amountBurn,
+        rewardAmount: Math.floor(amountBurn / 3),
+      })
 
       // now check the updated token balance of the staking contract
       const stakingBalance = await NMR.balanceOf(stakingAddress)
@@ -435,6 +458,7 @@ describe('Staking', function() {
   describe('Staking._burnFullStake', () => {
     const staker = wallets.seller.signer.signingKey.address
     const funder = wallets.numerai.signer.signingKey.address
+    const rewardRecipient = wallets.rewardRecipient.signer.signingKey.address
     const tokenID = TOKEN_TYPES.NMR
 
     it('should burnFullStake successfully', async () => {
@@ -456,6 +480,11 @@ describe('Staking', function() {
       const txn = await contracts.TestStaking.instance.burnFullStake(
         tokenID,
         staker,
+        rewardRecipient,
+      )
+      const result = await contracts.TestStaking.instance.verboseWaitForTransaction(
+        txn,
+        '_burnFullStake()',
       )
 
       // check receipt for correct event logs
@@ -470,6 +499,12 @@ describe('Staking', function() {
         staker,
         amountToAdd,
       ])
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: contracts.TestStaking.instance.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: amountToAdd,
+        rewardAmount: Math.floor(amountToAdd / 3),
+      })
 
       // check the returned fullStake amount
       const returnVal = await contracts.TestStaking.instance.getFullStake()

@@ -28,21 +28,19 @@ contract MultiTokenRewards is NMRUtils {
     }
 
     /// @notice Claims burn rewards with any ERC20 token.
-    /// @param from address The account whose tokens (ERC20) will be burned.
     /// @param value uint256 The amount of tokens (ERC20) being sent.
     /// @param token address The address of the token (ERC20) being sent.
     /// @param minNMRBurned uint256 The minimum amount of NMR (18 decimals) to be burned.
     /// @param rewardRecipient address The account to receive the burn reward.
     /// @return reward uint256 The amount of NMR (18 decimals) rewarded.
     function swapAndClaim(
-        address from,
         uint256 value,
         address token,
         uint256 minNMRBurned,
         address rewardRecipient
     ) public returns (uint256 reward) {
         // forward token approval
-        ERC20Utils._forwardApproval(token, from, getUniswapAddress(token), value);
+        ERC20Utils._forwardApproval(token, msg.sender, getUniswapAddress(token), value);
 
         // get expected swap amount
         (uint256 expectedNMR, uint256 expectedETH) = getExpectedSwapAmount(token, value);
@@ -59,10 +57,10 @@ contract MultiTokenRewards is NMRUtils {
 
         // claim BurnRewards
         NMRUtils._changeApproval(_burnRewards, amountNMR);
-        reward = BurnRewards(_burnRewards).burnAndClaim(address(this), amountNMR, rewardRecipient);
+        reward = BurnRewards(_burnRewards).burnAndClaim(amountNMR, rewardRecipient);
 
         // emit event
-        emit SwapAndClaimed(token, from, value, amountNMR, reward);
+        emit SwapAndClaimed(token, msg.sender, value, amountNMR, reward);
 
         // return reward amount
         return reward;

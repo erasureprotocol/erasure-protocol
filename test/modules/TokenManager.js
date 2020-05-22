@@ -11,6 +11,7 @@ describe('TokenManager', async () => {
   const spender = accounts[0].signer.address
   const owner = accounts[1].signer.address
   const other = accounts[2].signer.address
+  const rewardRecipient = accounts[3].signer.address
 
   const artifact = require('../../build/TestTokenManager.json')
 
@@ -81,7 +82,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -99,6 +100,7 @@ describe('TokenManager', async () => {
       const txn = await TestTokenManager.burn(
         ErasureHelper.constants.TOKEN_TYPES.DAI,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -130,6 +132,7 @@ describe('TokenManager', async () => {
       const txn = await TestTokenManager.burn(
         ErasureHelper.constants.TOKEN_TYPES.NMR,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -143,13 +146,86 @@ describe('TokenManager', async () => {
         value: amountTokens,
       })
     })
+    it('should burn DAI and claim reward', async () => {
+      // mint tokens
+      await DAI.mintMockTokens(TestTokenManager.contractAddress, amountTokens)
+
+      // get expected amounts
+      const expectedETH = await UniswapDAI.getTokenToEthInputPrice(amountTokens)
+      const expectedNMR = await UniswapNMR.getEthToTokenInputPrice(expectedETH)
+
+      // execute tx
+      const txn = await TestTokenManager.burn(
+        ErasureHelper.constants.TOKEN_TYPES.DAI,
+        amountTokens,
+        rewardRecipient,
+      )
+      const result = await TestTokenManager.verboseWaitForTransaction(
+        txn,
+        '_burn()',
+      )
+
+      // validate events
+      await assertEvent2(result, DAI, 'Transfer', 2, {
+        from: TestTokenManager.contractAddress,
+        to: ethers.constants.AddressZero,
+        value: expectedNMR,
+      })
+      await assertEvent2(result, UniswapDAI, 'EthPurchase', 0, {
+        buyer: TestTokenManager.contractAddress,
+        tokens_sold: amountTokens,
+        eth_bought: expectedETH,
+      })
+      await assertEvent2(result, UniswapDAI, 'TokenPurchase', 0, {
+        buyer: UniswapDAI.contractAddress,
+        eth_sold: expectedETH,
+        tokens_bought: expectedNMR,
+      })
+
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: TestTokenManager.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: expectedNMR,
+        rewardAmount: expectedNMR.div(3),
+      })
+    })
+    it('should burn NMR and claim reward', async () => {
+      // mint tokens
+      await NMR.mintMockTokens(TestTokenManager.contractAddress, amountTokens)
+
+      // execute tx
+      const txn = await TestTokenManager.burn(
+        ErasureHelper.constants.TOKEN_TYPES.NMR,
+        amountTokens,
+        rewardRecipient,
+      )
+      const result = await TestTokenManager.verboseWaitForTransaction(
+        txn,
+        '_burn()',
+      )
+
+      // validate events
+      await assertEvent2(result, NMR, 'Transfer', 0, {
+        from: TestTokenManager.contractAddress,
+        to: ethers.constants.AddressZero,
+        value: amountTokens,
+      })
+
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: TestTokenManager.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: amountTokens,
+        rewardAmount: amountTokens.div(3),
+      })
+    })
     it('should revert with invalid token', async () => {
       await assert.revertWith(
         TestTokenManager.burn(
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           amountTokens,
+          ethers.constants.AddressZero,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -245,7 +321,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -322,7 +398,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -345,6 +421,7 @@ describe('TokenManager', async () => {
         ErasureHelper.constants.TOKEN_TYPES.DAI,
         owner,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -381,6 +458,7 @@ describe('TokenManager', async () => {
         ErasureHelper.constants.TOKEN_TYPES.NMR,
         owner,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -394,14 +472,93 @@ describe('TokenManager', async () => {
         value: amountTokens,
       })
     })
+    it('should burn DAI with reward', async () => {
+      // get expected amounts
+      const expectedETH = await UniswapDAI.getTokenToEthInputPrice(amountTokens)
+      const expectedNMR = await UniswapNMR.getEthToTokenInputPrice(expectedETH)
+
+      // mint tokens
+      await DAI.mintMockTokens(owner, amountTokens)
+      await DAI.from(owner).approve(
+        TestTokenManager.contractAddress,
+        amountTokens,
+      )
+
+      // execute tx
+      const result = await TestTokenManager.verboseWaitForTransaction(
+        await TestTokenManager.burnFrom(
+          ErasureHelper.constants.TOKEN_TYPES.DAI,
+          owner,
+          amountTokens,
+          rewardRecipient,
+        ),
+        '_burnFrom()',
+      )
+
+      // validate events
+      await assertEvent2(result, DAI, 'Transfer', 3, {
+        from: TestTokenManager.contractAddress,
+        to: ethers.constants.AddressZero,
+        value: expectedNMR,
+      })
+      await assertEvent2(result, UniswapDAI, 'EthPurchase', 0, {
+        buyer: TestTokenManager.contractAddress,
+        tokens_sold: amountTokens,
+        eth_bought: expectedETH,
+      })
+      await assertEvent2(result, UniswapDAI, 'TokenPurchase', 0, {
+        buyer: UniswapDAI.contractAddress,
+        eth_sold: expectedETH,
+        tokens_bought: expectedNMR,
+      })
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: TestTokenManager.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: expectedNMR,
+        rewardAmount: expectedNMR.div(3),
+      })
+    })
+    it('should burn NMR with reward', async () => {
+      // mint tokens
+      await NMR.mintMockTokens(owner, amountTokens)
+      await NMR.from(owner).approve(
+        TestTokenManager.contractAddress,
+        amountTokens,
+      )
+
+      // execute tx
+      const result = await TestTokenManager.verboseWaitForTransaction(
+        await TestTokenManager.burnFrom(
+          ErasureHelper.constants.TOKEN_TYPES.NMR,
+          owner,
+          amountTokens,
+          rewardRecipient,
+        ),
+        '_burnFrom()',
+      )
+
+      // validate events
+      await assertEvent2(result, NMR, 'Transfer', 0, {
+        from: owner,
+        to: TestTokenManager.contractAddress,
+        value: amountTokens,
+      })
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: TestTokenManager.contractAddress,
+        recipient: rewardRecipient,
+        burnAmount: amountTokens,
+        rewardAmount: amountTokens.div(3),
+      })
+    })
     it('should revert with invalid token', async () => {
       await assert.revertWith(
         TestTokenManager.burnFrom(
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           owner,
           amountTokens,
+          ethers.constants.AddressZero,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -482,7 +639,7 @@ describe('TokenManager', async () => {
     it('should revert with invalid token', async () => {
       await assert.revertWith(
         TestTokenManager._totalSupply(ErasureHelper.constants.TOKEN_TYPES.NaN),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -516,7 +673,7 @@ describe('TokenManager', async () => {
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           other,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -539,6 +696,7 @@ describe('TokenManager', async () => {
       )
     })
     it('should get NMR', async () => {
+      await NMR.from(owner).approve(TestTokenManager.contractAddress, 0)
       await NMR.from(owner).approve(
         TestTokenManager.contractAddress,
         amountTokens,
@@ -561,7 +719,7 @@ describe('TokenManager', async () => {
           owner,
           TestTokenManager.contractAddress,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })

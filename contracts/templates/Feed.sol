@@ -16,6 +16,8 @@ contract Feed is Staking, ProofHashes, Operated, EventMetadata, Template {
 
     event Initialized(address operator, bytes metadata);
 
+    constructor() Template('Post', Feed(this).initialize.selector) public { }
+
     /// @notice Constructor
     /// @dev Access Control: only factory
     ///      State Machine: before all

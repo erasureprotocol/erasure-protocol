@@ -14,27 +14,28 @@ contract BurnRewards is NMRUtils {
 
     // Reward ratio of 10 means that the contract needs to be funded with 1,000,000 in order to suport burning of 10,000,000 supply
     constructor (uint256 rewardRatio) public {
-        require(rewardRatio > 0, "ratio cannot be zero");
+        require(rewardRatio > 0, "BurnRewards: ratio cannot be zero");
         _rewardRatio = rewardRatio;
     }
 
     /// @notice Burns a specific amount of NMR from the target address and distributes burn reward.
-    /// @param from address The account whose tokens will be burned.
     /// @param value uint256 The amount of NMR (18 decimals) to be burned.
     /// @param rewardRecipient address The account to receive the burn reward.
     /// @return reward uint256 The amount of NMR (18 decimals) rewarded.
-    function burnAndClaim(address from, uint256 value, address rewardRecipient) public returns (uint256 reward) {
+    function burnAndClaim(uint256 value, address rewardRecipient) public returns (uint256 reward) {
+        require(rewardRecipient != address(0), "BurnRewards/burnAndClaim: rewardRecipient cannot be zero");
+        
         // calculate reward amount
         reward = value / _rewardRatio;
 
         // perform NMR burn
-        NMRUtils._burnFrom(from, value);
+        NMRUtils._burnFrom(msg.sender, value);
 
         // transfer burn reward to recipient
         NMRUtils._transfer(rewardRecipient, reward);
 
         // emit event
-        emit RewardClaimed(from, rewardRecipient, value, reward);
+        emit RewardClaimed(msg.sender, rewardRecipient, value, reward);
 
         // return reward amount
         return reward;

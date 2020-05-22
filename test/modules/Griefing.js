@@ -254,6 +254,7 @@ describe('Griefing', function() {
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
+          ethers.constants.AddressZero,
           punishment,
           Buffer.from(message),
         ),
@@ -275,6 +276,7 @@ describe('Griefing', function() {
         contracts.TestGriefing.instance.grief(
           buyer,
           seller,
+          ethers.constants.AddressZero,
           punishment,
           Buffer.from(message),
         ),
@@ -295,8 +297,14 @@ describe('Griefing', function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
-        'nmr burnFrom failed',
+          .grief(
+            buyer,
+            seller,
+            ethers.constants.AddressZero,
+            punishment,
+            Buffer.from(message),
+          ),
+        'NMRUtils/_burnFrom: nmr.numeraiTransfer failed',
       )
     })
 
@@ -314,8 +322,14 @@ describe('Griefing', function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
-        'nmr burnFrom failed',
+          .grief(
+            buyer,
+            seller,
+            ethers.constants.AddressZero,
+            punishment,
+            Buffer.from(message),
+          ),
+        'NMRUtils/_burnFrom: nmr.numeraiTransfer failed',
       )
     })
 
@@ -331,7 +345,13 @@ describe('Griefing', function() {
       await assert.revert(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(
+            buyer,
+            seller,
+            ethers.constants.AddressZero,
+            punishment,
+            Buffer.from(message),
+          ),
       )
     })
 
@@ -359,7 +379,13 @@ describe('Griefing', function() {
       await assert.revertWith(
         contracts.TestGriefing.instance
           .from(buyer)
-          .grief(buyer, seller, punishment, Buffer.from(message)),
+          .grief(
+            buyer,
+            seller,
+            ethers.constants.AddressZero,
+            punishment,
+            Buffer.from(message),
+          ),
         'insufficient deposit to remove',
       )
     })
@@ -390,7 +416,13 @@ describe('Griefing', function() {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, punishment, Buffer.from(message))
+        .grief(
+          buyer,
+          seller,
+          ethers.constants.AddressZero,
+          punishment,
+          Buffer.from(message),
+        )
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn,
       )
@@ -441,7 +473,13 @@ describe('Griefing', function() {
 
       const txn = await contracts.TestGriefing.instance
         .from(buyer)
-        .grief(buyer, seller, punishment, Buffer.from(message))
+        .grief(
+          buyer,
+          seller,
+          ethers.constants.AddressZero,
+          punishment,
+          Buffer.from(message),
+        )
       const receipt = await contracts.TestGriefing.instance.verboseWaitForTransaction(
         txn,
       )

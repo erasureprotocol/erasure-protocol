@@ -90,9 +90,52 @@ async function setupDeployment() {
 
   deployer.setPrivateKey(accounts[accounts.length - 1].secretKey)
 
+  const rewardRatio = 3
+  const BurnRewards = await deployer.deploy(
+    contracts.BurnRewards.artifact,
+    false,
+    rewardRatio,
+  )
+
+  const rewardAmount = ethers.utils.parseEther('1000000')
+  await NMR.from(accounts[accounts.length - 1].signer.address).mintMockTokens(
+    accounts[accounts.length - 1].signer.address,
+    rewardAmount,
+  )
+  await NMR.from(accounts[accounts.length - 1].signer.address).transfer(
+    BurnRewards.contractAddress,
+    rewardAmount,
+  )
+  console.log(`BurnRewards Deployed at ${BurnRewards.contractAddress}`)
+
+  const MultiTokenRewards = await deployer.deploy(
+    contracts.MultiTokenRewards.artifact,
+    false,
+    BurnRewards.contractAddress,
+  )
+  console.log(
+    `MultiTokenRewards Deployed at ${MultiTokenRewards.contractAddress}`,
+  )
+
+  const tokenAmount = ethers.utils.parseEther('10000')
+  await NMR.mintMockTokens(accounts[0].signer.address, tokenAmount)
+  await NMR.mintMockTokens(accounts[1].signer.address, tokenAmount)
+  await NMR.mintMockTokens(accounts[2].signer.address, tokenAmount)
+  await NMR.mintMockTokens(accounts[3].signer.address, tokenAmount)
+  await NMR.mintMockTokens(accounts[4].signer.address, tokenAmount)
+
   console.log(`Deployment Completed`)
 
-  return [deployer, contracts, NMR, DAI, UniswapNMR, UniswapDAI]
+  return [
+    deployer,
+    contracts,
+    NMR,
+    DAI,
+    UniswapNMR,
+    UniswapDAI,
+    BurnRewards,
+    MultiTokenRewards,
+  ]
 }
 
 async function deployUniswapFactory(deployer) {
@@ -165,14 +208,14 @@ async function deployUniswap(deployer, contractObj, token, UniswapFactory) {
       .timestamp + 6000
 
   await token
-    .from(await signer.getAddress())
-    .mintMockTokens(await signer.getAddress(), tokenAmount)
+    .from(account.signer.address)
+    .mintMockTokens(account.signer.address, tokenAmount)
   await token
-    .from(await signer.getAddress())
+    .from(account.signer.address)
     .approve(contract.contractAddress, tokenAmount)
 
   await contract
-    .from(await signer.getAddress())
+    .from(account.signer.address)
     .addLiquidity(0, tokenAmount, deadline, {
       value: ethAmount,
     })
