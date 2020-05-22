@@ -12,7 +12,7 @@ const Template_Artifact = require('../../build/GriefingEscrow.json')
 const Factory_Artifact = require('../../build/ErasureFactory.json')
 const Registry_Artifact = require('../../build/Erasure_Escrows.json')
 
-const AgreementTemplate_Artifact = require('../../build/GriefingEscrow.json')
+const AgreementTemplate_Artifact = require('../../build/GriefingAgreement.json')
 const AgreementFactory_Artifact = require('../../build/ErasureFactory.json')
 const AgreementRegistry_Artifact = require('../../build/Erasure_Agreements.json')
 

@@ -37,7 +37,7 @@ contract TokenManager is BurnDAI {
     }
 
     modifier onlyValidTokenID(Tokens tokenID) {
-        require(isValidTokenID(tokenID), 'invalid tokenID');
+        require(isValidTokenID(tokenID), 'TokenManager: invalid tokenID');
         _;
     }
 

@@ -67,6 +67,8 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
     event DataSubmitted(bytes data);
     event Cancelled();
 
+    constructor() Template('Escrow', GriefingEscrow(this).initialize.selector) public { }
+
     /// @notice Constructor used to initialize the escrow parameters.
     /// @dev Access Control: only factory
     ///      State Machine: before all
@@ -130,6 +132,7 @@ contract GriefingEscrow is Countdown, Staking, EventMetadata, Operated, Template
         // set agreementParams if defined
         if (agreementParams.length != 0) {
             (
+                // todo: add reward recipient
                 uint256 ratio,
                 Griefing.RatioType ratioType,
                 uint256 agreementCountdown

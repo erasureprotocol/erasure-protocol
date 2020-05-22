@@ -8,5 +8,7 @@ before(async function() {
     DAI,
     UniswapNMR,
     UniswapDAI,
+    BurnRewards,
+    MultiTokenRewards,
   ] = await setupDeployment()
 })

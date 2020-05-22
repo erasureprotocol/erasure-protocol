@@ -81,7 +81,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -99,6 +99,7 @@ describe('TokenManager', async () => {
       const txn = await TestTokenManager.burn(
         ErasureHelper.constants.TOKEN_TYPES.DAI,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -130,6 +131,7 @@ describe('TokenManager', async () => {
       const txn = await TestTokenManager.burn(
         ErasureHelper.constants.TOKEN_TYPES.NMR,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -148,8 +150,9 @@ describe('TokenManager', async () => {
         TestTokenManager.burn(
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           amountTokens,
+          ethers.constants.AddressZero,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -245,7 +248,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -322,7 +325,7 @@ describe('TokenManager', async () => {
           other,
           amountTokens,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -345,6 +348,7 @@ describe('TokenManager', async () => {
         ErasureHelper.constants.TOKEN_TYPES.DAI,
         owner,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -381,6 +385,7 @@ describe('TokenManager', async () => {
         ErasureHelper.constants.TOKEN_TYPES.NMR,
         owner,
         amountTokens,
+        ethers.constants.AddressZero,
       )
       const result = await TestTokenManager.verboseWaitForTransaction(
         txn,
@@ -400,8 +405,9 @@ describe('TokenManager', async () => {
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           owner,
           amountTokens,
+          ethers.constants.AddressZero,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -482,7 +488,7 @@ describe('TokenManager', async () => {
     it('should revert with invalid token', async () => {
       await assert.revertWith(
         TestTokenManager._totalSupply(ErasureHelper.constants.TOKEN_TYPES.NaN),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -516,7 +522,7 @@ describe('TokenManager', async () => {
           ErasureHelper.constants.TOKEN_TYPES.NaN,
           other,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })
@@ -539,6 +545,7 @@ describe('TokenManager', async () => {
       )
     })
     it('should get NMR', async () => {
+      await NMR.from(owner).approve(TestTokenManager.contractAddress, 0)
       await NMR.from(owner).approve(
         TestTokenManager.contractAddress,
         amountTokens,
@@ -561,7 +568,7 @@ describe('TokenManager', async () => {
           owner,
           TestTokenManager.contractAddress,
         ),
-        'invalid tokenID',
+        'TokenManager: invalid tokenID',
       )
     })
   })

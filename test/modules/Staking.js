@@ -31,7 +31,7 @@ describe('Staking', function() {
     it('should fail when no allowance', async () => {
       await assert.revertWith(
         contracts.TestStaking.instance.addStake(tokenID, staker, funder, 10),
-        'insufficient allowance',
+        'ERC20Utils/_transferFrom: erc20.transferFrom failed',
       )
     })
 

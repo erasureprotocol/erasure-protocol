@@ -33,7 +33,12 @@ describe('BurnDAI', async () => {
     it('should fail if not enough tokens', async () => {
       // check for revert
       await assert.revertWith(
-        TestBurnDAI.from(spender).burnFrom(owner, amountToBurn),
+        TestBurnDAI.from(spender).burnFrom(
+          owner,
+          amountToBurn,
+          ethers.constants.AddressZero,
+          BurnRewards.contractAddress,
+        ),
         'ERC20: transfer amount exceeds balance',
       )
     })
@@ -44,7 +49,12 @@ describe('BurnDAI', async () => {
 
       // check for revert
       await assert.revertWith(
-        TestBurnDAI.from(spender).burnFrom(owner, amountToBurn),
+        TestBurnDAI.from(spender).burnFrom(
+          owner,
+          amountToBurn,
+          ethers.constants.AddressZero,
+          BurnRewards.contractAddress,
+        ),
         'ERC20: transfer amount exceeds allowance',
       )
     })
@@ -58,7 +68,12 @@ describe('BurnDAI', async () => {
       await DAI.from(owner).approve(TestBurnDAI.contractAddress, amountToBurn)
 
       // execute burn
-      const txn = await TestBurnDAI.from(spender).burnFrom(owner, amountToBurn)
+      const txn = await TestBurnDAI.from(spender).burnFrom(
+        owner,
+        amountToBurn,
+        ethers.constants.AddressZero,
+        BurnRewards.contractAddress,
+      )
       const result = await TestBurnDAI.verboseWaitForTransaction(
         txn,
         'burnFrom()',
@@ -98,13 +113,80 @@ describe('BurnDAI', async () => {
         tokens_bought: expectedNMR,
       })
     })
+
+    it('should succeed and claim reward', async () => {
+      // get expected amounts
+      const expectedETH = await UniswapDAI.getTokenToEthInputPrice(amountToBurn)
+      const expectedNMR = await UniswapNMR.getEthToTokenInputPrice(expectedETH)
+
+      // mint tokens
+      await DAI.mintMockTokens(owner, amountToBurn)
+      // approve
+      await DAI.from(owner).approve(TestBurnDAI.contractAddress, amountToBurn)
+
+      // execute burn
+      const txn = await TestBurnDAI.from(spender).burnFrom(
+        owner,
+        amountToBurn,
+        other,
+        BurnRewards.contractAddress,
+      )
+      const result = await TestBurnDAI.verboseWaitForTransaction(
+        txn,
+        'burnFrom()',
+      )
+
+      // validate events
+      await assertEvent2(result, DAI, 'Transfer', 0, {
+        from: owner,
+        to: TestBurnDAI.contractAddress,
+        value: amountToBurn,
+      })
+      await assertEvent2(result, DAI, 'Transfer', 1, {
+        from: TestBurnDAI.contractAddress,
+        to: UniswapDAI.contractAddress,
+        value: amountToBurn,
+      })
+      await assertEvent2(result, DAI, 'Transfer', 2, {
+        from: UniswapNMR.contractAddress,
+        to: TestBurnDAI.contractAddress,
+        value: expectedNMR,
+      })
+      await assertEvent2(result, DAI, 'Transfer', 3, {
+        from: TestBurnDAI.contractAddress,
+        to: ethers.constants.AddressZero,
+        value: expectedNMR,
+      })
+      await assertEvent2(result, BurnRewards, 'RewardClaimed', 0, {
+        source: TestBurnDAI.contractAddress,
+        recipient: other,
+        burnAmount: expectedNMR,
+        rewardAmount: expectedNMR.div(3),
+      })
+
+      await assertEvent2(result, UniswapDAI, 'EthPurchase', 0, {
+        buyer: TestBurnDAI.contractAddress,
+        tokens_sold: amountToBurn,
+        eth_bought: expectedETH,
+      })
+
+      await assertEvent2(result, UniswapDAI, 'TokenPurchase', 0, {
+        buyer: UniswapDAI.contractAddress,
+        eth_sold: expectedETH,
+        tokens_bought: expectedNMR,
+      })
+    })
   })
 
   describe('BurnDAI._burn', async () => {
     it('should fail if not enough tokens', async () => {
       // check for revert
       await assert.revertWith(
-        TestBurnDAI.from(owner).burn(amountToBurn),
+        TestBurnDAI.from(owner).burn(
+          amountToBurn,
+          ethers.constants.AddressZero,
+          BurnRewards.contractAddress,
+        ),
         'ERC20: transfer amount exceeds balance',
       )
     })
@@ -118,7 +200,11 @@ describe('BurnDAI', async () => {
       await DAI.mintMockTokens(TestBurnDAI.contractAddress, amountToBurn)
 
       // execute burn
-      const txn = await TestBurnDAI.from(owner).burn(amountToBurn)
+      const txn = await TestBurnDAI.from(owner).burn(
+        amountToBurn,
+        ethers.constants.AddressZero,
+        BurnRewards.contractAddress,
+      )
       const result = await TestBurnDAI.verboseWaitForTransaction(txn, 'burn()')
 
       // validate events

@@ -62,6 +62,30 @@ const contracts = {
   UniswapFactory: {
     artifact: require('../build/MockUniswapFactory.json'),
   },
+  BurnRewards: {
+    artifact: require('../build/BurnRewards.json'),
+    mainnet: {
+      address: '',
+    },
+    rinkeby: {
+      address: '',
+    },
+    kovan: {
+      address: '',
+    },
+  },
+  MultiTokenRewards: {
+    artifact: require('../build/MultiTokenRewards.json'),
+    mainnet: {
+      address: '',
+    },
+    rinkeby: {
+      address: '',
+    },
+    kovan: {
+      address: '',
+    },
+  },
   RegistryManager: {
     artifact: require('../build/RegistryManager.json'),
     mainnet: {
